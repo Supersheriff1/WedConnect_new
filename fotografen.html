@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#25242b">
+  <meta name="description" content="Entdecke Hochzeiten, die zu deinem Stil passen, und baue dein Portfolio mit WedConnect gezielt auf.">
+  <title>Für Fotografen | WedConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --canvas: #25242b;
+      --subtle: #2b2a31;
+      --surface: #302f38;
+      --raised: #34323a;
+      --hover: #3c3943;
+      --ink: #f5f2ec;
+      --body: #e3dfe2;
+      --muted: #c2bdc3;
+      --gold: #d5b67a;
+      --gold-ink: #29262b;
+      --border: #514e59;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: "Manrope", Arial, sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+      --content: 1200px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+    body { margin: 0; background: var(--canvas); color: var(--body); font-family: var(--sans); font-size: 16px; line-height: 1.65; }
+    a { color: inherit; }
+    button { font: inherit; }
+    .wrap { width: min(var(--content), calc(100% - clamp(36px, 8vw, 96px))); margin-inline: auto; }
+    .topbar { position: sticky; top: 0; z-index: 10; background: rgb(37 36 43 / 92%); border-bottom: 1px solid rgb(81 78 89 / 70%); backdrop-filter: blur(16px); }
+    .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+    .brand { color: var(--ink); font-size: 18px; font-weight: 800; letter-spacing: -.04em; text-decoration: none; white-space: nowrap; }
+    .brand-mark { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: clamp(18px, 3vw, 38px); }
+    .nav-links a { color: var(--muted); font-size: 13px; font-weight: 700; text-decoration: none; transition: color .18s ease; }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--ink); }
+    .nav-cta { min-height: 44px !important; padding: 0 18px !important; font-size: 13px !important; }
+    .menu-toggle { display: none; width: 46px; height: 46px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); }
+    .eyebrow { margin: 0 0 18px; color: var(--gold); font: 600 11px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { color: var(--ink); }
+    h1, h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.035em; }
+    h1 { max-width: 720px; margin-bottom: 24px; font-size: clamp(44px, 6.2vw, 76px); line-height: 1.03; }
+    h1 span { color: var(--gold); }
+    h2 { margin-bottom: 0; font-size: clamp(32px, 4vw, 46px); line-height: 1.13; }
+    h3 { margin-bottom: 12px; font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+    p { margin-bottom: 0; color: var(--body); }
+    .hero { padding: clamp(68px, 9vw, 120px) 0 90px; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap: clamp(42px, 7vw, 96px); align-items: center; }
+    .hero-copy { max-width: 680px; }
+    .hero h2 { margin-bottom: 18px; font-family: var(--sans); font-size: clamp(21px, 2.2vw, 27px); font-weight: 600; line-height: 1.35; letter-spacing: -.025em; }
+    .hero-copy > p:not(.eyebrow) { max-width: 620px; color: var(--muted); font-size: clamp(16px, 1.5vw, 18px); line-height: 1.8; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button { min-height: 52px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid transparent; border-radius: 8px; font-size: 14px; font-weight: 800; text-decoration: none; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+    .button:hover { transform: translateY(-1px); }
+    .button:focus-visible, a:focus-visible, .menu-toggle:focus-visible, dialog button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .button-primary { background: var(--gold); color: var(--gold-ink); }
+    .button-primary:hover { background: #e2c991; }
+    .button-secondary { border-color: var(--border); background: var(--surface); color: var(--ink); }
+    .button-secondary:hover { border-color: var(--gold); background: var(--hover); }
+    .hero-art { position: relative; min-height: 440px; display: grid; place-items: center; }
+    .art-glow { position: absolute; width: 82%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgb(213 182 122 / 13%), rgb(213 182 122 / 0%) 68%); }
+    .pairing { position: relative; z-index: 1; width: min(100%, 490px); padding: 25px; border: 1px solid var(--border); border-radius: 20px; background: linear-gradient(145deg, #34323a, #2c2b32); box-shadow: 0 28px 80px #09090b66; transform: rotate(-2deg); }
+    .pairing-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; color: var(--muted); font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .live-dot { display: inline-flex; align-items: center; gap: 8px; }
+    .live-dot::before { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); content: ""; box-shadow: 0 0 12px rgb(213 182 122 / 70%); }
+    .pair-images { display: grid; grid-template-columns: 1fr 50px 1fr; align-items: center; gap: 12px; }
+    .profile-visual { min-width: 0; }
+    .visual-frame { position: relative; height: 180px; overflow: hidden; border: 1px solid #ffffff14; border-radius: 12px; background: linear-gradient(150deg, #685e58 0%, #3b3940 48%, #8a775d 100%); }
+    .visual-frame::before { position: absolute; inset: 0; background: linear-gradient(0deg, rgb(20 19 23 / 76%), transparent 65%); content: ""; }
+    .visual-frame.couple { background: radial-gradient(ellipse at 50% 62%, #bfae98 0 13%, transparent 14%), radial-gradient(ellipse at 42% 52%, #322d30 0 10%, transparent 11%), radial-gradient(ellipse at 60% 49%, #52464a 0 11%, transparent 12%), linear-gradient(135deg, #6d746f, #b09a77 48%, #43444b); }
+    .visual-frame.photo { background: radial-gradient(ellipse at 50% 45%, #d4b58e 0 9%, transparent 10%), radial-gradient(ellipse at 50% 42%, #27272e 0 15%, transparent 16%), linear-gradient(145deg, #7a7167, #4c4850 52%, #9b876e); }
+    .frame-label { position: absolute; right: 10px; bottom: 10px; left: 10px; color: var(--ink); font: 500 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .profile-name { margin: 11px 0 2px; color: var(--ink); font-size: 13px; font-weight: 800; }
+    .profile-meta { margin: 0; color: var(--muted); font-size: 11px; }
+    .connection { position: relative; display: grid; place-items: center; height: 100%; }
+    .connection::before { position: absolute; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); content: ""; }
+    .connection span { position: relative; display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--gold); border-radius: 50%; background: var(--canvas); color: var(--gold); font-size: 18px; box-shadow: 0 0 24px rgb(213 182 122 / 20%); }
+    .pairing-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font: 500 10px var(--mono); letter-spacing: .04em; }
+    .pairing-foot strong { color: var(--gold); font-weight: 500; }
+    .section { padding: clamp(66px, 8vw, 104px) 0; border-top: 1px solid var(--border); }
+    .section:nth-of-type(even) { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 1.2%), transparent); }
+    .section-grid { display: grid; grid-template-columns: minmax(230px, .78fr) minmax(0, 1.22fr); gap: clamp(36px, 8vw, 112px); align-items: start; }
+    .section-heading { position: sticky; top: 112px; }
+    .section-heading .eyebrow { margin-bottom: 15px; }
+    .section-content { max-width: 720px; }
+    .section-content > p + p { margin-top: 18px; }
+    .section-content > p { font-size: 16px; line-height: 1.85; }
+    .subsection { margin-top: 34px; }
+    .subsection h3 { display: flex; align-items: center; gap: 12px; }
+    .subsection h3::before { width: 18px; height: 1px; background: var(--gold); content: ""; }
+    .steps { display: grid; gap: 0; margin: 18px 0 0; padding: 0; list-style: none; counter-reset: steps; }
+    .steps li { position: relative; display: grid; grid-template-columns: 38px 1fr; gap: 16px; padding: 15px 0; border-top: 1px solid var(--border); color: var(--body); counter-increment: steps; }
+    .steps li::before { color: var(--gold); font: 500 12px var(--mono); content: "0" counter(steps); }
+    .steps + p { margin-top: 22px; }
+    .list-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 14px; margin: 16px 0 0; padding: 0; list-style: none; }
+    .list-grid li, .benefits li { display: flex; align-items: flex-start; gap: 11px; color: var(--body); }
+    .list-grid li::before, .benefits li::before { flex: 0 0 auto; width: 6px; height: 6px; margin-top: .68em; border-radius: 50%; background: var(--gold); content: ""; }
+    .rights-list { display: flex; flex-wrap: wrap; gap: 9px; margin: 18px 0 0; padding: 0; list-style: none; }
+    .rights-list li { padding: 8px 13px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 13px; }
+    .benefits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; margin: 0; padding: 0; list-style: none; }
+    .benefits li { min-height: 68px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .benefits li::before { margin-top: 0; }
+    .material-note { display: grid; grid-template-columns: 46px 1fr; gap: 16px; align-items: start; margin-top: 26px; padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .material-note span { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgb(213 182 122 / 55%); border-radius: 50%; color: var(--gold); font: 500 15px var(--mono); }
+    .material-note p { color: var(--ink); font-size: 14px; }
+    .signup { padding: clamp(74px, 10vw, 126px) 0; border-top: 1px solid var(--border); background: radial-gradient(ellipse at 78% 50%, rgb(213 182 122 / 8%), transparent 45%), var(--subtle); }
+    .signup-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(240px, .8fr); gap: 36px; align-items: end; }
+    .signup h2 { max-width: 680px; margin-bottom: 18px; }
+    .signup p { max-width: 680px; color: var(--muted); font-size: 17px; line-height: 1.8; }
+    .signup .actions { margin: 0; justify-content: flex-end; }
+    footer { padding: 24px 0; border-top: 1px solid var(--border); background: var(--canvas); }
+    .footer-inner { display: flex; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 12px; }
+    .footer-inner a { text-decoration: none; }
+    dialog { width: min(440px, calc(100% - 32px)); padding: 28px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--body); box-shadow: 0 30px 100px #0009; }
+    dialog::backdrop { background: rgb(12 12 15 / 75%); backdrop-filter: blur(4px); }
+    dialog h2 { margin-bottom: 12px; font-family: var(--serif); font-size: 30px; }
+    dialog p { margin-bottom: 22px; color: var(--muted); }
+    dialog button { width: 100%; }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+      .hero-copy { max-width: 760px; }
+      .hero-art { min-height: 360px; }
+      .pairing { width: min(100%, 520px); }
+      .section-grid { grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); gap: 44px; }
+    }
+    @media (max-width: 720px) {
+      .wrap { width: calc(100% - 36px); }
+      .nav { min-height: 68px; }
+      .menu-toggle { display: inline-grid; place-items: center; }
+      .nav-links { position: absolute; top: calc(100% + 1px); right: 0; left: 0; display: none; padding: 18px; border-bottom: 1px solid var(--border); background: var(--canvas); }
+      .nav-links.open { display: grid; gap: 4px; }
+      .nav-links a { padding: 12px 8px; }
+      .nav-links .nav-cta { width: 100%; margin-top: 8px; }
+      .hero { padding-top: 66px; }
+      .hero-art { min-height: 330px; }
+      .section-grid { grid-template-columns: 1fr; gap: 24px; }
+      .section-heading { position: static; }
+      .section-heading h2 { max-width: 620px; }
+      .signup-grid { grid-template-columns: 1fr; gap: 22px; }
+      .signup .actions { justify-content: flex-start; }
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: clamp(42px, 11vw, 54px); }
+      .hero-art { min-height: 280px; }
+      .pairing { padding: 16px; }
+      .pair-images { grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr); gap: 8px; }
+      .visual-frame { height: 134px; }
+      .connection span { width: 34px; height: 34px; font-size: 15px; }
+      .pairing-foot { font-size: 8px; }
+      .actions { display: grid; grid-template-columns: 1fr; }
+      .button { width: 100%; min-height: 52px; }
+      .list-grid, .benefits { grid-template-columns: 1fr; }
+      .material-note { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#hero" aria-label="WedConnect – zum Seitenanfang">Wed<span class="brand-mark">Connect</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Menü öffnen"><span aria-hidden="true">☰</span></button>
+      <nav class="nav-links" id="main-nav" aria-label="Hauptnavigation">
+        <a href="#hero" aria-current="page">Für Fotografen</a>
+        <a href="#how-it-works">So funktioniert’s</a>
+        <a href="#rights">Nutzungsrechte</a>
+        <button class="button button-primary nav-cta" type="button" data-signup>Profil erstellen</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero" aria-labelledby="page-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">WedConnect · Für Fotografen</p>
+          <h1 id="page-title">Für Fotografen – <span>Baue das Portfolio auf, das du wirklich zeigen willst</span></h1>
+          <h2>Erweitere dein Portfolio mit Hochzeiten, die zu deinem Stil passen.</h2>
+          <p>WedConnect zeigt dir viele Hochzeiten. Du entscheidest selbst, welche davon zu deiner Ästhetik, deinem Anspruch und deiner Bildsprache passen. Gezielt statt zufällig. Keine Kosten. Keine gestellten Szenen.</p>
+          <div class="actions">
+            <button class="button button-primary" type="button" data-signup>Profil erstellen <span aria-hidden="true">↗</span></button>
+            <a class="button button-secondary" href="#how-it-works">Hochzeiten entdecken <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <div class="hero-art" role="img" aria-label="Illustration einer Verbindung zwischen Hochzeitspaar und Fotograf">
+          <div class="art-glow" aria-hidden="true"></div>
+          <div class="pairing">
+            <div class="pairing-head"><span>WedConnect · Pairing</span><span class="live-dot">Beidseitiges Interesse</span></div>
+            <div class="pair-images">
+              <div class="profile-visual">
+                <div class="visual-frame couple" aria-hidden="true"><span class="frame-label">Hochzeit · Editorial</span></div>
+                <p class="profile-name">Das Hochzeitspaar</p><p class="profile-meta">Stil · Location · Ablauf</p>
+              </div>
+              <div class="connection" aria-hidden="true"><span>↔</span></div>
+              <div class="profile-visual">
+                <div class="visual-frame photo" aria-hidden="true"><span class="frame-label">Fotografie · Portfolio</span></div>
+                <p class="profile-name">Deine Bildsprache</p><p class="profile-meta">Auswahl · Interesse · Match</p>
+              </div>
+            </div>
+            <div class="pairing-foot"><span>DU ENTSCHEIDEST</span><strong>MATCH NUR BEI BEIDSEITIGEM INTERESSE</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="problem" aria-labelledby="problem-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">01 / Ausgangslage</p><h2 id="problem-title">Warum WedConnect für Fotografen entwickelt wurde</h2></div>
+        <div class="section-content"><p>Ein starkes Hochzeitsportfolio entsteht durch bewusste Auswahl. Workshops sind teuer, Styled Shoots künstlich, selbst organisierte Shootings kosten Zeit und Geld, viele Hochzeiten dürfen nicht veröffentlicht werden. WedConnect löst dieses Problem.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works" aria-labelledby="how-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">02 / Ablauf</p><h2 id="how-title">Wie WedConnect funktioniert</h2></div>
+        <div class="section-content">
+          <p>WedConnect zeigt dir eine breite Auswahl an Hochzeiten. Du entscheidest, welche davon zu deinem Portfolio passen.</p>
+          <div class="subsection"><h3>Funktionsprinzip</h3><p>Viele Optionen, aber nur Matches bei beidseitigem Interesse.</p></div>
+          <div class="subsection"><h3>Ablauf</h3>
+            <ol class="steps">
+              <li>Du siehst Paare, Locations, Stilrichtungen und Abläufe.</li>
+              <li>Du erkennst sofort, ob die Hochzeit visuell zu deiner Bildsprache passt.</li>
+              <li>Du zeigst Interesse, wenn es für dich relevant ist.</li>
+              <li>Ein Match entsteht nur, wenn das Paar ebenfalls Interesse hat.</li>
+            </ol>
+          </div>
+          <p>Du bestimmst, was du fotografieren möchtest – und was nicht.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="selection" aria-labelledby="selection-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">03 / Deine Auswahl</p><h2 id="selection-title">Du wählst nach deinen Kriterien</h2></div>
+        <div class="section-content">
+          <p>Fotografen suchen nicht beliebige Hochzeiten, sondern jene, die ihr Portfolio gezielt weiterentwickeln.</p>
+          <div class="subsection"><h3>Stilrichtungen</h3><ul class="list-grid"><li>Fine Art</li><li>Editorial</li><li>Modern</li><li>Elegant</li><li>Boho</li><li>Urban</li><li>Destination Weddings</li></ul></div>
+          <div class="subsection"><h3>Auswahlkriterien</h3><ul class="list-grid"><li>Location</li><li>Stil</li><li>Ablauf</li><li>Paarprofil</li><li>Bildwünsche</li><li>Atmosphäre</li><li>Ästhetik</li></ul></div>
+          <p style="margin-top:26px">Du baust dein Portfolio bewusst und strategisch auf.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="rights" aria-labelledby="rights-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">04 / Bildrechte</p><h2 id="rights-title">Nutzungsrechte</h2></div>
+        <div class="section-content">
+          <p>Viele Fotografen begleiten Hochzeiten, dürfen die Bilder aber nicht verwenden. WedConnect bringt dich mit Paaren zusammen, die bereit sind, dir Nutzungsrechte zu geben.</p>
+          <div class="subsection"><h3>Nutzungsbereiche</h3><ul class="rights-list"><li>Website</li><li>Portfolio</li><li>Social Media</li><li>Werbung</li><li>Print</li></ul></div>
+          <p style="margin-top:24px">Alles klar geregelt und dokumentiert.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="material" aria-labelledby="material-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">05 / Portfolio</p><h2 id="material-title">Hochwertiges Portfolio-Material ohne Kosten</h2></div>
+        <div class="section-content">
+          <p>Workshops und Styled Shoots sind inszeniert. WedConnect bietet Zugang zu visuell relevanten Hochzeiten ohne zusätzliche Kosten. Du investierst deine Zeit, nicht dein Budget.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="development" aria-labelledby="development-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">06 / Entwicklung</p><h2 id="development-title">Weiterentwicklung</h2></div>
+        <div class="section-content"><p>Hochzeiten mit klarer Ästhetik, passenden Paaren und hochwertigen Locations helfen dir, deinen Stil zu schärfen und dein Portfolio gezielt auszubauen.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="benefits" aria-labelledby="benefits-title">
+      <div class="wrap section-grid">
+        <div class="section-heading"><p class="eyebrow">07 / Vorteile</p><h2 id="benefits-title">Warum Fotografen WedConnect nutzen</h2></div>
+        <div class="section-content">
+          <ul class="benefits">
+            <li>Viele Hochzeiten – du wählst selbst aus</li>
+            <li>Paare, die Nutzungsrechte bewusst freigeben</li>
+            <li>Visuell starke Hochzeiten und hochwertige Locations</li>
+            <li>Portfolio wächst ohne Kosten</li>
+            <li>Faire TFP-Struktur</li>
+            <li>Matches nur bei beidseitigem Interesse</li>
+            <li>Moderne, klare Kommunikation</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="signup" id="signup" aria-labelledby="signup-title">
+      <div class="wrap signup-grid">
+        <div>
+          <p class="eyebrow">08 / Nächster Schritt</p>
+          <h2 id="signup-title">Call-to-Action</h2>
+          <p>Bereit für Hochzeiten, die dein Portfolio weiterbringen? Erstelle dein Profil und finde Paare, deren Bilder du verwenden darfst.</p>
+        </div>
+        <div class="actions"><button class="button button-primary" type="button" data-signup>Profil erstellen <span aria-hidden="true">↗</span></button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap footer-inner"><a class="brand" href="#hero">Wed<span class="brand-mark">Connect</span></a><span>Für Fotografen</span></div></footer>
+
+  <dialog id="signup-dialog" aria-labelledby="dialog-title">
+    <h2 id="dialog-title">Profil erstellen</h2>
+    <p>Die Registrierung ist in diesem Demo-Stand noch nicht angebunden.</p>
+    <button class="button button-primary" type="button" data-close>Schließen</button>
+  </dialog>
+  <script>
+    const menuButton = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('#main-nav');
+    menuButton.addEventListener('click', () => {
+      const open = menuButton.getAttribute('aria-expanded') !== 'true';
+      menuButton.setAttribute('aria-expanded', String(open));
+      menuButton.setAttribute('aria-label', open ? 'Menü schließen' : 'Menü öffnen');
+      menu.classList.toggle('open', open);
+    });
+    menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+      menu.classList.remove('open');
+      menuButton.setAttribute('aria-expanded', 'false');
+      menuButton.setAttribute('aria-label', 'Menü öffnen');
+    }));
+    const signupDialog = document.querySelector('#signup-dialog');
+    document.querySelectorAll('[data-signup]').forEach(button => button.addEventListener('click', () => signupDialog.showModal()));
+    document.querySelector('[data-close]').addEventListener('click', () => signupDialog.close());
+    signupDialog.addEventListener('click', event => { if (event.target === signupDialog) signupDialog.close(); });
+  </script>
+</body>
+</html>
