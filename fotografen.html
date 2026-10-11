@@ -40,13 +40,13 @@
     .nav-links { display: flex; align-items: center; gap: clamp(18px, 3vw, 38px); }
     .nav-links a { color: var(--muted); font-size: 13px; font-weight: 700; text-decoration: none; transition: color .18s ease; }
     .nav-links a:hover, .nav-links a:focus-visible { color: var(--ink); }
-    .nav-cta { min-height: 44px !important; padding: 0 18px !important; font-size: 13px !important; }
+    .nav-cta { min-height: 48px !important; padding: 0 18px !important; font-size: 13px !important; }
     .menu-toggle { display: none; width: 46px; height: 46px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); }
     .eyebrow { margin: 0 0 18px; color: var(--gold); font: 600 11px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
     h1, h2, h3, p { margin-top: 0; }
     h1, h2, h3 { color: var(--ink); }
     h1, h2 { font-family: var(--sans); font-weight: 600; letter-spacing: -.045em; }
-    h1 { max-width: 720px; margin-bottom: 24px; font-size: clamp(44px, 6.2vw, 76px); line-height: 1.02; }
+    h1 { max-width: 720px; margin-bottom: 24px; font-weight: 800; font-size: clamp(44px, 6.2vw, 76px); line-height: 1.02; }
     h1 span { color: var(--gold); }
     h2 { margin-bottom: 0; font-size: clamp(31px, 3.5vw, 42px); line-height: 1.15; }
     h3 { margin-bottom: 12px; font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
@@ -57,7 +57,7 @@
     .hero h2 { margin-bottom: 18px; font-family: var(--sans); font-size: clamp(21px, 2.2vw, 27px); font-weight: 600; line-height: 1.35; letter-spacing: -.025em; }
     .hero-copy > p:not(.eyebrow) { max-width: 620px; color: var(--muted); font-size: clamp(16px, 1.5vw, 18px); line-height: 1.8; }
     .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-    .button { min-height: 52px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid transparent; border-radius: 8px; font-size: 14px; font-weight: 800; text-decoration: none; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+    .button { min-height: 48px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid transparent; border-radius: 8px; font-size: 15px; font-weight: 800; text-decoration: none; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
     .button:hover { transform: translateY(-1px); }
     .button:focus-visible, a:focus-visible, .menu-toggle:focus-visible, dialog button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     .button-primary { background: var(--gold); color: var(--gold-ink); }
@@ -65,13 +65,27 @@
     .button-secondary { border-color: var(--border); background: var(--surface); color: var(--ink); }
     .button-secondary:hover { border-color: var(--gold); background: var(--hover); }
     .hero-art { position: relative; min-height: 620px; display: grid; place-items: center; }
-    .hero-photo { position: relative; width: min(100%, 560px); height: clamp(500px, 51vw, 660px); margin: 0; overflow: hidden; border: 1px solid rgb(245 242 236 / 15%); background: var(--surface); box-shadow: 18px 18px 0 var(--subtle); }
-    .hero-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 42%; filter: saturate(.78); }
-    .hero-photo::after { position: absolute; inset: 0; border: 1px solid rgb(245 242 236 / 8%); background: linear-gradient(180deg, transparent 56%, rgb(16 15 19 / 28%)); content: ""; pointer-events: none; }
+    .pairing-card { width: min(100%, 560px); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 24px 64px #09090b55; }
+    .pairing-photo { position: relative; height: clamp(275px, 27vw, 360px); overflow: hidden; background: var(--raised); }
+    .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 42%; filter: saturate(.82); }
+    .pairing-photo::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 65%, rgb(16 15 19 / 24%)); content: ""; pointer-events: none; }
+    .pairing-caption { display: flex; justify-content: space-between; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+    .pairing-caption span:first-child { color: var(--gold); font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .pairing-content { padding: 18px 22px 20px; }
+    .pairing-topline { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 16px; color: var(--gold); font: 500 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .pairing-profiles { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: center; gap: 12px; }
+    .pairing-profile:last-child { text-align: right; }
+    .profile-kicker { display: block; margin-bottom: 8px; color: var(--muted); font: 500 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .pairing-profile h3 { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
+    .pairing-profile p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .pairing-connector { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--border); border-radius: 50%; color: var(--gold); font-size: 18px; }
+    .pairing-status { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--body); font-size: 12px; }
+    .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgb(213 182 122 / 13%); }
+    .status-code { margin-left: auto; color: var(--muted); font: 500 9px var(--mono); letter-spacing: .08em; }
     .section { padding: clamp(66px, 8vw, 104px) 0; border-top: 1px solid var(--border); }
     .section:nth-of-type(even) { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 1.2%), transparent); }
     .section-grid { display: grid; grid-template-columns: minmax(230px, .78fr) minmax(0, 1.22fr); gap: clamp(36px, 8vw, 112px); align-items: start; }
-    .section-heading { position: sticky; top: 112px; }
+    .section-heading { position: static; }
     .section-heading .eyebrow { margin-bottom: 15px; }
     .section-content { max-width: 720px; }
     .section-content > p + p { margin-top: 18px; }
@@ -108,7 +122,8 @@
       .hero-grid { grid-template-columns: 1fr; gap: 36px; }
       .hero-copy { max-width: 760px; }
       .hero-art { min-height: 560px; }
-      .hero-photo { width: min(100%, 520px); height: 560px; }
+      .pairing-card { width: min(100%, 560px); }
+      .pairing-photo { height: 340px; }
       .section-grid { grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); gap: 44px; }
     }
     @media (max-width: 720px) {
@@ -121,7 +136,7 @@
       .nav-links .nav-cta { width: 100%; margin-top: 8px; }
       .hero { padding-top: 66px; }
       .hero-art { min-height: 440px; }
-      .hero-photo { height: 460px; }
+      .pairing-photo { height: 300px; }
       .section-grid { grid-template-columns: 1fr; gap: 24px; }
       .section-heading { position: static; }
       .section-heading h2 { max-width: 620px; }
@@ -131,9 +146,15 @@
     @media (max-width: 480px) {
       h1 { font-size: clamp(42px, 11vw, 54px); }
       .hero-art { min-height: 350px; }
-      .hero-photo { height: 370px; box-shadow: 10px 10px 0 var(--subtle); }
+      .pairing-caption, .pairing-content { padding-right: 16px; padding-left: 16px; }
+      .pairing-photo { height: 250px; }
+      .pairing-profiles { grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr); gap: 8px; }
+      .pairing-connector { width: 34px; height: 34px; }
+      .pairing-profile h3 { font-size: 14px; }
+      .pairing-profile p { font-size: 11px; }
+      .status-code { font-size: 8px; }
       .actions { display: grid; grid-template-columns: 1fr; }
-      .button { width: 100%; min-height: 52px; }
+      .button { width: 100%; min-height: 50px; font-size: 16px; }
       .list-grid, .benefits { grid-template-columns: 1fr; }
       .footer-inner { flex-direction: column; }
     }
@@ -160,7 +181,7 @@
     <section class="hero" id="hero" aria-labelledby="page-title">
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <h1 id="page-title">Baue das Portfolio auf, das du wirklich zeigen willst</h1>
+          <h1 id="page-title">Baue das Portfolio auf, das du <span>wirklich zeigen willst</span></h1>
           <h2>Erweitere dein Portfolio mit Hochzeiten, die zu deinem Stil passen.</h2>
           <p>WedConnect zeigt dir viele Hochzeiten. Du entscheidest selbst, welche davon zu deiner Ästhetik, deinem Anspruch und deiner Bildsprache passen. Gezielt statt zufällig. Keine Kosten. Keine gestellten Szenen.</p>
           <div class="actions">
@@ -169,10 +190,22 @@
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
-          <!-- Editorial wedding image from Unsplash: sina rezakhani, Dhv3oEeul1I -->
-          <figure class="hero-photo">
-            <img src="https://images.unsplash.com/photo-1701027650721-301148a68ae3?auto=format&amp;fit=crop&amp;fm=jpg&amp;q=85&amp;w=1400" alt="" fetchpriority="high">
-          </figure>
+          <div class="pairing-card">
+            <div class="pairing-photo">
+              <!-- Editorial wedding image from Unsplash: sina rezakhani, Dhv3oEeul1I -->
+              <img src="https://images.unsplash.com/photo-1701027650721-301148a68ae3?auto=format&amp;fit=crop&amp;fm=jpg&amp;q=85&amp;w=1400" alt="" fetchpriority="high">
+            </div>
+            <div class="pairing-caption"><span>WedConnect · Pairing</span><span>Beispielansicht · Symbolbild</span></div>
+            <div class="pairing-content">
+              <div class="pairing-topline"><span>01 / Hochzeit</span><span>02 / Fotograf</span></div>
+              <div class="pairing-profiles">
+                <div class="pairing-profile"><span class="profile-kicker">Paar</span><h3>Hochzeitspaar</h3><p>Location · Stil · Ablauf</p></div>
+                <div class="pairing-connector" aria-hidden="true">↔</div>
+                <div class="pairing-profile"><span class="profile-kicker">Profil</span><h3>Fotografenprofil</h3><p>Bildsprache · Portfolio</p></div>
+              </div>
+              <div class="pairing-status"><span class="status-dot"></span><span>Beide Seiten entscheiden selbst</span><span class="status-code">BEIDSEITIGES INTERESSE</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
