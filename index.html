@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#25242b">
+  <meta name="description" content="WedConnect bringt Hochzeitspaare und Hochzeitsfotografen für mögliche TFP-Zusammenarbeiten zusammen. Ein Match entsteht nur bei beidseitigem Interesse.">
+  <meta property="og:title" content="WedConnect — Wenn Hochzeiten und Bildsprachen zusammenfinden">
+  <meta property="og:description" content="Ein Match für eine mögliche Zusammenarbeit entsteht nur, wenn beide Seiten Interesse zeigen.">
+  <meta property="og:type" content="website">
+  <title>WedConnect — Wenn Hochzeiten und Bildsprachen zusammenfinden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--canvas:#25242b;--subtle:#2b2a31;--surface:#302f38;--raised:#34323a;--hover:#3c3943;--ink:#f5f2ec;--body:#e3dfe2;--muted:#c2bdc3;--gold:#d5b67a;--gold-ink:#29262b;--border:#514e59;--sans:"Montserrat",Arial,sans-serif;--mono:"IBM Plex Mono",monospace;--content:1200px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--canvas);color:var(--body);font:400 16px/1.65 var(--sans)}a{color:inherit}img{max-width:100%;display:block}button{font:inherit}.wrap{width:min(var(--content),calc(100% - clamp(36px,8vw,96px)));margin-inline:auto}.topbar{position:sticky;top:0;z-index:20;background:rgb(37 36 43 / 93%);border-bottom:1px solid rgb(81 78 89 / 75%);backdrop-filter:blur(16px)}.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:28px}.brand{color:var(--ink);font-size:19px;font-weight:700;letter-spacing:-.045em;text-decoration:none;white-space:nowrap}.brand-mark{color:var(--gold)}.nav-links{display:flex;align-items:center;gap:clamp(16px,2.5vw,34px)}.nav-links>a:not(.button){font-size:13px;font-weight:600;text-decoration:none;color:var(--body);transition:color .2s}.nav-links>a:not(.button):hover{color:var(--gold)}.button{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:12px 19px;border:1px solid transparent;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;transition:background .2s,border-color .2s,transform .2s}.button:hover{transform:translateY(-2px)}.button-primary{background:var(--gold);color:var(--gold-ink)}.button-primary:hover{background:#e1c58f}.button-secondary{background:var(--surface);border-color:var(--border);color:var(--ink)}.button-secondary:hover{background:var(--hover);border-color:var(--gold)}.menu-toggle{display:none;min-width:46px;min-height:46px;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer}.menu-toggle svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7}
+    .hero{position:relative;overflow:hidden;padding:clamp(58px,8vw,106px) 0 clamp(70px,9vw,112px);border-bottom:1px solid var(--border);background:radial-gradient(ellipse at 76% 38%,rgb(213 182 122 / 8%),transparent 37%),var(--canvas)}.hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);align-items:center;gap:clamp(42px,7vw,88px)}.hero-copy{max-width:610px;min-width:0}.eyebrow{margin:0 0 20px;color:var(--gold);font:500 11px/1.5 var(--mono);letter-spacing:.12em;text-transform:uppercase}.hero h1{margin:0 0 23px;color:var(--ink);font-size:clamp(42px,4.4vw,60px);font-weight:700;line-height:1.06;letter-spacing:-.06em}.hero h1 span{color:var(--gold)}.hero-lead{max-width:560px;margin:0;color:var(--body);font-size:18px;line-height:1.75}.hero-note{margin:17px 0 0;color:var(--muted);font-size:13px;line-height:1.6}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:29px}.hero-art{position:relative;min-width:0}.pairing-card{overflow:hidden;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:0 24px 68px #09090b55}.pairing-photo{aspect-ratio:1.24/1;overflow:hidden;background:var(--hover)}.pairing-photo img{width:100%;height:100%;object-fit:cover;object-position:54% center}.pairing-caption{display:flex;justify-content:space-between;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px}.pairing-caption span:first-child{color:var(--gold);font-family:var(--mono);letter-spacing:.03em}.pairing-content{padding:18px 20px 16px}.pairing-topline{display:flex;justify-content:space-between;color:var(--muted);font:500 10px var(--mono);letter-spacing:.06em;text-transform:uppercase}.pairing-profiles{display:grid;grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr);align-items:center;gap:12px;padding:17px 0}.pairing-profile{min-width:0}.pairing-profile small{display:block;margin-bottom:4px;color:var(--gold);font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase}.pairing-profile h2{margin:0;color:var(--ink);font-size:15px;font-weight:700;letter-spacing:-.02em}.pairing-profile p{margin:4px 0 0;color:var(--muted);font-size:12px}.connector{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--border);border-radius:50%;color:var(--gold);font-size:20px}.pairing-status{display:flex;align-items:center;gap:9px;padding-top:13px;border-top:1px solid var(--border);color:var(--body);font-size:11px}.status-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgb(213 182 122 / 12%)}.status-label{margin-left:auto;color:var(--muted);font:500 9px var(--mono);letter-spacing:.045em;text-align:right}
+    .intro{padding:clamp(70px,9vw,118px) 0}.intro-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(36px,8vw,112px);align-items:start}.section-kicker{margin:0 0 17px;color:var(--gold);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase}.intro h2,.editorial-copy h2,.closing h2{margin:0;color:var(--ink);font-size:clamp(34px,4.5vw,54px);font-weight:700;line-height:1.12;letter-spacing:-.055em}.intro-copy p{max-width:650px;margin:0 0 17px;color:var(--body);font-size:17px;line-height:1.8}.intro-copy p:last-child{margin-bottom:0}.intro-copy strong{color:var(--ink);font-weight:600}.role-section{padding:0 0 clamp(76px,10vw,126px)}.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.role-card{position:relative;display:flex;min-height:250px;flex-direction:column;justify-content:space-between;overflow:hidden;padding:clamp(24px,3.6vw,42px);border:1px solid var(--border);border-radius:16px;background:linear-gradient(140deg,var(--surface),var(--subtle))}.role-card::after{position:absolute;right:-64px;bottom:-116px;width:260px;height:260px;border:1px solid rgb(213 182 122 / 22%);border-radius:50%;content:""}.role-card:nth-child(2){background:linear-gradient(145deg,#34323a,#29282f)}.role-number{color:var(--gold);font:500 11px var(--mono);letter-spacing:.08em}.role-card h3{max-width:410px;margin:26px 0 12px;color:var(--ink);font-size:clamp(23px,2.7vw,32px);font-weight:700;line-height:1.2;letter-spacing:-.04em}.role-card p{max-width:440px;margin:0;color:var(--body);font-size:15px;line-height:1.75}.role-link{position:relative;z-index:1;display:inline-flex;align-items:center;gap:10px;margin-top:25px;color:var(--gold);font-size:14px;font-weight:700;text-decoration:none}.role-link span{transition:transform .2s}.role-link:hover span{transform:translateX(4px)}
+    .editorial{padding:clamp(72px,9vw,112px) 0;background:var(--subtle);border-block:1px solid var(--border)}.editorial-grid{display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:clamp(38px,7vw,92px);align-items:center}.editorial-grid.reverse{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)}.editorial-grid.reverse .editorial-art{order:-1}.editorial-copy{max-width:520px}.editorial-copy h2{margin-bottom:20px}.editorial-copy>p:not(.section-kicker){margin:0;color:var(--body);font-size:17px;line-height:1.8}.editorial-art{min-width:0}.art-frame{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:0 22px 54px #09090b38}.art-frame img{width:100%;aspect-ratio:1.35/1;object-fit:cover}.art-caption{display:flex;justify-content:space-between;gap:15px;padding:12px 16px;color:var(--muted);font:500 10px var(--mono);letter-spacing:.045em;text-transform:uppercase}.art-caption span:last-child{text-align:right}.steps-section{padding:clamp(74px,9vw,112px) 0}.steps-heading{max-width:680px;margin-bottom:38px}.steps-heading h2{margin:0;color:var(--ink);font-size:clamp(34px,4.5vw,54px);font-weight:700;line-height:1.12;letter-spacing:-.055em}.steps-heading>p:last-child{max-width:580px;margin:16px 0 0;color:var(--body);font-size:16px;line-height:1.75}.steps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.step-card{min-height:195px;padding:25px 24px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.step-index{display:flex;align-items:center;gap:10px;margin-bottom:24px;color:var(--gold);font:500 11px var(--mono);letter-spacing:.08em}.step-index::after{height:1px;flex:1;background:var(--border);content:""}.step-card h3{margin:0 0 9px;color:var(--ink);font-size:18px;font-weight:700;letter-spacing:-.025em}.step-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}.notice{display:flex;gap:14px;align-items:flex-start;margin-top:20px;padding:18px 20px;border:1px solid rgb(213 182 122 / 36%);border-radius:12px;background:rgb(213 182 122 / 6%)}.notice-mark{flex:0 0 auto;color:var(--gold);font-size:18px;line-height:1.2}.notice p{margin:0;color:var(--body);font-size:13px;line-height:1.7}.notice strong{color:var(--ink);font-weight:600}
+    .closing{padding:clamp(68px,9vw,108px) 0;border-top:1px solid var(--border);background:radial-gradient(ellipse at 18% 100%,rgb(213 182 122 / 8%),transparent 38%),var(--canvas)}.closing-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}.closing-copy{max-width:720px}.closing h2{margin-bottom:16px}.closing-copy>p:not(.section-kicker){margin:0;color:var(--body);font-size:16px;line-height:1.75}.closing-actions{display:flex;flex-wrap:wrap;gap:11px;justify-content:flex-end}.footer{border-top:1px solid var(--border);background:#222127}.footer-inner{display:flex;min-height:82px;align-items:center;justify-content:space-between;gap:18px}.footer small{color:var(--muted);font-size:11px}.footer-links{display:flex;gap:20px}.footer-links a{color:var(--muted);font-size:12px;text-decoration:none}.footer-links a:hover{color:var(--gold)}
+    a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.menu-toggle:focus-visible{outline-offset:4px}
+    @media(max-width:900px){.hero-grid{grid-template-columns:minmax(0,1fr);gap:38px}.hero-copy{max-width:760px}.hero-art{width:min(100%,720px);margin-inline:auto}.pairing-photo{aspect-ratio:1.5/1}.intro-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:40px}.editorial-grid,.editorial-grid.reverse{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:34px}.closing-grid{grid-template-columns:1fr}.closing-actions{justify-content:flex-start}}
+    @media(max-width:760px){.nav{min-height:70px}.menu-toggle{display:grid;place-items:center}.nav-links{position:absolute;top:calc(100% + 1px);left:0;right:0;display:none;align-items:stretch;gap:0;padding:10px clamp(18px,4vw,32px) 18px;border-bottom:1px solid var(--border);background:var(--canvas)}.nav-links.open{display:flex;flex-direction:column}.nav-links>a:not(.button){padding:13px 5px;border-bottom:1px solid rgb(81 78 89 / 55%);font-size:14px}.nav-cta{margin-top:13px}.intro-grid{grid-template-columns:1fr;gap:22px}.intro h2{max-width:700px}.role-grid{grid-template-columns:1fr}.role-card{min-height:220px}.editorial-grid,.editorial-grid.reverse{grid-template-columns:1fr;gap:27px}.editorial-grid.reverse .editorial-art{order:0}.editorial-copy{max-width:680px}.editorial-art{width:min(100%,720px)}.steps-grid{grid-template-columns:1fr}.step-card{min-height:0}.step-index{margin-bottom:15px}}
+    @media(max-width:520px){body{font-size:16px}.wrap{width:calc(100% - 36px)}.hero{padding-top:52px}.hero h1{font-size:clamp(43px,12vw,58px);line-height:1.03}.hero-lead{font-size:16px;line-height:1.75}.actions{flex-direction:column;align-items:stretch}.actions .button{width:100%;min-height:50px;font-size:15px}.pairing-photo{aspect-ratio:1.08/1}.pairing-caption{font-size:9px;padding:10px 12px}.pairing-content{padding:15px 13px 13px}.pairing-profiles{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:7px}.pairing-profile h2{font-size:13px}.pairing-profile p{font-size:10px}.connector{width:32px;height:32px;font-size:17px}.pairing-status{font-size:10px}.status-label{max-width:110px;font-size:8px}.intro-copy p,.editorial-copy>p:not(.section-kicker){font-size:16px}.art-frame img{aspect-ratio:1.1/1}.art-caption{font-size:9px;padding:10px 12px}.footer-inner{align-items:flex-start;flex-direction:column;justify-content:center;padding-block:20px}.footer-links{flex-wrap:wrap;gap:10px 18px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#start" aria-label="WedConnect – zum Seitenanfang">Wed<span class="brand-mark">Connect</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Menü öffnen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <nav class="nav-links" id="main-nav" aria-label="Hauptnavigation">
+        <a href="#idee">Die Idee</a>
+        <a href="#ablauf">So funktioniert’s</a>
+        <a href="#paare">Für Hochzeitspaare</a>
+        <a href="/fotografen.html">Für Fotografen</a>
+        <a class="button button-primary nav-cta" href="#paare">WedConnect entdecken <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="start">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">WEDCONNECT · HOCHZEITEN IN GUTER GESELLSCHAFT</p>
+          <h1 id="hero-title">Wenn Hochzeiten und <span>Bildsprachen</span> zusammenfinden.</h1>
+          <p class="hero-lead">WedConnect bringt Hochzeitspaare und Hochzeitsfotografen für mögliche TFP-Zusammenarbeiten zusammen. Eine passende Verbindung beginnt dort, wo beide Seiten Ja sagen.</p>
+          <div class="actions">
+            <a class="button button-primary" href="#idee">Die Idee kennenlernen <span aria-hidden="true">↓</span></a>
+            <a class="button button-secondary" href="/fotografen.html">Für Fotografen <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="hero-note">Ein Match ist der Beginn eines Gesprächs – noch keine Buchungszusage.</p>
+        </div>
+        <div class="hero-art">
+          <div class="pairing-card">
+            <div class="pairing-photo"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/wedconnect-hero.webp" alt="Redaktionelle Illustration: Eine Hochzeitsfotografin fotografiert ein Paar in einer eleganten Stadtkulisse." fetchpriority="high"></div>
+            <div class="pairing-caption"><span>WEDCONNECT · PAIRING</span><span>Illustration · Symbolbild</span></div>
+            <div class="pairing-content">
+              <div class="pairing-topline"><span>01 / Hochzeit</span><span>02 / Fotograf</span></div>
+              <div class="pairing-profiles">
+                <div class="pairing-profile"><small>Das Paar</small><h2>Ein Tag mit eigener Geschichte</h2><p>Ort · Stil · Vorstellungen</p></div>
+                <div class="connector" aria-hidden="true">↔</div>
+                <div class="pairing-profile"><small>Der Fotograf</small><h2>Ein Blick mit eigener Handschrift</h2><p>Erfahrung · Bildsprache</p></div>
+              </div>
+              <div class="pairing-status"><span class="status-dot" aria-hidden="true"></span><span>Beide Seiten entscheiden selbst</span><span class="status-label">BEIDSEITIGES INTERESSE</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro" id="idee" aria-labelledby="idee-title">
+      <div class="wrap intro-grid">
+        <div><p class="section-kicker">01 / DIE IDEE</p><h2 id="idee-title">Nicht irgendein Auftrag. Eine Zusammenarbeit, die passt.</h2></div>
+        <div class="intro-copy">
+          <p>Jede Hochzeit hat ihren eigenen Charakter. Und jeder Fotograf bringt eine eigene Sicht auf Geschichten, Licht und echte Momente mit.</p>
+          <p><strong>WedConnect macht diese beiden Perspektiven füreinander sichtbar.</strong> Paare stellen ihre Hochzeit vor. Fotografen entdecken Feiern, die zu ihrer Bildsprache und Erfahrung passen.</p>
+          <p>Interesse ist immer gegenseitig. So kann aus einem passenden Eindruck ein persönliches Gespräch werden – mit Raum, die Erwartungen auf beiden Seiten zu klären.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="role-section" aria-label="Einstiege für Paare und Fotografen">
+      <div class="wrap role-grid">
+        <article class="role-card" id="paare">
+          <span class="role-number">01 — FÜR HOCHZEITSPAARE</span>
+          <div><h3>Zeigt, was euren Hochzeitstag besonders macht.</h3><p>Teilt eure Vorstellungen, euren Ort und die Atmosphäre, die ihr euch wünscht. So können Fotografen einschätzen, ob ihre Art zu fotografieren zu euch passt.</p><a class="role-link" href="#ablauf">Die Idee verstehen <span aria-hidden="true">↗</span></a></div>
+        </article>
+        <article class="role-card" id="fotografen">
+          <span class="role-number">02 — FÜR FOTOGRAFEN</span>
+          <div><h3>Entdeckt Hochzeiten, die eure Arbeit weiterbringen.</h3><p>Findet Paare und Feiern, die zu eurem Stil passen. Erfahrt, wie WedConnect euch beim gezielten Ausbau eures Portfolios unterstützen soll.</p><a class="role-link" href="/fotografen.html">Für Fotografen <span aria-hidden="true">↗</span></a></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="editorial" aria-labelledby="editorial-title">
+      <div class="wrap editorial-grid">
+        <div class="editorial-copy"><p class="section-kicker">02 / ZWEI PERSPEKTIVEN</p><h2 id="editorial-title">Ein guter Match beginnt mit einem guten Gefühl.</h2><p>Paare suchen nach einem Blick, der ihren Tag versteht. Fotografen suchen nach Geschichten, die zu ihrer Handschrift passen. WedConnect bringt beide Seiten zusammen, ohne die Entscheidung vorwegzunehmen.</p></div>
+        <figure class="editorial-art"><div class="art-frame"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-gespraech.webp" alt="Ein Hochzeitspaar und eine Fotografin betrachten gemeinsam passende Hochzeitsbilder." loading="lazy"></div><figcaption class="art-caption"><span>Eine gemeinsame Vorstellung</span><span>Illustration · Symbolbild</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="steps-section" id="ablauf" aria-labelledby="steps-title">
+      <div class="wrap">
+        <div class="steps-heading"><p class="section-kicker">03 / SO FUNKTIONIERT’S</p><h2 id="steps-title">Von der ersten Vorstellung zum Gespräch.</h2><p>Der Ablauf soll einfach bleiben: Beide Seiten lernen sich kennen, prüfen die Passung und entscheiden selbst, ob sie Kontakt aufnehmen möchten.</p></div>
+        <div class="steps-grid">
+          <article class="step-card"><div class="step-index">01 <span>PROFIL</span></div><h3>Beide Seiten zeigen sich.</h3><p>Paare beschreiben ihre Hochzeit. Fotografen stellen Erfahrung, Region und Bildsprache vor.</p></article>
+          <article class="step-card"><div class="step-index">02 <span>INTERESSE</span></div><h3>Jede Seite wählt selbst.</h3><p>Beide prüfen, ob Hochzeit, Erwartungen und fotografischer Stil zueinander passen.</p></article>
+          <article class="step-card"><div class="step-index">03 <span>MATCH</span></div><h3>Ein Gespräch kann beginnen.</h3><p>Erst wenn beide Interesse zeigen, entsteht ein Match – und die Möglichkeit, Details miteinander zu besprechen.</p></article>
+        </div>
+        <div class="notice"><span class="notice-mark" aria-hidden="true">↗</span><p><strong>Ein Match ist keine Buchungszusage.</strong> Umfang, Gegenleistung, Bildlieferung und Nutzungsrechte werden vor einer Zusammenarbeit ausdrücklich zwischen den Beteiligten vereinbart. WedConnect befindet sich derzeit im Aufbau; Registrierung und Matching sind noch nicht produktiv verfügbar.</p></div>
+      </div>
+    </section>
+
+    <section class="editorial" aria-labelledby="clarity-title">
+      <div class="wrap editorial-grid reverse">
+        <div class="editorial-copy"><p class="section-kicker">04 / KLARE ABSPRACHEN</p><h2 id="clarity-title">Gute Zusammenarbeit braucht klare Vereinbarungen.</h2><p>Bevor gemeinsam fotografiert wird, sollten Erwartungen und Bildrechte offen besprochen werden. Dazu gehören Ablauf und Umfang, Gegenleistung, Lieferung sowie die Frage, wo die entstandenen Bilder verwendet werden dürfen.</p></div>
+        <figure class="editorial-art"><div class="art-frame"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-galerie-rechte.webp" alt="Ein Hochzeitspaar und eine Fotografin betrachten gemeinsam eine fertige Bildergalerie am Laptop." loading="lazy"></div><figcaption class="art-caption"><span>Rechte gemeinsam klären</span><span>Illustration · Symbolbild</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="closing" aria-labelledby="closing-title">
+      <div class="wrap closing-grid">
+        <div class="closing-copy"><p class="section-kicker">WEDCONNECT · ZWEI SEITEN, EIN GESPRÄCH</p><h2 id="closing-title">Finde heraus, ob WedConnect zu dir passt.</h2><p>Lerne die Idee kennen und erfahre, wie WedConnect mögliche Zusammenarbeit zwischen Hochzeitspaaren und Fotografen unterstützen soll.</p></div>
+        <div class="closing-actions"><a class="button button-primary" href="#ablauf">So funktioniert’s <span aria-hidden="true">↑</span></a><a class="button button-secondary" href="/fotografen.html">Für Fotografen <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="wrap footer-inner"><a class="brand" href="#start">Wed<span class="brand-mark">Connect</span></a><nav class="footer-links" aria-label="Footer"><a href="#idee">Die Idee</a><a href="#ablauf">So funktioniert’s</a><a href="/fotografen.html">Für Fotografen</a></nav><small>© 2026 WedConnect · Im Aufbau</small></div></footer>
+  <script>
+    const menuButton=document.querySelector('.menu-toggle');
+    const menu=document.querySelector('#main-nav');
+    menuButton.addEventListener('click',()=>{const open=menuButton.getAttribute('aria-expanded')!=='true';menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Menü schließen':'Menü öffnen');menu.classList.toggle('open',open)});
+    menu.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menu.classList.remove('open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Menü öffnen')}));
+  </script>
+</body>
+</html>
