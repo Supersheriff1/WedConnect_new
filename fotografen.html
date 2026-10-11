@@ -313,6 +313,75 @@
       .story-figure figcaption span:last-child { text-align: left; }
     }
 
+    /* Unified editorial rhythm below the first content block */
+    .section.story-section {
+      background: var(--canvas);
+      border-top-color: rgb(81 78 89 / 68%);
+    }
+    #problem-title,
+    .story-title,
+    .signup-copy h2 {
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: clamp(20.37px, 2.13vw, 26.19px);
+      font-weight: 500;
+      line-height: 1.4;
+      letter-spacing: -.025em;
+      text-wrap: balance;
+    }
+    .story-heading-row > p,
+    .rights-copy > p:not(.eyebrow):not(.rights-assurance),
+    .material-copy > p:not(.story-title):not(.material-note),
+    .signup-copy > p:not(.eyebrow) {
+      font-size: 15.52px;
+      line-height: 1.75;
+    }
+    .process-steps h3,
+    .selection-label h3,
+    .benefit-list h3,
+    .portfolio-alternative h3 {
+      font-size: 15.52px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+    .process-steps p,
+    .benefit-list p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .mutual-note p,
+    .selection-foot,
+    .rights-assurance,
+    .material-note {
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .development-path strong {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .selection-tags span,
+    .rights-tags span {
+      font-size: 12px;
+    }
+    .story-figure {
+      border-color: rgb(245 242 236 / 10%);
+      border-radius: 14px;
+      box-shadow: 0 14px 36px rgb(9 9 11 / 18%);
+    }
+    .story-figure figcaption {
+      font-size: 11px;
+    }
+    @media (max-width: 680px) {
+      .process-steps p,
+      .benefit-list p { font-size: 14px; }
+      .story-heading-row > p,
+      .rights-copy > p:not(.eyebrow):not(.rights-assurance),
+      .material-copy > p:not(.story-title):not(.material-note),
+      .signup-copy > p:not(.eyebrow) { font-size: 15px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
     }
