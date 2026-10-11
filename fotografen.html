@@ -86,7 +86,8 @@
     .pairing-connector svg { display: block; width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
     .pairing-connector svg circle { fill: currentColor; stroke: none; }
     .pairing-status { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--body); font-size: 11.64px; }
-    .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgb(213 182 122 / 13%); }
+    @keyframes status-pulse { 0%, 100% { box-shadow: 0 0 0 3px rgb(113 196 143 / 16%), 0 0 0 0 rgb(113 196 143 / 0%); } 50% { box-shadow: 0 0 0 3px rgb(113 196 143 / 18%), 0 0 0 7px rgb(113 196 143 / 0%); } }
+    .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: #72c78e; box-shadow: 0 0 0 3px rgb(113 196 143 / 16%); animation: status-pulse 2.4s ease-in-out infinite; }
     .status-code { margin-left: auto; color: var(--muted); font: 500 8.73px var(--mono); letter-spacing: .08em; }
     .section { padding: clamp(66px, 8vw, 104px) 0; border-top: 1px solid var(--border); }
     .section:nth-of-type(even) { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 1.2%), transparent); }
@@ -244,7 +245,6 @@
             <div class="pairing-photo">
               <img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-fenster.jpg" alt="Links prüft eine Fotografin ihr Portfolio im Atelier; rechts findet eine Hochzeit statt. Ein sichtbarer Abstand und zwei getrennte Lichtlinien zeigen, dass beide Seiten sich erst noch finden müssen." fetchpriority="high">
             </div>
-            <div class="pairing-caption"><span>WedConnect · Pairing</span><span>Editorial-Illustration · Symbolbild</span></div>
             <div class="pairing-content">
               <div class="pairing-topline"><span>01 / Fotograf</span><span>02 / Hochzeit</span></div>
               <div class="pairing-profiles">
@@ -252,7 +252,7 @@
                 <span class="pairing-connector" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4 16h8m-3-3 3 3-3 3M28 16h-8m3-3-3 3 3 3"/><circle cx="16" cy="16" r="2"/></svg></span>
                 <div class="pairing-profile"><span class="profile-kicker">Paar</span><h3>Hochzeitspaar</h3><p>Location · Stil · Ablauf</p></div>
               </div>
-              <div class="pairing-status"><span class="status-dot"></span><span>Beide Seiten entscheiden selbst</span><span class="status-code">BEIDSEITIGES INTERESSE</span></div>
+              <div class="pairing-status"><span class="status-dot" aria-hidden="true"></span><span>Beidseitiges Interesse</span></div>
             </div>
           </div>
         </div>
