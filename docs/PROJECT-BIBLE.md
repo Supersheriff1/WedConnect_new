@@ -1,6 +1,6 @@
 # WedConnect · Project Bible
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Stand:** 11. Oktober 2026  
 
 ## 1. Ziel des Projekts
@@ -23,7 +23,7 @@ Die Website erklärt WedConnect, bevor sich jemand registriert:
 - rechtliche Informationen und Datenschutz
 - klare Einstiege zur Registrierung und App
 
-Die öffentliche Seite folgt dem dunklen Pairing-System mit Goldakzenten. Ihre Typografie und Bildsprache richten sich nach der WedConnect Design Bible v1.2.
+Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.
 
 **Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
 
@@ -200,7 +200,7 @@ Für einen öffentlichen Betrieb braucht WedConnect Werkzeuge zur Verwaltung und
 
 ## 14. Designstandard
 
-Die verbindliche visuelle Referenz ist die **WedConnect Design Bible v1.2**. Sie hat Vorrang vor älteren visuellen Vorgaben in dieser Project Bible.
+Für die öffentliche Website ist die **WedConnect Design Bible v1.3** verbindlich. Designmaster ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Commit `519b6b727139ef99bd0681b4aa89dd6c2d53c2de`. Dashboard und eingeloggte App sind von dieser Festlegung ausgenommen; ihr aktueller visueller Standard bleibt unverändert.
 
 - Öffentliche Website: dunkle Pairing-Flächen mit gezielten Goldakzenten.
 - Öffentliche Website: Montserrat für Überschriften, Fließtext, Navigation und Controls; IBM Plex Mono nur für kurze Kennzeichnungen.
@@ -211,7 +211,7 @@ Die verbindliche visuelle Referenz ist die **WedConnect Design Bible v1.2**. Sie
 - Mobile Lesetexte mindestens 16 px; Layouts behalten sichtbare Außenabstände.
 - Bewegungen beachten `prefers-reduced-motion`.
 
-Neue Komponenten folgen der Design Bible v1.2. Die Product Bible beschreibt Produktumfang und Verhalten; visuelle Detailregeln stehen ausschließlich in der Design Bible.
+Neue öffentliche Seiten und Komponenten folgen dem Designmaster „Für Fotografen“ und der Design Bible v1.3. Die Product Bible beschreibt Produktumfang und Verhalten; visuelle Detailregeln der öffentlichen Website stehen ausschließlich in der Design Bible. Dashboard und eingeloggte App werden durch diese Aktualisierung nicht verändert.
 
 ## 15. Technische Umsetzung
 
