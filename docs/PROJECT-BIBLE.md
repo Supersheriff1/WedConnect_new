@@ -1,6 +1,6 @@
 # WedConnect · Project Bible
 
-**Version:** 1.3  
+**Version:** 1.4  
 **Stand:** 11. Oktober 2026  
 
 ## 1. Ziel des Projekts
@@ -23,7 +23,7 @@ Die Website erklärt WedConnect, bevor sich jemand registriert:
 - rechtliche Informationen und Datenschutz
 - klare Einstiege zur Registrierung und App
 
-Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verwenden zwei visuelle Blöcke: links Überschrift und Erklärung gemeinsam, rechts die passende Illustration; auf schmalen Mobilgeräten folgen diese Blöcke untereinander. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.
+Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verbinden Überschrift und Erklärung zu einem Textblock mit einer passenden Illustration. Bildposition, Bildgröße, Textbreite und Abstände variieren passend zum Inhalt, damit ein lebendiger redaktioneller Seitenrhythmus entsteht. Auf schmalen Mobilgeräten steht der Text vor der Illustration. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.
 
 **Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
 
@@ -200,7 +200,7 @@ Für einen öffentlichen Betrieb braucht WedConnect Werkzeuge zur Verwaltung und
 
 ## 14. Designstandard
 
-Für die öffentliche Website ist die **WedConnect Design Bible v1.4** verbindlich. Designmaster ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Commit `ec5d6379995a1a724e17923a1b328ad53c6b6849`. Dashboard und eingeloggte App sind von dieser Festlegung ausgenommen; ihr aktueller visueller Standard bleibt unverändert.
+Für die öffentliche Website ist die **WedConnect Design Bible v1.4** verbindlich. Designmaster ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Commit `34b62aeb331e8b663e9b0f76d29d786798f19616`. Dashboard und eingeloggte App sind von dieser Festlegung ausgenommen; ihr aktueller visueller Standard bleibt unverändert.
 
 - Öffentliche Website: dunkle Pairing-Flächen mit gezielten Goldakzenten.
 - Öffentliche Website: Montserrat für Überschriften, Fließtext, Navigation und Controls; IBM Plex Mono nur für kurze Kennzeichnungen.
@@ -211,7 +211,7 @@ Für die öffentliche Website ist die **WedConnect Design Bible v1.4** verbindli
 - Mobile Lesetexte mindestens 16 px; Layouts behalten sichtbare Außenabstände.
 - Bewegungen beachten `prefers-reduced-motion`.
 
-Neue öffentliche Seiten und Komponenten folgen dem Designmaster „Für Fotografen“ und der Design Bible v1.4. Die Product Bible beschreibt Produktumfang und Verhalten; visuelle Detailregeln der öffentlichen Website stehen ausschließlich in der Design Bible. Dashboard und eingeloggte App werden durch diese Aktualisierung nicht verändert.
+Neue öffentliche Seiten und Komponenten folgen dem Designmaster „Für Fotografen“ und der Design Bible v1.5. Die Product Bible beschreibt Produktumfang und Verhalten; visuelle Detailregeln der öffentlichen Website stehen ausschließlich in der Design Bible. Dashboard und eingeloggte App werden durch diese Aktualisierung nicht verändert.
 
 ## 15. Technische Umsetzung
 
