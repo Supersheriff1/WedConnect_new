@@ -111,10 +111,10 @@
     .portfolio-alternatives { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .portfolio-alternative { min-width: 0; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: rgb(255 255 255 / 1.4%); }
     .alternative-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-    @keyframes icon-drift { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-    .alternative-icon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid rgb(213 182 122 / 30%); border-radius: 10px; background: rgb(213 182 122 / 9%); color: var(--gold); animation: icon-drift 5.2s ease-in-out infinite; }
-    .portfolio-alternative:nth-child(2) .alternative-icon { animation-delay: -1.7s; }
-    .portfolio-alternative:nth-child(3) .alternative-icon { animation-delay: -3.4s; }
+    @keyframes icon-drift { 0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 0 0 rgb(213 182 122 / 0%); } 50% { transform: translateY(-3px) scale(1.045); box-shadow: 0 0 0 4px rgb(213 182 122 / 8%), 0 0 16px rgb(213 182 122 / 14%); } }
+    .alternative-icon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid rgb(213 182 122 / 30%); border-radius: 10px; background: rgb(213 182 122 / 9%); color: var(--gold); animation: icon-drift 3.6s ease-in-out infinite; }
+    .portfolio-alternative:nth-child(2) .alternative-icon { animation-delay: -1.2s; }
+    .portfolio-alternative:nth-child(3) .alternative-icon { animation-delay: -2.4s; }
     .alternative-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
     .portfolio-alternative h3 { margin: 0; color: var(--ink); font-size: 16px; font-weight: 600; letter-spacing: -.02em; line-height: 1.4; }
     .portfolio-alternative .alternative-meta { display: block; margin-top: 4px; color: var(--gold); font: 500 9px/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
@@ -261,7 +261,7 @@
             <div class="problem-intro">
               <div class="section-heading"><p class="eyebrow">01 / DER AUSGANGSPUNKT</p><h2 id="problem-title">Du hast Erfahrung. Dein Portfolio zeigt sie nur nicht.</h2></div>
               <div class="section-content">
-                <p>Viele Fotograf:innen bringen bereits echte Erfahrung mit. Sie haben Hochzeiten begleitet und wissen, worauf es ankommt.</p>
+                <p>Viele Fotografen bringen bereits echte Erfahrung mit. Sie haben Hochzeiten begleitet und wissen, worauf es ankommt.</p>
                 <p>Doch oft dürfen die Bilder nicht veröffentlicht werden. Das Können ist da, aber im Portfolio bleibt die Erfahrung unsichtbar.</p>
               </div>
             </div>
