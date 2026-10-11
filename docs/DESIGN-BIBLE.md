@@ -1,12 +1,12 @@
 # WedConnect · Design Bible
 
-**Version:** 1.1  
-**Stand:** 10. Oktober 2026  
+**Version:** 1.2  
+**Stand:** 11. Oktober 2026  
 **Status:** verbindlicher visueller Standard ab diesem Stand  
-**Geltungsbereich:** öffentliche Website, App-Demo und alle neuen WedConnect-Oberflächen  
-**Designsystem:** Pairing · Dark Editorial · Gold
+**Geltungsbereich:** öffentliche WedConnect-Website, Dashboard/App und neue Produktoberflächen  
+**Designsystem:** Pairing · Dark Editorial · Gold · Illustrated Website
 
-Diese Fassung ersetzt die bisherige Design Bible mit Cream-&-Gold-Vorgaben vollständig. Sie dokumentiert den freigegebenen Pairing-Stand der aktuellen WedConnect-Demo. Neue Screens und Änderungen folgen dieser Bible. Eine Abweichung braucht eine bewusste, dokumentierte Produkt- und Designentscheidung.
+Diese Fassung aktualisiert die visuelle Referenz v1.1. Sie übernimmt die im Website-Referenzscreenshot sichtbare Typografie und den freigegebenen Illustrationsstil. Neue Screens und Änderungen folgen dieser Bible. Eine Abweichung braucht eine bewusste, dokumentierte Produkt- und Designentscheidung.
 
 ## 1. Designziel und Markenerlebnis
 
@@ -79,31 +79,34 @@ Diese Werte gelten für deckende Farbpaare. Transparenz, Bildhintergründe, Verl
 
 ## 3. Typografie
 
-| Einsatz | Schriftfamilie | Gewicht |
-|---|---|---|
-| Überschriften, UI, Fließtext, Navigation, Buttons und Formulare | **Manrope** | 400 bis 800; Titel meist 600 bis 800 |
-| Eyebrows, Nummerierungen, technische Kurzlabels und kompakte Statuscodes | **IBM Plex Mono** | 400 bis 600 |
-| Fallback | Arial, sans-serif | Browserstandard |
+Die öffentliche Marketing-Website folgt der Schriftwirkung des freigegebenen Screenshots: eine prägnante, geometrische Sans-Schrift mit klarer Hierarchie. Website und Dashboard behalten getrennte typografische Rollen.
 
-Manrope ist die einheitliche Hauptschrift. Libre Caslon Text und Montserrat gehören nicht mehr zum aktiven Pairing-System. IBM Plex Mono unterstützt die technische, strukturierte Note und bleibt auf kurze Labels beschränkt.
+| Oberfläche / Einsatz | Schriftfamilie | Gewicht |
+|---|---|---|
+| Öffentliche Website: Überschriften, UI, Fließtext, Navigation, Buttons und Formulare | **Montserrat** | 400 bis 800; Hero-Titel meist 700 bis 800 |
+| Dashboard und funktionale App-Oberflächen | **Manrope** | 400 bis 800; Titel meist 600 bis 800 |
+| Eyebrows, Nummerierungen, technische Kurzlabels und kompakte Statuscodes | **IBM Plex Mono** | 400 bis 600 |
+| Fallback | Arial, sans-serif | Systemfallback |
+
+Montserrat prägt die öffentliche Website und die großen, kräftigen Headlines im Referenzscreenshot. Manrope bleibt für funktionale Dashboard- und App-Flächen reserviert. IBM Plex Mono bleibt auf kurze Kennzeichnungen beschränkt. Libre Caslon Text ist kein Bestandteil der aktuellen Pairing-Website-Typografie.
 
 ### Größen und Hierarchie
 
-- Desktop-Fließtext: in der Regel 15 bis 17 px.
+- Desktop-Fließtext: in der Regel 16 bis 18 px.
 - Mobiler Fließtext: mindestens 16 px.
-- Hero-Headline: fließend von ungefähr 40 bis 68 px auf großen Ansichten; mobil passend zum Viewport, ohne erzwungene Zeilenumbrüche.
-- Seitentitel und Abschnittstitel: responsiv, klar nachrangig zur Hero-Headline.
+- Website-Hero-Headline: ungefähr 48 bis 88 px auf großen Ansichten; mobil fließend passend zum Viewport.
+- Seitentitel und Abschnittstitel: responsiv und klar nachrangig zur Hero-Headline.
 - Buttons und wichtige Formulare auf Mobilgeräten: 16 px.
-- Metadaten: in der Regel mindestens 12 px. Kleine rein dekorative Nummern dürfen darunter liegen, wenn sie keine notwendige Information tragen.
+- Metadaten: in der Regel mindestens 12 px. Rein dekorative Nummern dürfen kleiner sein, wenn sie keine notwendige Information tragen.
 - Zeilenhöhe für längere Texte: mindestens 1.55; kurze Überschriften kompakter.
 
-Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltlich bedeutender Teil in `accent-gold`. Die Hervorhebung soll die Aussage strukturieren und nicht als dekorativer Effekt eingesetzt werden.
+Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltlich bedeutender Teil in `accent-gold`. Die Hervorhebung strukturiert die Aussage und ist kein bloßer Effekt.
 
 ### Lesbarkeit
 
-- Headline-Länge wird über verfügbare Breite und Schriftgröße gesteuert. Keine starren `<br>`-Umbrüche, die bei Zwischenbreiten unnatürliche Zeilen erzwingen.
+- Headlines passen sich über verfügbare Breite und Schriftgröße an. Keine starren `<br>`-Umbrüche, die bei Zwischenbreiten unnatürlich wirken.
 - Lange Absätze erhalten eine begrenzte Lesebreite.
-- Fließtext und unterstützende Erklärung bleiben auch auf Mobilgeräten deutlich lesbar.
+- Fließtext bleibt auch auf Mobilgeräten deutlich lesbar.
 - Großbuchstaben und Monospace sind kurze UI-Marker, keine langen Lesetexte.
 
 ## 4. Layout, Raster und Abstände
@@ -115,6 +118,7 @@ Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltl
 - Layouts dürfen nicht auf eine einzelne Desktopbreite angewiesen sein. Übergänge zwischen Breakpoints sind genauso wichtig wie die kleinste und größte Ansicht.
 - Karten, Formulare und App-Views erhalten `min-width: 0`, wenn sie in Flex- oder Grid-Layouts liegen.
 - Horizontales Scrollen der gesamten Seite ist zu vermeiden. Horizontal scrollbare Streifen sind nur für gezielte Inhalte wie eine Portfolio-Galerie zulässig und müssen als solche erkennbar sein.
+- Öffentliche redaktionelle Abschnitte ordnen Überschrift, erklärenden Text und Illustration in einem stabilen Raster. Bei schmalen Breiten stapeln sie sich mit dem Text vor der Illustration.
 
 ### Responsive Breakpoints der aktuellen Referenz
 
@@ -134,12 +138,17 @@ Breakpoints sind Startwerte der Referenz, keine Erlaubnis für abrupte oder fehl
 Bilder bringen echte Hochzeitserfahrung und fotografische Qualität in die Oberfläche. Die Gestaltung bleibt dokumentarisch, modern und glaubwürdig.
 
 - Bevorzugt werden echte Hochzeitsreportagen und nachvollziehbare Portfolioarbeiten.
-- Illustrationen sind zulässig, wenn sie redaktionell, hochwertig und zurückhaltend wirken. KI-Bilder werden als solche gekennzeichnet.
+- Öffentliche Marketingseiten verwenden für jeden inhaltlichen Abschnitt eine passende redaktionelle Illustration. Motiv und Aussage unterstützen den jeweiligen Text konkret; generische Wiederholungen sind zu vermeiden.
+- Die WedConnect-Hero-Illustration mit Hochzeitspaar und Fotograf ist die visuelle Stilreferenz für neue Website-Illustrationen. Die Motive sollen sich als zusammenhängende Serie lesen.
+- KI-Illustrationen werden als Symbol- oder Konzeptmotive gekennzeichnet und nicht als echte Hochzeitsreportage ausgegeben.
+- Diese erzählerischen Illustrationen gehören zur öffentlichen Website. Im Dashboard werden sie nicht eingesetzt; dort stehen echte Profil-/Portfolioaufnahmen und funktionale Icons im Vordergrund.
 - Bildauswahl zeigt echte Menschen und Arbeitskontexte, keine inszenierten Hochzeitsklischees.
 - Keine Bögen oder Fensterformen als Bildmaske, kein dekorativer Rahmen, der die Bildwirkung dominiert.
 - Zuschnitte erhalten Gesichter, wichtige Gesten und fotografische Aussage. Wo ein vollständiger Bildausschnitt wichtig ist, wird kein `cover`-Zuschnitt erzwungen.
 - Bildunterschriften, Nummern und erklärende Angaben stehen bevorzugt in einer ausgerichteten Zeile unter dem Bild. Sie werden nicht über das Motiv gelegt, wenn sie dort nicht klar lesbar sind.
 - Hero-Motive erhalten Raum, aber keine losgelösten Badges oder Texte, die an Bild- oder Viewporträndern kleben.
+- Jeder erklärende Website-Abschnitt verbindet Text und Motiv als ausgerichtete Komposition. Kurze Conversion-Zeilen, Navigation, Formulare und rechtliche Hinweise benötigen keine erzählerische Illustration.
+- Illustrationen werden als lokale, optimierte Projektassets eingebunden. Alternativtexte beschreiben das Motiv; `object-fit: cover` ist nur für passend komponierte Illustrationen zulässig und darf keine relevante Handlung abschneiden.
 
 ## 6. Komponenten
 
@@ -246,6 +255,6 @@ Der maßgebliche visuelle Referenzstand ist `wedconnect-komplett-pairing-v1.html
 
 ## 10. Referenzstatus der aktuellen Demo
 
-Die Referenz-HTML zeigt das dunkle Pairing-System, Manrope, IBM Plex Mono, Goldakzente, eckigere Buttons, Karten und das zentrierte Verbindungselement. Die Layoutregeln enthalten eine fließende Seitenkante und responsive Navigation.
+Die Produktdemo zeigt das dunkle Pairing-System, Manrope für funktionale App-Oberflächen, IBM Plex Mono für kurze Metadaten, Goldakzente, eckigere Buttons, Karten und das zentrierte Verbindungselement. Öffentliche Marketingseiten nutzen Montserrat und die dazu passende redaktionelle WedConnect-Illustrationsserie. Dashboard und Website bleiben visuell verwandt, unterscheiden sich aber in Typografie und Bildsprache.
 
 Die HTML-Datei ist visuell und funktional ein Prototyp. Echte Authentifizierung, persistente Profile, serverseitige Matches, produktive Nachrichten und Rechteverwaltung sind nicht implementiert. Die Responsive-Regeln dienen als verbindliche Gestaltungsleitlinie; neue Komponenten sind bei den relevanten schmalen, mittleren und breiten Viewports praktisch zu prüfen.
