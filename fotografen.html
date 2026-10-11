@@ -96,9 +96,15 @@
     #problem .section-copy { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
     #problem .section-heading h2 { max-width: 560px; }
     #problem .section-content { max-width: 610px; }
-    #problem .section-content > p:first-child { color: var(--ink); font-size: clamp(18px, 1.7vw, 21px); line-height: 1.7; }
+    #problem .section-content > p { font-size: clamp(16px, 1.45vw, 18px); line-height: 1.75; }
+    #problem .section-content > p:first-child { color: var(--ink); font-size: clamp(18px, 1.65vw, 20px); line-height: 1.65; }
     #problem .section-content > p:last-child { padding-left: 18px; border-left: 1px solid var(--gold); color: var(--muted); }
     #problem .section-illustration { justify-self: end; width: 100%; margin-top: 0; }
+    .portfolio-alternatives { margin-top: 28px; border-top: 1px solid var(--border); }
+    .portfolio-alternative { display: grid; grid-template-columns: minmax(120px, .72fr) minmax(0, 1.4fr); gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .portfolio-alternative h3 { margin: 0; color: var(--ink); font-size: 15px; font-weight: 600; letter-spacing: -.02em; line-height: 1.5; }
+    .portfolio-alternative p { color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .portfolio-alternative .alternative-meta { display: block; margin-top: 5px; color: var(--gold); font: 500 9px/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
     .subsection { margin-top: 34px; }
     .subsection h3 { display: flex; align-items: center; gap: 12px; }
     .subsection h3::before { width: 18px; height: 1px; background: var(--gold); content: ""; }
@@ -169,6 +175,9 @@
       .pairing-profile h3 { font-size: 14px; }
       .pairing-profile p { font-size: 11px; }
       .status-code { font-size: 8px; }
+      .portfolio-alternative { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 14px 0; }
+      .portfolio-alternative h3 { display: flex; align-items: baseline; gap: 10px; }
+      .portfolio-alternative .alternative-meta { margin-top: 0; }
       .actions { display: grid; grid-template-columns: 1fr; }
       .button { width: 100%; min-height: 50px; font-size: 16px; }
       .list-grid, .benefits { grid-template-columns: 1fr; }
@@ -232,8 +241,13 @@
           <div class="section-content">
             <p>Viele Fotograf:innen bringen bereits echte Erfahrung mit. Sie haben Hochzeiten begleitet und wissen, worauf es ankommt.</p>
             <p>Doch ihr Portfolio bleibt oft kleiner, als es sein müsste: Viele Paare erlauben nicht, die entstandenen Bilder zu veröffentlichen. Das Können ist da – online bleibt es unsichtbar.</p>
-            <p>Styled Shoots und Workshops können neue Bilder und Impulse liefern. Sie sind jedoch inszeniert oder kosten Zeit und Geld – und bilden eine echte Hochzeit nur bedingt ab.</p>
-            <p>Genau hier setzt WedConnect an: mit passenden Möglichkeiten, das eigene Portfolio gezielt weiterzuentwickeln.</p>
+            <p>Es gibt drei Wege, ein Portfolio zu erweitern. Jeder hat seine eigenen Grenzen:</p>
+            <div class="portfolio-alternatives" aria-label="Möglichkeiten für neue Portfolio-Bilder">
+              <article class="portfolio-alternative"><h3>Styled Shoots<span class="alternative-meta">Inszeniert</span></h3><p>Planung, Models und Location erzeugen Bilder mit kontrollierten Bedingungen. Sie zeigen den eigenen Blick, aber nicht den Ablauf und die spontanen Momente einer echten Hochzeit.</p></article>
+              <article class="portfolio-alternative"><h3>Workshops<span class="alternative-meta">Zeit und Kosten</span></h3><p>Sie bringen neue Impulse und Übung. Bis daraus ein eigenes, vielseitiges Portfolio entsteht, braucht es oft weitere Shootings und zusätzliche Investitionen.</p></article>
+              <article class="portfolio-alternative"><h3>Echte Hochzeiten<span class="alternative-meta">Bildrechte nötig</span></h3><p>Sie zeigen Erfahrung unter realen Bedingungen. Doch viele Paare geben Bilder nicht zur Veröffentlichung frei – die Fotos bleiben privat und fehlen im Portfolio.</p></article>
+            </div>
+            <p>WedConnect setzt genau dort an: Du kannst Hochzeiten entdecken, die zu deinem Stil passen und bei denen die Nutzung der Bilder vorab geklärt werden kann.</p>
           </div>
         </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-gap.webp" alt="Eine nachdenkliche Hochzeitsfotografin prüft ihr Portfolio und überlegt, wie sie ihre echte Erfahrung sichtbar machen kann." loading="lazy"></figure>
@@ -362,3 +376,4 @@
   </script>
 </body>
 </html>
+
