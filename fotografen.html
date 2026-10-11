@@ -245,8 +245,8 @@
     .process-layout { display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); gap: clamp(28px, 5vw, 58px); align-items: center; }
     .process-layout { align-items: start; }
     .process-figure { position: relative; isolation: isolate; }
-    .process-steps li { transition: transform .22s ease, background-color .22s ease, border-color .22s ease; }
-    .process-steps li:hover { transform: translateY(-3px); border-top-color: var(--gold); background: linear-gradient(180deg, rgb(213 182 122 / 6%), transparent 70%); }
+    .process-steps li { transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease; }
+    .process-steps li:hover { border-color: var(--gold); background: linear-gradient(145deg, rgb(213 182 122 / 9%), rgb(255 255 255 / 1.2%)); box-shadow: 0 8px 24px rgb(0 0 0 / 18%); }
     .process-steps li:hover .step-index { color: var(--ink); }
     .process-steps li:hover h3 { color: var(--gold); }
     @media (prefers-reduced-motion: reduce) { .process-steps li { transition: none; } }
@@ -255,8 +255,8 @@
     .process-watermark { position: absolute; z-index: 2; right: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
     .process-watermark .brand-mark { color: var(--gold); }
     .process-right { min-width: 0; }
-    .process-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; padding: 0; list-style: none; }
-    .process-steps li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; min-width: 0; padding: 18px 14px 20px; border-top: 1px solid var(--border); }
+    .process-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; margin: -8px; padding: 0; list-style: none; }
+    .process-steps li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; min-width: 0; margin: 8px; padding: 24px 22px 26px; border: 1px solid var(--border); border-radius: 10px; background: rgb(255 255 255 / 1.2%); }
     .step-index, .selection-label > span, .development-path div > span, .benefit-list li > span { color: var(--gold); font: 500 9px/1.5 var(--mono); }
     .process-steps h3, .selection-label h3, .benefit-list h3 { margin: 0 0 5px; color: var(--ink); font-size: 14px; font-weight: 600; letter-spacing: -.02em; }
     .process-steps p { color: var(--muted); font-size: 11px; line-height: 1.65; }
