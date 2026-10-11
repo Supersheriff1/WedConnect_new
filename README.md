@@ -1,16 +1,26 @@
 # WedConnect
 
-WedConnect connects wedding couples and wedding photographers for potential TFP collaborations. A match means mutual interest and opens a conversation; it is not a booking confirmation.
+WedConnect connects wedding couples and wedding photographers for potential TFP collaborations. A mutual match starts a conversation; it is not a booking confirmation.
 
-## Project documents
+## Product and design source of truth
 
-- [Project Bible](docs/PROJECT-BIBLE.md) — product scope, roles, flows, rights, and technical boundaries.
-- [Design Bible](docs/DESIGN-BIBLE.md) — current visual system for the public website and app.
+- [Project Bible](docs/PROJECT-BIBLE.md) — product scope, roles, flows, rights, and boundaries.
+- [Design Bible](docs/DESIGN-BIBLE.md) — visual standards for the public website and the separate logged-in app.
+- [Technical Foundation](docs/TECHNICAL-FOUNDATION.md) — planned architecture, environments, and delivery sequence.
 
-## Current repository state
+## Current implementation
 
-This repository is the clean starting point for WedConnect. The project and design bibles are the initial source of truth. No application demo or production implementation has been added yet. The design bible references an existing pairing HTML as a visual reference; that file is not part of this repository at this stage.
+The repository currently contains the public “Für Fotografen” design master and its illustration assets. It does not yet contain the production app, authentication, database, or file-upload flows. The current HTML page is a design reference to preserve when the public site is moved into the app.
 
-## Important product boundary
+The public website follows the Design Bible. The logged-in app is a separate product surface and is not required to inherit the marketing-site illustration style.
 
-A mutual match starts a conversation, not a booking. Scope, compensation, delivery, and image usage rights must be explicitly agreed before collaboration.
+## Product boundary
+
+A mutual match starts a conversation, not a booking. Scope, compensation, delivery, and image usage rights must be explicitly agreed before a collaboration.
+
+## Development principles
+
+- GitHub is the source of truth; changes go through branches and pull requests.
+- Preview and production environments use separate backend projects and credentials.
+- Database changes are committed as Supabase migrations.
+- All user-facing data access is protected by database Row Level Security.
