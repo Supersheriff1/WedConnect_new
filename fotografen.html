@@ -262,9 +262,12 @@
     .process-value-card > p { color: var(--muted); font-size: 13px; line-height: 1.7; }
     .process-value-note { margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.65; }
     .coverage-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .coverage-tags span { padding: 5px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--body); font-size: 10px; line-height: 1.4; }
-    .coverage-tags span { transition: transform .2s ease, border-color .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease; }
-    .coverage-tags span:hover { transform: translateY(-2px); border-color: rgb(213 182 122 / 64%); background: rgb(213 182 122 / 9%); color: var(--ink); box-shadow: 0 4px 12px rgb(9 9 11 / 22%); }
+    .coverage-tags span { padding: 6px 9px; border: 1px solid rgb(213 182 122 / 38%); border-radius: 5px; background: rgb(213 182 122 / 8%); color: var(--ink); font-size: 10px; line-height: 1.4; box-shadow: inset 0 1px 0 rgb(245 242 236 / 3%), 0 2px 8px rgb(9 9 11 / 12%); transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
+    .coverage-tags span:hover { transform: translateY(-1px); border-color: rgb(213 182 122 / 64%); background: rgb(213 182 122 / 13%); box-shadow: inset 0 1px 0 rgb(245 242 236 / 5%), 0 3px 10px rgb(9 9 11 / 18%); }
+    .usage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .usage-grid span { display: flex; align-items: center; gap: 7px; min-height: 34px; padding: 7px 9px; border: 1px solid rgb(213 182 122 / 27%); border-radius: 6px; background: rgb(213 182 122 / 5%); color: var(--body); font-size: 10px; line-height: 1.35; }
+    .usage-grid span::before { width: 5px; height: 5px; flex: 0 0 auto; border-radius: 50%; background: var(--gold); content: ""; }
+    .process-value-card > p.usage-retention { padding-top: 8px; border-top: 1px solid rgb(81 78 89 / 65%); font-size: 11px; line-height: 1.55; }
     @media (max-width: 680px) { .process-value-grid { grid-template-columns: 1fr; gap: 10px; } .process-value-card { padding: 18px; } }
     .process-watermark { position: absolute; z-index: 2; right: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
     .problem-watermark { position: absolute; z-index: 2; left: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
@@ -669,7 +672,9 @@
             <article class="process-value-card">
               <span class="process-value-label">DEINE NUTZUNGSRECHTE</span>
               <strong>Ein wichtiger Teil des Gegenwerts</strong>
-              <p>In deinem Profil gibst du an, wofür du die Bilder nutzen möchtest, zum Beispiel für Portfolio, Website, Social Media oder Werbung. Das Paar sieht diese Angaben vorab. Die vereinbarten Nutzungsrechte haltet ihr mit passenden Verträgen fest. Die bestätigte Vereinbarung bleibt ab dem Hochzeitsdatum 12 Monate bei WedConnect gespeichert und wird danach gelöscht.</p>
+              <p>In deinem Profil gibst du an, wofür du die Bilder nutzen möchtest. Das Paar sieht diese Angaben vorab. Die vereinbarten Nutzungsrechte haltet ihr gemeinsam schriftlich fest.</p>
+              <div class="usage-grid" aria-label="Mögliche Nutzungsbereiche"><span>Portfolio</span><span>Website</span><span>Social Media</span><span>Werbung</span></div>
+              <p class="usage-retention">Die bestätigte Vereinbarung bleibt ab dem Hochzeitsdatum 12 Monate bei <em class="brand-name"><span class="brand-word">Wed</span><span class="brand-mark">Connect</span></em> gespeichert und wird danach gelöscht.</p>
             </article>
           </div>
           <p class="process-value-note">Honorar, Umfang und Nutzungsbereiche besprecht ihr gemeinsam und haltet sie vor der Hochzeit fest.</p>
