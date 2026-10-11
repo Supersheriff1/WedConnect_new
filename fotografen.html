@@ -35,10 +35,10 @@
     .wrap { width: min(var(--content), calc(100% - clamp(36px, 8vw, 96px))); margin-inline: auto; }
     .topbar { position: sticky; top: 0; z-index: 10; background: rgb(37 36 43 / 92%); border-bottom: 1px solid rgb(81 78 89 / 70%); backdrop-filter: blur(16px); }
     .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
-    .brand { color: var(--ink); font-size: 18px; font-weight: 800; letter-spacing: -.04em; text-decoration: none; white-space: nowrap; }
+    .brand { color: var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.04em; text-decoration: none; white-space: nowrap; }
     .brand-mark { color: var(--gold); }
     .nav-links { display: flex; align-items: center; gap: clamp(18px, 3vw, 38px); }
-    .nav-links a { color: var(--muted); font-size: 13px; font-weight: 700; text-decoration: none; transition: color .18s ease; }
+    .nav-links a { color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: none; transition: color .18s ease; }
     .nav-links a:hover, .nav-links a:focus-visible { color: var(--ink); }
     .nav-cta { min-height: 48px !important; padding: 0 18px !important; font-size: 13px !important; }
     .menu-toggle { display: none; width: 46px; height: 46px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); }
@@ -46,18 +46,18 @@
     h1, h2, h3, p { margin-top: 0; }
     h1, h2, h3 { color: var(--ink); }
     h1, h2 { font-family: var(--sans); font-weight: 600; letter-spacing: -.045em; }
-    h1 { max-width: 720px; margin-bottom: 24px; font-weight: 800; font-size: clamp(46px, 6.4vw, 84px); line-height: 1.03; text-wrap: balance; }
+    h1 { max-width: 720px; margin-bottom: 24px; font-weight: 700; font-size: clamp(42px, 5.5vw, 72px); line-height: 1.08; text-wrap: balance; }
     h1 span { color: var(--gold); }
     h2 { margin-bottom: 0; font-size: clamp(31px, 3.5vw, 42px); line-height: 1.15; }
-    h3 { margin-bottom: 12px; font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+    h3 { margin-bottom: 12px; font-size: 19px; font-weight: 600; letter-spacing: -.02em; }
     p { margin-bottom: 0; color: var(--body); }
     .hero { padding: clamp(68px, 9vw, 120px) 0 90px; overflow: hidden; }
     .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap: clamp(42px, 7vw, 96px); align-items: center; }
     .hero-copy { max-width: 680px; }
-    .hero h2 { margin-bottom: 18px; font-family: var(--sans); font-size: clamp(21px, 2.2vw, 27px); font-weight: 600; line-height: 1.35; letter-spacing: -.025em; }
+    .hero h2 { margin-bottom: 18px; font-family: var(--sans); font-size: clamp(21px, 2.2vw, 27px); font-weight: 500; line-height: 1.4; letter-spacing: -.025em; }
     .hero-copy > p:not(.eyebrow) { max-width: 620px; color: var(--muted); font-size: clamp(16px, 1.5vw, 18px); line-height: 1.8; }
     .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-    .button { min-height: 48px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid transparent; border-radius: 8px; font-size: 15px; font-weight: 800; text-decoration: none; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+    .button { min-height: 48px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid transparent; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
     .button:hover { transform: translateY(-1px); }
     .button:focus-visible, a:focus-visible, .menu-toggle:focus-visible, dialog button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     .button-primary { background: var(--gold); color: var(--gold-ink); }
@@ -76,7 +76,7 @@
     .pairing-profiles { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: center; gap: 12px; }
     .pairing-profile:last-child { text-align: right; }
     .profile-kicker { display: block; margin-bottom: 8px; color: var(--muted); font: 500 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
-    .pairing-profile h3 { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
+    .pairing-profile h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
     .pairing-profile p { color: var(--muted); font-size: 12px; line-height: 1.5; }
     .pairing-connector { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--border); border-radius: 50%; color: var(--gold); font-size: 18px; }
     .pairing-status { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--body); font-size: 12px; }
@@ -200,7 +200,7 @@
         <div class="hero-art">
           <div class="pairing-card">
             <div class="pairing-photo">
-              <img src="assets/illustrations/wedconnect-hero.webp" alt="Illustration: Eine Hochzeitsfotografin fotografiert ein Paar in einer eleganten europäischen Stadtkulisse" fetchpriority="high">
+              <img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/wedconnect-hero.webp" alt="Illustration: Eine Hochzeitsfotografin fotografiert ein Paar in einer eleganten europäischen Stadtkulisse" fetchpriority="high">
             </div>
             <div class="pairing-caption"><span>WedConnect · Pairing</span><span>Editorial-Illustration · Symbolbild</span></div>
             <div class="pairing-content">
@@ -221,7 +221,7 @@
       <div class="wrap section-grid">
         <div class="section-heading"><h2 id="problem-title">Warum WedConnect entwickelt wurde</h2></div>
         <div class="section-content"><p>Ein starkes Hochzeitsportfolio entsteht durch bewusste Auswahl. Workshops sind teuer, Styled Shoots künstlich, selbst organisierte Shootings kosten Zeit und Geld, viele Hochzeiten dürfen nicht veröffentlicht werden. WedConnect löst dieses Problem.</p></div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-portfolio-start.webp" alt="Eine Hochzeitsfotografin sichtet ihre bisherigen Aufnahmen und plant den Aufbau ihres Portfolios." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-start.webp" alt="Eine Hochzeitsfotografin sichtet ihre bisherigen Aufnahmen und plant den Aufbau ihres Portfolios." loading="lazy"></figure>
       </div>
     </section>
 
@@ -241,7 +241,7 @@
           </div>
           <p>Du bestimmst, was du fotografieren möchtest – und was nicht.</p>
         </div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-match-gespraech.webp" alt="Ein Paar und eine Fotografin wählen gemeinsam passende Hochzeitsbilder aus." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-gespraech.webp" alt="Ein Paar und eine Fotografin wählen gemeinsam passende Hochzeitsbilder aus." loading="lazy"></figure>
       </div>
     </section>
 
@@ -254,7 +254,7 @@
           <div class="subsection"><h3>Auswahlkriterien</h3><ul class="list-grid"><li>Location</li><li>Stil</li><li>Ablauf</li><li>Paarprofil</li><li>Bildwünsche</li><li>Atmosphäre</li><li>Ästhetik</li></ul></div>
           <p style="margin-top:26px">Du baust dein Portfolio bewusst und strategisch auf.</p>
         </div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-location-auswahl.webp" alt="Eine Fotografin prüft Licht und Location, während ein Hochzeitspaar im Hintergrund steht." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-location-auswahl.webp" alt="Eine Fotografin prüft Licht und Location, während ein Hochzeitspaar im Hintergrund steht." loading="lazy"></figure>
       </div>
     </section>
 
@@ -266,7 +266,7 @@
           <div class="subsection"><h3>Nutzungsbereiche</h3><ul class="rights-list"><li>Website</li><li>Portfolio</li><li>Social Media</li><li>Werbung</li><li>Print</li></ul></div>
           <p style="margin-top:24px">Alles klar geregelt und dokumentiert.</p>
         </div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-galerie-rechte.webp" alt="Ein Hochzeitspaar und eine Fotografin betrachten eine fertige Bildergalerie am Laptop." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-galerie-rechte.webp" alt="Ein Hochzeitspaar und eine Fotografin betrachten eine fertige Bildergalerie am Laptop." loading="lazy"></figure>
       </div>
     </section>
 
@@ -276,7 +276,7 @@
         <div class="section-content">
           <p>Workshops und Styled Shoots sind inszeniert. WedConnect bietet Zugang zu visuell relevanten Hochzeiten ohne zusätzliche Kosten. Du investierst deine Zeit, nicht dein Budget.</p>
         </div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-echte-hochzeit.webp" alt="Eine Fotografin hält ein Hochzeitspaar bei einer echten Reportage fest." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-echte-hochzeit.webp" alt="Eine Fotografin hält ein Hochzeitspaar bei einer echten Reportage fest." loading="lazy"></figure>
       </div>
     </section>
 
@@ -284,7 +284,7 @@
       <div class="wrap section-grid">
         <div class="section-heading"><h2 id="development-title">Weiterentwicklung</h2></div>
         <div class="section-content"><p>Hochzeiten mit klarer Ästhetik, passenden Paaren und hochwertigen Locations helfen dir, deinen Stil zu schärfen und dein Portfolio gezielt auszubauen.</p></div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-portfolio-aufbau.webp" alt="Eine Fotografin ordnet ihre fertigen Hochzeitsbilder in einer Online-Galerie." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-aufbau.webp" alt="Eine Fotografin ordnet ihre fertigen Hochzeitsbilder in einer Online-Galerie." loading="lazy"></figure>
       </div>
     </section>
 
@@ -302,7 +302,7 @@
             <li>Moderne, klare Kommunikation</li>
           </ul>
         </div>
-        <figure class="section-illustration"><img src="assets/illustrations/fotografen-zusammenarbeit.webp" alt="Eine Fotografin teilt einen fertigen Hochzeitsprint mit dem Paar." loading="lazy"></figure>
+        <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-zusammenarbeit.webp" alt="Eine Fotografin teilt einen fertigen Hochzeitsprint mit dem Paar." loading="lazy"></figure>
       </div>
     </section>
 
@@ -313,7 +313,7 @@
           <h2 id="signup-title">Call-to-Action</h2>
           <p>Bereit für Hochzeiten, die dein Portfolio weiterbringen? Erstelle dein Profil und finde Paare, deren Bilder du verwenden darfst.</p>
         </div>
-        <figure class="section-illustration signup-art"><img src="assets/illustrations/wedconnect-hero.webp" alt="Illustration: Fotografin und Hochzeitspaar begegnen sich bei einem Shooting" loading="lazy"></figure>
+        <figure class="section-illustration signup-art"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/wedconnect-hero.webp" alt="Illustration: Fotografin und Hochzeitspaar begegnen sich bei einem Shooting" loading="lazy"></figure>
         <div class="actions"><button class="button button-primary" type="button" data-signup>Profil erstellen <span aria-hidden="true">↗</span></button></div>
       </div>
     </section>
