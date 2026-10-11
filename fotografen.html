@@ -245,13 +245,14 @@
     .process-layout { display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); gap: clamp(28px, 5vw, 58px); align-items: center; }
     .process-layout { align-items: start; }
     .process-figure { position: relative; isolation: isolate; }
-    .process-figure::before { position: absolute; inset: 0; z-index: 3; padding: 1.5px; border-radius: inherit; background: linear-gradient(180deg, transparent 0%, rgb(213 182 122 / 12%) 18%, rgb(213 182 122 / 88%) 50%, rgb(213 182 122 / 12%) 82%, transparent 100%) left top / 2px 220% no-repeat; content: ""; pointer-events: none; animation: process-frame-rise 5s ease-in-out infinite alternate; }
-    @keyframes process-frame-rise { from { background-position: left -110% top; } to { background-position: left 110% top; } }
+    .process-figure::before { content: none; }
+    .process-figure::after { position: absolute; z-index: 3; top: 1px; bottom: 41px; left: 0; width: 2px; border-radius: 2px; background: linear-gradient(180deg, transparent, rgb(213 182 122 / 92%), transparent); content: ""; pointer-events: none; animation: process-frame-rise 4s ease-in-out infinite alternate; }
+    @keyframes process-frame-rise { from { transform: translateY(0); } to { transform: translateY(calc(100% - 2px)); } }
     .process-steps li { transition: transform .22s ease, background-color .22s ease, border-color .22s ease; }
     .process-steps li:hover { transform: translateY(-3px); border-top-color: var(--gold); background: linear-gradient(180deg, rgb(213 182 122 / 6%), transparent 70%); }
     .process-steps li:hover .step-index { color: var(--ink); }
     .process-steps li:hover h3 { color: var(--gold); }
-    @media (prefers-reduced-motion: reduce) { .process-figure::before { animation: none; background-position: left center; } .process-steps li { transition: none; } }
+    @media (prefers-reduced-motion: reduce) { .process-figure::after { animation: none; top: 50%; transform: translateY(-50%); } .process-steps li { transition: none; } }
     .process-figure img { aspect-ratio: 1.38 / 1; }
     .process-figure { position: relative; }
     .process-watermark { position: absolute; z-index: 2; right: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
