@@ -321,6 +321,52 @@
     }
 
     /* Unified editorial rhythm below the first content block */
+    .process-steps li {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 16px 0 18px;
+      border-top: 1px solid var(--border);
+    }
+    .process-step-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 3px;
+    }
+    .process-step-icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid rgb(213 182 122 / 34%);
+      border-radius: 10px;
+      background: rgb(213 182 122 / 8%);
+      color: var(--gold);
+    }
+    .process-step-icon svg {
+      display: block;
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.6;
+    }
+    .process-step-top .step-index { margin-left: auto; }
+    .process-steps h3 { margin: 0; }
+    .process-steps p { max-width: 34ch; }
+    .process-panel .story-heading-row { margin-bottom: 28px; }
+    .process-panel .story-figure { box-shadow: none; }
+    @media (max-width: 680px) {
+      .process-panel .story-heading-row { margin-bottom: 22px; }
+    }
+
     .section.story-section {
       background: var(--canvas);
       border-top-color: rgb(81 78 89 / 68%);
@@ -469,17 +515,41 @@
 
     <section class="section story-section process-section" id="how-it-works" aria-labelledby="how-title">
       <div class="wrap">
-        <header class="story-heading-row"><div><p class="eyebrow">02 / DER WEG ZUM MATCH</p><h2 class="story-title" id="how-title">Von der ersten Auswahl bis zum echten Match.</h2></div><p><em class="brand-name"><span class="brand-word">Wed</span><span class="brand-mark">Connect</span></em> zeigt dir Hochzeiten, die zu deinem Portfolio passen könnten. Du entscheidest, ob du Interesse hast.</p></header>
-        <div class="process-layout">
-          <figure class="story-figure process-figure"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-gespraech.webp" alt="Eine Fotografin und ein Paar wählen gemeinsam passende Hochzeitsbilder aus." loading="lazy"><figcaption><span>Ein Match beginnt mit eurer Auswahl</span><span>WEDCONNECT · 02</span></figcaption></figure>
-          <div class="process-right">
-            <ol class="process-steps">
-              <li><span class="step-index">01</span><div><h3>Entdecken</h3><p>Sieh Paare, Locations, Stilrichtungen und Abläufe.</p></div></li>
-              <li><span class="step-index">02</span><div><h3>Abgleichen</h3><p>Erkenne, ob die Hochzeit zu deiner Bildsprache passt.</p></div></li>
-              <li><span class="step-index">03</span><div><h3>Interesse zeigen</h3><p>Wähle nur Hochzeiten, die dich wirklich ansprechen.</p></div></li>
-              <li><span class="step-index">04</span><div><h3>Match erhalten</h3><p>Erst wenn auch das Paar Interesse hat, geht es weiter.</p></div></li>
-            </ol>
-            <div class="mutual-note"><span class="mutual-symbol" aria-hidden="true">↔</span><p><strong>Nur bei beidseitigem Interesse.</strong> Beide Seiten entscheiden selbst.</p></div>
+        <div class="problem-panel process-panel">
+          <header class="story-heading-row">
+            <div>
+              <p class="eyebrow">02 / DER WEG ZUM MATCH</p>
+              <h2 class="story-title" id="how-title">So findest du passende Hochzeiten auf <em class="brand-name"><span class="brand-word">Wed</span><span class="brand-mark">Connect</span></em>.</h2>
+            </div>
+            <p>Entdecke Hochzeiten mit Informationen zu Paar, Location, Stil und Ablauf. Du entscheidest selbst, welche zu deiner Bildsprache passen und bei welchen du Interesse zeigen möchtest.</p>
+          </header>
+          <div class="process-layout">
+            <figure class="story-figure process-figure"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-gespraech.webp" alt="Eine Fotografin und ein Hochzeitspaar betrachten gemeinsam passende Hochzeitsbilder." loading="lazy"><figcaption><span>Jede Seite entscheidet selbst</span><span>WEDCONNECT · 02</span></figcaption></figure>
+            <div class="process-right">
+              <ol class="process-steps">
+                <li>
+                  <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="14" height="16" rx="2"/><path d="M6 8h8M6 11h5"/><circle cx="17" cy="16" r="3.5"/><path d="m19.5 18.5 2 2"/></svg></span><span class="step-index">01</span></div>
+                  <h3>Entdecken</h3>
+                  <p>Sieh dir die Angaben zum Hochzeitspaar, zur Location, zum Stil und zum Ablauf an.</p>
+                </li>
+                <li>
+                  <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg></span><span class="step-index">02</span></div>
+                  <h3>Auswählen</h3>
+                  <p>Prüfe, ob die Hochzeit zu deiner Arbeit und deinen Vorstellungen passt.</p>
+                </li>
+                <li>
+                  <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 4z"/><path d="M9 10h6M12 7v6"/></svg></span><span class="step-index">03</span></div>
+                  <h3>Interesse zeigen</h3>
+                  <p>Zeige nur bei Hochzeiten Interesse, die dich wirklich ansprechen.</p>
+                </li>
+                <li>
+                  <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 15-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0"/><path d="m15 9 1.5-1.5a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/><path d="m8 12 8 0"/></svg></span><span class="step-index">04</span></div>
+                  <h3>Match erhalten</h3>
+                  <p>Ein Match entsteht, wenn auch das Hochzeitspaar Interesse an dir zeigt. Dann könnt ihr miteinander sprechen.</p>
+                </li>
+              </ol>
+              <div class="mutual-note"><span class="mutual-symbol" aria-hidden="true">↔</span><p><strong>Ein Match ist der Anfang des Kontakts</strong>, noch keine Buchungszusage. Die Details eurer Zusammenarbeit vereinbart ihr gemeinsam.</p></div>
+            </div>
           </div>
         </div>
       </div>
