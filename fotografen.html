@@ -70,7 +70,9 @@
     .pairing-card::before { position: absolute; inset: 0; z-index: 3; padding: 1.5px; border-radius: inherit; background: conic-gradient(from var(--hero-frame-angle), transparent 0deg 332deg, rgb(213 182 122 / 12%) 340deg, rgb(213 182 122 / 86%) 352deg, rgb(213 182 122 / 12%) 360deg); content: ""; pointer-events: none; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: hero-frame-orbit 8s linear infinite; }
     @keyframes hero-frame-orbit { to { --hero-frame-angle: 360deg; } }
     .pairing-photo { position: relative; height: clamp(275px, 27vw, 360px); overflow: hidden; background: var(--raised); }
-    .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 60%; }
+    .pairing-watermark { position: absolute; z-index: 2; bottom: 15px; left: 18px; color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: -.04em; opacity: .88; text-shadow: 0 1px 10px rgb(0 0 0 / 85%); }
+    .pairing-watermark span { color: var(--gold); }
     .pairing-photo::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 65%, rgb(16 15 19 / 24%)); content: ""; pointer-events: none; }
     .pairing-caption { display: flex; justify-content: space-between; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 11.64px; }
     .pairing-caption span:first-child { color: var(--gold); font: 600 9.7px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
@@ -244,6 +246,7 @@
           <div class="pairing-card">
             <div class="pairing-photo">
               <img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-fenster.jpg" alt="Links prüft eine Fotografin ihr Portfolio im Atelier; rechts findet eine Hochzeit statt. Ein sichtbarer Abstand und zwei getrennte Lichtlinien zeigen, dass beide Seiten sich erst noch finden müssen." fetchpriority="high">
+              <span class="pairing-watermark" aria-label="WedConnect">Wed<span>Connect</span></span>
             </div>
             <div class="pairing-content">
               <div class="pairing-topline"><span>01 / Fotograf</span><span>02 / Hochzeit</span></div>
