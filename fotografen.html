@@ -491,6 +491,14 @@
     @media (max-width: 900px) {
       .portfolio-alternative { padding: 20px; border: 1px solid rgb(213 182 122 / 28%); border-radius: 12px; }
     }
+    .process-steps { grid-template-rows: repeat(2, minmax(245px, 1fr)); align-items: stretch; }
+    @media (max-width: 680px) {
+      .process-steps { grid-template-rows: repeat(2, minmax(220px, 1fr)); }
+    }
+    @media (max-width: 420px) {
+      .process-steps { grid-template-rows: none; grid-auto-rows: auto; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
     }
@@ -586,22 +594,22 @@
                 <li>
                   <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="14" height="16" rx="2"/><path d="M6 8h8M6 11h5"/><circle cx="17" cy="16" r="3.5"/><path d="m19.5 18.5 2 2"/></svg></span><span class="step-index">01</span></div>
                   <h3>Hochzeit entdecken</h3>
-                  <p>Sieh dir Paar, Location, Stil und geplanten Ablauf an.</p>
+                  <p>Sieh dir Paar, Location, Stil und Ablauf an.</p>
                 </li>
                 <li>
                   <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg></span><span class="step-index">02</span></div>
                   <h3>Passung prüfen</h3>
-                  <p>Vergleiche die Hochzeit mit deiner Bildsprache und deinem Portfolio.</p>
+                  <p>Prüfe, ob Bildsprache und Portfolio zur Hochzeit passen.</p>
                 </li>
                 <li>
                   <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 4z"/><path d="M9 10h6M12 7v6"/></svg></span><span class="step-index">03</span></div>
                   <h3>Interesse zeigen</h3>
-                  <p>Zeige nur bei Hochzeiten Interesse, die du wirklich fotografieren möchtest.</p>
+                  <p>Zeige Interesse, wenn du dir die Hochzeit als Auftrag vorstellen kannst.</p>
                 </li>
                 <li>
                   <div class="process-step-top"><span class="process-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 15-1.5 1.5a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0"/><path d="m15 9 1.5-1.5a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/><path d="m8 12 8 0"/></svg></span><span class="step-index">04</span></div>
                   <h3>Kontakt aufnehmen</h3>
-                  <p>Wenn auch das Paar Interesse an dir zeigt, entsteht ein Match. Dann könnt ihr die Zusammenarbeit besprechen.</p>
+                  <p>Bei beidseitigem Interesse entsteht ein Match. Dann besprecht ihr die Zusammenarbeit.</p>
                 </li>
               </ol>
               </div>
