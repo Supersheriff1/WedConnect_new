@@ -516,6 +516,25 @@
       .process-steps { grid-template-rows: none; grid-auto-rows: auto; }
     }
 
+    .faq-section { border-top: 1px solid var(--border); }
+    .faq-heading { max-width: 760px; margin-bottom: 30px; }
+    .faq-heading .eyebrow { margin-bottom: 14px; }
+    .faq-heading > p:last-child { max-width: 640px; margin-top: 12px; color: var(--muted); font-size: 15.52px; line-height: 1.75; }
+    .faq-list { max-width: 920px; border-top: 1px solid var(--border); }
+    .faq-list details { border-bottom: 1px solid var(--border); }
+    .faq-list summary { position: relative; display: flex; align-items: center; min-height: 68px; padding: 18px 52px 18px 0; color: var(--ink); font-size: 15.52px; font-weight: 600; line-height: 1.5; list-style: none; cursor: pointer; }
+    .faq-list summary::-webkit-details-marker { display: none; }
+    .faq-list summary::after { position: absolute; right: 8px; color: var(--gold); font-size: 22px; font-weight: 400; content: "+"; transition: transform .2s ease; }
+    .faq-list details[open] summary::after { transform: rotate(45deg); }
+    .faq-list summary:hover { color: var(--gold); }
+    .faq-list summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+    .faq-list details > p { max-width: 780px; padding: 0 48px 22px 0; color: var(--muted); font-size: 15px; line-height: 1.8; }
+    @media (max-width: 680px) {
+      .faq-heading { margin-bottom: 22px; }
+      .faq-list summary { min-height: 62px; padding-right: 42px; font-size: 15px; }
+      .faq-list details > p { padding-right: 24px; font-size: 14px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
     }
@@ -530,6 +549,7 @@
         <a href="#hero" aria-current="page">Für Fotografen</a>
         <a href="#how-it-works">So funktioniert’s</a>
         <a href="#rights">Nutzungsrechte</a>
+        <a href="#faq">FAQ</a>
         <button class="button button-primary nav-cta" type="button" data-signup>Profil erstellen</button>
       </nav>
     </div>
@@ -682,6 +702,46 @@
           <li><span>05</span><div><h3>Faire TFP-Struktur</h3><p>Leistung, Gegenleistung und Nutzungsrechte werden nachvollziehbar vereinbart.</p></div></li>
           <li><span>06</span><div><h3>Match mit echtem Interesse</h3><p>Ein Match entsteht nur, wenn beide Seiten Interesse zeigen.</p></div></li>
         </ul>
+      </div>
+    </section>
+
+    <section class="section story-section faq-section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap">
+        <header class="faq-heading">
+          <p class="eyebrow">06 / FAQ</p>
+          <h2 class="story-title" id="faq-title">Häufige Fragen zu WedConnect.</h2>
+          <p>Das Wichtigste zu TFP, Honorar, Bildrechten und zur Zusammenarbeit auf einen Blick.</p>
+        </header>
+        <div class="faq-list">
+          <details>
+            <summary>Was bedeutet TFP bei WedConnect?</summary>
+            <p>TFP steht ursprünglich für „Time for Prints“ und bezeichnet heute häufig eine Zusammenarbeit, bei der Bilder für das Portfolio entstehen. Bei WedConnect fotografierst du eine echte Hochzeit und vereinbarst mit dem Paar vorab, welche Leistung, Gegenleistung und Bildnutzung gelten.</p>
+          </details>
+          <details>
+            <summary>Ist TFP automatisch kostenlos?</summary>
+            <p>Nein. TFP bedeutet nicht automatisch, dass du ohne Honorar arbeitest. Du kannst dein Honorar passend zu den Hochzeitsteilen festlegen, die du begleiten möchtest. Auch eine Ganztagesreportage kann vereinbart werden. Entscheidend ist, was du und das Paar vorab gemeinsam festhaltet.</p>
+          </details>
+          <details>
+            <summary>Wie vereinbaren wir Honorar und Umfang?</summary>
+            <p>Du gibst in deinem Profil an, welche Teile einer Hochzeit du begleiten möchtest und welches Honorar du dafür ansetzt. Nach einem Match besprecht ihr den genauen Ablauf, die vereinbarte Leistung und die Lieferung. Verbindlich ist, was ihr gemeinsam festhaltet.</p>
+          </details>
+          <details>
+            <summary>Wie werden die Nutzungsrechte festgehalten?</summary>
+            <p>Du gibst in deinem Profil an, wofür du die Bilder verwenden möchtest, zum Beispiel für Portfolio, Website, Social Media oder Werbung. Das Paar sieht diese Angaben vorab. Die konkrete Vereinbarung haltet ihr schriftlich fest und bestätigt sie beide. Einwilligungen der abgebildeten Gäste sind davon getrennt zu betrachten.</p>
+          </details>
+          <details>
+            <summary>Wie lange bleibt unsere Vereinbarung gespeichert?</summary>
+            <p>Die bestätigte Vereinbarung bleibt ab dem Hochzeitsdatum 12 Monate bei WedConnect gespeichert und wird danach gelöscht. Ladet euch vorher eine Kopie herunter, wenn ihr sie länger aufbewahren möchtet.</p>
+          </details>
+          <details>
+            <summary>Wann entsteht ein Match?</summary>
+            <p>Ein Match entsteht nur, wenn sowohl du als auch das Hochzeitspaar Interesse zeigen. Es ist der Beginn des Kontakts, noch keine Buchungszusage. Danach besprecht ihr die Details eurer Zusammenarbeit.</p>
+          </details>
+          <details>
+            <summary>Welche Kosten entstehen für Fotograf:innen?</summary>
+            <p>Für das auf dieser Seite beschriebene Basisangebot ist derzeit keine Teilnahmegebühr vorgesehen. Ob später kostenpflichtige Zusatzfunktionen dazukommen, ist noch nicht festgelegt. Preise und Bedingungen würden vor der Nutzung transparent angezeigt.</p>
+          </details>
+        </div>
       </div>
     </section>
 
