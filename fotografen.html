@@ -347,8 +347,19 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 8px;
-      padding: 16px 0 18px;
-      border-top: 1px solid var(--border);
+      margin: 8px;
+      padding: 22px 24px 24px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgb(255 255 255 / 1.2%);
+    }
+    .process-steps li:hover {
+      border-color: var(--gold);
+      background: linear-gradient(145deg, rgb(213 182 122 / 9%), rgb(255 255 255 / 1.2%));
+      box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+    }
+    @media (max-width: 720px) {
+      .process-steps li { margin: 0; padding: 20px 22px 22px; }
     }
     .process-step-top {
       width: 100%;
