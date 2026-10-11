@@ -110,7 +110,7 @@
     #problem .section-heading h2 { max-width: 590px; }
     #problem .section-content { max-width: 630px; }
     #problem .section-content > p { font-size: clamp(15.52px, 1.46vw, 17.46px); line-height: 1.8; }
-    .problem-illustration { display: flex; min-width: 0; flex-direction: column; align-self: stretch; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .problem-illustration { position: relative; display: flex; min-width: 0; flex-direction: column; align-self: stretch; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .problem-illustration img { display: block; width: 100%; flex: 1; aspect-ratio: 1.15 / 1; object-fit: cover; }
     .problem-image-note { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 13px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11.64px; }
     .problem-image-note span:first-child { color: var(--gold); font: 500 8.73px/1.5 var(--mono); letter-spacing: .12em; }
@@ -267,6 +267,8 @@
     .coverage-tags span:hover { transform: translateY(-2px); border-color: rgb(213 182 122 / 64%); background: rgb(213 182 122 / 9%); color: var(--ink); box-shadow: 0 4px 12px rgb(9 9 11 / 22%); }
     @media (max-width: 680px) { .process-value-grid { grid-template-columns: 1fr; gap: 10px; } .process-value-card { padding: 18px; } }
     .process-watermark { position: absolute; z-index: 2; right: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
+    .problem-watermark { position: absolute; z-index: 2; left: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
+    .problem-watermark .brand-mark { color: var(--gold); }
     .process-watermark .brand-mark { color: var(--gold); }
     .process-right { min-width: 0; }
     .process-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; margin: -8px; padding: 0; list-style: none; }
@@ -599,7 +601,7 @@
                 <p>Doch häufig bleiben genau diese Bilder unsichtbar: Viele Paare erlauben keine Veröffentlichung. So wächst die Erfahrung, während das Portfolio kaum mitwächst.</p>
               </div>
             </div>
-            <figure class="problem-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-user-image.jpg" alt="Eine ratlose Fotografin betrachtet ein Fotoalbum mit Hochzeitsbildern, die zu ihr ausgerichtet sind." loading="lazy"><figcaption class="problem-image-note"><span>DIE PORTFOLIO-LÜCKE</span><span>Erfahrung da. Freigabe fehlt.</span></figcaption></figure>
+            <figure class="problem-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-user-image.jpg" alt="Eine ratlose Fotografin betrachtet ein Fotoalbum mit Hochzeitsbildern, die zu ihr ausgerichtet sind." loading="lazy"><span class="problem-watermark" aria-label="WedConnect"><span class="brand-word">Wed</span><span class="brand-mark">Connect</span></span><figcaption class="problem-image-note"><span>DIE PORTFOLIO-LÜCKE</span><span>Erfahrung da. Freigabe fehlt.</span></figcaption></figure>
           </div>
           <div class="problem-options">
             <div class="options-heading"><p class="eyebrow">WEGE ZUM PORTFOLIO</p></div>
