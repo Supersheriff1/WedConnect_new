@@ -244,6 +244,9 @@
     .process-steps p { max-width: none; font-size: 15.52px; line-height: 1.75; }
     .process-layout { display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); gap: clamp(28px, 5vw, 58px); align-items: center; }
     .process-figure img { aspect-ratio: 1.38 / 1; }
+    .process-figure { position: relative; }
+    .process-watermark { position: absolute; z-index: 2; right: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
+    .process-watermark .brand-mark { color: var(--gold); }
     .process-right { min-width: 0; }
     .process-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; padding: 0; list-style: none; }
     .process-steps li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; min-width: 0; padding: 14px 0 16px; border-top: 1px solid var(--border); }
@@ -534,7 +537,7 @@
             </div>
           </header>
           <div class="process-layout">
-            <div class="process-visual-column"><figure class="story-figure process-figure"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-fotograf.jpg" alt="Ein Hochzeitsfotograf sucht auf seinem Smartphone in der WedConnect App nach passenden Hochzeitspaaren." loading="lazy"><span class="process-watermark" aria-label="WedConnect"><span class="brand-word">Wed</span><span class="brand-mark">Connect</span></span><figcaption><span>Passende Hochzeiten entdecken</span><span>WEDCONNECT · 02</span></figcaption></figure><div class="mutual-note"><span class="mutual-symbol" aria-hidden="true">↔</span><p><strong>Ein Match ist der Anfang des Kontakts</strong>, noch keine Buchungszusage. Die Details eurer Zusammenarbeit vereinbart ihr gemeinsam.</p></div></div>
+            <div class="process-visual-column"><figure class="story-figure process-figure"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-fotograf.jpg" alt="Ein Hochzeitsfotograf scrollt auf seinem Smartphone durch drei unterschiedliche Hochzeitspaare in der WedConnect App." loading="lazy"><span class="process-watermark" aria-label="WedConnect"><span class="brand-word">Wed</span><span class="brand-mark">Connect</span></span><figcaption><span>Passende Hochzeiten entdecken</span><span>WEDCONNECT · 02</span></figcaption></figure><div class="mutual-note"><span class="mutual-symbol" aria-hidden="true">↔</span><p><strong>Ein Match ist der Anfang des Kontakts</strong>, noch keine Buchungszusage. Die Details eurer Zusammenarbeit vereinbart ihr gemeinsam.</p></div></div>
             <div class="process-right">
               <ol class="process-steps">
                 <li>
