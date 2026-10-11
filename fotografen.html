@@ -263,6 +263,8 @@
     .process-value-note { margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.65; }
     .coverage-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .coverage-tags span { padding: 5px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--body); font-size: 10px; line-height: 1.4; }
+    .coverage-tags span { transition: transform .2s ease, border-color .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease; }
+    .coverage-tags span:hover { transform: translateY(-2px); border-color: rgb(213 182 122 / 64%); background: rgb(213 182 122 / 9%); color: var(--ink); box-shadow: 0 4px 12px rgb(9 9 11 / 22%); }
     @media (max-width: 680px) { .process-value-grid { grid-template-columns: 1fr; gap: 10px; } .process-value-card { padding: 18px; } }
     .process-watermark { position: absolute; z-index: 2; right: 16px; bottom: 53px; color: var(--ink); font-family: var(--sans); font-size: 13px; font-style: normal; font-weight: 800; letter-spacing: -.045em; line-height: 1; text-shadow: 0 1px 8px rgb(0 0 0 / 85%); }
     .process-watermark .brand-mark { color: var(--gold); }
@@ -645,7 +647,7 @@
             <article class="process-value-card">
               <span class="process-value-label">DEINE NUTZUNGSRECHTE</span>
               <strong>Ein wichtiger Teil des Gegenwerts</strong>
-              <p>Die vereinbarten Bildrechte erlauben dir, Fotos für Portfolio, Website und Eigenwerbung zu nutzen.</p>
+              <p>Die vereinbarten Bildrechte erlauben dir, Fotos für Portfolio, Website und Eigenwerbung zu nutzen. Dafür stellen wir euch passende Nutzungsverträge bereit.</p>
             </article>
           </div>
           <p class="process-value-note">Honorar, Umfang und Nutzungsbereiche besprecht ihr gemeinsam und haltet sie vor der Hochzeit fest.</p>
