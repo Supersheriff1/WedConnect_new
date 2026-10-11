@@ -65,7 +65,8 @@
     .button-secondary { border-color: var(--border); background: var(--surface); color: var(--ink); }
     .button-secondary:hover { border-color: var(--gold); background: var(--hover); }
     .hero-art { position: relative; min-height: 620px; display: grid; place-items: center; }
-    .pairing-card { width: min(100%, 560px); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 24px 64px #09090b55; }
+    .pairing-card { width: min(100%, 560px); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 24px 64px #09090b55; animation: hero-frame-glow 6s ease-in-out infinite; }
+    @keyframes hero-frame-glow { 0%, 100% { border-color: var(--border); box-shadow: 0 24px 64px #09090b55, 0 0 0 0 rgb(213 182 122 / 0%); } 50% { border-color: rgb(213 182 122 / 38%); box-shadow: 0 24px 64px #09090b55, 0 0 0 2px rgb(213 182 122 / 10%); } }
     .pairing-photo { position: relative; height: clamp(275px, 27vw, 360px); overflow: hidden; background: var(--raised); }
     .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
     .pairing-photo::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 65%, rgb(16 15 19 / 24%)); content: ""; pointer-events: none; }
@@ -79,8 +80,9 @@
     .profile-kicker { display: block; margin-bottom: 8px; color: var(--muted); font: 500 8.73px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
     .pairing-profile h3 { margin: 0 0 4px; font-size: 15.52px; font-weight: 600; }
     .pairing-profile p { color: var(--muted); font-size: 11.64px; line-height: 1.5; }
-    .pairing-connector { display: grid; width: 46px; height: 46px; place-items: center; border: 1px solid var(--gold); border-radius: 50%; background: var(--gold); color: var(--gold-ink); font-size: 20px; font-weight: 700; box-shadow: 0 0 0 5px rgb(213 182 122 / 12%); animation: pairing-pulse 2.8s ease-in-out infinite; }
-    @keyframes pairing-pulse { 0%, 100% { transform: translateX(-1px) scale(1); box-shadow: 0 0 0 4px rgb(213 182 122 / 12%); } 50% { transform: translateX(1px) scale(1.06); box-shadow: 0 0 0 8px rgb(213 182 122 / 8%); } }
+    .pairing-connector { display: grid; width: 46px; height: 46px; place-items: center; border: 1px solid rgb(213 182 122 / 48%); border-radius: 50%; background: rgb(213 182 122 / 8%); color: var(--gold); box-shadow: 0 0 0 4px rgb(213 182 122 / 5%); }
+    .pairing-connector svg { display: block; width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .pairing-connector svg circle { fill: currentColor; stroke: none; }
     .pairing-status { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--body); font-size: 11.64px; }
     .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgb(213 182 122 / 13%); }
     .status-code { margin-left: auto; color: var(--muted); font: 500 8.73px var(--mono); letter-spacing: .08em; }
@@ -195,7 +197,7 @@
       .pairing-caption, .pairing-content { padding-right: 16px; padding-left: 16px; }
       .pairing-photo { height: 250px; }
       .pairing-profiles { grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr); gap: 8px; }
-      .pairing-connector { width: 36px; height: 36px; font-size: 16px; }
+      .pairing-connector { width: 36px; height: 36px; }
       .pairing-profile h3 { font-size: 13.58px; }
       .pairing-profile p { font-size: 10.67px; }
       .status-code { font-size: 7.76px; }
@@ -245,7 +247,7 @@
               <div class="pairing-topline"><span>01 / Fotograf</span><span>02 / Hochzeit</span></div>
               <div class="pairing-profiles">
                 <div class="pairing-profile"><span class="profile-kicker">Profil</span><h3>Fotografenprofil</h3><p>Bildsprache · Portfolio</p></div>
-                <div class="pairing-connector" aria-hidden="true">↔</div>
+                <span class="pairing-connector" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4 16h8m-3-3 3 3-3 3M28 16h-8m3-3-3 3 3 3"/><circle cx="16" cy="16" r="2"/></svg></span>
                 <div class="pairing-profile"><span class="profile-kicker">Paar</span><h3>Hochzeitspaar</h3><p>Location · Stil · Ablauf</p></div>
               </div>
               <div class="pairing-status"><span class="status-dot"></span><span>Beide Seiten entscheiden selbst</span><span class="status-code">BEIDSEITIGES INTERESSE</span></div>
