@@ -1,6 +1,6 @@
 # WedConnect · Design Bible
 
-**Version:** 1.7  
+**Version:** 1.8  
 **Stand:** 11. Oktober 2026  
 **Status:** verbindlicher visueller Standard ab diesem Stand  
 **Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
@@ -152,9 +152,9 @@ Bilder bringen echte Hochzeitserfahrung und fotografische Qualität in die Oberf
 - Jeder erklärende Website-Abschnitt verbindet Text und Motiv als ausgerichtete Komposition. Kurze Conversion-Zeilen, Navigation, Formulare und rechtliche Hinweise benötigen keine erzählerische Illustration.
 - Illustrationen werden als optimierte Projektassets eingebunden. Wenn die HTML-Datei unabhängig von einem lokalen Asset-Ordner als Einzeldatei geteilt oder in einen Editor kopiert wird, verwenden die Bildpfade erreichbare absolute Projekt-URLs statt relativer Pfade. Alternativtexte beschreiben das Motiv; `object-fit: cover` ist nur für passend komponierte Illustrationen zulässig und darf keine relevante Handlung abschneiden.
 
-### Illustrationsmotiv „Portfolio-Lücke“\n\nDie Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine nachdenkliche Fotografin, die ihr Portfolio prüft. Sie erzählt von vorhandener Praxiserfahrung, die wegen eingeschränkter Veröffentlichungsrechte online kaum sichtbar wird. Die Bildsprache folgt der gemalten Hero-Referenz; das Motiv ist klar als redaktionelle Illustration und nicht als echte Reportage erkennbar.\n\n### Portfolio-Alternativen im Fotografen-Abschnitt
+### Illustrationsmotiv „Portfolio-Lücke“\n\nDie Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin, die ihr Portfolio prüft. Sie erzählt von vorhandener Praxiserfahrung, die wegen eingeschränkter Veröffentlichungsrechte online kaum sichtbar wird. Die Bildsprache folgt der gemalten Hero-Referenz; das Motiv ist klar als redaktionelle Illustration und nicht als echte Reportage erkennbar.\n\n### Portfolio-Alternativen im Fotografen-Abschnitt
 
-Die Sektion „Der Ausgangspunkt“ verwendet eine gut lesbare Überschrift und Fließtext im Größenbereich der Hero-Erklärung. Drei realistische Wege zum Portfolio werden als getrennte Zeilen gestaltet, jeweils mit Titel, kurzem Signal zur Hürde und konkreter Erklärung: Styled Shoots (inszeniert), Workshops (Zeit und Kosten) sowie echte Hochzeiten (Veröffentlichungsrechte). Die Hürden werden verständlich erklärt, ohne die Alternativen pauschal abzuwerten. Auf schmalen Mobilgeräten wechseln die Zeilen in eine einspaltige Anordnung.
+Die Sektion „Der Ausgangspunkt“ verwendet eine gut lesbare Überschrift und Fließtext im Größenbereich der Hero-Erklärung. Drei realistische Wege zum Portfolio werden als getrennte Zeilen gestaltet, jeweils mit Titel, kurzem Signal zur Hürde und konkreter Erklärung: Styled Shoots (inszeniert), Workshops (Zeit und Kosten) sowie echte Hochzeiten (Veröffentlichungsrechte). Die Alternativen stehen als drei gleichwertige, icon-geführte Karten in einem gemeinsamen Panel. Die Illustration sitzt direkt neben dem Einstiegstext im selben visuellen Block, mit Bildlegende, damit sie nicht isoliert wirkt. Die Hürden werden verständlich erklärt, ohne die Alternativen pauschal abzuwerten. Auf Tablet werden die Karten zu einer gegliederten Liste; auf schmalen Mobilgeräten stehen Bild und Text untereinander.
 
 ## 6. Komponenten
 
