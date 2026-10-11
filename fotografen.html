@@ -72,13 +72,15 @@
     .pairing-caption { display: flex; justify-content: space-between; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 11.64px; }
     .pairing-caption span:first-child { color: var(--gold); font: 600 9.7px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
     .pairing-content { padding: 18px 22px 20px; }
+    .brand-name { color: var(--gold); font-style: italic; font-weight: 500; }
     .pairing-topline { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 16px; color: var(--gold); font: 500 9.7px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
     .pairing-profiles { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: center; gap: 12px; }
     .pairing-profile:last-child { text-align: right; }
     .profile-kicker { display: block; margin-bottom: 8px; color: var(--muted); font: 500 8.73px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
     .pairing-profile h3 { margin: 0 0 4px; font-size: 15.52px; font-weight: 600; }
     .pairing-profile p { color: var(--muted); font-size: 11.64px; line-height: 1.5; }
-    .pairing-connector { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--border); border-radius: 50%; color: var(--gold); font-size: 17.46px; }
+    .pairing-connector { display: grid; width: 46px; height: 46px; place-items: center; border: 1px solid var(--gold); border-radius: 50%; background: var(--gold); color: var(--gold-ink); font-size: 20px; font-weight: 700; box-shadow: 0 0 0 5px rgb(213 182 122 / 12%); animation: pairing-pulse 2.8s ease-in-out infinite; }
+    @keyframes pairing-pulse { 0%, 100% { transform: translateX(-1px) scale(1); box-shadow: 0 0 0 4px rgb(213 182 122 / 12%); } 50% { transform: translateX(1px) scale(1.06); box-shadow: 0 0 0 8px rgb(213 182 122 / 8%); } }
     .pairing-status { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--body); font-size: 11.64px; }
     .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgb(213 182 122 / 13%); }
     .status-code { margin-left: auto; color: var(--muted); font: 500 8.73px var(--mono); letter-spacing: .08em; }
@@ -193,7 +195,7 @@
       .pairing-caption, .pairing-content { padding-right: 16px; padding-left: 16px; }
       .pairing-photo { height: 250px; }
       .pairing-profiles { grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr); gap: 8px; }
-      .pairing-connector { width: 34px; height: 34px; }
+      .pairing-connector { width: 36px; height: 36px; font-size: 16px; }
       .pairing-profile h3 { font-size: 13.58px; }
       .pairing-profile p { font-size: 10.67px; }
       .status-code { font-size: 7.76px; }
@@ -227,7 +229,7 @@
         <div class="hero-copy">
           <h1 id="page-title">Baue das Portfolio auf, <span>das du wirklich zeigen willst</span></h1>
           <h2>Erweitere dein Portfolio mit Hochzeiten, die zu deinem Stil passen.</h2>
-          <p>WedConnect zeigt dir viele Hochzeiten. Du entscheidest selbst, welche davon zu deiner Ästhetik, deinem Anspruch und deiner Bildsprache passen. Gezielt statt zufällig. Keine Kosten. Keine gestellten Szenen.</p>
+          <p><em class="brand-name">WedConnect</em> zeigt dir viele Hochzeiten. Du entscheidest selbst, welche davon zu deiner Ästhetik, deinem Anspruch und deiner Bildsprache passen. Gezielt statt zufällig. Keine Kosten. Keine gestellten Szenen.</p>
           <div class="actions">
             <button class="button button-primary" type="button" data-signup>Profil erstellen <span aria-hidden="true">↗</span></button>
             <a class="button button-secondary" href="#how-it-works">Hochzeiten entdecken <span aria-hidden="true">↓</span></a>
@@ -240,11 +242,11 @@
             </div>
             <div class="pairing-caption"><span>WedConnect · Pairing</span><span>Editorial-Illustration · Symbolbild</span></div>
             <div class="pairing-content">
-              <div class="pairing-topline"><span>01 / Hochzeit</span><span>02 / Fotograf</span></div>
+              <div class="pairing-topline"><span>01 / Fotograf</span><span>02 / Hochzeit</span></div>
               <div class="pairing-profiles">
-                <div class="pairing-profile"><span class="profile-kicker">Paar</span><h3>Hochzeitspaar</h3><p>Location · Stil · Ablauf</p></div>
-                <div class="pairing-connector" aria-hidden="true">↔</div>
                 <div class="pairing-profile"><span class="profile-kicker">Profil</span><h3>Fotografenprofil</h3><p>Bildsprache · Portfolio</p></div>
+                <div class="pairing-connector" aria-hidden="true">↔</div>
+                <div class="pairing-profile"><span class="profile-kicker">Paar</span><h3>Hochzeitspaar</h3><p>Location · Stil · Ablauf</p></div>
               </div>
               <div class="pairing-status"><span class="status-dot"></span><span>Beide Seiten entscheiden selbst</span><span class="status-code">BEIDSEITIGES INTERESSE</span></div>
             </div>
@@ -274,7 +276,7 @@
               <article class="portfolio-alternative"><div class="alternative-heading"><span class="alternative-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5M9 13h6M9 16h3M14 18l2 2 4-5"/></svg></span><div><h3>Echte Hochzeiten</h3><span class="alternative-meta">Bildrechte nötig</span></div></div><p>Sie zeigen Können unter realen Bedingungen. Ohne Freigabe des Paares bleiben die Aufnahmen privat und dürfen nicht ins Portfolio.</p></article>
             </div>
           </div>
-          <p class="problem-conclusion">WedConnect setzt genau dort an: Du entdeckst Hochzeiten, die zu deiner Bildsprache passen, und kannst die Veröffentlichung der Bilder vorab klären.</p>
+          <p class="problem-conclusion"><em class="brand-name">WedConnect</em> setzt genau dort an: Du entdeckst Hochzeiten, die zu deiner Bildsprache passen, und kannst die Veröffentlichung der Bilder vorab klären.</p>
         </div>
       </div>
     </section>
@@ -283,7 +285,7 @@
       <div class="wrap section-grid">
         <div class="section-heading"><h2 id="how-title">Wie WedConnect funktioniert</h2></div>
         <div class="section-content">
-          <p>WedConnect zeigt dir eine breite Auswahl an Hochzeiten. Du entscheidest, welche davon zu deinem Portfolio passen.</p>
+          <p><em class="brand-name">WedConnect</em> zeigt dir eine breite Auswahl an Hochzeiten. Du entscheidest, welche davon zu deinem Portfolio passen.</p>
           <div class="subsection"><h3>Funktionsprinzip</h3><p>Viele Optionen, aber nur Matches bei beidseitigem Interesse.</p></div>
           <div class="subsection"><h3>Ablauf</h3>
             <ol class="steps">
@@ -316,7 +318,7 @@
       <div class="wrap section-grid">
         <div class="section-heading"><h2 id="rights-title">Nutzungsrechte</h2></div>
         <div class="section-content">
-          <p>Viele Fotografen begleiten Hochzeiten, dürfen die Bilder aber nicht verwenden. WedConnect bringt dich mit Paaren zusammen, die bereit sind, dir Nutzungsrechte zu geben.</p>
+          <p>Viele Fotografen begleiten Hochzeiten, dürfen die Bilder aber nicht verwenden. <em class="brand-name">WedConnect</em> bringt dich mit Paaren zusammen, die bereit sind, dir Nutzungsrechte zu geben.</p>
           <div class="subsection"><h3>Nutzungsbereiche</h3><ul class="rights-list"><li>Website</li><li>Portfolio</li><li>Social Media</li><li>Werbung</li><li>Print</li></ul></div>
           <p style="margin-top:24px">Alles klar geregelt und dokumentiert.</p>
         </div>
@@ -328,7 +330,7 @@
       <div class="wrap section-grid">
         <div class="section-heading"><h2 id="material-title">Portfolio-Material ohne Kosten</h2></div>
         <div class="section-content">
-          <p>Workshops und Styled Shoots sind inszeniert. WedConnect bietet Zugang zu visuell relevanten Hochzeiten ohne zusätzliche Kosten. Du investierst deine Zeit, nicht dein Budget.</p>
+          <p>Workshops und Styled Shoots sind inszeniert. <em class="brand-name">WedConnect</em> bietet Zugang zu visuell relevanten Hochzeiten ohne zusätzliche Kosten. Du investierst deine Zeit, nicht dein Budget.</p>
         </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-echte-hochzeit.webp" alt="Eine Fotografin hält ein Hochzeitspaar bei einer echten Reportage fest." loading="lazy"></figure>
       </div>
