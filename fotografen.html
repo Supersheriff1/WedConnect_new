@@ -65,8 +65,10 @@
     .button-secondary { border-color: var(--border); background: var(--surface); color: var(--ink); }
     .button-secondary:hover { border-color: var(--gold); background: var(--hover); }
     .hero-art { position: relative; min-height: 620px; display: grid; place-items: center; }
-    .pairing-card { width: min(100%, 560px); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 24px 64px #09090b55; animation: hero-frame-glow 6s ease-in-out infinite; }
-    @keyframes hero-frame-glow { 0%, 100% { border-color: var(--border); box-shadow: 0 24px 64px #09090b55, 0 0 0 0 rgb(213 182 122 / 0%); } 50% { border-color: rgb(213 182 122 / 38%); box-shadow: 0 24px 64px #09090b55, 0 0 0 2px rgb(213 182 122 / 10%); } }
+    @property --hero-frame-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+    .pairing-card { position: relative; isolation: isolate; width: min(100%, 560px); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 24px 64px #09090b55; }
+    .pairing-card::before { position: absolute; inset: 0; z-index: 3; padding: 1.5px; border-radius: inherit; background: conic-gradient(from var(--hero-frame-angle), transparent 0deg 332deg, rgb(213 182 122 / 12%) 340deg, rgb(213 182 122 / 86%) 352deg, rgb(213 182 122 / 12%) 360deg); content: ""; pointer-events: none; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: hero-frame-orbit 8s linear infinite; }
+    @keyframes hero-frame-orbit { to { --hero-frame-angle: 360deg; } }
     .pairing-photo { position: relative; height: clamp(275px, 27vw, 360px); overflow: hidden; background: var(--raised); }
     .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
     .pairing-photo::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 65%, rgb(16 15 19 / 24%)); content: ""; pointer-events: none; }
