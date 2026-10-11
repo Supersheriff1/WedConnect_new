@@ -1,6 +1,6 @@
 # WedConnect · Design Bible
 
-**Version:** 1.4  
+**Version:** 1.5  
 **Stand:** 11. Oktober 2026  
 **Status:** verbindlicher visueller Standard ab diesem Stand  
 **Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
@@ -118,8 +118,9 @@ Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltl
 - Layouts dürfen nicht auf eine einzelne Desktopbreite angewiesen sein. Übergänge zwischen Breakpoints sind genauso wichtig wie die kleinste und größte Ansicht.
 - Karten, Formulare und App-Views erhalten `min-width: 0`, wenn sie in Flex- oder Grid-Layouts liegen.
 - Horizontales Scrollen der gesamten Seite ist zu vermeiden. Horizontal scrollbare Streifen sind nur für gezielte Inhalte wie eine Portfolio-Galerie zulässig und müssen als solche erkennbar sein.
-- Jeder öffentliche redaktionelle Abschnitt besteht aus genau zwei visuellen Blöcken: links steht die Überschrift mit dem erklärenden Text direkt darunter; rechts steht die zum Inhalt passende Illustration. Überschrift und Erklärung bilden gemeinsam eine Textspalte. Es gibt keine separate dritte Spalte für den Erklärungstext.
-- Auf Desktop und Tablet bleiben Textblock und Illustration nebeneinander und sind zueinander ausgerichtet. Bei schmalen mobilen Ansichten steht der vollständige Textblock zuerst, gefolgt von der Illustration in der verfügbaren Breite.
+- Jeder öffentliche redaktionelle Abschnitt hat zwei Hauptelemente: einen typografisch zusammengehörigen Textblock mit Überschrift und Erklärung sowie eine passende Illustration. Eine dritte separate Textspalte wird vermieden.
+- Die Seite wiederholt nicht in jedem Abschnitt dasselbe Raster. Für einen sorgfältigen redaktionellen Rhythmus wechseln Bildposition und Bildgröße; Textbreite, Abstände, Bildformat und dezente Hintergrundflächen variieren passend zum jeweiligen Inhalt. Varianten wirken bewusst gewählt und nicht dekorativ zufällig.
+- Auf Desktop und Tablet können Bild und Text je nach Erzählfluss nebeneinander stehen und die Seite abwechselnd links oder rechts öffnen. Auf schmalen Mobilansichten steht der vollständige Textblock zuerst, danach die Illustration.
 
 ### Responsive Breakpoints der aktuellen Referenz
 
@@ -252,10 +253,10 @@ Diese WedConnect Design Bible ist ab Version 1.3 der verbindliche visuelle Stand
 
 Diese Bible definiert ausschließlich das visuelle System von WedConnect. Produktumfang, Funktionsregeln und Markenstimme werden in den dafür vorgesehenen Projektunterlagen separat neu festgelegt. Ältere inhaltliche Quellen sind keine Grundlage für Änderungen am hier dokumentierten visuellen Standard.
 
-Der maßgebliche visuelle Master ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Stand Commit `ec5d6379995a1a724e17923a1b328ad53c6b6849`. Er definiert das Erscheinungsbild und den Seitenaufbau der öffentlichen Website. Neue öffentliche Seiten übernehmen diese Gestaltung; ihre Texte, Beispiele und Illustrationen werden für den jeweiligen Inhalt passend ausgearbeitet. Änderungen am Master werden zuerst in dieser Bible und danach konsistent auf den öffentlichen Seiten umgesetzt. Dashboard und eingeloggte App folgen weiterhin ihrem eigenen, hier nicht veränderten Standard.
+Der maßgebliche visuelle Master ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Stand Commit `34b62aeb331e8b663e9b0f76d29d786798f19616`. Er definiert das Erscheinungsbild und den Seitenaufbau der öffentlichen Website. Neue öffentliche Seiten übernehmen diese Gestaltung; ihre Texte, Beispiele und Illustrationen werden für den jeweiligen Inhalt passend ausgearbeitet. Änderungen am Master werden zuerst in dieser Bible und danach konsistent auf den öffentlichen Seiten umgesetzt. Dashboard und eingeloggte App folgen weiterhin ihrem eigenen, hier nicht veränderten Standard.
 
 ## 10. Referenzstatus
 
-`fotografen.html` ist der freigegebene Designmaster für die öffentliche Website: dunkles Pairing-System, Montserrat, IBM Plex Mono für kurze Labels, Goldakzente, klare Karten, zweispaltige Inhaltsabschnitte mit Text links und passender Illustration rechts sowie die redaktionelle WedConnect-Illustrationsserie. Die öffentliche Startseite, die Seite für Hochzeitspaare und weitere öffentliche Informationsseiten richten sich nach diesem Stand. Das eingeloggte Dashboard und die App sind ausdrücklich ausgenommen und bleiben im derzeitigen Designsystem mit Manrope und funktionalen Portfoliofotos.
+`fotografen.html` ist der freigegebene Designmaster für die öffentliche Website: dunkles Pairing-System, Montserrat, IBM Plex Mono für kurze Labels, Goldakzente, klare Karten, abwechslungsreiche redaktionelle Inhaltsabschnitte, in denen Textblock und passende Illustration ihre Position und Größe sinnvoll wechseln sowie die redaktionelle WedConnect-Illustrationsserie. Die öffentliche Startseite, die Seite für Hochzeitspaare und weitere öffentliche Informationsseiten richten sich nach diesem Stand. Das eingeloggte Dashboard und die App sind ausdrücklich ausgenommen und bleiben im derzeitigen Designsystem mit Manrope und funktionalen Portfoliofotos.
 
 Die HTML-Datei ist visuell und funktional ein Prototyp. Echte Authentifizierung, persistente Profile, serverseitige Matches, produktive Nachrichten und Rechteverwaltung sind nicht implementiert. Die Responsive-Regeln dienen als verbindliche Gestaltungsleitlinie; neue Komponenten sind bei den relevanten schmalen, mittleren und breiten Viewports praktisch zu prüfen.
