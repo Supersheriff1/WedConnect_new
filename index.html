@@ -24,6 +24,7 @@
     @media(max-width:760px){.nav{min-height:70px}.menu-toggle{display:grid;place-items:center}.nav-links{position:absolute;top:calc(100% + 1px);left:0;right:0;display:none;align-items:stretch;gap:0;padding:10px clamp(18px,4vw,32px) 18px;border-bottom:1px solid var(--border);background:var(--canvas)}.nav-links.open{display:flex;flex-direction:column}.nav-links>a:not(.button){padding:13px 5px;border-bottom:1px solid rgb(81 78 89 / 55%);font-size:14px}.nav-cta{margin-top:13px}.intro-grid{grid-template-columns:1fr;gap:22px}.intro h2{max-width:700px}.role-grid{grid-template-columns:1fr}.role-card{min-height:220px}.editorial-grid,.editorial-grid.reverse{grid-template-columns:1fr;gap:27px}.editorial-grid.reverse .editorial-art{order:0}.editorial-copy{max-width:680px}.editorial-art{width:min(100%,720px)}.steps-grid{grid-template-columns:1fr}.step-card{min-height:0}.step-index{margin-bottom:15px}}
     @media(max-width:520px){body{font-size:16px}.wrap{width:calc(100% - 36px)}.hero{padding-top:52px}.hero h1{font-size:clamp(43px,12vw,58px);line-height:1.03}.hero-lead{font-size:16px;line-height:1.75}.actions{flex-direction:column;align-items:stretch}.actions .button{width:100%;min-height:50px;font-size:15px}.pairing-photo{aspect-ratio:1.08/1}.pairing-caption{font-size:9px;padding:10px 12px}.pairing-content{padding:15px 13px 13px}.pairing-profiles{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:7px}.pairing-profile h2{font-size:13px}.pairing-profile p{font-size:10px}.connector{width:32px;height:32px;font-size:17px}.pairing-status{font-size:10px}.status-label{max-width:110px;font-size:8px}.intro-copy p,.editorial-copy>p:not(.section-kicker){font-size:16px}.art-frame img{aspect-ratio:1.1/1}.art-caption{font-size:9px;padding:10px 12px}.footer-inner{align-items:flex-start;flex-direction:column;justify-content:center;padding-block:20px}.footer-links{flex-wrap:wrap;gap:10px 18px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+    .brand-cta .brand-wordmark{display:inline-flex;gap:0;white-space:nowrap}
   </style>
 </head>
 <body>
@@ -34,7 +35,7 @@
       <nav class="nav-links" id="main-nav" aria-label="Hauptnavigation">
         <a href="/hochzeitspaare.html">Für Hochzeitspaare</a>
         <a href="/fotografen.html">Für Fotografen</a>
-        <a class="button button-secondary nav-cta brand-cta" href="/#paare"><span>Wed</span><span class="brand-mark">Connect</span> entdecken <span aria-hidden="true">↗</span></a>
+        <a class="button button-secondary nav-cta brand-cta" href="/#paare"><span class="brand-wordmark">Wed<span class="brand-mark">Connect</span></span> entdecken <span aria-hidden="true">↗</span></a>
       </nav>
     </div>
   </header>
