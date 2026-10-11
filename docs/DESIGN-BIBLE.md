@@ -1,6 +1,6 @@
 # WedConnect · Design Bible
 
-**Version:** 1.6  
+**Version:** 1.7  
 **Stand:** 11. Oktober 2026  
 **Status:** verbindlicher visueller Standard ab diesem Stand  
 **Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
@@ -152,7 +152,11 @@ Bilder bringen echte Hochzeitserfahrung und fotografische Qualität in die Oberf
 - Jeder erklärende Website-Abschnitt verbindet Text und Motiv als ausgerichtete Komposition. Kurze Conversion-Zeilen, Navigation, Formulare und rechtliche Hinweise benötigen keine erzählerische Illustration.
 - Illustrationen werden als optimierte Projektassets eingebunden. Wenn die HTML-Datei unabhängig von einem lokalen Asset-Ordner als Einzeldatei geteilt oder in einen Editor kopiert wird, verwenden die Bildpfade erreichbare absolute Projekt-URLs statt relativer Pfade. Alternativtexte beschreiben das Motiv; `object-fit: cover` ist nur für passend komponierte Illustrationen zulässig und darf keine relevante Handlung abschneiden.
 
-### Illustrationsmotiv „Portfolio-Lücke“\n\nDie Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine nachdenkliche Fotografin, die ihr Portfolio prüft. Sie erzählt von vorhandener Praxiserfahrung, die wegen eingeschränkter Veröffentlichungsrechte online kaum sichtbar wird. Die Bildsprache folgt der gemalten Hero-Referenz; das Motiv ist klar als redaktionelle Illustration und nicht als echte Reportage erkennbar.\n\n## 6. Komponenten
+### Illustrationsmotiv „Portfolio-Lücke“\n\nDie Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine nachdenkliche Fotografin, die ihr Portfolio prüft. Sie erzählt von vorhandener Praxiserfahrung, die wegen eingeschränkter Veröffentlichungsrechte online kaum sichtbar wird. Die Bildsprache folgt der gemalten Hero-Referenz; das Motiv ist klar als redaktionelle Illustration und nicht als echte Reportage erkennbar.\n\n### Portfolio-Alternativen im Fotografen-Abschnitt
+
+Die Sektion „Der Ausgangspunkt“ verwendet eine gut lesbare Überschrift und Fließtext im Größenbereich der Hero-Erklärung. Drei realistische Wege zum Portfolio werden als getrennte Zeilen gestaltet, jeweils mit Titel, kurzem Signal zur Hürde und konkreter Erklärung: Styled Shoots (inszeniert), Workshops (Zeit und Kosten) sowie echte Hochzeiten (Veröffentlichungsrechte). Die Hürden werden verständlich erklärt, ohne die Alternativen pauschal abzuwerten. Auf schmalen Mobilgeräten wechseln die Zeilen in eine einspaltige Anordnung.
+
+## 6. Komponenten
 
 ### Navigation
 
@@ -260,3 +264,4 @@ Der maßgebliche visuelle Master ist `fotografen.html` im Repository `Supersheri
 `fotografen.html` ist der freigegebene Designmaster für die öffentliche Website: dunkles Pairing-System, Montserrat, IBM Plex Mono für kurze Labels, Goldakzente, klare Karten, abwechslungsreiche redaktionelle Inhaltsabschnitte, in denen Textblock und passende Illustration ihre Position und Größe sinnvoll wechseln sowie die redaktionelle WedConnect-Illustrationsserie. Die öffentliche Startseite, die Seite für Hochzeitspaare und weitere öffentliche Informationsseiten richten sich nach diesem Stand. Das eingeloggte Dashboard und die App sind ausdrücklich ausgenommen und bleiben im derzeitigen Designsystem mit Manrope und funktionalen Portfoliofotos.
 
 Die HTML-Datei ist visuell und funktional ein Prototyp. Echte Authentifizierung, persistente Profile, serverseitige Matches, produktive Nachrichten und Rechteverwaltung sind nicht implementiert. Die Responsive-Regeln dienen als verbindliche Gestaltungsleitlinie; neue Komponenten sind bei den relevanten schmalen, mittleren und breiten Viewports praktisch zu prüfen.
+
