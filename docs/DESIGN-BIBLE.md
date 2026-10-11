@@ -247,11 +247,11 @@ Vor der Freigabe jeder Seite und Komponente:
 
 ## 9. Source of Truth und Pflege
 
-Diese WedConnect Design Bible ist ab Version 1.1 die aktuelle visuelle Referenz. Sie ersetzt die frühere Design Bible und deren Cream-&-Gold-Vorgaben.
+Diese WedConnect Design Bible ist ab Version 1.2 die aktuelle visuelle Referenz. Sie ersetzt die frühere Design Bible und deren Cream-&-Gold-Vorgaben.
 
 Diese Bible definiert ausschließlich das visuelle System von WedConnect. Produktumfang, Funktionsregeln und Markenstimme werden in den dafür vorgesehenen Projektunterlagen separat neu festgelegt. Ältere inhaltliche Quellen sind keine Grundlage für Änderungen am hier dokumentierten visuellen Standard.
 
-Der maßgebliche visuelle Referenzstand ist `wedconnect-komplett-pairing-v1.html` (Pairing-Stand vom 10. Oktober 2026). Änderungen an Tokens, Typografie, Bildregeln oder Komponenten werden zuerst in dieser Bible dokumentiert und anschließend konsistent umgesetzt.
+Der maßgebliche visuelle Referenzstand umfasst `wedconnect-komplett-pairing-v1.html`, den freigegebenen Website-Screenshot vom 11. Oktober 2026 und die WedConnect-Hero-Illustration. Änderungen an Tokens, Typografie, Bildregeln oder Komponenten werden zuerst in dieser Bible dokumentiert und anschließend konsistent umgesetzt.
 
 ## 10. Referenzstatus der aktuellen Demo
 

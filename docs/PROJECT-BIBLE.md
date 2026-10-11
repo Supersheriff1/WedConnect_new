@@ -1,5 +1,8 @@
 # WedConnect · Project Bible
 
+**Version:** 1.1  
+**Stand:** 11. Oktober 2026  
+
 ## 1. Ziel des Projekts
 
 WedConnect ist eine Plattform, die Hochzeitspaare mit Hochzeitsfotograf:innen für mögliche TFP-Zusammenarbeiten verbindet. Beide Seiten stellen sich vor, prüfen passende Profile und entscheiden selbst, ob sie Interesse haben.
@@ -20,7 +23,7 @@ Die Website erklärt WedConnect, bevor sich jemand registriert:
 - rechtliche Informationen und Datenschutz
 - klare Einstiege zur Registrierung und App
 
-Die öffentliche Seite verwendet das verbindliche WedConnect Pairing-Design gemäß WedConnect Design Bible und führt zur Anmeldung mit Rollenwahl.
+Die öffentliche Seite folgt dem dunklen Pairing-System mit Goldakzenten. Ihre Typografie und Bildsprache richten sich nach der WedConnect Design Bible v1.2.
 
 **Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
 
@@ -197,15 +200,24 @@ Für einen öffentlichen Betrieb braucht WedConnect Werkzeuge zur Verwaltung und
 
 ## 14. Designstandard
 
-Für Website und App gilt die **WedConnect Design Bible v1.1**. Sie ist die maßgebliche visuelle Referenz und beschreibt das Pairing-Design mit dunklen Flächen, Goldakzenten, Manrope und IBM Plex Mono. Dazu gehören unter anderem responsive Layouts, großzügige Profile und Karten, gut lesbare Bedienelemente, vollständige Bilddarstellung wo inhaltlich erforderlich sowie reduzierte Animationen bei `prefers-reduced-motion`.
+Die verbindliche visuelle Referenz ist die **WedConnect Design Bible v1.2**. Sie hat Vorrang vor älteren visuellen Vorgaben in dieser Project Bible.
 
-Neue Komponenten müssen den vollständigen Standard der Design Bible übernehmen. Bei Widersprüchen zwischen älteren Cream-&-Gold-Angaben in dieser Project Bible und der Design Bible gilt die Design Bible v1.1.
+- Öffentliche Website: dunkle Pairing-Flächen mit gezielten Goldakzenten.
+- Öffentliche Website: Montserrat für Überschriften, Fließtext, Navigation und Controls; IBM Plex Mono nur für kurze Kennzeichnungen.
+- Dashboard und funktionale App-Oberflächen: Manrope; IBM Plex Mono für kompakte Metadaten.
+- Öffentliche Textabschnitte erhalten jeweils eine passende Illustration im redaktionellen WedConnect-Stil, angelehnt an die Hero-Illustration.
+- Diese erzählerischen Illustrationen bleiben auf der öffentlichen Website. Dashboard-Ansichten verwenden echte Profil- und Portfoliofotos sowie funktionale Icons.
+- Buttons und Formulare bleiben kontrastreich und auf Mobilgeräten bequem bedienbar; Primärbuttons mindestens 50 px hoch.
+- Mobile Lesetexte mindestens 16 px; Layouts behalten sichtbare Außenabstände.
+- Bewegungen beachten `prefers-reduced-motion`.
+
+Neue Komponenten folgen der Design Bible v1.2. Die Product Bible beschreibt Produktumfang und Verhalten; visuelle Detailregeln stehen ausschließlich in der Design Bible.
 
 ## 15. Technische Umsetzung
 
 ### Prototyp
 
-Eine HTML-Demo ist als Prototyp vorgesehen und soll Gestaltung und Kernabläufe zeigen:
+Die vorhandene HTML-Demo dient dazu, Gestaltung und Kernabläufe zu zeigen:
 
 - öffentliche Informationsansicht
 - Rollenwahl und simulierte Anmeldung
@@ -217,4 +229,4 @@ Eine HTML-Demo ist als Prototyp vorgesehen und soll Gestaltung und Kernabläufe 
 - Profil- und Kontoverwaltung
 - lokale Speicherung im Browser
 
-Sie ist kein Produktivsystem. Anmeldung, Datenübertragung, Zahlungen und echte Chat-Sicherheit sind darin nicht angebunden. Im Repository `WedConnect_new` ist derzeit noch keine Demo-Datei eingecheckt. Ein konkreter Demo-Stand wird erst dann als maßgeblich behandelt, wenn er dort mit eindeutigem Dateinamen und Referenz festgehalten ist.
+Sie ist kein Produktivsystem. Anmeldung, Datenübertragung, Zahlungen und echte Chat-Sicherheit sind darin nicht angebunden.
