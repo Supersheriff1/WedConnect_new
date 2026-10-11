@@ -1,6 +1,6 @@
 # WedConnect · Design Bible
 
-**Version:** 1.8  
+**Version:** 1.9  
 **Stand:** 11. Oktober 2026  
 **Status:** verbindlicher visueller Standard ab diesem Stand  
 **Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
@@ -154,7 +154,7 @@ Bilder bringen echte Hochzeitserfahrung und fotografische Qualität in die Oberf
 
 ### Illustrationsmotiv „Portfolio-Lücke“\n\nDie Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin, die ihr Portfolio prüft. Sie erzählt von vorhandener Praxiserfahrung, die wegen eingeschränkter Veröffentlichungsrechte online kaum sichtbar wird. Die Bildsprache folgt der gemalten Hero-Referenz; das Motiv ist klar als redaktionelle Illustration und nicht als echte Reportage erkennbar.\n\n### Portfolio-Alternativen im Fotografen-Abschnitt
 
-Die Sektion „Der Ausgangspunkt“ verwendet eine gut lesbare Überschrift und Fließtext im Größenbereich der Hero-Erklärung. Drei realistische Wege zum Portfolio werden als getrennte Zeilen gestaltet, jeweils mit Titel, kurzem Signal zur Hürde und konkreter Erklärung: Styled Shoots (inszeniert), Workshops (Zeit und Kosten) sowie echte Hochzeiten (Veröffentlichungsrechte). Die Alternativen stehen als drei gleichwertige, icon-geführte Karten in einem gemeinsamen Panel. Die Illustration sitzt direkt neben dem Einstiegstext im selben visuellen Block, mit Bildlegende, damit sie nicht isoliert wirkt. Die Hürden werden verständlich erklärt, ohne die Alternativen pauschal abzuwerten. Auf Tablet werden die Karten zu einer gegliederten Liste; auf schmalen Mobilgeräten stehen Bild und Text untereinander.
+Die Sektion „Der Ausgangspunkt“ verwendet eine gut lesbare Überschrift und Fließtext im Größenbereich der Hero-Erklärung. Drei realistische Wege zum Portfolio werden als getrennte Zeilen gestaltet, jeweils mit Titel, kurzem Signal zur Hürde und konkreter Erklärung: Styled Shoots (inszeniert), Workshops (Zeit und Kosten) sowie echte Hochzeiten (Veröffentlichungsrechte). Die Alternativen stehen als drei gleichwertige, icon-geführte Karten in einem gemeinsamen Panel. Die Illustration sitzt direkt neben dem Einstiegstext im selben visuellen Block, mit Bildlegende, damit sie nicht isoliert wirkt. Hochzeitsbilder in der Szene sind natürlich ausgerichtet. Icons dürfen mit einer ruhigen, niedrig-amplitudigen Bewegung von maximal 2 px dauerhaft belebt werden; Animationen werden bei `prefers-reduced-motion: reduce` vollständig deaktiviert. Die Hürden werden verständlich erklärt, ohne die Alternativen pauschal abzuwerten. Auf Tablet werden die Karten zu einer gegliederten Liste; auf schmalen Mobilgeräten stehen Bild und Text untereinander.
 
 ## 6. Komponenten
 
