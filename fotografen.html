@@ -84,50 +84,51 @@
     .status-code { margin-left: auto; color: var(--muted); font: 500 9px var(--mono); letter-spacing: .08em; }
     .section { position: relative; padding: clamp(84px, 10vw, 132px) 0; border-top: 1px solid var(--border); }
     .section:nth-of-type(even) { background: linear-gradient(105deg, rgb(255 255 255 / 1.8%), transparent 62%); }
-    .section-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(36px, 7vw, 100px); row-gap: 14px; align-items: center; }
-    .section-heading { grid-column: 1; position: static; }
+    .section-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(36px, 7vw, 100px); align-items: center; }
+    .section-copy { grid-column: 1; min-width: 0; }
+    .section-heading { position: static; }
     .section-heading .eyebrow { margin-bottom: 13px; }
     .section-heading h2 { max-width: 590px; }
-    .section-content { grid-column: 1; max-width: 640px; }
+    .section-content { max-width: 640px; }
     .section-content > p + p { margin-top: 18px; }
     .section-content > p { font-size: 16px; line-height: 1.85; }
-    .section-illustration { grid-column: 2; grid-row: 1 / span 2; width: 100%; min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: 0 22px 56px #09090b38; }
+    .section-illustration { grid-column: 2; grid-row: 1; width: 100%; min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: 0 22px 56px #09090b38; }
     .section-illustration img { display: block; width: 100%; aspect-ratio: 1.42; object-fit: cover; }
     #problem { padding-top: clamp(96px, 12vw, 156px); padding-bottom: clamp(96px, 12vw, 156px); }
-    #problem .section-grid { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); column-gap: clamp(40px, 8vw, 112px); }
+    #problem .section-grid { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: clamp(40px, 8vw, 112px); }
     #problem .section-illustration { border: 0; border-radius: 4px; background: transparent; box-shadow: none; }
     #problem .section-illustration img { aspect-ratio: 1.22; }
     #how-it-works { background: var(--subtle); }
     #how-it-works .section-grid { grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); }
-    #how-it-works .section-heading, #how-it-works .section-content { grid-column: 2; }
+    #how-it-works .section-copy { grid-column: 2; }
     #how-it-works .section-illustration { grid-column: 1; }
     #how-it-works .section-illustration img { aspect-ratio: 1.22; }
     #how-it-works .steps li { grid-template-columns: 42px 1fr; padding-block: 18px; }
-    #selection .section-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); column-gap: clamp(30px, 5vw, 68px); }
-    #selection .section-illustration { border-radius: 50% 50% 16px 16px; }
+    #selection .section-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(30px, 5vw, 68px); }
+    #selection .section-illustration { border-radius: 16px; }
     #selection .section-illustration img { aspect-ratio: 1.18; }
     #selection .list-grid { gap: 12px 20px; }
     #rights { background: var(--subtle); }
     #rights .section-grid { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); }
-    #rights .section-heading, #rights .section-content { grid-column: 2; }
-    #rights .section-illustration { grid-column: 1; grid-row: 1 / span 2; border-radius: 16px 16px 80px 16px; }
+    #rights .section-copy { grid-column: 2; }
+    #rights .section-illustration { grid-column: 1; }
     #rights .section-illustration img { aspect-ratio: 1.12; }
-    #rights .section-content { max-width: none; padding: clamp(24px, 3vw, 38px); border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    #rights .section-content { max-width: none; margin-top: 22px; padding: clamp(24px, 3vw, 38px); border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
     #rights .rights-list { gap: 8px; }
     #rights .rights-list li { padding: 7px 11px; background: var(--raised); }
-    #material .section-grid { grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); column-gap: clamp(36px, 6vw, 82px); }
+    #material .section-grid { grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); gap: clamp(36px, 6vw, 82px); }
     #material .section-heading h2 { max-width: 520px; font-size: clamp(38px, 4.5vw, 58px); }
     #material .section-illustration { border: 0; border-radius: 2px; background: transparent; box-shadow: none; }
     #material .section-illustration img { aspect-ratio: 1.12; }
     #development .section-grid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
-    #development .section-heading, #development .section-content { grid-column: 2; }
-    #development .section-illustration { grid-column: 1; border-radius: 16px 16px 16px 72px; }
+    #development .section-copy { grid-column: 2; }
+    #development .section-illustration { grid-column: 1; }
     #development .section-illustration img { aspect-ratio: 1.32; }
     #development .section-heading h2 { max-width: 560px; font-size: clamp(38px, 4.3vw, 56px); }
-    #benefits .section-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); column-gap: clamp(34px, 6vw, 78px); }
+    #benefits .section-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(34px, 6vw, 78px); }
     #benefits .benefits { grid-template-columns: 1fr 1fr; gap: 0 24px; }
     #benefits .benefits li { min-height: 62px; padding-block: 12px; }
-    #benefits .section-illustration { border-radius: 16px 80px 16px 16px; }
+    #benefits .section-content { padding-left: 22px; border-left: 1px solid var(--gold); }
     #benefits .section-illustration img { aspect-ratio: 1.2; }
     .subsection { margin-top: 34px; }
     .subsection h3 { display: flex; align-items: center; gap: 12px; }
@@ -146,11 +147,12 @@
     .benefits li::before { margin-top: 0; }
     .signup { padding: clamp(82px, 11vw, 136px) 0; border-top: 1px solid var(--border); background: radial-gradient(ellipse at 78% 50%, rgb(213 182 122 / 8%), transparent 45%), var(--subtle); }
     .signup-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(32px, 6vw, 82px); align-items: center; }
-    .signup-grid > div:first-child { grid-column: 1; grid-row: 1; }
-    .signup-art { grid-column: 2; grid-row: 1 / span 2; width: 100%; max-width: none; }
+    .signup-copy { grid-column: 1; }
+    .signup-art { grid-column: 2; width: 100%; max-width: none; }
     .signup-art img { aspect-ratio: 1.35; }
     .signup h2 { max-width: 680px; margin-bottom: 18px; }
     .signup p { max-width: 680px; color: var(--muted); font-size: 17px; line-height: 1.8; }
+    .signup .actions { margin-top: 24px; justify-content: flex-start; }
     .signup .actions { grid-column: 1; grid-row: 2; margin: 0; justify-content: flex-start; }
     
     .signup .actions { margin: 0; justify-content: flex-end; }
@@ -168,8 +170,7 @@
       .hero-art { min-height: 560px; }
       .pairing-card { width: min(100%, 560px); }
       .pairing-photo { height: 340px; }
-      .section-grid, #problem .section-grid, #how-it-works .section-grid, #selection .section-grid, #rights .section-grid, #material .section-grid, #development .section-grid, #benefits .section-grid { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); column-gap: 28px; row-gap: 12px; }
-      #selection .section-illustration, #material .section-illustration { border-radius: 14px; }
+      .section-grid, #problem .section-grid, #how-it-works .section-grid, #selection .section-grid, #rights .section-grid, #material .section-grid, #development .section-grid, #benefits .section-grid { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 28px; }
       .signup-grid { grid-template-columns: minmax(0, 1fr) minmax(240px, .8fr); gap: 28px; }
       .signup-art { display: block; }
     }
@@ -184,17 +185,15 @@
       .hero { padding-top: 66px; }
       .hero-art { min-height: 440px; }
       .pairing-photo { height: 300px; }
-      .section-grid, #problem .section-grid, #how-it-works .section-grid, #selection .section-grid, #rights .section-grid, #material .section-grid, #development .section-grid, #benefits .section-grid { grid-template-columns: 1fr; gap: 20px; }
-      .section-heading, .section-content, #how-it-works .section-heading, #how-it-works .section-content, #rights .section-heading, #rights .section-content, #development .section-heading, #development .section-content { grid-column: 1; grid-row: auto; }
-      .section-illustration, #how-it-works .section-illustration, #rights .section-illustration, #development .section-illustration { grid-column: 1; grid-row: auto; width: min(100%, 560px); justify-self: start; }
+      .section-grid, #problem .section-grid, #how-it-works .section-grid, #selection .section-grid, #rights .section-grid, #material .section-grid, #development .section-grid, #benefits .section-grid { grid-template-columns: 1fr; gap: 24px; }
+      .section-copy, #how-it-works .section-copy, #rights .section-copy, #development .section-copy, .section-illustration, #how-it-works .section-illustration, #rights .section-illustration, #development .section-illustration { grid-column: 1; grid-row: auto; width: 100%; }
       #rights .section-content { padding: 24px; }
       #benefits .benefits { grid-template-columns: 1fr; }
       .section-heading { position: static; }
       .section-heading h2 { max-width: 620px; }
       .signup-grid { grid-template-columns: 1fr; gap: 22px; }
-      .signup-grid > div:first-child { grid-column: 1; grid-row: 1; }
-      .signup .actions { grid-column: 1; grid-row: 2; justify-content: flex-start; }
-      .signup-art { grid-column: 1; grid-row: 3; display: block; width: min(100%, 560px); }
+      .signup-copy, .signup-art { grid-column: 1; grid-row: auto; width: 100%; }
+      .signup .actions { justify-content: flex-start; }
     }
     @media (max-width: 480px) {
       h1 { font-size: clamp(42px, 11vw, 54px); }
@@ -264,16 +263,19 @@
 
     <section class="section" id="problem" aria-labelledby="problem-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">01 / DER AUSGANGSPUNKT</p><h2 id="problem-title">Warum WedConnect entwickelt wurde</h2></div>
-        <div class="section-content"><p>Ein starkes Hochzeitsportfolio entsteht durch bewusste Auswahl. Workshops sind teuer, Styled Shoots künstlich, selbst organisierte Shootings kosten Zeit und Geld, viele Hochzeiten dürfen nicht veröffentlicht werden. WedConnect löst dieses Problem.</p></div>
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">01 / DER AUSGANGSPUNKT</p><p class="eyebrow">01 / DER AUSGANGSPUNKT</p><h2 id="problem-title">Warum WedConnect entwickelt wurde</h2></div>
+<div class="section-content"><p>Ein starkes Hochzeitsportfolio entsteht durch bewusste Auswahl. Workshops sind teuer, Styled Shoots künstlich, selbst organisierte Shootings kosten Zeit und Geld, viele Hochzeiten dürfen nicht veröffentlicht werden. WedConnect löst dieses Problem.</p></div>
+        </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-start.webp" alt="Eine Hochzeitsfotografin sichtet ihre bisherigen Aufnahmen und plant den Aufbau ihres Portfolios." loading="lazy"></figure>
       </div>
     </section>
 
     <section class="section" id="how-it-works" aria-labelledby="how-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">02 / DER ABLAUF</p><h2 id="how-title">Wie WedConnect funktioniert</h2></div>
-        <div class="section-content">
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">02 / DER ABLAUF</p><p class="eyebrow">02 / DER ABLAUF</p><h2 id="how-title">Wie WedConnect funktioniert</h2></div>
+<div class="section-content">
           <p>WedConnect zeigt dir eine breite Auswahl an Hochzeiten. Du entscheidest, welche davon zu deinem Portfolio passen.</p>
           <div class="subsection"><h3>Funktionsprinzip</h3><p>Viele Optionen, aber nur Matches bei beidseitigem Interesse.</p></div>
           <div class="subsection"><h3>Ablauf</h3>
@@ -286,18 +288,21 @@
           </div>
           <p>Du bestimmst, was du fotografieren möchtest – und was nicht.</p>
         </div>
+        </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-gespraech.webp" alt="Ein Paar und eine Fotografin wählen gemeinsam passende Hochzeitsbilder aus." loading="lazy"></figure>
       </div>
     </section>
 
     <section class="section" id="selection" aria-labelledby="selection-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">03 / DEINE AUSWAHL</p><h2 id="selection-title">Du wählst nach deinen Kriterien</h2></div>
-        <div class="section-content">
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">03 / DEINE AUSWAHL</p><p class="eyebrow">03 / DEINE AUSWAHL</p><h2 id="selection-title">Du wählst nach deinen Kriterien</h2></div>
+<div class="section-content">
           <p>Fotografen suchen nicht beliebige Hochzeiten, sondern jene, die ihr Portfolio gezielt weiterentwickeln.</p>
           <div class="subsection"><h3>Stilrichtungen</h3><ul class="list-grid"><li>Fine Art</li><li>Editorial</li><li>Modern</li><li>Elegant</li><li>Boho</li><li>Urban</li><li>Destination Weddings</li></ul></div>
           <div class="subsection"><h3>Auswahlkriterien</h3><ul class="list-grid"><li>Location</li><li>Stil</li><li>Ablauf</li><li>Paarprofil</li><li>Bildwünsche</li><li>Atmosphäre</li><li>Ästhetik</li></ul></div>
           <p style="margin-top:26px">Du baust dein Portfolio bewusst und strategisch auf.</p>
+        </div>
         </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-location-auswahl.webp" alt="Eine Fotografin prüft Licht und Location, während ein Hochzeitspaar im Hintergrund steht." loading="lazy"></figure>
       </div>
@@ -305,11 +310,13 @@
 
     <section class="section" id="rights" aria-labelledby="rights-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">04 / KLARE VEREINBARUNGEN</p><h2 id="rights-title">Nutzungsrechte</h2></div>
-        <div class="section-content">
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">04 / KLARE VEREINBARUNGEN</p><p class="eyebrow">04 / KLARE VEREINBARUNGEN</p><h2 id="rights-title">Nutzungsrechte</h2></div>
+<div class="section-content">
           <p>Viele Fotografen begleiten Hochzeiten, dürfen die Bilder aber nicht verwenden. WedConnect bringt dich mit Paaren zusammen, die bereit sind, dir Nutzungsrechte zu geben.</p>
           <div class="subsection"><h3>Nutzungsbereiche</h3><ul class="rights-list"><li>Website</li><li>Portfolio</li><li>Social Media</li><li>Werbung</li><li>Print</li></ul></div>
           <p style="margin-top:24px">Alles klar geregelt und dokumentiert.</p>
+        </div>
         </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-galerie-rechte.webp" alt="Ein Hochzeitspaar und eine Fotografin betrachten eine fertige Bildergalerie am Laptop." loading="lazy"></figure>
       </div>
@@ -317,9 +324,11 @@
 
     <section class="section" id="material" aria-labelledby="material-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">05 / DEIN PORTFOLIO</p><h2 id="material-title">Portfolio-Material ohne Kosten</h2></div>
-        <div class="section-content">
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">05 / DEIN PORTFOLIO</p><p class="eyebrow">05 / DEIN PORTFOLIO</p><h2 id="material-title">Portfolio-Material ohne Kosten</h2></div>
+<div class="section-content">
           <p>Workshops und Styled Shoots sind inszeniert. WedConnect bietet Zugang zu visuell relevanten Hochzeiten ohne zusätzliche Kosten. Du investierst deine Zeit, nicht dein Budget.</p>
+        </div>
         </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-echte-hochzeit.webp" alt="Eine Fotografin hält ein Hochzeitspaar bei einer echten Reportage fest." loading="lazy"></figure>
       </div>
@@ -327,16 +336,19 @@
 
     <section class="section" id="development" aria-labelledby="development-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">06 / WEITERENTWICKLUNG</p><h2 id="development-title">Weiterentwicklung</h2></div>
-        <div class="section-content"><p>Hochzeiten mit klarer Ästhetik, passenden Paaren und hochwertigen Locations helfen dir, deinen Stil zu schärfen und dein Portfolio gezielt auszubauen.</p></div>
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">06 / WEITERENTWICKLUNG</p><p class="eyebrow">06 / WEITERENTWICKLUNG</p><h2 id="development-title">Weiterentwicklung</h2></div>
+<div class="section-content"><p>Hochzeiten mit klarer Ästhetik, passenden Paaren und hochwertigen Locations helfen dir, deinen Stil zu schärfen und dein Portfolio gezielt auszubauen.</p></div>
+        </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-portfolio-aufbau.webp" alt="Eine Fotografin ordnet ihre fertigen Hochzeitsbilder in einer Online-Galerie." loading="lazy"></figure>
       </div>
     </section>
 
     <section class="section" id="benefits" aria-labelledby="benefits-title">
       <div class="wrap section-grid">
-        <div class="section-heading"><p class="eyebrow">07 / DEINE VORTEILE</p><h2 id="benefits-title">Warum Fotografen WedConnect nutzen</h2></div>
-        <div class="section-content">
+        <div class="section-copy">
+<div class="section-heading"><p class="eyebrow">07 / DEINE VORTEILE</p><p class="eyebrow">07 / DEINE VORTEILE</p><h2 id="benefits-title">Warum Fotografen WedConnect nutzen</h2></div>
+<div class="section-content">
           <ul class="benefits">
             <li>Viele Hochzeiten – du wählst selbst aus</li>
             <li>Paare, die Nutzungsrechte bewusst freigeben</li>
@@ -347,19 +359,20 @@
             <li>Moderne, klare Kommunikation</li>
           </ul>
         </div>
+        </div>
         <figure class="section-illustration"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-zusammenarbeit.webp" alt="Eine Fotografin teilt einen fertigen Hochzeitsprint mit dem Paar." loading="lazy"></figure>
       </div>
     </section>
 
     <section class="signup" id="signup" aria-labelledby="signup-title">
       <div class="wrap signup-grid">
-        <div>
-          
-          <h2 id="signup-title">Call-to-Action</h2>
+        <div class="signup-copy">
+          <p class="eyebrow">DEIN NÄCHSTER SCHRITT</p>
+          <h2 id="signup-title">Dein nächstes Portfolio beginnt hier.</h2>
           <p>Bereit für Hochzeiten, die dein Portfolio weiterbringen? Erstelle dein Profil und finde Paare, deren Bilder du verwenden darfst.</p>
+          <div class="actions"><button class="button button-primary" type="button" data-signup>Profil erstellen <span aria-hidden="true">↗</span></button></div>
         </div>
         <figure class="section-illustration signup-art"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/wedconnect-hero.webp" alt="Illustration: Fotografin und Hochzeitspaar begegnen sich bei einem Shooting" loading="lazy"></figure>
-        <div class="actions"><button class="button button-primary" type="button" data-signup>Profil erstellen <span aria-hidden="true">↗</span></button></div>
       </div>
     </section>
   </main>
