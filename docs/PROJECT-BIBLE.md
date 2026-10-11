@@ -1,6 +1,6 @@
 # WedConnect · Project Bible
 
-**Version:** 1.7  
+**Version:** 1.8  
 **Stand:** 11. Oktober 2026  
 
 ## 1. Ziel des Projekts
@@ -23,7 +23,7 @@ Die Website erklärt WedConnect, bevor sich jemand registriert:
 - rechtliche Informationen und Datenschutz
 - klare Einstiege zur Registrierung und App
 
-Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verbinden Überschrift und Erklärung zu einem Textblock mit einer passenden Illustration. Bildposition, Bildgröße, Textbreite und Abstände variieren passend zum Inhalt, damit ein lebendiger redaktioneller Seitenrhythmus entsteht. Auf schmalen Mobilgeräten steht der Text vor der Illustration. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt, warum erfahrene Fotograf:innen oft zu wenige veröffentlichbare Bilder im Portfolio haben. Die Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin vor einem fast leeren Portfolio. Im gemeinsamen Panel stehen Styled Shoots, Workshops und echte Hochzeiten als drei icon-geführte Alternativen mit ihren jeweiligen Hürden. Auf Desktop verbindet das Bild den Einstiegstext visuell mit der Alternativenreihe; auf kleinen Ansichten stehen Bild und Inhalte untereinander.
+Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verbinden Überschrift und Erklärung zu einem Textblock mit einer passenden Illustration. Bildposition, Bildgröße, Textbreite und Abstände variieren passend zum Inhalt, damit ein lebendiger redaktioneller Seitenrhythmus entsteht. Auf schmalen Mobilgeräten steht der Text vor der Illustration. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt, warum erfahrene Fotograf:innen oft zu wenige veröffentlichbare Bilder im Portfolio haben. Die Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin vor einem fast leeren Portfolio; die Albumfotos sind natürlich ausgerichtet. Im gemeinsamen Panel stehen Styled Shoots, Workshops und echte Hochzeiten als drei icon-geführte Alternativen mit ihren jeweiligen Hürden. Die Icons bewegen sich dezent und dauerhaft; bei aktivierter Betriebssystemeinstellung für reduzierte Bewegung bleibt die Animation aus. Auf Desktop verbindet das Bild den Einstiegstext visuell mit der Alternativenreihe; auf kleinen Ansichten stehen Bild und Inhalte untereinander.
 
 **Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
 
