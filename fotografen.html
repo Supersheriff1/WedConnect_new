@@ -70,7 +70,7 @@
     .pairing-card::before { position: absolute; inset: 0; z-index: 3; padding: 1.5px; border-radius: inherit; background: conic-gradient(from var(--hero-frame-angle), transparent 0deg 332deg, rgb(213 182 122 / 12%) 340deg, rgb(213 182 122 / 86%) 352deg, rgb(213 182 122 / 12%) 360deg); content: ""; pointer-events: none; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: hero-frame-orbit 8s linear infinite; }
     @keyframes hero-frame-orbit { to { --hero-frame-angle: 360deg; } }
     .pairing-photo { position: relative; height: clamp(275px, 27vw, 360px); overflow: hidden; background: var(--raised); }
-    .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transform: scale(1.2) translateY(10%); transform-origin: center; }
+    .pairing-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
     .pairing-watermark { position: absolute; z-index: 2; bottom: 15px; left: 18px; color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: -.04em; opacity: .88; text-shadow: 0 1px 10px rgb(0 0 0 / 85%); }
     .pairing-watermark span { color: var(--gold); }
     .pairing-photo::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 65%, rgb(16 15 19 / 24%)); content: ""; pointer-events: none; }
@@ -245,7 +245,7 @@
         <div class="hero-art">
           <div class="pairing-card">
             <div class="pairing-photo">
-              <img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-match-fenster.jpg" alt="Links prüft eine Fotografin ihr Portfolio im Atelier; rechts findet eine Hochzeit statt. Ein sichtbarer Abstand und zwei getrennte Lichtlinien zeigen, dass beide Seiten sich erst noch finden müssen." fetchpriority="high">
+              <img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-fenster-neu.webp" alt="Links prüft eine Fotografin ihr Portfolio im Atelier; rechts findet eine Hochzeit statt. Ein sichtbarer Abstand und zwei getrennte Lichtlinien zeigen, dass beide Seiten sich erst noch finden müssen." fetchpriority="high">
               <span class="pairing-watermark" aria-label="WedConnect">Wed<span>Connect</span></span>
             </div>
             <div class="pairing-content">
