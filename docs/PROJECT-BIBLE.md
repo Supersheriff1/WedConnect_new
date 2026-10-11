@@ -1,6 +1,6 @@
 # WedConnect · Project Bible
 
-**Version:** 1.5  
+**Version:** 1.6  
 **Stand:** 11. Oktober 2026  
 
 ## 1. Ziel des Projekts
@@ -23,7 +23,7 @@ Die Website erklärt WedConnect, bevor sich jemand registriert:
 - rechtliche Informationen und Datenschutz
 - klare Einstiege zur Registrierung und App
 
-Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verbinden Überschrift und Erklärung zu einem Textblock mit einer passenden Illustration. Bildposition, Bildgröße, Textbreite und Abstände variieren passend zum Inhalt, damit ein lebendiger redaktioneller Seitenrhythmus entsteht. Auf schmalen Mobilgeräten steht der Text vor der Illustration. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt: Viele Fotograf:innen bringen bereits echte Hochzeitserfahrung mit, können sie wegen fehlender Veröffentlichungsfreigaben aber nicht immer im Portfolio zeigen. Styled Shoots und Workshops sind mögliche Alternativen, bilden eine echte Hochzeit jedoch nur bedingt ab. Das Bild `assets/illustrations/fotografen-portfolio-gap.webp` visualisiert diese nachdenkliche Portfolio-Lücke.
+Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verbinden Überschrift und Erklärung zu einem Textblock mit einer passenden Illustration. Bildposition, Bildgröße, Textbreite und Abstände variieren passend zum Inhalt, damit ein lebendiger redaktioneller Seitenrhythmus entsteht. Auf schmalen Mobilgeräten steht der Text vor der Illustration. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt: Viele Fotograf:innen bringen bereits echte Hochzeitserfahrung mit, können sie wegen fehlender Veröffentlichungsfreigaben aber nicht immer im Portfolio zeigen. Styled Shoots und Workshops sind mögliche Alternativen, bilden eine echte Hochzeit jedoch nur bedingt ab. Das Bild `assets/illustrations/fotografen-portfolio-gap.webp` visualisiert diese nachdenkliche Portfolio-Lücke. Die drei Alternativen werden einzeln mit jeweiliger Hürde gezeigt: Styled Shoots sind inszeniert, Workshops brauchen Zeit und Investitionen, Veröffentlichungen echter Hochzeiten hängen von den Bildrechten ab. Die Fließtexte orientieren sich typografisch an der Hero-Erklärung.
 
 **Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
 
