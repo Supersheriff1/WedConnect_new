@@ -1,12 +1,12 @@
 # WedConnect · Design Bible
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Stand:** 11. Oktober 2026  
 **Status:** verbindlicher visueller Standard ab diesem Stand  
-**Geltungsbereich:** öffentliche WedConnect-Website, Dashboard/App und neue Produktoberflächen  
-**Designsystem:** Pairing · Dark Editorial · Gold · Illustrated Website
+**Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
+**Designsystem:** Öffentlicher Website-Master · Dark Editorial · Gold · redaktionelle Illustrationen
 
-Diese Fassung aktualisiert die visuelle Referenz v1.1. Sie übernimmt die im Website-Referenzscreenshot sichtbare Typografie und den freigegebenen Illustrationsstil. Neue Screens und Änderungen folgen dieser Bible. Eine Abweichung braucht eine bewusste, dokumentierte Produkt- und Designentscheidung.
+Diese Fassung legt die aktuelle „Für Fotografen“-Seite als verbindlichen Designmaster für die gesamte öffentliche WedConnect-Website fest. Alle weiteren öffentlichen Seiten übernehmen deren Farbwelt, Typografie, Layoutprinzipien, Komponenten, Ausrichtung, Abstände und Illustrationsstil. Inhalte und Illustrationen werden passend zur jeweiligen Seite gestaltet. Das eingeloggte Dashboard und die App sind von dieser Festlegung ausgenommen; ihr bestehender visueller Standard bleibt unverändert.
 
 ## 1. Designziel und Markenerlebnis
 
@@ -247,14 +247,14 @@ Vor der Freigabe jeder Seite und Komponente:
 
 ## 9. Source of Truth und Pflege
 
-Diese WedConnect Design Bible ist ab Version 1.2 die aktuelle visuelle Referenz. Sie ersetzt die frühere Design Bible und deren Cream-&-Gold-Vorgaben.
+Diese WedConnect Design Bible ist ab Version 1.3 der verbindliche visuelle Standard für alle öffentlichen Website-Seiten. Sie ersetzt für diese Seiten frühere Designvorgaben. Das eingeloggte Dashboard und die App sind nicht Teil dieses Geltungsbereichs.
 
 Diese Bible definiert ausschließlich das visuelle System von WedConnect. Produktumfang, Funktionsregeln und Markenstimme werden in den dafür vorgesehenen Projektunterlagen separat neu festgelegt. Ältere inhaltliche Quellen sind keine Grundlage für Änderungen am hier dokumentierten visuellen Standard.
 
-Der maßgebliche visuelle Referenzstand umfasst `wedconnect-komplett-pairing-v1.html`, den freigegebenen Website-Screenshot vom 11. Oktober 2026 und die WedConnect-Hero-Illustration. Änderungen an Tokens, Typografie, Bildregeln oder Komponenten werden zuerst in dieser Bible dokumentiert und anschließend konsistent umgesetzt.
+Der maßgebliche visuelle Master ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Stand Commit `519b6b727139ef99bd0681b4aa89dd6c2d53c2de`. Er definiert das Erscheinungsbild und den Seitenaufbau der öffentlichen Website. Neue öffentliche Seiten übernehmen diese Gestaltung; ihre Texte, Beispiele und Illustrationen werden für den jeweiligen Inhalt passend ausgearbeitet. Änderungen am Master werden zuerst in dieser Bible und danach konsistent auf den öffentlichen Seiten umgesetzt. Dashboard und eingeloggte App folgen weiterhin ihrem eigenen, hier nicht veränderten Standard.
 
-## 10. Referenzstatus der aktuellen Demo
+## 10. Referenzstatus
 
-Die Produktdemo zeigt das dunkle Pairing-System, Manrope für funktionale App-Oberflächen, IBM Plex Mono für kurze Metadaten, Goldakzente, eckigere Buttons, Karten und das zentrierte Verbindungselement. Öffentliche Marketingseiten nutzen Montserrat und die dazu passende redaktionelle WedConnect-Illustrationsserie. Dashboard und Website bleiben visuell verwandt, unterscheiden sich aber in Typografie und Bildsprache.
+`fotografen.html` ist der freigegebene Designmaster für die öffentliche Website: dunkles Pairing-System, Montserrat, IBM Plex Mono für kurze Labels, Goldakzente, klare Karten und die redaktionelle WedConnect-Illustrationsserie. Die öffentliche Startseite, die Seite für Hochzeitspaare und weitere öffentliche Informationsseiten richten sich nach diesem Stand. Das eingeloggte Dashboard und die App sind ausdrücklich ausgenommen und bleiben im derzeitigen Designsystem mit Manrope und funktionalen Portfoliofotos.
 
 Die HTML-Datei ist visuell und funktional ein Prototyp. Echte Authentifizierung, persistente Profile, serverseitige Matches, produktive Nachrichten und Rechteverwaltung sind nicht implementiert. Die Responsive-Regeln dienen als verbindliche Gestaltungsleitlinie; neue Komponenten sind bei den relevanten schmalen, mittleren und breiten Viewports praktisch zu prüfen.
