@@ -14,10 +14,7 @@
   const resetButton = document.querySelector("[data-password-reset]");
   const closeButton = document.querySelector("[data-auth-close]");
   const title = document.querySelector("#dialog-title");
-  const roleNote = document.querySelector("#auth-role-note");
   const emailInput = document.querySelector("#auth-email");
-  const role = document.body.dataset.accountRole;
-  const pendingRoleKey = "wedconnect.pendingRole";
   let mode = "signup";
   let busy = false;
 
@@ -44,7 +41,11 @@
     const isRecoveryUpdate = mode === "recovery-update";
 
     title.textContent = isSignup ? "Konto erstellen" : isSignin ? "Anmelden" : isRecoveryRequest ? "Passwort zurücksetzen" : "Neues Passwort festlegen";
-    roleNote.hidden = !isSignup;
+    document.querySelector("#auth-intro").textContent = isSignup
+      ? "Erstelle zuerst dein Konto. Deine Rolle legst du später im Profil fest."
+      : isSignin ? "Melde dich mit deiner E-Mail-Adresse oder Google an."
+      : isRecoveryRequest ? "Wir senden dir einen Link zum Zurücksetzen deines Passworts."
+      : "Lege ein neues Passwort für dein Konto fest.";
     passwordField.hidden = isRecoveryRequest;
     passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
     passwordInput.required = !isRecoveryRequest;
@@ -70,29 +71,6 @@
     return url.toString();
   }
 
-  function roleLabel(value) {
-    return value === "couple" ? "Hochzeitspaar" : value === "photographer" ? "Fotograf" : "";
-  }
-
-  async function assignGoogleRole() {
-    const selectedRole = sessionStorage.getItem(pendingRoleKey);
-    if (!selectedRole) return;
-    if (selectedRole !== "couple" && selectedRole !== "photographer") {
-      sessionStorage.removeItem(pendingRoleKey);
-      return;
-    }
-
-    const { error } = await supabase.rpc("assign_initial_role", { p_role: selectedRole });
-    if (error) {
-      setStatus("Die Anmeldung war erfolgreich. Die Rollen-Einrichtung ist noch nicht abgeschlossen. Bitte melde dich später erneut an.", "error");
-      sessionStorage.removeItem(pendingRoleKey);
-      return;
-    }
-
-    sessionStorage.removeItem(pendingRoleKey);
-    setStatus("Anmeldung erfolgreich. Dein Profilbereich folgt im nächsten Entwicklungsschritt.", "success");
-  }
-
   document.querySelectorAll("[data-signup]").forEach((button) => {
     button.addEventListener("click", () => {
       setMode("signup");
@@ -113,11 +91,6 @@
   });
 
   googleButton.addEventListener("click", async () => {
-    if (!role) {
-      setStatus("Die gewünschte Kontoart konnte nicht erkannt werden. Bitte lade die Seite neu.", "error");
-      return;
-    }
-    sessionStorage.setItem(pendingRoleKey, role);
     googleButton.disabled = true;
     setStatus("Weiterleitung zu Google …");
     try {
@@ -127,7 +100,6 @@
       });
       if (error) throw error;
     } catch (error) {
-      sessionStorage.removeItem(pendingRoleKey);
       setStatus(error && error.message ? error.message : "Die Anmeldung mit Google ist gerade nicht verfügbar.", "error");
       googleButton.disabled = false;
     }
@@ -146,12 +118,10 @@
 
     try {
       if (mode === "signup") {
-        if (!role) throw new Error("Die gewünschte Kontoart konnte nicht erkannt werden.");
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { account_role: role },
             emailRedirectTo: redirectUrl("confirmed")
           }
         });
@@ -194,18 +164,13 @@
       if (!dialog.open) dialog.showModal();
       return;
     }
-    if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-      window.setTimeout(() => { void assignGoogleRole(); }, 0);
-      if (new URLSearchParams(window.location.search).get("auth") === "google") {
-        if (!dialog.open) dialog.showModal();
-        if (!sessionStorage.getItem(pendingRoleKey)) {
-          setStatus("Anmeldung erfolgreich. Dein Profilbereich folgt im nächsten Entwicklungsschritt.", "success");
-        }
-      }
+    if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session
+      && new URLSearchParams(window.location.search).get("auth") === "google") {
+      if (!dialog.open) dialog.showModal();
+      setStatus("Anmeldung erfolgreich. Dein Profil wird im nächsten Schritt eingerichtet.", "success");
     }
   });
 
-  roleNote.textContent = role ? "Registrierung als " + roleLabel(role) + "." : "";
   setMode("signup");
 
   const authReturn = new URLSearchParams(window.location.search).get("auth");
