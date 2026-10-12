@@ -205,6 +205,9 @@
     }
   });
 
+  roleNote.textContent = role ? "Registrierung als " + roleLabel(role) + "." : "";
+  setMode("signup");
+
   const authReturn = new URLSearchParams(window.location.search).get("auth");
   if (authReturn === "confirmed") {
     setMode("signin");
@@ -215,8 +218,11 @@
     dialog.showModal();
   } else if (authReturn === "google") {
     dialog.showModal();
+  } else if (authReturn === "signup") {
+    setMode("signup");
+    dialog.showModal();
+  } else if (authReturn === "signin") {
+    setMode("signin");
+    dialog.showModal();
   }
-
-  roleNote.textContent = role ? "Registrierung als " + roleLabel(role) + "." : "";
-  setMode("signup");
 })();
