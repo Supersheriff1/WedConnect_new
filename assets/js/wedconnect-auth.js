@@ -17,6 +17,8 @@
   const emailInput = document.querySelector("#auth-email");
   let mode = "signup";
   let busy = false;
+  let pendingGoogleReturn = authReturn === "google";
+  const googleModeStorageKey = "wedconnect-google-auth-mode";
 
   if (!config || !config.url || !config.publishableKey || !createClient) {
     document.querySelectorAll("[data-signup]").forEach((button) => button.addEventListener("click", () => {
@@ -71,6 +73,35 @@
     return url.toString();
   }
 
+  function savedGoogleMode() {
+    try {
+      return window.sessionStorage.getItem(googleModeStorageKey) === "signin" ? "signin" : "signup";
+    } catch {
+      return "signup";
+    }
+  }
+
+  function clearGoogleMode() {
+    try {
+      window.sessionStorage.removeItem(googleModeStorageKey);
+    } catch {
+      // Session storage may be unavailable in restricted browser contexts.
+    }
+  }
+
+  function clearAuthReturn() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("auth");
+    window.history.replaceState(window.history.state, "", url.toString());
+  }
+
+  function googleReturnError() {
+    const query = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    return query.get("error_description") || hash.get("error_description")
+      || query.get("error") || hash.get("error");
+  }
+
   document.querySelectorAll("[data-signup]").forEach((button) => {
     button.addEventListener("click", () => {
       setMode("signup");
@@ -90,12 +121,14 @@
     googleButton.disabled = true;
     setStatus("Weiterleitung zu Google …");
     try {
+      window.sessionStorage.setItem(googleModeStorageKey, mode);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: redirectUrl("google") }
       });
       if (error) throw error;
     } catch (error) {
+      clearGoogleMode();
       setStatus(error && error.message ? error.message : "Die Anmeldung mit Google ist gerade nicht verfügbar.", "error");
       googleButton.disabled = false;
     }
@@ -160,10 +193,13 @@
       if (!dialog.open) dialog.showModal();
       return;
     }
-    if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session
-      && new URLSearchParams(window.location.search).get("auth") === "google") {
+    if (pendingGoogleReturn && (event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+      pendingGoogleReturn = false;
+      setMode(savedGoogleMode());
+      clearGoogleMode();
+      setStatus("Google-Anmeldung erfolgreich. Dein Profilbereich folgt im nächsten Entwicklungsschritt.", "success");
       if (!dialog.open) dialog.showModal();
-      setStatus("Anmeldung erfolgreich. Dein Profil wird im nächsten Schritt eingerichtet.", "success");
+      clearAuthReturn();
     }
   });
 
@@ -178,7 +214,17 @@
     setMode("recovery-update");
     dialog.showModal();
   } else if (authReturn === "google") {
+    setMode(savedGoogleMode());
     dialog.showModal();
+    const oauthError = googleReturnError();
+    if (oauthError) {
+      pendingGoogleReturn = false;
+      clearGoogleMode();
+      setStatus(`Google-Anmeldung fehlgeschlagen: ${oauthError}`, "error");
+      clearAuthReturn();
+    } else {
+      setStatus("Google-Anmeldung wird abgeschlossen …");
+    }
   } else if (authReturn === "signup") {
     setMode("signup");
     dialog.showModal();
