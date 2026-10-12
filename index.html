@@ -139,7 +139,17 @@
   .public-content-frame > section > .wrap { padding-inline: 24px; }
 }
 
-    </style>
+    
+    .role-dialog { width: min(440px, calc(100% - 32px)); padding: 30px; border: 1px solid rgba(199,164,104,.4); border-radius: 18px; color: var(--ink); background: var(--surface); box-shadow: 0 28px 80px rgba(0,0,0,.48); }
+    .role-dialog::backdrop { background: rgba(15,14,18,.72); backdrop-filter: blur(4px); }
+    .role-dialog h2 { margin: 0 0 8px; }
+    .role-dialog > p { color: var(--muted); line-height: 1.6; }
+    .role-dialog-choices { display: grid; gap: 10px; margin: 22px 0 16px; }
+    .role-dialog-choices .button { width: 100%; }
+    .role-dialog-login { font-size: 12px; line-height: 1.8; }
+    .role-dialog-login a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+    .role-dialog-close { width: 100%; margin-top: 12px; }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -149,7 +159,7 @@
       <nav class="nav-links" id="main-nav" aria-label="Hauptnavigation">
         <a href="/hochzeitspaare.html">Für Hochzeitspaare</a>
         <a href="/fotografen.html">Für Fotografen</a>
-        <a class="button button-primary nav-cta brand-cta" aria-label="Jetzt starten" href="/#paare">Jetzt starten <span aria-hidden="true">↗</span></a>
+        <button class="button button-primary nav-cta brand-cta" type="button" aria-label="Jetzt starten" data-role-dialog>Jetzt starten <span aria-hidden="true">↗</span></button>
       </nav>
     </div>
   </header>
@@ -244,12 +254,31 @@
       </div>
     </section>
   </main>
+
+  <dialog class="role-dialog" id="role-dialog" aria-labelledby="role-dialog-title">
+    <h2 id="role-dialog-title">Wie möchtest du starten?</h2>
+    <p>Wähle den Zugang, der zu dir passt.</p>
+    <div class="role-dialog-choices">
+      <a class="button button-primary" href="/hochzeitspaare.html?auth=signup">Als Hochzeitspaar starten <span aria-hidden="true">↗</span></a>
+      <a class="button button-secondary" href="/fotografen.html?auth=signup">Als Fotograf starten <span aria-hidden="true">↗</span></a>
+    </div>
+    <p class="role-dialog-login">Schon registriert?
+      <a href="/hochzeitspaare.html?auth=signin">Als Hochzeitspaar anmelden</a> ·
+      <a href="/fotografen.html?auth=signin">Als Fotograf anmelden</a>
+    </p>
+    <button class="button button-secondary role-dialog-close" type="button" data-role-dialog-close>Schließen</button>
+  </dialog>
   <footer class="footer"><div class="wrap footer-inner"><a class="brand" href="#start">Wed<span class="brand-mark">Connect</span></a><nav class="footer-links" aria-label="Footer"><a href="#idee">Die Idee</a><a href="#ablauf">So funktioniert’s</a><a href="/hochzeitspaare.html">Für Hochzeitspaare</a><a href="/fotografen.html">Für Fotografen</a></nav><small>© 2026 WedConnect · Im Aufbau</small></div></footer>
   <script>
     const menuButton=document.querySelector('.menu-toggle');
     const menu=document.querySelector('#main-nav');
     menuButton.addEventListener('click',()=>{const open=menuButton.getAttribute('aria-expanded')!=='true';menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Menü schließen':'Menü öffnen');menu.classList.toggle('open',open)});
     menu.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menu.classList.remove('open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Menü öffnen')}));
+
+    const roleDialog=document.querySelector('#role-dialog');
+    document.querySelector('[data-role-dialog]').addEventListener('click',()=>{menu.classList.remove('open');menuButton.setAttribute('aria-expanded','false');roleDialog.showModal()});
+    document.querySelector('[data-role-dialog-close]').addEventListener('click',()=>roleDialog.close());
+    roleDialog.addEventListener('click',event=>{if(event.target===roleDialog)roleDialog.close()});
   </script>
 </body>
 </html>
