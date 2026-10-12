@@ -1,6 +1,6 @@
 # WedConnect · Project Bible
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Stand:** 11. Oktober 2026  
 
 ## 1. Ziel des Projekts
@@ -23,7 +23,7 @@ Die Website erklärt WedConnect, bevor sich jemand registriert:
 - rechtliche Informationen und Datenschutz
 - klare Einstiege zur Registrierung und App
 
-Die aktuelle Seite „Für Fotografen“ ist der verbindliche Designmaster für die gesamte öffentliche WedConnect-Website. Alle weiteren öffentlichen Seiten folgen ihrer dunklen Pairing-Gestaltung mit Goldakzenten, Montserrat, klarer Typografie, Ausrichtung, Abständen und redaktionellen Illustrationen, die zum jeweiligen Inhalt passen. Inhaltliche Abschnitte verbinden Überschrift und Erklärung zu einem Textblock mit einer passenden Illustration. Bildposition, Bildgröße, Textbreite und Abstände variieren passend zum Inhalt, damit ein lebendiger redaktioneller Seitenrhythmus entsteht. Auf schmalen Mobilgeräten steht der Text vor der Illustration. Das eingeloggte Dashboard und die App sind von dieser Gestaltungsregel ausgenommen und bleiben im bestehenden Design.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt, warum erfahrene Fotografen oft zu wenige veröffentlichbare Bilder im Portfolio haben. Die Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin mit einem nahezu frontal ausgerichteten Album. Auf der linken Seite ist genau ein großes, aufrecht stehendes Hochzeitsfoto im Hochformat zu sehen; die rechte Albumseite bleibt leer. Keine verdrehten oder schräg liegenden Fotos. Im gemeinsamen Panel stehen Styled Shoots, Workshops und echte Hochzeiten als drei icon-geführte Alternativen mit ihren jeweiligen Hürden. Die Icons bewegen sich mit gut wahrnehmbarer, aber ruhiger Animation und versetztem Rhythmus; bei aktivierter Betriebssystemeinstellung für reduzierte Bewegung bleibt die Animation aus. Auf Desktop verbindet das Bild den Einstiegstext visuell mit der Alternativenreihe; auf kleinen Ansichten stehen Bild und Inhalte untereinander.
+Die Seite „Für Fotografen“ ist der verbindliche Designmaster für die öffentliche WedConnect-Website. Startseite und Hochzeitspaare-Seite sind visuell an diesen Stand angeglichen und übernehmen Gestaltung, Typografie, Außenrahmen und Abstände. Ihr Design ist freigegeben; ihre Texte sind noch frühe Entwürfe und ausdrücklich nicht eingefroren. Die jeweils gültigen visuellen Regeln stehen in der aktuellen Design Bible unter `docs/DESIGN-BIBLE.md`. Das eingeloggte Dashboard und die App folgen ihrem eigenen Designstandard.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt, warum erfahrene Fotografen oft zu wenige veröffentlichbare Bilder im Portfolio haben. Die Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin mit einem nahezu frontal ausgerichteten Album. Auf der linken Seite ist genau ein großes, aufrecht stehendes Hochzeitsfoto im Hochformat zu sehen; die rechte Albumseite bleibt leer. Keine verdrehten oder schräg liegenden Fotos. Im gemeinsamen Panel stehen Styled Shoots, Workshops und echte Hochzeiten als drei icon-geführte Alternativen mit ihren jeweiligen Hürden. Die Icons bewegen sich mit gut wahrnehmbarer, aber ruhiger Animation und versetztem Rhythmus; bei aktivierter Betriebssystemeinstellung für reduzierte Bewegung bleibt die Animation aus. Auf Desktop verbindet das Bild den Einstiegstext visuell mit der Alternativenreihe; auf kleinen Ansichten stehen Bild und Inhalte untereinander.
 
 **Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
 
@@ -200,33 +200,19 @@ Für einen öffentlichen Betrieb braucht WedConnect Werkzeuge zur Verwaltung und
 
 ## 14. Designstandard
 
-Für die öffentliche Website ist die **WedConnect Design Bible v1.4** verbindlich. Designmaster ist `fotografen.html` im Repository `Supersheriff1/WedConnect_new`, Commit `34b62aeb331e8b663e9b0f76d29d786798f19616`. Dashboard und eingeloggte App sind von dieser Festlegung ausgenommen; ihr aktueller visueller Standard bleibt unverändert.
-
-- Öffentliche Website: dunkle Pairing-Flächen mit gezielten Goldakzenten.
-- Öffentliche Website: Montserrat für Überschriften, Fließtext, Navigation und Controls; IBM Plex Mono nur für kurze Kennzeichnungen.
-- Dashboard und funktionale App-Oberflächen: Manrope; IBM Plex Mono für kompakte Metadaten.
-- Öffentliche Textabschnitte erhalten jeweils eine passende Illustration im redaktionellen WedConnect-Stil, angelehnt an die Hero-Illustration.
-- Diese erzählerischen Illustrationen bleiben auf der öffentlichen Website. Dashboard-Ansichten verwenden echte Profil- und Portfoliofotos sowie funktionale Icons.
-- Buttons und Formulare bleiben kontrastreich und auf Mobilgeräten bequem bedienbar; Primärbuttons mindestens 50 px hoch.
-- Mobile Lesetexte mindestens 16 px; Layouts behalten sichtbare Außenabstände.
-- Bewegungen beachten `prefers-reduced-motion`.
-
-Neue öffentliche Seiten und Komponenten folgen dem Designmaster „Für Fotografen“ und der Design Bible v1.5. Die Product Bible beschreibt Produktumfang und Verhalten; visuelle Detailregeln der öffentlichen Website stehen ausschließlich in der Design Bible. Dashboard und eingeloggte App werden durch diese Aktualisierung nicht verändert.
+Für die öffentliche Website gilt die aktuelle Design Bible `docs/DESIGN-BIBLE.md`, Version 2.3. Der eingefrorene Designmaster ist „Für Fotografen“. Startseite und Hochzeitspaare-Seite übernehmen den visuellen Stand einschließlich des gemeinsamen Außenrahmens. Ihre Texte bleiben bis zu einer gesonderten Freigabe Entwürfe. Das Dashboard und die eingeloggte App sind von diesem Website-Designstandard ausgenommen.
 
 ## 15. Technische Umsetzung
 
-### Prototyp
+### Aktueller Implementierungsstand
 
-Die vorhandene HTML-Demo dient dazu, Gestaltung und Kernabläufe zu zeigen:
+- Die öffentlichen Seiten `index.html`, `fotografen.html` und `hochzeitspaare.html` sind statische HTML-Seiten.
+- Das Design von Startseite und Hochzeitspaare-Seite ist an den eingefrorenen Fotografen-Master angeglichen.
+- Die Texte auf der Startseite und der Seite für Hochzeitspaare sind frühe Entwürfe und nicht Teil des eingefrorenen Designstands.
+- Supabase Auth, Datenbanktabellen, Profil-Onboarding und Matching sind noch nicht angebunden.
 
-- öffentliche Informationsansicht
-- Rollenwahl und simulierte Anmeldung
-- Paar- und Fotograf:innenansicht
-- Demo-Profile, Filter und Portfolio-Galerien
-- Interessen und Matches
-- Match-Animation
-- Nachrichtenbereich
-- Profil- und Kontoverwaltung
-- lokale Speicherung im Browser
+### Nächster Umsetzungsschritt: Authentifizierung
 
-Sie ist kein Produktivsystem. Anmeldung, Datenübertragung, Zahlungen und echte Chat-Sicherheit sind darin nicht angebunden.
+Die erste produktive Anbindung soll Supabase Auth mit E-Mail/Passwort und Google umfassen. Die Rollenwahl Hochzeitspaar oder Fotograf wird beim Registrierungsablauf getroffen und dauerhaft mit dem Konto verknüpft. Rollen- und Profildaten werden mit Row Level Security geschützt. Danach folgen rollenabhängige Profilformulare und die Matching-Funktionen.
+
+Die Browser-App verwendet ausschließlich den öffentlichen Supabase Publishable Key (früher anon key). Ein Service-Role-Key oder anderer geheimer Schlüssel darf nie in HTML, JavaScript oder im Browser gespeichert werden.
