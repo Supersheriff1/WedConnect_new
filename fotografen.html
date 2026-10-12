@@ -104,7 +104,7 @@
     .section-content > p + p { margin-top: 18px; }
     .section-content > p { font-size: clamp(15.52px, 1.46vw, 17.46px); line-height: 1.8; }
     #problem .section-grid { display: block; }
-    .problem-panel { overflow: hidden; padding: clamp(24px, 4.5vw, 52px); border: 1px solid var(--border); border-radius: 20px; background: linear-gradient(135deg, rgb(255 255 255 / 2%), transparent 50%), var(--subtle); }
+    .problem-panel { --panel-gutter: clamp(24px, 4.5vw, 52px); overflow: hidden; padding: var(--panel-gutter); border: 1px solid var(--border); border-radius: 20px; background: linear-gradient(135deg, rgb(255 255 255 / 2%), transparent 50%), var(--subtle); }
     .problem-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap: clamp(32px, 5vw, 70px); align-items: stretch; }
     .problem-intro { display: flex; flex-direction: column; justify-content: center; gap: 22px; }
     #problem .section-heading h2 { max-width: 590px; }
@@ -613,6 +613,13 @@
   
     #problem .problem-panel{padding-bottom:var(--divider-space)}
     .process-panel{padding-top:var(--divider-space)}
+
+    /* Interne Trenner reichen bis an die Innenkante des gemeinsamen Rahmens. */
+    .process-panel > .process-value,
+    .process-panel > .faq-inner{
+      margin-inline:calc(-1 * var(--panel-gutter));
+      padding-inline:var(--panel-gutter);
+    }
 
   </style>
 </head>
