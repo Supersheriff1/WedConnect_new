@@ -659,11 +659,10 @@
     .auth-status[data-state="success"] { color: #A4C5A8; }
     .auth-status[data-state="error"] { color: #E3A09A; }
     .auth-status:empty { display: none; }
-    .auth-role-note { color: var(--gold); }
 
     </style>
 </head>
-<body data-account-role="photographer">
+<body>
   <header class="topbar">
     <div class="wrap nav">
       <a class="brand" href="/" aria-label="WedConnect – Startseite">Wed<span class="brand-mark">Connect</span></a>
@@ -851,7 +850,7 @@
 
   <dialog class="dialog auth-dialog" id="signup-dialog" aria-labelledby="dialog-title">
     <h2 id="dialog-title">Konto erstellen</h2>
-    <p class="auth-intro auth-role-note" id="auth-role-note">Registrierung als Fotograf.</p>
+    <p class="auth-intro" id="auth-intro">Erstelle zuerst dein Konto. Deine Rolle legst du später im Profil fest.</p>
     <form class="auth-form" id="auth-form">
       <label class="auth-field" for="auth-email">E-Mail-Adresse
         <input id="auth-email" name="email" type="email" autocomplete="email" required>
