@@ -141,9 +141,49 @@
   .public-content-frame > section > .wrap { padding-inline: 24px; }
 }
 
+        .auth-dialog {
+      max-height: min(90vh, 820px);
+      overflow-y: auto;
+    }
+    .auth-dialog h2 { margin-bottom: 10px; }
+    .auth-dialog [hidden] { display: none !important; }
+    .auth-intro { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .auth-form { display: grid; gap: 14px; }
+    .auth-field { display: grid; gap: 7px; color: var(--ink); font-size: 13px; font-weight: 600; }
+    .auth-field input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--canvas);
+      color: var(--ink);
+      font: inherit;
+    }
+    .auth-field input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .auth-dialog .button { width: 100%; margin-top: 12px; }
+    .auth-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0 4px; color: var(--muted); font: 500 10px var(--mono); }
+    .auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: var(--border); content: ""; }
+    .auth-text-button {
+      display: block;
+      margin: 15px auto 0;
+      padding: 5px;
+      border: 0;
+      background: none;
+      color: var(--gold);
+      font: 600 13px var(--sans);
+      cursor: pointer;
+    }
+    .auth-text-button:hover { color: var(--ink); }
+    .auth-status { min-height: 1.5em; margin: 14px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .auth-status[data-state="success"] { color: #A4C5A8; }
+    .auth-status[data-state="error"] { color: #E3A09A; }
+    .auth-status:empty { display: none; }
+    .auth-role-note { color: var(--gold); }
+
     </style>
 </head>
-<body>
+<body data-account-role="couple">
   <header class="topbar">
     <div class="wrap nav">
       <a class="brand" href="/" aria-label="WedConnect – Startseite">Wed<span class="brand-mark">Connect</span></a>
@@ -229,12 +269,32 @@
     </section>
   </main>
   <footer class="footer"><div class="wrap footer-inner"><a class="brand" href="/" aria-label="WedConnect – Startseite">Wed<span class="brand-mark">Connect</span></a><nav class="footer-links" aria-label="Footer"><a href="/">Startseite</a><a href="/hochzeitspaare.html">Für Hochzeitspaare</a><a href="/fotografen.html">Für Fotografen</a><a href="#faq">FAQ</a></nav><small>© 2026 WedConnect · Im Aufbau</small></div></footer>
-  <dialog class="dialog" id="signup-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Hochzeitsprofil erstellen</h2><p>Die Registrierung ist in diesem Demo-Stand noch nicht angebunden.</p><button class="button button-primary" type="button" data-close>Schließen</button></dialog>
+  <dialog class="dialog auth-dialog" id="signup-dialog" aria-labelledby="dialog-title">
+    <h2 id="dialog-title">Konto erstellen</h2>
+    <p class="auth-intro auth-role-note" id="auth-role-note">Registrierung als Hochzeitspaar.</p>
+    <form class="auth-form" id="auth-form">
+      <label class="auth-field" for="auth-email">E-Mail-Adresse
+        <input id="auth-email" name="email" type="email" autocomplete="email" required>
+      </label>
+      <label class="auth-field" id="auth-password-field" for="auth-password">Passwort
+        <input id="auth-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+      </label>
+      <button class="button button-primary" type="submit" data-auth-submit>Konto erstellen</button>
+    </form>
+    <div class="auth-divider" aria-hidden="true"><span>ODER</span></div>
+    <button class="button button-secondary" type="button" data-google-auth>Mit Google fortfahren</button>
+    <button class="auth-text-button" type="button" data-auth-toggle>Du hast schon ein Konto? Anmelden</button>
+    <button class="auth-text-button" type="button" data-password-reset hidden>Passwort vergessen?</button>
+    <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+    <button class="button button-secondary" type="button" data-auth-close>Schließen</button>
+  </dialog>
   <script>
     const menuButton=document.querySelector('.menu-toggle');const menu=document.querySelector('#main-nav');
     menuButton.addEventListener('click',()=>{const open=menuButton.getAttribute('aria-expanded')!=='true';menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Menü schließen':'Menü öffnen');menu.classList.toggle('open',open)});
     menu.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menu.classList.remove('open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Menü öffnen')}));
-    const dialog=document.querySelector('#signup-dialog');document.querySelectorAll('[data-signup]').forEach(button=>button.addEventListener('click',()=>dialog.showModal()));document.querySelector('[data-close]').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase-config.js"></script>
+  <script src="/assets/js/wedconnect-auth.js"></script>
 </body>
 </html>
