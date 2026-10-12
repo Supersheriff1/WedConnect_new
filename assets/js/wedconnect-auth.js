@@ -61,7 +61,7 @@
     googleButton.hidden = isRecoveryRequest || isRecoveryUpdate;
     toggleButton.hidden = isRecoveryRequest || isRecoveryUpdate;
     resetButton.hidden = !isSignin;
-    toggleButton.textContent = isSignin ? "Noch kein Konto? Jetzt registrieren" : "Du hast schon ein Konto? Anmelden";
+    toggleButton.textContent = isSignin ? "Noch kein Konto? Konto erstellen" : "Schon registriert? Anmelden";
     setStatus("");
   }
 
