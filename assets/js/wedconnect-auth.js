@@ -127,9 +127,6 @@
         } else {
           setStatus("Fast geschafft: Öffne den Bestätigungslink, den Supabase an deine E-Mail-Adresse geschickt hat.", "success");
         }
-        window.setTimeout(() => {
-          if (dialog.open) dialog.close();
-        }, 1800);
       } else if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
