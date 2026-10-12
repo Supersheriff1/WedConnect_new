@@ -1,6 +1,6 @@
 # WedConnect · Design Bible
 
-**Version:** 2.2  
+**Version:** 2.3  
 **Stand:** 12. Oktober 2026  
 **Status:** eingefrorener, verbindlicher visueller Standard ab diesem Stand  
 **Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
@@ -126,6 +126,7 @@ Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltl
 - Layouts dürfen nicht auf eine einzelne Desktopbreite angewiesen sein. Übergänge zwischen Breakpoints sind genauso wichtig wie die kleinste und größte Ansicht.
 - Karten, Formulare und App-Views erhalten `min-width: 0`, wenn sie in Flex- oder Grid-Layouts liegen.
 - Horizontales Scrollen der gesamten Seite ist zu vermeiden. Horizontal scrollbare Streifen sind nur für gezielte Inhalte wie eine Portfolio-Galerie zulässig und müssen als solche erkennbar sein.
+- Die Inhaltsbereiche der Startseite und der Seite für Hochzeitspaare erhalten wie die Fotografen-Seite einen durchgehenden Außenrahmen mit 1-px-Rand, 20-px-Radius und `subtle`-Fläche. Die Abschnitte liegen darin auf einer gemeinsamen Fläche; Trennlinien laufen über die gesamte Innenbreite. Hero, Abschluss-CTA und Footer bleiben außerhalb des Rahmens.
 - Jeder öffentliche redaktionelle Abschnitt hat zwei Hauptelemente: einen typografisch zusammengehörigen Textblock mit Überschrift und Erklärung sowie eine passende Illustration. Eine dritte separate Textspalte wird vermieden.
 - Die Seite wiederholt nicht in jedem Abschnitt dasselbe Raster. Für einen sorgfältigen redaktionellen Rhythmus wechseln Bildposition und Bildgröße; Textbreite, Abstände, Bildformat und dezente Hintergrundflächen variieren passend zum jeweiligen Inhalt. Varianten wirken bewusst gewählt und nicht dekorativ zufällig.
 - Auf Desktop und Tablet können Bild und Text je nach Erzählfluss nebeneinander stehen und die Seite abwechselnd links oder rechts öffnen. Auf schmalen Mobilansichten steht der vollständige Textblock zuerst, danach die Illustration.
