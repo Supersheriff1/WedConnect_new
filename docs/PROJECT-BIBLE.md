@@ -209,10 +209,13 @@ Für die öffentliche Website gilt die aktuelle Design Bible `docs/DESIGN-BIBLE.
 - Die öffentlichen Seiten `index.html`, `fotografen.html` und `hochzeitspaare.html` sind statische HTML-Seiten.
 - Das Design von Startseite und Hochzeitspaare-Seite ist an den eingefrorenen Fotografen-Master angeglichen.
 - Die Texte auf der Startseite und der Seite für Hochzeitspaare sind frühe Entwürfe und nicht Teil des eingefrorenen Designstands.
-- Supabase Auth, Datenbanktabellen, Profil-Onboarding und Matching sind noch nicht angebunden.
+- Die Supabase-Auth-Oberfläche ist in den Profil-Dialogen für Hochzeitspaare und Fotografen eingebunden.
+- Die erste Datenbankmigration für private Profile und Rollen liegt unter `supabase/migrations`; sie muss noch im Projekt ausgeführt werden.
+- Google OAuth und Redirect-URLs sind im Supabase-Dashboard noch zu konfigurieren.
+- Profil-Onboarding und Matching sind noch nicht implementiert.
 
-### Nächster Umsetzungsschritt: Authentifizierung
+### Aktueller Auth-Schritt
 
-Die erste produktive Anbindung soll Supabase Auth mit E-Mail/Passwort und Google umfassen. Die Rollenwahl Hochzeitspaar oder Fotograf wird beim Registrierungsablauf getroffen und dauerhaft mit dem Konto verknüpft. Rollen- und Profildaten werden mit Row Level Security geschützt. Danach folgen rollenabhängige Profilformulare und die Matching-Funktionen.
+E-Mail/Passwort, E-Mail-Bestätigung, Passwortzurücksetzung und die Schaltfläche für Google sind mit Supabase Auth verbunden. Die Seite gibt die Rolle Hochzeitspaar oder Fotograf beim Registrieren vor. Ein Google-Konto erhält seine Rolle nach der Rückkehr über eine abgesicherte Einmal-Funktion. Die SQL-Migration muss vor Tests in Supabase ausgeführt werden. Google-Zugangsdaten und Redirect-URLs werden anschließend im Supabase-Dashboard konfiguriert.
 
-Die Browser-App verwendet ausschließlich den öffentlichen Supabase Publishable Key (früher anon key). Ein Service-Role-Key oder anderer geheimer Schlüssel darf nie in HTML, JavaScript oder im Browser gespeichert werden.
+Die Browser-App verwendet ausschließlich den öffentlichen Supabase Publishable Key. Ein Secret Key oder Datenbankpasswort darf nie in HTML, JavaScript oder im Browser gespeichert werden. Rollen- und Profildaten erhalten Row-Level-Security-Policies; die erste Migration erlaubt nur den eigenen privaten Profil-Datensatz.
