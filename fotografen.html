@@ -603,6 +603,13 @@
     .process-value,.faq-inner{margin-top:clamp(28px,3vw,38px);padding-top:clamp(28px,3vw,38px);border-top:1px solid var(--border)}
     .faq-inner .faq-list{max-width:none}
 
+  
+    /* Einheitliche Abstände und Trenner zwischen den vier Inhaltsblöcken. */
+    :root{--divider-space:clamp(28px,3vw,38px)}
+    .section#problem{padding-bottom:0}
+    .section.story-section.process-section{padding-top:0}
+    .process-value,.faq-inner{margin-top:var(--divider-space);padding-top:var(--divider-space);border-top:1px solid var(--border)}
+
   </style>
 </head>
 <body>
