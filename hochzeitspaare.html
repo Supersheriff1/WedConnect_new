@@ -112,7 +112,36 @@
       .faq-list details > p { padding-right: 24px; }
     }
 
-  </style>
+  /* Durchgehender Inhaltsrahmen nach dem Fotografen-Master */
+.public-content-frame {
+  width: min(var(--content), calc(100% - clamp(36px, 8vw, 96px)));
+  margin: clamp(38px, 5vw, 60px) auto;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 2%), transparent 50%), var(--subtle);
+}
+.public-content-frame > section {
+  margin: 0;
+  padding-block: clamp(52px, 7vw, 82px);
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+}
+.public-content-frame > section:first-child { border-top: 0; }
+.public-content-frame > section > .wrap {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-inline: clamp(24px, 4.5vw, 52px);
+}
+@media (max-width: 520px) {
+  .public-content-frame { width: calc(100% - 36px); margin-block: 34px; }
+  .public-content-frame > section { padding-block: 44px; }
+  .public-content-frame > section > .wrap { padding-inline: 24px; }
+}
+
+    </style>
 </head>
 <body>
   <header class="topbar">
@@ -143,6 +172,7 @@
       </div>
     </section>
 
+    <div class="public-content-frame">
     <section class="section" aria-labelledby="profile-title">
       <div class="wrap section-grid">
         <div class="section-heading"><p class="eyebrow">01 / EUER HOCHZEITSPROFIL</p><h2 id="profile-title">Erzählt, was euren Tag ausmacht.</h2></div>
@@ -188,6 +218,8 @@
         </div>
       </div>
     </section>
+
+    </div>
 
     <section class="closing" aria-labelledby="closing-title">
       <div class="wrap closing-panel">
