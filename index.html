@@ -110,7 +110,36 @@
       .faq-list details > p { padding-right: 24px; }
     }
 
-  </style>
+  /* Durchgehender Inhaltsrahmen nach dem Fotografen-Master */
+.public-content-frame {
+  width: min(var(--content), calc(100% - clamp(36px, 8vw, 96px)));
+  margin: clamp(38px, 5vw, 60px) auto;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 2%), transparent 50%), var(--subtle);
+}
+.public-content-frame > section {
+  margin: 0;
+  padding-block: clamp(52px, 7vw, 82px);
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+}
+.public-content-frame > section:first-child { border-top: 0; }
+.public-content-frame > section > .wrap {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-inline: clamp(24px, 4.5vw, 52px);
+}
+@media (max-width: 520px) {
+  .public-content-frame { width: calc(100% - 36px); margin-block: 34px; }
+  .public-content-frame > section { padding-block: 44px; }
+  .public-content-frame > section > .wrap { padding-inline: 24px; }
+}
+
+    </style>
 </head>
 <body>
   <header class="topbar">
@@ -155,6 +184,7 @@
       </div>
     </section>
 
+    <div class="public-content-frame">
     <section class="intro" id="idee" aria-labelledby="idee-title">
       <div class="wrap intro-grid">
         <div><p class="section-kicker">01 / DIE IDEE</p><h2 id="idee-title">Nicht irgendein Auftrag. Eine Zusammenarbeit, die passt.</h2></div>
@@ -204,6 +234,8 @@
         <figure class="editorial-art"><div class="art-frame"><img src="https://raw.githubusercontent.com/Supersheriff1/WedConnect_new/main/assets/illustrations/fotografen-galerie-rechte.webp" alt="Ein Hochzeitspaar und eine Fotografin betrachten gemeinsam eine fertige Bildergalerie am Laptop." loading="lazy"></div><figcaption class="art-caption"><span>Rechte gemeinsam klären</span><span>Illustration · Symbolbild</span></figcaption></figure>
       </div>
     </section>
+
+    </div>
 
     <section class="closing" aria-labelledby="closing-title">
       <div class="wrap closing-grid">
