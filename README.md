@@ -9,7 +9,9 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 
 ## Current repository state
 
-This repository is the clean starting point for WedConnect. The project and design bibles are the initial source of truth. No application demo or production implementation has been added yet. The design bible references an existing pairing HTML as a visual reference; that file is not part of this repository at this stage.
+The repository contains the public pages `index.html`, `hochzeitspaare.html`, and `fotografen.html`. The photographer page is the visual master; the homepage and couples page now follow its design system and outer content frame. Their copy is still an early draft and is not frozen.
+
+The public site is static HTML. Supabase authentication, user data, and the matching app are not connected yet. The next implementation milestone is Supabase Auth with email/password and Google, followed by secure role assignment for couples and photographers.
 
 ## Important product boundary
 
