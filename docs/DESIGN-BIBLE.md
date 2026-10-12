@@ -269,7 +269,7 @@ Der maßgebliche visuelle Master ist `fotografen.html` im Repository `Supersheri
 
 ## 10. Referenzstatus
 
-`fotografen.html` ist der freigegebene Designmaster für die öffentliche Website: dunkles Pairing-System, Montserrat, IBM Plex Mono für kurze Labels, Goldakzente, klare Karten, abwechslungsreiche redaktionelle Inhaltsabschnitte, in denen Textblock und passende Illustration ihre Position und Größe sinnvoll wechseln sowie die redaktionelle WedConnect-Illustrationsserie. Die öffentliche Startseite, die Seite für Hochzeitspaare und weitere öffentliche Informationsseiten richten sich nach diesem Stand. Das eingeloggte Dashboard und die App sind ausdrücklich ausgenommen und bleiben im derzeitigen Designsystem mit Manrope und funktionalen Portfoliofotos.
+`fotografen.html` ist der eingefrorene Designmaster für die öffentliche Website: dunkles Pairing-System, Manrope als Hauptschrift, IBM Plex Mono für kurze Labels, Goldakzente, klare Karten, abwechslungsreiche redaktionelle Inhaltsabschnitte und die redaktionelle WedConnect-Illustrationsserie. Die öffentliche Startseite, die Seite für Hochzeitspaare und weitere öffentliche Informationsseiten richten sich nach diesem Stand. Das eingeloggte Dashboard und die App sind ausdrücklich ausgenommen und behalten ihren eigenen Interaktions- und Bildstandard mit funktionalen Portfoliofotos.
 
 Die HTML-Datei ist visuell und funktional ein Prototyp. Echte Authentifizierung, persistente Profile, serverseitige Matches, produktive Nachrichten und Rechteverwaltung sind nicht implementiert. Die Responsive-Regeln dienen als verbindliche Gestaltungsleitlinie; neue Komponenten sind bei den relevanten schmalen, mittleren und breiten Viewports praktisch zu prüfen.
 
