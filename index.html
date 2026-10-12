@@ -293,7 +293,6 @@
     const signupDialog=document.querySelector('#signup-dialog');
     document.querySelectorAll('[data-signup]').forEach(button=>button.addEventListener('click',()=>{menu.classList.remove('open');menuButton.setAttribute('aria-expanded','false');signupDialog.showModal()}));
     document.querySelector('[data-auth-close]').addEventListener('click',()=>signupDialog.close());
-    signupDialog.addEventListener('click',event=>{if(event.target===signupDialog)signupDialog.close()});
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
