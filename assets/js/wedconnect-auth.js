@@ -79,10 +79,6 @@
   });
 
   closeButton.addEventListener("click", () => dialog.close());
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
-  });
-
   toggleButton.addEventListener("click", () => setMode(mode === "signup" ? "signin" : "signup"));
 
   resetButton.addEventListener("click", () => {
@@ -131,6 +127,9 @@
         } else {
           setStatus("Fast geschafft: Öffne den Bestätigungslink, den Supabase an deine E-Mail-Adresse geschickt hat.", "success");
         }
+        window.setTimeout(() => {
+          if (dialog.open) dialog.close();
+        }, 1800);
       } else if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
