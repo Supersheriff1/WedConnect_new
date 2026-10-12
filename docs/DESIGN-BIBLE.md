@@ -1,12 +1,12 @@
 # WedConnect · Design Bible
 
-**Version:** 2.1  
-**Stand:** 11. Oktober 2026  
-**Status:** verbindlicher visueller Standard ab diesem Stand  
+**Version:** 2.2  
+**Stand:** 12. Oktober 2026  
+**Status:** eingefrorener, verbindlicher visueller Standard ab diesem Stand  
 **Geltungsbereich:** öffentliche WedConnect-Website. Dashboard und eingeloggte App sind ausdrücklich ausgenommen.  
 **Designsystem:** Öffentlicher Website-Master · Dark Editorial · Gold · redaktionelle Illustrationen
 
-Diese Fassung legt die aktuelle „Für Fotografen“-Seite als verbindlichen Designmaster für die gesamte öffentliche WedConnect-Website fest. Alle weiteren öffentlichen Seiten übernehmen deren Farbwelt, Typografie, Layoutprinzipien, Komponenten, Ausrichtung, Abstände und Illustrationsstil. Inhalte und Illustrationen werden passend zur jeweiligen Seite gestaltet. Das eingeloggte Dashboard und die App sind von dieser Festlegung ausgenommen; ihr bestehender visueller Standard bleibt unverändert.
+Diese Fassung friert die aktuelle „Für Fotografen“-Seite als verbindlichen Designmaster für die gesamte öffentliche WedConnect-Website ein. Startseite und Hochzeitspaare-Seite übernehmen ihre Farbwelt, Typografie, Layoutprinzipien, Komponenten, Ausrichtung, Abstände und Illustrationsstil. Inhalte und Illustrationen bleiben passend zur jeweiligen Seite. Das eingeloggte Dashboard und die App sind ausgenommen; ihr bestehender visueller Standard bleibt unverändert.
 
 ## 1. Designziel und Markenerlebnis
 
@@ -83,22 +83,30 @@ Die öffentliche Marketing-Website folgt der Schriftwirkung des freigegebenen Sc
 
 | Oberfläche / Einsatz | Schriftfamilie | Gewicht |
 |---|---|---|
-| Öffentliche Website: Überschriften, UI, Fließtext, Navigation, Buttons und Formulare | **Montserrat** | 400 bis 800; Hero-Titel meist 700 bis 800 |
+| Öffentliche Website: Überschriften, UI, Fließtext, Navigation, Buttons und Formulare | **Manrope** | 400 bis 800; Hero-Titel 700 |
 | Dashboard und funktionale App-Oberflächen | **Manrope** | 400 bis 800; Titel meist 600 bis 800 |
 | Eyebrows, Nummerierungen, technische Kurzlabels und kompakte Statuscodes | **IBM Plex Mono** | 400 bis 600 |
 | Fallback | Arial, sans-serif | Systemfallback |
 
-Montserrat prägt die öffentliche Website und die großen, kräftigen Headlines im Referenzscreenshot. Manrope bleibt für funktionale Dashboard- und App-Flächen reserviert. IBM Plex Mono bleibt auf kurze Kennzeichnungen beschränkt. Libre Caslon Text ist kein Bestandteil der aktuellen Pairing-Website-Typografie.
+Manrope ist die verbindliche Schriftfamilie der öffentlichen Website und folgt dem eingefrorenen Stand der „Für Fotografen“-Seite. IBM Plex Mono bleibt auf kurze Kennzeichnungen beschränkt. Libre Caslon Text ist kein Bestandteil der aktuellen Pairing-Website-Typografie.
 
 ### Größen und Hierarchie
 
-- Desktop-Fließtext: in der Regel 16 bis 18 px.
-- Mobiler Fließtext: mindestens 16 px.
-- Website-Hero-Headline: ungefähr 48 bis 88 px auf großen Ansichten; mobil fließend passend zum Viewport.
-- Seitentitel und Abschnittstitel: responsiv und klar nachrangig zur Hero-Headline.
-- Buttons und wichtige Formulare auf Mobilgeräten: 16 px.
-- Metadaten: in der Regel mindestens 12 px. Rein dekorative Nummern dürfen kleiner sein, wenn sie keine notwendige Information tragen.
-- Zeilenhöhe für längere Texte: mindestens 1.55; kurze Überschriften kompakter.
+Die folgenden Werte bilden die gemeinsame Typografie der öffentlichen Seiten ab. Einzelne Seiten dürfen eigene Raster und Inhalte verwenden, halten aber dieselben Textrollen und Größen ein.
+
+| Rolle | Verbindlicher Maßstab |
+|---|---|
+| Hero-Titel, Desktop | `clamp(40.74px, 5.34vw, 69.84px)`, Gewicht 700, Zeilenhöhe 1.08 |
+| Hero-Titel, mobil | `clamp(40.74px, 10.67vw, 52.38px)`, Zeilenhöhe 1.08 |
+| Abschnittsüberschrift | `clamp(20.37px, 2.13vw, 26.19px)`, Gewicht 500, Zeilenhöhe 1.4 |
+| Abschluss-CTA-Überschrift | `clamp(24px, 2.7vw, 32px)`, Gewicht 500, Zeilenhöhe 1.2 |
+| Fließtext | `clamp(15.52px, 1.46vw, 17.46px)`, Zeilenhöhe 1.8 |
+| Grundgröße der Seite | 15.52px, Zeilenhöhe 1.65 |
+| Standard-Unterüberschrift | 18.43px, Gewicht 600 |
+| Titel in Schritt- und Infokarten | 15.52px, Gewicht 600, Zeilenhöhe 1.45 |
+| Navigation | Markenname 17.46px; Links 12.61px, Gewicht 600 |
+| Eyebrow und kurze Abschnittsmarker | 10.67px IBM Plex Mono, Gewicht 600, Zeilenhöhe 1.4 |
+| Primärer Button | Desktop 14.55px; Mobil 15.52px; Höhe 48px bzw. 50px |
 
 Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltlich bedeutender Teil in `accent-gold`. Die Hervorhebung strukturiert die Aussage und ist kein bloßer Effekt.
 
@@ -111,7 +119,7 @@ Die Hauptheadline kann zweifarbig sein: Haupttext in `text-primary`, ein inhaltl
 
 ## 4. Layout, Raster und Abstände
 
-- Zentrale Inhaltsfläche: maximal 1240 px einschließlich Innenabständen.
+- Zentrale Inhaltsfläche: maximal 1200 px einschließlich Innenabständen.
 - Seitenränder: fließend mit `clamp(18px, 4vw, 48px)` für allgemeine Seitencontainer.
 - Mobile App-Inhalt: mindestens 18 px Abstand zum Viewportrand.
 - Grid-Spalten verwenden `minmax(0, 1fr)`, damit Inhalte nicht über ihre Spalte hinausragen.

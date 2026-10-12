@@ -55,6 +55,61 @@
     .faq-heading>p,.closing-copy>p:not(.eyebrow),.faq-list details>p,.dialog p{font-size:clamp(15.52px,1.46vw,17.46px);line-height:1.8}
     .faq-list summary{font-size:15.52px}
 
+
+    /* WedConnect public design master v2.2, frozen from fotografen.html */
+    :root { --sans: "Manrope", Arial, sans-serif; }
+    body { font-family: var(--sans); font-size: 15.52px; line-height: 1.65; }
+    .topbar { background: rgb(37 36 43 / 92%); border-bottom: 1px solid rgb(81 78 89 / 70%); }
+    .nav { min-height: 76px; }
+    .brand { font-size: 17.46px; letter-spacing: -.04em; }
+    .nav-links { gap: clamp(18px, 3vw, 38px); }
+    .nav-links a:not(.button) { color: var(--muted); font-size: 12.61px; font-weight: 600; transition: color .18s ease; }
+    .nav-links a:not(.button):hover, .nav-links a:not(.button):focus-visible { color: var(--ink); }
+    .nav-cta { min-height: 48px; padding: 0 18px; font-size: 12.61px !important; }
+    .nav-links .nav-cta.button-primary,
+    .nav-links .nav-cta.button-primary:hover,
+    .nav-links .nav-cta.button-primary:focus-visible { color: var(--gold-ink); }
+    .eyebrow, .section-kicker { color: var(--gold); font: 600 10.67px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2, h3 { font-family: var(--sans); }
+    .hero h1 { color: var(--ink); font-size: clamp(40.74px, 5.34vw, 69.84px); font-weight: 700; line-height: 1.08; letter-spacing: -.045em; }
+    .intro h2, .editorial-copy h2, .steps-heading h2, .section-heading h2, .faq-heading h2 {
+      color: var(--ink); font-size: clamp(20.37px, 2.13vw, 26.19px); font-weight: 500; line-height: 1.4; letter-spacing: -.025em;
+    }
+    .closing h2 { color: var(--ink); font-size: clamp(24px, 2.7vw, 32px); font-weight: 500; line-height: 1.2; letter-spacing: -.025em; }
+    h3 { color: var(--ink); font-size: 18.43px; font-weight: 600; letter-spacing: -.02em; }
+    .role-card h3 { font-size: 18.43px; font-weight: 600; line-height: 1.4; }
+    .step-card h3, .detail-card h3 { font-size: 15.52px; font-weight: 600; line-height: 1.45; letter-spacing: -.02em; }
+    .hero-lead, .intro-copy p, .role-card p, .editorial-copy > p:not(.section-kicker),
+    .steps-heading > p:last-child, .step-card p, .closing-copy > p:not(.section-kicker),
+    .section-copy p, .detail-card p, .faq-heading > p:last-child, .faq-list details > p {
+      font-size: clamp(15.52px, 1.46vw, 17.46px); line-height: 1.8;
+    }
+    .role-link, .button { font-size: 14.55px; }
+    .button { min-height: 48px; padding: 0 22px; border-radius: 8px; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+    .button:hover { transform: translateY(-1px); }
+    .button-primary:hover { background: #e2c991; }
+    .hero-note, .notice p, .faq-list summary, .dialog p { font-size: 13px; line-height: 1.65; }
+    .faq-list summary { color: var(--ink); font-weight: 600; }
+    .footer { padding: 22px 0; border-top: 1px solid var(--border); background: #222127; }
+    .footer-inner { min-height: 0; color: var(--muted); font-size: 11.64px; }
+    .footer-links a { color: var(--muted); font-size: 11.64px; }
+    .footer small { color: var(--muted); font-size: 10.67px; }
+    @media (max-width: 720px) {
+      .nav { min-height: 68px; }
+      .nav-links { gap: 4px; padding: 18px; }
+      .nav-links.open { display: grid; flex-direction: initial; }
+      .nav-links a { padding: 12px 8px; }
+      .nav-links .nav-cta { width: 100%; margin-top: 8px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding-block: 20px; }
+    }
+    @media (max-width: 520px) {
+      .hero h1 { font-size: clamp(40.74px, 10.67vw, 52.38px); line-height: 1.08; }
+      .button, .actions .button { min-height: 50px; font-size: 15.52px; }
+      .actions .button { width: 100%; }
+      .faq-list summary { min-height: 62px; padding-right: 42px; font-size: 15.52px; }
+      .faq-list details > p { padding-right: 24px; }
+    }
+
   </style>
 </head>
 <body>
