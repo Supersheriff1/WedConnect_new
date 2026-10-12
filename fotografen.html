@@ -661,6 +661,64 @@
     .auth-status:empty { display: none; }
 
     </style>
+<style id="auth-dialog-design">
+    .auth-dialog {
+      width: min(460px, calc(100% - 32px));
+      max-width: 460px;
+      max-height: min(88vh, 780px);
+      margin: auto;
+      padding: clamp(24px, 5vw, 34px);
+      overflow-y: auto;
+      border: 1px solid rgb(213 182 122 / 30%);
+      border-radius: 18px;
+      background: var(--surface);
+      color: var(--body);
+      box-shadow: 0 24px 72px rgb(0 0 0 / 48%);
+    }
+    .auth-dialog::backdrop { background: rgb(12 12 15 / 78%); backdrop-filter: blur(5px); }
+    .auth-dialog[open] { animation: auth-dialog-in .18s ease-out; }
+    @keyframes auth-dialog-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .auth-dialog [hidden] { display: none !important; }
+    .auth-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 27px; }
+    .auth-dialog-brand { color: var(--ink); font-size: 17px; font-weight: 700; letter-spacing: -.045em; text-decoration: none; }
+    .auth-dialog-brand span { color: var(--gold); }
+    .auth-close { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--raised, #34323a); color: var(--muted); cursor: pointer; transition: color .18s ease, border-color .18s ease, background .18s ease; }
+    .auth-close:hover { border-color: var(--gold); background: var(--hover, #3c3943); color: var(--ink); }
+    .auth-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+    .auth-kicker { margin: 0 0 10px !important; color: var(--gold) !important; font: 500 10px/1.5 var(--mono, monospace) !important; letter-spacing: .13em; text-transform: uppercase; }
+    .auth-dialog h2 { margin: 0 0 9px !important; color: var(--ink); font-size: clamp(26px, 6vw, 30px) !important; font-weight: 700; line-height: 1.2; letter-spacing: -.045em; }
+    .auth-intro { max-width: 38ch; margin: 0 0 23px !important; color: var(--muted) !important; font-size: 14px !important; line-height: 1.65 !important; }
+    .auth-form { display: grid; gap: 16px; }
+    .auth-field { display: grid; gap: 8px; color: var(--body); font-size: 13px; font-weight: 600; }
+    .auth-field input { width: 100%; min-height: 52px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--canvas); color: var(--ink); font: 400 15px/1.4 var(--sans, Arial, sans-serif); transition: border-color .18s ease, box-shadow .18s ease; }
+    .auth-field input::placeholder { color: var(--muted); opacity: .78; }
+    .auth-field input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgb(213 182 122 / 15%); }
+    .auth-field input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .auth-dialog .auth-submit { width: 100%; min-height: 50px; margin: 4px 0 0; border-radius: 8px; font-size: 15px; }
+    .auth-divider { display: flex; align-items: center; gap: 14px; margin: 22px 0 17px; color: var(--muted); font: 500 10px/1 var(--mono, monospace); letter-spacing: .08em; }
+    .auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: var(--border); content: ""; }
+    .auth-dialog .auth-google { position: relative; width: 100%; min-height: 50px; margin: 0; padding: 12px 46px; border-radius: 8px; font-size: 14px; }
+    .auth-google svg { position: absolute; left: 16px; width: 20px; height: 20px; }
+    .auth-google span { text-align: center; }
+    .auth-status { margin: 16px 0 0 !important; padding: 0; color: var(--muted); font-size: 13px !important; line-height: 1.6 !important; }
+    .auth-status[data-state="success"], .auth-status[data-state="error"] { padding: 12px 14px; border: 1px solid; border-radius: 8px; }
+    .auth-status[data-state="success"] { border-color: rgb(164 197 168 / 40%); background: rgb(164 197 168 / 8%); color: #A4C5A8; }
+    .auth-status[data-state="error"] { border-color: rgb(227 160 154 / 42%); background: rgb(227 160 154 / 8%); color: #E3A09A; }
+    .auth-status:empty { display: none; }
+    .auth-text-button { display: block; width: 100%; min-height: 44px; margin: 13px 0 0; padding: 8px 4px; border: 0; background: transparent; color: var(--gold); font: 600 13px/1.5 var(--sans, Arial, sans-serif); text-align: center; cursor: pointer; }
+    .auth-text-button:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+    .auth-text-button:focus-visible, .auth-close:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    @media (max-width: 420px) {
+      .auth-dialog { width: calc(100% - 24px); padding: 23px 20px; }
+      .auth-dialog-head { margin-bottom: 22px; }
+      .auth-intro { font-size: 14px !important; }
+      .auth-field input { font-size: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .auth-dialog[open] { animation: none; }
+      .auth-close, .auth-field input { transition: none; }
+    }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -849,6 +907,13 @@
   <footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="/" aria-label="WedConnect – Startseite">Wed<span class="brand-mark">Connect</span></a><nav class="footer-links" aria-label="Footer"><a href="/">Startseite</a><a href="/hochzeitspaare.html">Für Hochzeitspaare</a><a href="#how-it-works">Ablauf</a><a href="#faq">FAQ</a></nav><small>© 2026 WedConnect · Im Aufbau</small></div></footer>
 
   <dialog class="dialog auth-dialog" id="signup-dialog" aria-labelledby="dialog-title">
+    <div class="auth-dialog-head">
+      <a class="auth-dialog-brand" href="/" aria-label="WedConnect Startseite">Wed<span>Connect</span></a>
+      <button class="auth-close" type="button" data-auth-close aria-label="Anmeldefenster schließen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <p class="auth-kicker">DEIN ZUGANG ZU WEDCONNECT</p>
     <h2 id="dialog-title">Konto erstellen</h2>
     <p class="auth-intro" id="auth-intro">Erstelle zuerst dein Konto. Deine Rolle legst du später im Profil fest.</p>
     <form class="auth-form" id="auth-form">
@@ -858,14 +923,21 @@
       <label class="auth-field" id="auth-password-field" for="auth-password">Passwort
         <input id="auth-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
       </label>
-      <button class="button button-primary" type="submit" data-auth-submit>Konto erstellen</button>
+      <button class="button button-primary auth-submit" type="submit" data-auth-submit>Konto erstellen</button>
     </form>
     <div class="auth-divider" aria-hidden="true"><span>ODER</span></div>
-    <button class="button button-secondary" type="button" data-google-auth>Mit Google fortfahren</button>
+    <button class="button button-secondary auth-google" type="button" data-google-auth>
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11c-.5 2.4-1.9 4.4-4 5.8v5h6.5c3.8-3.5 6.1-8.7 6.1-14.5z"/>
+        <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.5-5c-1.8 1.2-4.1 2-7 2-5.3 0-9.8-3.6-11.4-8.4l-6.7 5.2C9.3 39.5 16.1 44 24 44z"/>
+        <path fill="#FBBC05" d="M12.6 27.7a12 12 0 0 1 0-7.4l-6.7-5.2a20 20 0 0 0 0 17.8l6.7-5.2z"/>
+        <path fill="#EA4335" d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.8 29.5 4 24 4 16.1 4 9.3 8.5 5.9 15.1l6.7 5.2c1.6-4.8 6.1-8.4 11.4-8.4z"/>
+      </svg>
+      <span>Mit Google fortfahren</span>
+    </button>
+    <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
     <button class="auth-text-button" type="button" data-auth-toggle>Du hast schon ein Konto? Anmelden</button>
     <button class="auth-text-button" type="button" data-password-reset hidden>Passwort vergessen?</button>
-    <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
-    <button class="button button-secondary" type="button" data-auth-close>Schließen</button>
   </dialog>
   <script>
     const menuButton = document.querySelector('.menu-toggle');
