@@ -226,7 +226,7 @@
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Hochformat 9:16</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Hochformat 4:5</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
@@ -358,8 +358,8 @@
     const image = new Image();
     image.onload = () => {
       cropState = { image, sourceUrl, onApply, rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
-      cropCanvas.width = 900;
-      cropCanvas.height = 1600;
+      cropCanvas.width = 960;
+      cropCanvas.height = 1200;
       cropZoom.value = "1";
       drawCrop(cropCanvas, cropState);
       cropDialog.showModal();
@@ -387,8 +387,8 @@
         image.src = sourceUrl;
       });
       const canvas = document.createElement("canvas");
-      canvas.width = 900;
-      canvas.height = 1600;
+      canvas.width = 960;
+      canvas.height = 1200;
       const context = canvas.getContext("2d");
       context.fillStyle = "#25242b";
       context.fillRect(0, 0, canvas.width, canvas.height);
