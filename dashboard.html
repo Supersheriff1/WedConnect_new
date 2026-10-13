@@ -86,10 +86,26 @@
       .photo-picker{margin:14px 0 18px}
       .photo-picker-button{width:100%;min-height:50px}
       .crop-canvas-wrap{max-height:none;display:grid;justify-items:center}
-      .crop-canvas-wrap #crop-canvas{width:auto;max-width:100%;height:auto;max-height:42dvh}
+      .crop-canvas-wrap{width:min(100%,33.6dvh,240px);aspect-ratio:4/5;max-height:none;display:grid;justify-items:center;margin-inline:auto}.crop-canvas-wrap #crop-canvas{width:100%;height:100%;max-width:100%;max-height:none;display:block}
     }
 
-  </style>
+  
+    .photo-upload-intro{margin:0 0 8px!important;color:var(--body)!important;font-size:14px!important;line-height:1.5}
+    .photo-upload-detail{margin:2px 0 8px!important;color:var(--muted)!important;font-size:11px!important;line-height:1.45;opacity:.78}
+    .photo-delete-button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .portfolio-photo-actions .photo-delete-button{width:44px!important;min-width:44px;height:42px;justify-self:end;display:grid;place-items:center;padding:8px!important}
+    .delete-photo-dialog{width:min(420px,calc(100% - 28px));max-width:none;max-height:calc(100dvh - 28px);padding:0;overflow:auto;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--body);box-shadow:0 24px 80px #09090bcc}
+    .delete-photo-dialog::backdrop{background:rgb(12 12 15 / 78%);backdrop-filter:blur(5px)}
+    .delete-photo-content{padding:clamp(20px,6vw,28px)}
+    .delete-photo-icon{width:42px;height:42px;display:grid;place-items:center;margin-bottom:16px;border:1px solid rgb(213 182 122 / 32%);border-radius:10px;background:rgb(213 182 122 / 8%);color:var(--gold)}
+    .delete-photo-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .delete-photo-content h2{margin:0 0 8px;color:var(--ink);font-size:21px;line-height:1.25}
+    .delete-photo-content p{margin:0;color:var(--muted);font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+    .delete-photo-actions{display:flex;gap:10px;margin-top:22px}
+    .delete-photo-actions .button{flex:1;min-height:48px;padding:10px 12px;font-size:13px}
+    .delete-photo-confirm{background:#b65d5d!important;border-color:#b65d5d!important;color:#fff!important}
+    @media(max-width:560px){.delete-photo-dialog{width:calc(100% - 32px);border-radius:12px}.delete-photo-actions{gap:8px}.delete-photo-actions .button{min-width:0}}
+</style>
 </head>
 <body>
   <div id="loading" class="loading" role="status" aria-live="polite"><div class="loading-card"><div class="loading-brand"><span class="loading-wordmark" aria-hidden="true">Wed<span>Connect</span></span><span class="loading-connection" aria-hidden="true"><i></i><b></b><i></i></span></div><p>Dein Bereich wird vorbereitet …</p></div></div>
@@ -115,11 +131,12 @@
       </form>
     </div>
   </main>
-<dialog id="photo-viewer" class="photo-viewer" aria-label="Foto in Originalansicht"><button id="photo-viewer-close" class="button button-secondary photo-viewer-close" type="button" aria-label="Foto schließen">Schließen</button><img id="photo-viewer-image" alt=""></dialog>
+<dialog id="delete-photo-dialog" class="delete-photo-dialog" aria-labelledby="delete-photo-title"><form method="dialog" class="delete-photo-content"><span class="delete-photo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg></span><h2 id="delete-photo-title">Foto löschen?</h2><p id="delete-photo-message">Möchtest du dieses Foto wirklich löschen?</p><div class="delete-photo-actions"><button class="button button-secondary" type="submit" value="cancel">Abbrechen</button><button class="button button-primary delete-photo-confirm" type="submit" value="confirm">Foto löschen</button></div></form></dialog>
+  <dialog id="photo-viewer" class="photo-viewer" aria-label="Foto in Originalansicht"><button id="photo-viewer-close" class="button button-secondary photo-viewer-close" type="button" aria-label="Foto schließen">Schließen</button><img id="photo-viewer-image" alt=""></dialog>
     <dialog id="crop-dialog" class="crop-dialog" aria-labelledby="crop-title">
     <h2 id="crop-title">Foto zuschneiden und ausrichten</h2>
     <p>Verschiebe und drehe das Foto, bis der sichtbare Hochformat-Ausschnitt passt.</p>
-    <div class="crop-canvas-wrap"><canvas id="crop-canvas" width="1200" height="800" aria-label="Fotoausschnitt"></canvas></div>
+    <div class="crop-canvas-wrap"><canvas id="crop-canvas" width="960" height="1200" aria-label="Fotoausschnitt"></canvas></div>
     <div class="crop-controls">
       <button class="button button-secondary" type="button" id="crop-rotate">90° drehen</button>
       <div class="crop-zoom-control"><label for="crop-zoom">Zoom</label><input id="crop-zoom" type="range" min="0.5" max="3" step="0.01" value="1"></div>
@@ -171,7 +188,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-mobile-crop-review-v9"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-mobile-photo-ui-v10"></script>
 </body>
 </html>
 
