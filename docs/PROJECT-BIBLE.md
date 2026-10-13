@@ -1,7 +1,7 @@
 # WedConnect · Project Bible
 
-**Version:** 2.1  
-**Stand:** 11. Oktober 2026  
+**Version:** 2.2  
+**Stand:** 13. Oktober 2026  
 
 ## 1. Ziel des Projekts
 
@@ -29,10 +29,9 @@ Die Seite „Für Fotografen“ ist der verbindliche Designmaster für die öffe
 
 ## 3. Registrierung und Konten
 
-Bei der Registrierung wählt die Person zuerst eine Rolle:
+Registrierung und Anmeldung sind für alle Personen identisch. Es wird dabei keine Rolle abgefragt.
 
-- Hochzeitspaar
-- Fotograf:in
+Nach erfolgreicher Anmeldung führt WedConnect alle Nutzer:innen ins Dashboard. Erst beim Anlegen des Profils wählen sie, ob sie ein Hochzeitsprofil oder ein Fotograf:innenprofil erstellen. Daraus ergibt sich das rollenabhängige Onboarding.
 
 Vorgesehene Anmeldewege:
 
@@ -43,9 +42,11 @@ Vorgesehene Anmeldewege:
 
 Dazu kommen Konto- und Profilverwaltung, Abmeldung, Passwort- beziehungsweise Kontowiederherstellung, Datenschutzinformationen und Kontolöschung.
 
-**Umsetzung:** Authentifizierungsdienst mit verifizierten Konten, sicherer Sitzungsverwaltung und rollenabhängigem Onboarding. Ein Konto muss einer Rolle zugeordnet sein. Ein Rollenwechsel im Demo-Modus ist keine produktive Kontofunktion.
+**Umsetzung:** Authentifizierungsdienst mit verifizierten Konten und sicherer Sitzungsverwaltung. Rolle und Profiltyp werden erst im Dashboard bei der Profilanlage festgelegt.
 
 ## 4. Onboarding und Profile
+
+Nach der Anmeldung wählen Nutzer:innen im Dashboard ihren Profiltyp und legen das passende Profil an. Entdecken, Matches, Nachrichten und Matching-Aktionen bleiben gesperrt, bis alle erforderlichen Profilangaben vollständig sind. Der Profilstatus und die Freigabe müssen serverseitig geprüft werden; eine reine UI-Sperre reicht für den produktiven Betrieb nicht aus.
 
 ### Hochzeitsprofil
 

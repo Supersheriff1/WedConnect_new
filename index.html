@@ -160,7 +160,6 @@
     .auth-status:empty{display:none}
   </style>
 <style id="auth-dialog-design">
-    .auth-dialog {
       width: min(460px, calc(100% - 32px));
       max-width: 460px;
       max-height: min(88vh, 780px);
@@ -216,7 +215,32 @@
       .auth-dialog[open] { animation: none; }
       .auth-close, .auth-field input { transition: none; }
     }
-  </style>
+  
+    .auth-dialog {
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      padding: 20px 28px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .auth-dialog::-webkit-scrollbar { display: none; }
+    .auth-dialog-head { margin-bottom: 12px; }
+    .auth-intro { margin-bottom: 11px !important; }
+    .auth-form { gap: 9px; }
+    .auth-field { gap: 6px; }
+    .auth-field input { min-height: 44px; }
+    .auth-divider { margin: 11px 0 8px; }
+    .auth-text-button { min-height: 38px; margin-top: 5px; }
+    .auth-status { margin-top: 8px !important; }
+    @media (max-height: 760px) {
+      .auth-dialog { padding: 16px 24px; }
+      .auth-dialog-head { margin-bottom: 8px; }
+      .auth-intro { margin-bottom: 8px !important; }
+      .auth-divider { margin: 8px 0 6px; }
+      .auth-status[data-state="success"], .auth-status[data-state="error"] { padding: 8px 10px; }
+      .auth-text-button { min-height: 34px; margin-top: 3px; }
+    }
+</style>
 </head>
 <body>
   <header class="topbar">
@@ -368,6 +392,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-auth.js?v=20261012-google"></script>
+  <script src="/assets/js/wedconnect-auth.js?v=20261013-dashboard"></script>
 </body>
 </html>

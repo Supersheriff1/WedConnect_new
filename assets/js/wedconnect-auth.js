@@ -15,11 +15,13 @@
   const closeButton = document.querySelector("[data-auth-close]");
   const title = document.querySelector("#dialog-title");
   const emailInput = document.querySelector("#auth-email");
+  const authIntro = document.querySelector("#auth-intro");
+  const authReturn = new URLSearchParams(window.location.search).get("auth");
+  const appBaseUrl = new URL(".", window.location.href);
   let mode = "signup";
   let busy = false;
-  const authReturn = new URLSearchParams(window.location.search).get("auth");
   let pendingGoogleReturn = authReturn === "google";
-  const googleModeStorageKey = "wedconnect-google-auth-mode";
+  let redirecting = false;
 
   if (!config || !config.url || !config.publishableKey || !createClient) {
     document.querySelectorAll("[data-signup]").forEach((button) => button.addEventListener("click", () => {
@@ -44,15 +46,15 @@
     const isRecoveryUpdate = mode === "recovery-update";
 
     title.textContent = isSignup ? "Konto erstellen" : isSignin ? "Anmelden" : isRecoveryRequest ? "Passwort zurücksetzen" : "Neues Passwort festlegen";
-    document.querySelector("#auth-intro").textContent = isSignup
-      ? "Erstelle zuerst dein Konto. Deine Rolle legst du später im Profil fest."
+    authIntro.textContent = isSignup
+      ? "Erstelle dein WedConnect-Konto. Nach der Anmeldung richtest du dein Profil ein."
       : isSignin ? "Melde dich mit deiner E-Mail-Adresse oder Google an."
       : isRecoveryRequest ? "Wir senden dir einen Link zum Zurücksetzen deines Passworts."
       : "Lege ein neues Passwort für dein Konto fest.";
     passwordField.hidden = isRecoveryRequest;
     passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
     passwordInput.required = !isRecoveryRequest;
-    passwordInput.minLength = isRecoveryUpdate ? 8 : 8;
+    passwordInput.minLength = 8;
     passwordInput.value = "";
     if (isRecoveryRequest) passwordInput.required = false;
     if (isRecoveryUpdate) {
@@ -69,25 +71,9 @@
   }
 
   function redirectUrl(state) {
-    const url = new URL(window.location.href);
+    const url = new URL("index.html", appBaseUrl);
     url.searchParams.set("auth", state);
     return url.toString();
-  }
-
-  function savedGoogleMode() {
-    try {
-      return window.sessionStorage.getItem(googleModeStorageKey) === "signin" ? "signin" : "signup";
-    } catch {
-      return "signup";
-    }
-  }
-
-  function clearGoogleMode() {
-    try {
-      window.sessionStorage.removeItem(googleModeStorageKey);
-    } catch {
-      // Session storage may be unavailable in restricted browser contexts.
-    }
   }
 
   function clearAuthReturn() {
@@ -101,6 +87,12 @@
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     return query.get("error_description") || hash.get("error_description")
       || query.get("error") || hash.get("error");
+  }
+
+  function goToDashboard() {
+    if (redirecting) return;
+    redirecting = true;
+    window.location.assign(new URL("dashboard.html", appBaseUrl).toString());
   }
 
   document.querySelectorAll("[data-signup]").forEach((button) => {
@@ -122,14 +114,12 @@
     googleButton.disabled = true;
     setStatus("Weiterleitung zu Google …");
     try {
-      window.sessionStorage.setItem(googleModeStorageKey, mode);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: redirectUrl("google") }
       });
       if (error) throw error;
     } catch (error) {
-      clearGoogleMode();
       setStatus(error && error.message ? error.message : "Die Anmeldung mit Google ist gerade nicht verfügbar.", "error");
       googleButton.disabled = false;
     }
@@ -151,20 +141,18 @@
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: redirectUrl("confirmed")
-          }
+          options: { emailRedirectTo: redirectUrl("confirmed") }
         });
         if (error) throw error;
         if (data.session) {
-          setStatus("Konto erstellt. Dein Profilbereich folgt im nächsten Entwicklungsschritt.", "success");
+          goToDashboard();
         } else {
-          setStatus("Fast geschafft: Öffne den Bestätigungslink, den Supabase an deine E-Mail-Adresse geschickt hat.", "success");
+          setStatus("Fast geschafft: Öffne den Bestätigungslink, den Supabase an deine E-Mail-Adresse geschickt hat. Danach kannst du dich anmelden.", "success");
         }
       } else if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        setStatus("Anmeldung erfolgreich. Dein Profilbereich folgt im nächsten Entwicklungsschritt.", "success");
+        goToDashboard();
       } else if (mode === "recovery-request") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: redirectUrl("password-reset")
@@ -175,7 +163,7 @@
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
         setMode("signin");
-        setStatus("Dein Passwort wurde geändert.", "success");
+        setStatus("Dein Passwort wurde geändert.");
       }
     } catch (error) {
       const message = error && error.message ? error.message : "Das hat gerade nicht funktioniert. Bitte versuche es erneut.";
@@ -196,11 +184,8 @@
     }
     if (pendingGoogleReturn && (event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
       pendingGoogleReturn = false;
-      setMode(savedGoogleMode());
-      clearGoogleMode();
-      setStatus("Google-Anmeldung erfolgreich. Dein Profilbereich folgt im nächsten Entwicklungsschritt.", "success");
-      if (!dialog.open) dialog.showModal();
       clearAuthReturn();
+      goToDashboard();
     }
   });
 
@@ -214,16 +199,29 @@
     setMode("recovery-update");
     dialog.showModal();
   } else if (authReturn === "google") {
-    setMode(savedGoogleMode());
     dialog.showModal();
     const oauthError = googleReturnError();
     if (oauthError) {
       pendingGoogleReturn = false;
-      clearGoogleMode();
       setStatus(`Google-Anmeldung fehlgeschlagen: ${oauthError}`, "error");
       clearAuthReturn();
     } else {
       setStatus("Google-Anmeldung wird abgeschlossen …");
+      supabase.auth.getSession().then(({ data, error }) => {
+        if (error) {
+          pendingGoogleReturn = false;
+          setStatus("Google-Anmeldung konnte nicht abgeschlossen werden. Bitte melde dich erneut an.", "error");
+          return;
+        }
+        if (data.session) {
+          pendingGoogleReturn = false;
+          clearAuthReturn();
+          goToDashboard();
+        }
+      }).catch(() => {
+        pendingGoogleReturn = false;
+        setStatus("Google-Anmeldung konnte nicht abgeschlossen werden. Bitte melde dich erneut an.", "error");
+      });
     }
   } else if (authReturn === "signup") {
     setMode("signup");
