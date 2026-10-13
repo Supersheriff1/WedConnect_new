@@ -45,6 +45,9 @@ alter table public.couple_profiles enable row level security;
 alter table public.photographer_profiles enable row level security;
 alter table public.profile_photos enable row level security;
 
+revoke all on table public.couple_profiles, public.photographer_profiles, public.profile_photos from anon, authenticated;
+grant select, insert, update, delete on table public.couple_profiles, public.photographer_profiles, public.profile_photos to authenticated;
+
 drop policy if exists "Read own or complete couple profiles" on public.couple_profiles;
 create policy "Read own or complete couple profiles"
   on public.couple_profiles for select to authenticated
