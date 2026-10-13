@@ -139,7 +139,15 @@
     @media(max-width:560px){.photo-placement-select{min-height:42px;font-size:12px}.profile-review-photos{gap:18px}}
     .portfolio-photo-card.is-gallery-only img{aspect-ratio:auto!important;object-fit:contain!important;background:transparent}
     @media(max-width:560px){.portfolio-photo-card.is-gallery-only.is-mobile-main img{width:100%;height:auto;max-height:42dvh;aspect-ratio:auto!important;object-fit:contain!important;background:transparent}}
-</style>
+
+    .portfolio-photo-actions .photo-highlight-button{color:var(--muted)}
+    .portfolio-photo-actions .photo-highlight-button.is-highlight{border-color:rgb(213 182 122 / 65%);background:rgb(213 182 122 / 14%);color:var(--gold)}
+    .photo-highlight-button svg{width:18px;height:18px;fill:currentColor;stroke:currentColor;stroke-width:.5;stroke-linejoin:round}
+    .profile-photo-gallery .photo-preview{position:relative}
+    .photo-highlight-badge{position:absolute;z-index:1;top:9px;right:9px;width:30px;height:30px;display:grid!important;place-items:center;margin:0!important;border:1px solid rgb(213 182 122 / 70%);border-radius:50%;background:rgb(37 36 43 / 88%);color:var(--gold)}
+    .photo-highlight-badge svg{width:16px;height:16px;fill:currentColor}
+    @media(max-width:560px){.portfolio-photo-actions .button{width:42px!important;min-width:42px}}
+  </style>
 </head>
 <body>
   <div id="loading" class="loading" role="status" aria-live="polite"><div class="loading-card"><div class="loading-brand"><span class="loading-wordmark" aria-hidden="true">Wed<span>Connect</span></span><span class="loading-connection" aria-hidden="true"><i></i><b></b><i></i></span></div><p>Dein Bereich wird vorbereitet …</p></div></div>
@@ -222,7 +230,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photo-purpose-options-v24"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-highlight-star-v25"></script>
 </body>
 </html>
 
