@@ -95,7 +95,7 @@
 
     function navItem(label, icon, active = false, disabled = false) {
       return '<button class="nav-link' + (active ? ' active' : '') + '" type="button" ' +
-        (active ? 'aria-current="page"' : disabled ? 'aria-disabled="true" data-future' : 'data-future') +
+        (active ? 'aria-current="page"' : disabled ? 'disabled aria-disabled="true"' : '') +
         '>' + icons[icon] + '<span>' + label + '</span>' + (disabled ? '<span class="nav-soon">Demnächst</span>' : '') + '</button>';
     }
 
@@ -147,9 +147,6 @@
         '<article class="feature-card"><span class="feature-icon">' + icons[item[1]] + '</span><h3>' + item[2] + '</h3><p>' + item[3] + '</p><span class="feature-status">' + item[4] + '</span></article>'
       ).join("");
 
-      document.querySelectorAll("[data-future]").forEach((button) => button.addEventListener("click", () => {
-        showNotice("Dieser Bereich wird ergänzt, sobald das Profil-Onboarding und die passenden Daten verfügbar sind.");
-      }));
       document.querySelector("#profile-action").addEventListener("click", () => {
         showNotice("Dein Konto und deine Rolle sind gespeichert. Das rollenabhängige Profil-Onboarding ist der nächste Umsetzungsschritt.");
       });
