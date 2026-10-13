@@ -42,12 +42,6 @@
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : '') + '</button>';
   }
 
-  function featureCard(icon, title, description, status) {
-    return '<article class="feature-card"><span class="feature-icon">' + icons[icon] +
-      '</span><h3>' + title + '</h3><p>' + description +
-      '</p><span class="feature-status">' + status + '</span></article>';
-  }
-
   function setupRole(role, user) {
     currentRole = role === "couple" || role === "photographer" ? role : "";
     currentUser = user;
@@ -62,31 +56,16 @@
     document.querySelector("#avatar").textContent = (shortName || user.email || "W").slice(0, 1).toUpperCase();
     document.querySelector("#role-eyebrow").textContent = couple ? "Bereich für Hochzeitspaare" : photographer ? "Bereich für Fotograf:innen" : "Dein WedConnect-Konto";
     document.querySelector("#page-title").textContent = shortName ? "Willkommen, " + shortName : "Willkommen bei WedConnect";
-    document.querySelector("#page-lead").textContent = couple
-      ? "Dein nächster Schritt ist euer Hochzeitsprofil. Erst wenn es vollständig ist, kannst du passende Fotograf:innen entdecken."
-      : photographer
-        ? "Dein nächster Schritt ist dein Fotograf:innenprofil. Erst wenn es vollständig ist, kannst du passende Hochzeiten entdecken."
-        : "Dein Konto ist bereit. Richte jetzt dein persönliches Profil ein. Danach schaltest du die passenden Bereiche frei.";
-    document.querySelector("#hero-title").textContent = couple ? "Erzählt uns von eurer Hochzeit"
-      : photographer ? "Zeig, wie du Hochzeiten siehst" : "Womit möchtest du starten?";
-    document.querySelector("#hero-copy").textContent = couple
-      ? "Mit Datum, Ort, Ablauf und euren Bildwünschen können Fotograf:innen einschätzen, ob eure Hochzeit zu ihnen passt."
-      : photographer
-        ? "Mit Region, Erfahrung, Stil und deinem Portfolio können Paare erkennen, ob deine Arbeit zu ihrer Hochzeit passt."
-        : "Wähle im nächsten Schritt, ob du ein Hochzeitsprofil oder ein Fotograf:innenprofil anlegen möchtest.";
-    document.querySelector("#next-title").textContent = couple ? "Erstelle dein Hochzeitsprofil"
-      : photographer ? "Erstelle dein Fotograf:innenprofil" : "Lege dein Profil an";
+    document.querySelector("#next-title").textContent = couple ? "Hochzeitsprofil vervollständigen"
+      : photographer ? "Fotograf:innenprofil vervollständigen" : "Profil anlegen";
     document.querySelector("#next-copy").textContent = couple
-      ? "Dein Profil ist noch nicht vollständig. Ergänze später Datum, Ort, Ablauf und Bildwünsche, bevor du mit dem Matching beginnst."
+      ? "Datum, Ort und Bildwünsche"
       : photographer
-        ? "Dein Profil ist noch nicht vollständig. Ergänze später Region, Erfahrung, Stil, Portfolio und Verfügbarkeit, bevor du mit dem Matching beginnst."
-        : "Wähle zuerst deinen Profiltyp. Du vervollständigst dein Profil, bevor Entdecken, Matches und Nachrichten freigeschaltet werden.";
-    document.querySelector("#next-status").textContent = currentRole ? "Entdecken und Matching bleiben bis zum vollständigen Profil gesperrt." : "Wähle jetzt deinen Profiltyp.";
-    document.querySelector("#profile-status").textContent = currentRole ? "Profil · Noch unvollständig" : "Profil · Noch nicht angelegt";
-    document.querySelector("#profile-action").textContent = currentRole ? "Profil fortsetzen" : "Profil anlegen";
-    document.querySelector("#account-copy").textContent = user.email
-      ? "Angemeldet als " + user.email + ". Deine Sitzung wird über Supabase geschützt."
-      : "Du bist angemeldet. Deine Sitzung wird über Supabase geschützt.";
+        ? "Region, Portfolio und Verfügbarkeit"
+        : "Wähle zuerst deinen Profiltyp.";
+    document.querySelector("#profile-status").textContent = currentRole ? "Profil · Noch offen" : "Profil · Noch nicht angelegt";
+    document.querySelector("#profile-action").textContent = currentRole ? "Profil-Onboarding folgt" : "Profil anlegen";
+    document.querySelector("#account-copy").textContent = user.email ? "Angemeldet als " + user.email : "Angemeldet";
 
     const items = couple
       ? [
@@ -119,9 +98,6 @@
       navItem("Entdecken","discover",false,true) +
       navItem("Matches","matches",false,true) +
       navItem("Nachrichten","messages",false,true);
-    document.querySelector("#feature-grid").innerHTML = items.map((item) =>
-      featureCard(item[1],item[2],item[3],item[4])
-    ).join("");
   }
 
   function openProfileSetup() {
@@ -133,7 +109,7 @@
       profileSelect.focus();
       return;
     }
-    showNotice("Dein Profil ist noch nicht vollständig. Vervollständige die Angaben, bevor Entdecken und Matching freigeschaltet werden.");
+    showNotice("Das Profil-Onboarding folgt als nächster Schritt.");
   }
 
   document.querySelector("#profile-action").addEventListener("click", openProfileSetup);
@@ -160,7 +136,7 @@
       if (role !== "couple" && role !== "photographer") throw new Error("Dein Profiltyp konnte nicht bestätigt werden.");
       profileDialog.close();
       setupRole(role, currentUser);
-      showNotice("Dein Profiltyp ist gespeichert. Das Profil bleibt unvollständig, bis du die erforderlichen Angaben ergänzt. Entdecken und Matching bleiben bis dahin gesperrt.");
+      showNotice("Profiltyp gespeichert.");
     } catch (error) {
       profileDialogStatus.textContent = error && error.message
         ? error.message
