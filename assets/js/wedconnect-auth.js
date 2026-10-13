@@ -22,6 +22,7 @@
   let busy = false;
   let pendingGoogleReturn = authReturn === "google";
   let googleAuthInProgress = false;
+  let googleReturnTimer = null;
   let redirecting = false;
 
   if (!config || !config.url || !config.publishableKey || !createClient) {
@@ -99,6 +100,10 @@
   function finishGoogleReturn(session) {
     if (!pendingGoogleReturn || !session || redirecting) return;
     pendingGoogleReturn = false;
+    if (googleReturnTimer) {
+      window.clearTimeout(googleReturnTimer);
+      googleReturnTimer = null;
+    }
     clearAuthReturn();
     goToDashboard();
   }
@@ -217,21 +222,19 @@
       clearAuthReturn();
     } else {
       setStatus("Google-Anmeldung wird abgeschlossen …");
+      googleReturnTimer = window.setTimeout(() => {
+        if (!pendingGoogleReturn || redirecting) return;
+        pendingGoogleReturn = false;
+        setStatus("Die Anmeldung dauert länger als erwartet. Bitte versuche es erneut.", "error");
+      }, 15000);
       supabase.auth.getSession().then(({ data, error }) => {
         if (error) {
-          pendingGoogleReturn = false;
-          setStatus("Google-Anmeldung konnte nicht abgeschlossen werden. Bitte melde dich erneut an.", "error");
+          setStatus("Google-Anmeldung wird noch abgeschlossen …");
           return;
         }
-        if (data.session) {
-          finishGoogleReturn(data.session);
-        } else {
-          pendingGoogleReturn = false;
-          setStatus("Google-Anmeldung wurde nicht abgeschlossen. Bitte versuche es erneut.", "error");
-        }
+        if (data.session) finishGoogleReturn(data.session);
       }).catch(() => {
-        pendingGoogleReturn = false;
-        setStatus("Google-Anmeldung konnte nicht abgeschlossen werden. Bitte melde dich erneut an.", "error");
+        setStatus("Google-Anmeldung wird noch abgeschlossen …");
       });
     }
   } else if (authReturn === "signup") {
