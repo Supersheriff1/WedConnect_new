@@ -131,6 +131,12 @@
     .profile-photo-gallery .photo-preview img{width:100%;height:auto;max-height:none;aspect-ratio:auto!important;display:block;object-fit:contain!important;background:transparent;border-radius:0}
     @media(max-width:700px){.profile-photo-gallery.photo-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
     @media(max-width:420px){.profile-photo-gallery.photo-preview-grid{grid-template-columns:1fr;gap:12px}}
+    .photo-placement-select{width:100%;min-height:40px;margin-top:9px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--raised);color:var(--body);font:500 12px/1.4 var(--sans)}
+    .photo-placement-select:focus{outline:2px solid var(--gold);outline-offset:2px}
+    .profile-review-photos{display:grid;gap:24px;margin-bottom:22px}
+    .profile-review-photos h3{margin:0 0 10px;color:var(--ink);font-size:15px}
+    .profile-review-photos .profile-photo-gallery.photo-preview-grid{margin:0}
+    @media(max-width:560px){.photo-placement-select{min-height:42px;font-size:12px}.profile-review-photos{gap:18px}}
 </style>
 </head>
 <body>
@@ -214,7 +220,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-profile-gallery-full-v23"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photo-purpose-options-v24"></script>
 </body>
 </html>
 
