@@ -211,10 +211,11 @@
         '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
-    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p>Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen. JPG, PNG oder WebP · maximal 2 MB pro Bild. Die Profilkarte zeigt das Foto im Hochformat (4:5). Im Zuschnitt siehst du genau, welcher Bildausschnitt später angezeigt wird.</p>' +
+    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p class="photo-upload-intro">Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen.</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Hochformat 4:5</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
@@ -493,7 +494,10 @@
       const removeButton = document.createElement("button");
       removeButton.className = "button button-secondary";
       removeButton.type = "button";
-      removeButton.textContent = "Entfernen";
+      removeButton.classList.add("photo-delete-button");
+      removeButton.setAttribute("aria-label", "Ausgewähltes Foto entfernen");
+      removeButton.title = "Ausgewähltes Foto entfernen";
+      removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg>';
       removeButton.addEventListener("click", () => {
         if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
         if (item.previewUrl && item.previewUrl !== item.originalPreviewUrl) URL.revokeObjectURL(item.previewUrl);
@@ -540,6 +544,16 @@
         event.preventDefault();
         showPhotoViewer(url, label);
       }
+    });
+  }
+
+  function confirmPhotoDelete(message) {
+    const dialog = document.querySelector("#delete-photo-dialog");
+    document.querySelector("#delete-photo-message").textContent = message;
+    return new Promise((resolve) => {
+      const handleClose = () => resolve(dialog.returnValue === "confirm");
+      dialog.addEventListener("close", handleClose, { once: true });
+      dialog.showModal();
     });
   }
 
@@ -590,9 +604,12 @@
       const deleteButton = document.createElement("button");
       deleteButton.className = "button button-secondary";
       deleteButton.type = "button";
-      deleteButton.textContent = "Foto löschen";
+      deleteButton.classList.add("photo-delete-button");
+      deleteButton.setAttribute("aria-label", "Foto löschen");
+      deleteButton.title = "Foto löschen";
+      deleteButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg>';
       deleteButton.addEventListener("click", async () => {
-        if (!window.confirm((labels[photo.photo_type] || "Foto") + " und seine Darstellung endgültig löschen?")) return;
+        if (!(await confirmPhotoDelete((labels[photo.photo_type] || "Foto") + " und seine Darstellung endgültig löschen?"))) return;
         deleteButton.disabled = true;
         try {
           const storageError = await removeProfilePhoto(photo);
@@ -671,9 +688,12 @@
       const deleteButton = document.createElement("button");
       deleteButton.className = "button button-secondary";
       deleteButton.type = "button";
-      deleteButton.textContent = "Foto löschen";
+      deleteButton.classList.add("photo-delete-button");
+      deleteButton.setAttribute("aria-label", "Foto löschen");
+      deleteButton.title = "Foto löschen";
+      deleteButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg>';
       deleteButton.addEventListener("click", async () => {
-        if (!window.confirm("Stilfoto " + (index + 1) + " und sein Zuschnitt endgültig löschen?")) return;
+        if (!(await confirmPhotoDelete("Stilfoto " + (index + 1) + " und sein Zuschnitt endgültig löschen?"))) return;
         deleteButton.disabled = true;
         editButton.disabled = true;
         try {
