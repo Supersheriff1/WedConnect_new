@@ -513,9 +513,11 @@
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
       const cropButton = document.createElement("button");
-      cropButton.className = "button button-secondary";
+      cropButton.className = "button button-secondary photo-crop-button";
       cropButton.type = "button";
-      cropButton.textContent = "Zuschnitt wählen";
+      cropButton.setAttribute("aria-label", "Zuschnitt anpassen");
+      cropButton.title = "Zuschnitt anpassen";
+      cropButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg>';
       cropButton.addEventListener("click", () => openCropEditor(item.file, async (blob) => {
         if (item.previewUrl && item.previewUrl !== item.originalPreviewUrl) URL.revokeObjectURL(item.previewUrl);
         item.displayFile = new File([blob], item.name.replace(/\.[^.]+$/, "") + "-display.jpg", { type: "image/jpeg" });
@@ -685,9 +687,11 @@
       const caption = document.createElement("p");
       caption.textContent = "Stilfoto " + (index + 1);
       const editButton = document.createElement("button");
-      editButton.className = "button button-secondary";
+      editButton.className = "button button-secondary photo-crop-button";
       editButton.type = "button";
-      editButton.textContent = "Zuschnitt anpassen";
+      editButton.setAttribute("aria-label", "Zuschnitt anpassen");
+      editButton.title = "Zuschnitt anpassen";
+      editButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg>';
       editButton.addEventListener("click", async () => {
         editButton.disabled = true;
         try {
