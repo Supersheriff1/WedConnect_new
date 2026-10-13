@@ -511,7 +511,6 @@
       const image = document.createElement("img");
       image.src = item.previewUrl;
       image.alt = "Ausgewähltes Stilfoto " + (index + 1);
-      makeImageViewable(image, item.previewUrl, image.alt);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = item.name;
@@ -634,7 +633,6 @@
       const image = document.createElement("img");
       image.src = data.signedUrl;
       image.alt = (labels[photo.photo_type] || "Foto") + " " + (index + 1);
-      makeImageViewable(image, data.signedUrl, image.alt);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = labels[photo.photo_type] || "Foto";
@@ -687,7 +685,6 @@
       const image = document.createElement("img");
       image.src = displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
-      makeImageViewable(image, displayUrl, image.alt);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = "Stilfoto " + (index + 1);
@@ -1018,7 +1015,6 @@
       const image = document.createElement("img");
       image.src = data.signedUrl;
       image.alt = labels[photo.photo_type] + " " + (index + 1);
-      makeImageViewable(image, data.signedUrl, image.alt);
       const caption = document.createElement("span");
       caption.textContent = labels[photo.photo_type] || "Foto";
       card.append(image, caption);
