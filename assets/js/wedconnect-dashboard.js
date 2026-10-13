@@ -14,6 +14,7 @@
   const progressBar = document.querySelector(".setup-progress");
   const progressFill = document.querySelector("#setup-progress-fill");
   const maxPhotoBytes = 10 * 1024 * 1024;
+  const maxPortfolioPhotoBytes = 2 * 1024 * 1024;
   const loadingStartedAt = performance.now();
   const minimumLoadingTime = 1800;
 
@@ -25,7 +26,7 @@
   let supabase;
   let currentUser = null;
   let currentRole = "";
-  let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [] };
+  let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [] };
 
   function showError(message, title = "Dashboard konnte nicht geladen werden") {
     loading.classList.add("hidden");
@@ -203,9 +204,11 @@
         '<input type="file" name="partner-two-photos" accept="image/jpeg,image/png,image/webp" multiple><p class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>";
     }
     const portfolioCount = currentPhotoCount("portfolio");
-    return '<div class="photo-panel"><h3>Portfoliofotos</h3><p>Lade mindestens 10 Hochzeitsfotos hoch.</p>' +
+    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p>Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen. JPG, PNG oder WebP · maximal 2 MB pro Bild.</p>' +
+      '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
+      '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       '<input type="file" name="portfolio-photos" accept="image/jpeg,image/png,image/webp" multiple>' +
-      '<p class="photo-count">Bereits hochgeladen: ' + portfolioCount + " / 10</p></div>";
+      '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + ' / 3</p></div>";
   }
 
   function renderReview() {
@@ -266,6 +269,7 @@
         : step === 2 ? (wizard.role === "couple" ? renderCoupleDetails() : renderPhotographerDetails())
           : step === 3 ? renderPhotoStep() : renderReview();
     if (step === 4) loadPhotoPreviews();
+    if (step === 3 && wizard.role === "photographer") attachPortfolioPhotoControls();
     if (step === 3 && wizard.role === "couple") {
       document.querySelectorAll('input[name="couple-photo-method"]').forEach((radio) =>
         radio.addEventListener("change", toggleCouplePhotoMethod)
@@ -281,6 +285,249 @@
     if (!method || !jointPanel || !individualPanels) return;
     jointPanel.hidden = method.value !== "joint";
     individualPanels.hidden = method.value !== "individual";
+  }
+
+  function drawCrop(canvas, state) {
+    const context = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    const imageWidth = state.image.naturalWidth;
+    const imageHeight = state.image.naturalHeight;
+    const quarterTurn = state.rotation % 180 !== 0;
+    const rotatedWidth = quarterTurn ? imageHeight : imageWidth;
+    const rotatedHeight = quarterTurn ? imageWidth : imageHeight;
+    const scale = Math.max(width / rotatedWidth, height / rotatedHeight) * state.zoom;
+    const maxX = Math.max(0, (rotatedWidth * scale - width) / 2);
+    const maxY = Math.max(0, (rotatedHeight * scale - height) / 2);
+    state.offsetX = Math.min(maxX, Math.max(-maxX, state.offsetX));
+    state.offsetY = Math.min(maxY, Math.max(-maxY, state.offsetY));
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = "#25242b";
+    context.fillRect(0, 0, width, height);
+    context.save();
+    context.translate(width / 2 + state.offsetX, height / 2 + state.offsetY);
+    context.rotate(state.rotation * Math.PI / 180);
+    context.scale(scale, scale);
+    context.drawImage(state.image, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
+    context.restore();
+  }
+
+  let cropState = null;
+  const cropDialog = document.querySelector("#crop-dialog");
+  const cropCanvas = document.querySelector("#crop-canvas");
+  const cropZoom = document.querySelector("#crop-zoom");
+  const cropSave = document.querySelector("#crop-save");
+  const cropRotate = document.querySelector("#crop-rotate");
+  let cropDrag = null;
+
+  function openCropEditor(blob, onApply) {
+    const sourceUrl = URL.createObjectURL(blob);
+    const image = new Image();
+    image.onload = () => {
+      cropState = { image, sourceUrl, onApply, rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
+      cropCanvas.width = 1200;
+      cropCanvas.height = 800;
+      cropZoom.value = "1";
+      drawCrop(cropCanvas, cropState);
+      cropDialog.showModal();
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(sourceUrl);
+      errorLine.textContent = "Das Foto konnte nicht geöffnet werden.";
+    };
+    image.src = sourceUrl;
+  }
+
+  function blobFromCanvas(canvas, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Das Foto konnte nicht verarbeitet werden.")), "image/jpeg", quality);
+    });
+  }
+
+  async function createCroppedPhoto() {
+    let result = await blobFromCanvas(cropCanvas, 0.88);
+    if (result.size <= maxPortfolioPhotoBytes) return result;
+    result = await blobFromCanvas(cropCanvas, 0.74);
+    if (result.size <= maxPortfolioPhotoBytes) return result;
+    const reduced = document.createElement("canvas");
+    reduced.width = 900;
+    reduced.height = 600;
+    drawCrop(reduced, cropState);
+    result = await blobFromCanvas(reduced, 0.72);
+    if (result.size > maxPortfolioPhotoBytes) throw new Error("Das zugeschnittene Foto ist noch größer als 2 MB.");
+    return result;
+  }
+
+  cropZoom.addEventListener("input", () => {
+    if (!cropState) return;
+    cropState.zoom = Number(cropZoom.value);
+    drawCrop(cropCanvas, cropState);
+  });
+
+  cropRotate.addEventListener("click", () => {
+    if (!cropState) return;
+    cropState.rotation = (cropState.rotation + 90) % 360;
+    drawCrop(cropCanvas, cropState);
+  });
+
+  cropCanvas.addEventListener("pointerdown", (event) => {
+    if (!cropState) return;
+    cropDrag = { x: event.clientX, y: event.clientY, offsetX: cropState.offsetX, offsetY: cropState.offsetY };
+    cropCanvas.setPointerCapture(event.pointerId);
+    cropCanvas.classList.add("is-dragging");
+  });
+  cropCanvas.addEventListener("pointermove", (event) => {
+    if (!cropDrag || !cropState) return;
+    const rect = cropCanvas.getBoundingClientRect();
+    const factor = cropCanvas.width / rect.width;
+    cropState.offsetX = cropDrag.offsetX + (event.clientX - cropDrag.x) * factor;
+    cropState.offsetY = cropDrag.offsetY + (event.clientY - cropDrag.y) * factor;
+    drawCrop(cropCanvas, cropState);
+  });
+  const endCropDrag = () => {
+    cropDrag = null;
+    cropCanvas.classList.remove("is-dragging");
+  };
+  cropCanvas.addEventListener("pointerup", endCropDrag);
+  cropCanvas.addEventListener("pointercancel", endCropDrag);
+
+  document.querySelector("#crop-cancel").addEventListener("click", () => cropDialog.close());
+  cropDialog.addEventListener("close", () => {
+    if (cropState && cropState.sourceUrl) URL.revokeObjectURL(cropState.sourceUrl);
+    cropState = null;
+  });
+  cropSave.addEventListener("click", async () => {
+    if (!cropState) return;
+    cropSave.disabled = true;
+    cropSave.textContent = "Wird übernommen …";
+    try {
+      const blob = await createCroppedPhoto();
+      await cropState.onApply(blob);
+      cropDialog.close();
+    } catch (error) {
+      errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gespeichert werden.";
+    } finally {
+      cropSave.disabled = false;
+      cropSave.textContent = "Zuschnitt übernehmen";
+    }
+  });
+
+  function renderPendingPortfolioPhotos() {
+    const container = document.querySelector("#portfolio-pending-photos");
+    if (!container) return;
+    container.innerHTML = "";
+    (wizard.pendingPhotos || []).forEach((item, index) => {
+      const card = document.createElement("article");
+      card.className = "portfolio-photo-card";
+      const image = document.createElement("img");
+      image.src = item.previewUrl;
+      image.alt = "Ausgewähltes Stilfoto " + (index + 1);
+      const caption = document.createElement("p");
+      caption.textContent = item.name;
+      const actions = document.createElement("div");
+      actions.className = "portfolio-photo-actions";
+      const cropButton = document.createElement("button");
+      cropButton.className = "button button-secondary";
+      cropButton.type = "button";
+      cropButton.textContent = "Zuschneiden / ausrichten";
+      cropButton.addEventListener("click", () => openCropEditor(item.file, async (blob) => {
+        URL.revokeObjectURL(item.previewUrl);
+        item.file = new File([blob], item.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+        item.previewUrl = URL.createObjectURL(blob);
+        renderPendingPortfolioPhotos();
+      }));
+      const removeButton = document.createElement("button");
+      removeButton.className = "button button-secondary";
+      removeButton.type = "button";
+      removeButton.textContent = "Entfernen";
+      removeButton.addEventListener("click", () => {
+        URL.revokeObjectURL(item.previewUrl);
+        wizard.pendingPhotos.splice(index, 1);
+        renderPendingPortfolioPhotos();
+        updatePortfolioPhotoCount();
+      });
+      actions.append(cropButton, removeButton);
+      card.append(image, caption, actions);
+      container.append(card);
+    });
+  }
+
+  function updatePortfolioPhotoCount() {
+    const count = document.querySelector("#portfolio-photo-count");
+    if (count) count.textContent = "Bereits hochgeladen: " + currentPhotoCount("portfolio") + " · ausgewählt: " + (wizard.pendingPhotos || []).length + " · mindestens 3";
+  }
+
+  async function loadExistingPortfolioPhotos() {
+    const container = document.querySelector("#portfolio-existing-photos");
+    if (!container) return;
+    container.innerHTML = "";
+    const portfolio = wizard.photos.filter((photo) => photo.photo_type === "portfolio");
+    for (const [index, photo] of portfolio.entries()) {
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photo.object_path, 600);
+      if (error || !data || !data.signedUrl) continue;
+      const card = document.createElement("article");
+      card.className = "portfolio-photo-card";
+      const image = document.createElement("img");
+      image.src = data.signedUrl;
+      image.alt = "Hochgeladenes Stilfoto " + (index + 1);
+      const caption = document.createElement("p");
+      caption.textContent = "Stilfoto " + (index + 1);
+      const editButton = document.createElement("button");
+      editButton.className = "button button-secondary";
+      editButton.type = "button";
+      editButton.textContent = "Zuschneiden / ausrichten";
+      editButton.addEventListener("click", async () => {
+        editButton.disabled = true;
+        try {
+          const response = await fetch(data.signedUrl);
+          if (!response.ok) throw new Error("Das Foto konnte nicht geladen werden.");
+          const sourceBlob = await response.blob();
+          openCropEditor(sourceBlob, async (blob) => {
+            const { error: uploadError } = await supabase.storage.from(photoBucket).upload(photo.object_path, blob, {
+              contentType: "image/jpeg",
+              upsert: true
+            });
+            if (uploadError) throw new Error("Das zugeschnittene Foto konnte nicht gespeichert werden.");
+            await loadExistingPortfolioPhotos();
+          });
+        } catch (error) {
+          errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht bearbeitet werden.";
+        } finally {
+          editButton.disabled = false;
+        }
+      });
+      card.append(image, caption, editButton);
+      container.append(card);
+    }
+    updatePortfolioPhotoCount();
+  }
+
+  function attachPortfolioPhotoControls() {
+    const input = document.querySelector('[name="portfolio-photos"]');
+    if (!input) return;
+    renderPendingPortfolioPhotos();
+    loadExistingPortfolioPhotos();
+    updatePortfolioPhotoCount();
+    input.addEventListener("change", () => {
+      errorLine.textContent = "";
+      const accepted = ["image/jpeg", "image/png", "image/webp"];
+      const additions = [];
+      for (const file of Array.from(input.files || [])) {
+        if (!accepted.includes(file.type)) {
+          errorLine.textContent = "Akzeptiert werden JPG-, PNG- und WebP-Dateien.";
+          continue;
+        }
+        if (file.size > maxPortfolioPhotoBytes) {
+          errorLine.textContent = "Jedes Stilfoto darf höchstens 2 MB groß sein.";
+          continue;
+        }
+        additions.push({ file, name: file.name, previewUrl: URL.createObjectURL(file) });
+      }
+      wizard.pendingPhotos = (wizard.pendingPhotos || []).concat(additions);
+      input.value = "";
+      renderPendingPortfolioPhotos();
+      updatePortfolioPhotoCount();
+    });
   }
 
   function collectFields() {
@@ -375,7 +622,7 @@
   }
 
   async function loadWizard(role, startStep) {
-    wizard = { step: startStep, role: role || "", data: { couple: {}, photographer: {} }, photos: [] };
+    wizard = { step: startStep, role: role || "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [] };
     currentRole = role || "";
     if (role === "couple") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
@@ -415,8 +662,9 @@
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       throw new Error("Bitte lade JPG-, PNG- oder WebP-Bilder hoch.");
     }
-    if (file.size > maxPhotoBytes) {
-      throw new Error("Jedes Foto darf höchstens 10 MB groß sein.");
+    const sizeLimit = photoType === "portfolio" ? maxPortfolioPhotoBytes : maxPhotoBytes;
+    if (file.size > sizeLimit) {
+      throw new Error("Jedes Foto darf höchstens " + (photoType === "portfolio" ? "2" : "10") + " MB groß sein.");
     }
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
     const objectPath = currentUser.id + "/" + crypto.randomUUID() + "." + extension;
@@ -459,20 +707,23 @@
         await uploadFile(item[0], item[1], wizard.photos.length + index);
       }
     } else {
-      const input = document.querySelector('[name="portfolio-photos"]');
-      const files = Array.from(input.files);
+      const pending = wizard.pendingPhotos || [];
       const existingCount = currentPhotoCount("portfolio");
-      if (existingCount + files.length < 10) {
-        throw new Error("Für dein Portfolio brauchst du mindestens 10 Fotos. Aktuell: " + existingCount + ".");
+      if (existingCount + pending.length < 3) {
+        throw new Error("Für dein Portfolio brauchst du mindestens 3 Stilfotos. Aktuell ausgewählt oder hochgeladen: " + (existingCount + pending.length) + ".");
       }
-      for (const [index, file] of files.entries()) {
-        await uploadFile(file, "portfolio", existingCount + index);
+      for (const [index, item] of pending.entries()) {
+        await uploadFile(item.file, "portfolio", existingCount + index);
       }
     }
     const { data, error } = await supabase.from("profile_photos")
       .select("photo_type,object_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
     if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden.");
     wizard.photos = data || [];
+    if (wizard.role === "photographer") {
+      (wizard.pendingPhotos || []).forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      wizard.pendingPhotos = [];
+    }
   }
 
   async function loadPhotoPreviews() {
@@ -616,7 +867,7 @@
         if (error) {
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) throw new Error("Lade Fotos von beiden Personen hoch.");
-          if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 10 Portfoliofotos hoch.");
+          if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");\n          if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           const code = error.code ? " (" + error.code + ")" : "";
           throw new Error("Profilabschluss fehlgeschlagen" + code + ": " + (message || "Bitte prüfe alle Angaben und Fotos."));
         }
