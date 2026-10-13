@@ -211,11 +211,6 @@ create policy "Delete own WedConnect profile photos"
     bucket_id = 'wedconnect-profile-photos'
     and (storage.foldername(name))[1] = (select auth.uid())::text
   );
-),
-  website_url text null check (website_url is null or website_url ~* '^https?://[^[:space:]]+$'),
-  updated_at timestamptz not null default now()
-);
-
 create table if not exists public.profile_photos (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
