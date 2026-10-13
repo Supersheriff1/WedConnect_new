@@ -1248,6 +1248,14 @@
         if (!selected) throw new Error("Wähle Hochzeitspaar oder Fotograf aus.");
         const { data, error } = await supabase.rpc("assign_initial_role", { p_role: selected.value });
         if (error) {
+          if ((error.message || "").includes("account_role_already_set")) {
+            const { data: account } = await supabase.from("profiles")
+              .select("role,profile_status").eq("id", currentUser.id).maybeSingle();
+            if (account && account.profile_status === "complete") {
+              throw new Error("Für dieses Konto ist bereits ein vollständiges Profil hinterlegt. Bitte kehre zum Dashboard zurück.");
+            }
+            throw new Error("Die Rollenänderung ist in Supabase noch nicht aktiviert. Führe die neue Migration aus und lade die Seite danach neu.");
+          }
           const code = error.code ? " (" + error.code + ")" : "";
           throw new Error("Rolle konnte nicht gespeichert werden" + code + ": " + (error.message || "Bitte versuche es erneut."));
         }
