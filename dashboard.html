@@ -105,6 +105,14 @@
     .delete-photo-actions .button{flex:1;min-height:48px;padding:10px 12px;font-size:13px}
     .delete-photo-confirm{background:#b65d5d!important;border-color:#b65d5d!important;color:#fff!important}
     @media(max-width:560px){.delete-photo-dialog{width:calc(100% - 32px);border-radius:12px}.delete-photo-actions{gap:8px}.delete-photo-actions .button{min-width:0}}
+
+    .photo-segments{display:none}
+    @media(max-width:560px){
+      .photo-preview.is-mobile-main,.portfolio-photo-card.is-mobile-main{position:relative}
+      .photo-preview.is-mobile-main .photo-segments,.portfolio-photo-card.is-mobile-main .photo-segments{position:absolute;z-index:4;top:13px;left:15px;right:15px;display:flex;gap:4px;pointer-events:none}
+      .photo-segments span{height:3px;min-width:0;flex:1;border-radius:3px;background:rgb(255 255 255 / 48%);box-shadow:0 1px 4px rgb(0 0 0 / 28%)}
+      .photo-segments span.is-active{background:#fff}
+    }
 </style>
 </head>
 <body>
@@ -188,7 +196,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-mobile-photo-ui-v10"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photo-segments-v11"></script>
 </body>
 </html>
 
