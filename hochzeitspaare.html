@@ -142,6 +142,26 @@
 }
 
         .auth-dialog {
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .auth-dialog::-webkit-scrollbar { display: none; }
+    .auth-dialog-head { margin-bottom: 18px; }
+    .auth-intro { margin-bottom: 16px !important; }
+    .auth-form { gap: 11px; }
+    .auth-field { gap: 6px; }
+    .auth-field input { min-height: 46px; }
+    .auth-divider { margin: 14px 0 11px; }
+    .auth-text-button { min-height: 38px; margin-top: 8px; }
+    .auth-status { margin-top: 10px !important; }
+    @media (max-height: 760px) {
+      .auth-dialog { padding: 20px 28px; }
+      .auth-dialog-head { margin-bottom: 13px; }
+      .auth-intro { margin-bottom: 11px !important; }
+      .auth-divider { margin: 10px 0 8px; }
+      .auth-status[data-state="success"], .auth-status[data-state="error"] { padding: 8px 11px; }
+    }
       max-height: min(90vh, 820px);
       overflow-y: auto;
     }
@@ -366,6 +386,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-auth.js?v=20261012-google"></script>
+  <script src="/assets/js/wedconnect-auth.js?v=20261013-dashboard"></script>
 </body>
 </html>
