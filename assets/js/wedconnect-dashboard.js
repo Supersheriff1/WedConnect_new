@@ -184,7 +184,18 @@
   }
 
   function renderPhotographerDetails() {
+    const compensationType = valueOf("compensation_type");
     return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Abschnitte und Reportage-Formate aus, die du anbietest.") +
+      choiceField("compensation_type", "Vergütung für deine fotografische Leistung", [
+        ["free", "Unentgeltlich"],
+        ["fixed", "Fixbetrag"],
+        ["negotiable", "Verhandelbar"]
+      ], "Lege fest, welche Vergütung du für deinen fotografischen Einsatz erwartest.") +
+      '<div id="compensation-amount-wrap" class="setup-field"' + (compensationType === "fixed" ? "" : " hidden") + '><label for="field-compensation_amount_eur">Gewünschter Betrag in Euro *</label><div class="input-with-suffix"><input id="field-compensation_amount_eur" name="compensation_amount_eur" data-profile-field type="number" min="1" max="100000" step="1" inputmode="numeric" value="' + escapeHtml(valueOf("compensation_amount_eur")) + '"' + (compensationType === "fixed" ? " required" : "") + '><span>€</span></div></div>' +
+      choiceField("usage_rights_compensation", "Zusätzliche Vergütung für die Nutzungsrechte?", [
+        ["yes", "Ja"],
+        ["no", "Nein"]
+      ], "Gilt zusätzlich zur Vergütung für den fotografischen Einsatz.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
       field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"');
   }
@@ -235,7 +246,10 @@
           ["Region", (Array.isArray(data.regions) ? data.regions : []).map((value) => (REGION_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.region],
           ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
           ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
-          ["Begleitung", data.coverage_scope], ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
+          ["Begleitung", data.coverage_scope],
+          ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "negotiable" ? "Verhandelbar" : data.compensation_type === "fixed" ? Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
+          ["Zusätzliche Vergütung für Nutzungsrechte", data.usage_rights_compensation === "yes" ? "Ja" : data.usage_rights_compensation === "no" ? "Nein" : "Nicht angegeben"],
+          ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
     return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) => {
@@ -874,6 +888,18 @@
         data.coverage_options = coverage;
         data.coverage_scope = coverageLabels.join(", ");
       }
+      if (!["free", "fixed", "negotiable"].includes(data.compensation_type)) {
+        throw new Error("Wähle deine gewünschte Vergütung aus.");
+      }
+      const amount = data.compensation_amount_eur === "" || data.compensation_amount_eur == null ? null : Number(data.compensation_amount_eur);
+      if (data.compensation_type === "fixed" && (!Number.isInteger(amount) || amount < 1 || amount > 100000)) {
+        throw new Error("Gib einen Betrag zwischen 1 und 100.000 Euro ein.");
+      }
+      if (data.compensation_type !== "fixed") data.compensation_amount_eur = null;
+      else data.compensation_amount_eur = amount;
+      if (!["yes", "no"].includes(data.usage_rights_compensation)) {
+        throw new Error("Gib an, ob du für die Nutzungsrechte zusätzlich entlohnt werden möchtest.");
+      }
       data.instagram_url = normalizeInstagram(data.instagram_url || "");
       data.website_url = normalizeWebsite(data.website_url || "");
     }
@@ -1091,6 +1117,16 @@
 
   fields.addEventListener("change", (event) => {
     const target = event.target;
+    if (target.matches('select[name="compensation_type"]')) {
+      const amountWrap = fields.querySelector("#compensation-amount-wrap");
+      const amountInput = fields.querySelector('input[name="compensation_amount_eur"]');
+      if (amountWrap && amountInput) {
+        const showAmount = target.value === "fixed";
+        amountWrap.hidden = !showAmount;
+        amountInput.required = showAmount;
+        if (!showAmount) amountInput.value = "";
+      }
+    }
     if (!target.matches('input[type="checkbox"][data-select-group="regions"]')) return;
     const countrywide = fields.querySelector('input[name="regions"][value="AT"]');
     if (!countrywide) return;
