@@ -197,18 +197,19 @@
       return '<div class="photo-methods"><label class="photo-method"><input type="radio" name="couple-photo-method" value="joint" checked><span><strong>Ein gemeinsames Foto</strong><br>Beide Personen sind auf dem Foto zu sehen.</span></label>' +
         '<label class="photo-method"><input type="radio" name="couple-photo-method" value="individual"><span><strong>Ein Foto pro Person</strong><br>Lade für beide Personen je ein Foto hoch.</span></label></div>' +
         '<div class="photo-panel" id="joint-photo-panel"><h3>Gemeinsames Foto</h3><p>Beide heiratenden Personen müssen zu sehen sein.</p>' +
-        '<input type="file" name="joint-photos" accept="image/jpeg,image/png,image/webp" multiple><p class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
+        '<input type="file" name="joint-photos" accept="image/jpeg,image/png,image/webp" multiple><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
         '<div class="setup-two-col" id="individual-photo-panels" hidden><div class="photo-panel"><h3>Erste Person</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        '<input type="file" name="partner-one-photos" accept="image/jpeg,image/png,image/webp" multiple><p class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
+        '<input type="file" name="partner-one-photos" accept="image/jpeg,image/png,image/webp" multiple><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
         '<div class="photo-panel"><h3>Zweite Person</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        '<input type="file" name="partner-two-photos" accept="image/jpeg,image/png,image/webp" multiple><p class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>";
+        '<input type="file" name="partner-two-photos" accept="image/jpeg,image/png,image/webp" multiple><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+        '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
     return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p>Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen. JPG, PNG oder WebP · maximal 2 MB pro Bild.</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       '<input type="file" name="portfolio-photos" accept="image/jpeg,image/png,image/webp" multiple>' +
-      '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + " / 3</p></div>";
+      '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
   function renderReview() {
@@ -269,6 +270,7 @@
           : step === 3 ? renderPhotoStep() : renderReview();
     if (step === 4) loadPhotoPreviews();
     if (step === 3 && wizard.role === "photographer") attachPortfolioPhotoControls();
+    if (step === 3 && wizard.role === "couple") loadExistingCouplePhotos();
     if (step === 3 && wizard.role === "couple") {
       document.querySelectorAll('input[name="couple-photo-method"]').forEach((radio) =>
         radio.addEventListener("change", toggleCouplePhotoMethod)
@@ -508,6 +510,73 @@
         showPhotoViewer(url, label);
       }
     });
+  }
+
+  async function removeProfilePhoto(photo) {
+    const { error: rowError } = await supabase.from("profile_photos")
+      .delete()
+      .eq("user_id", currentUser.id)
+      .eq("object_path", photo.object_path);
+    if (rowError) throw new Error("Das Foto konnte nicht aus dem Profil entfernt werden.");
+    wizard.photos = wizard.photos.filter((item) => item.object_path !== photo.object_path);
+    const paths = [photo.object_path, photo.display_path].filter(Boolean);
+    const { error: storageError } = await supabase.storage.from(photoBucket).remove(paths);
+    if (storageError) throw new Error("Das Foto wurde aus dem Profil entfernt, aber die gespeicherte Datei konnte nicht vollständig gelöscht werden.");
+  }
+
+  function updateCouplePhotoCounts() {
+    [
+      ["#joint-photo-count", "couple"],
+      ["#partner-one-photo-count", "partner_one"],
+      ["#partner-two-photo-count", "partner_two"]
+    ].forEach(([selector, type]) => {
+      const node = document.querySelector(selector);
+      if (node) node.textContent = "Bereits hochgeladen: " + currentPhotoCount(type);
+    });
+  }
+
+  async function loadExistingCouplePhotos() {
+    const container = document.querySelector("#couple-existing-photos");
+    if (!container) return;
+    container.innerHTML = "";
+    const labels = { couple: "Gemeinsames Foto", partner_one: "Erste Person", partner_two: "Zweite Person" };
+    const photos = wizard.photos.filter((photo) => photo.photo_type !== "portfolio");
+    for (const [index, photo] of photos.entries()) {
+      const path = photo.display_path || photo.object_path;
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(path, 600);
+      if (error || !data || !data.signedUrl) continue;
+      const card = document.createElement("article");
+      card.className = "portfolio-photo-card";
+      const image = document.createElement("img");
+      image.src = data.signedUrl;
+      image.alt = (labels[photo.photo_type] || "Foto") + " " + (index + 1);
+      makeImageViewable(image, data.signedUrl, image.alt);
+      const caption = document.createElement("p");
+      caption.textContent = labels[photo.photo_type] || "Foto";
+      const actions = document.createElement("div");
+      actions.className = "portfolio-photo-actions";
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "button button-secondary";
+      deleteButton.type = "button";
+      deleteButton.textContent = "Foto löschen";
+      deleteButton.addEventListener("click", async () => {
+        if (!window.confirm((labels[photo.photo_type] || "Foto") + " und seine Darstellung endgültig löschen?")) return;
+        deleteButton.disabled = true;
+        try {
+          await removeProfilePhoto(photo);
+          await loadExistingCouplePhotos();
+          updateCouplePhotoCounts();
+        } catch (error) {
+          errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gelöscht werden.";
+        } finally {
+          deleteButton.disabled = false;
+        }
+      });
+      actions.append(deleteButton);
+      card.append(image, caption, actions);
+      container.append(card);
+    }
+    updateCouplePhotoCounts();
   }
 
   async function loadExistingPortfolioPhotos() {
@@ -953,10 +1022,7 @@
         await uploadSelectedPhotos();
         wizard.step = 4;
       } else if (wizard.step === 4) {
-        const { data: savedRole, error: roleError } = await supabase.rpc("assign_initial_role", { p_role: wizard.role });
-        if (roleError) throw new Error("Deine Profilrolle konnte nicht bestätigt werden: " + (roleError.message || "Bitte versuche es erneut."));
-        if (savedRole && savedRole !== wizard.role) throw new Error("Die gespeicherte Profilrolle stimmt nicht mit deiner Auswahl überein.");
-        const { error } = await supabase.rpc("complete_profile");
+        const { error } = await supabase.rpc("complete_profile_for_role", { p_role: wizard.role });
         if (error) {
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) throw new Error("Lade Fotos von beiden Personen hoch.");
