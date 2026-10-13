@@ -57,6 +57,7 @@
     @media(max-width:560px){.photo-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.photo-preview img{height:120px}}
 
     .loading-brand{display:grid;justify-items:center;gap:13px;margin-bottom:12px}.loading-wordmark{color:var(--ink);font-size:25px;font-weight:800;letter-spacing:-.055em;animation:brand-breathe 2.4s ease-in-out infinite}.loading-wordmark span{color:var(--gold)}.loading-connection{height:14px;display:flex;align-items:center;justify-content:center}.loading-connection i{width:7px;height:7px;border:1px solid var(--gold);border-radius:50%;background:var(--surface);animation:node-pulse 1.8s ease-in-out infinite}.loading-connection i:last-child{animation-delay:.9s}.loading-connection b{position:relative;width:32px;height:1px;overflow:hidden;background:var(--border)}.loading-connection b::after{content:"";position:absolute;inset:0 auto 0 0;width:9px;background:var(--gold);animation:link-travel 1.8s ease-in-out infinite}@keyframes brand-breathe{0%,100%{opacity:.82}50%{opacity:1}}@keyframes node-pulse{0%,100%{transform:scale(.78);box-shadow:0 0 0 0 rgb(213 182 122 / 0%)}50%{transform:scale(1);box-shadow:0 0 0 4px rgb(213 182 122 / 12%)}}@keyframes link-travel{0%{transform:translateX(-2px);opacity:.25}50%{opacity:1}100%{transform:translateX(25px);opacity:.25}}\n    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+    .photographer-basics{display:grid;gap:22px}.experience-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.select-group{min-width:0}.select-group legend{margin-bottom:11px}.choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.choice-chip{min-width:0;min-height:48px;display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--body);font-size:12px;font-weight:600;cursor:pointer}.choice-chip:has(input:checked){border-color:var(--gold);background:rgb(213 182 122 / 8%);color:var(--ink)}.choice-chip input{width:16px;height:16px;flex:none;margin:0;accent-color:var(--gold)}.choice-chip span{min-width:0;line-height:1.35}.choice-group .setup-hint{margin-top:8px}@media(max-width:700px){.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.experience-grid{grid-template-columns:1fr}.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.choice-chip{padding:9px 10px;font-size:11px}}
   </style>
 </head>
 <body>
@@ -125,7 +126,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-role-error-detail-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photographer-structured-profile-v1"></script>
 </body>
 </html>
 
