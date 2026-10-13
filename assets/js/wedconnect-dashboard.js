@@ -226,7 +226,7 @@
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Hochformat 4:5</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Hochformat 9:16</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
