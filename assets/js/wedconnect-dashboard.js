@@ -14,6 +14,13 @@
   const progressBar = document.querySelector(".setup-progress");
   const progressFill = document.querySelector("#setup-progress-fill");
   const maxPhotoBytes = 10 * 1024 * 1024;
+  const loadingStartedAt = performance.now();
+  const minimumLoadingTime = 1800;
+
+  async function keepLoadingVisible() {
+    const remaining = minimumLoadingTime - (performance.now() - loadingStartedAt);
+    if (remaining > 0) await new Promise((resolve) => window.setTimeout(resolve, remaining));
+  }
   const photoBucket = "wedconnect-profile-photos";
   let supabase;
   let currentUser = null;
@@ -567,10 +574,12 @@
       return;
     }
     if (!account || !account.role) {
+      await keepLoadingVisible();
       await beginWizard("", 0);
       return;
     }
     if (account.profile_status !== "complete") {
+      await keepLoadingVisible();
       await beginWizard(account.role, 1);
       return;
     }
@@ -580,6 +589,7 @@
       showError("Dein Profil konnte nicht geladen werden.", "Profil nicht erreichbar");
       return;
     }
+    await keepLoadingVisible();
     setupRole(account.role, currentUser, true, profileGreeting(account.role, profile));
     supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
