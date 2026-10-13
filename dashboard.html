@@ -161,6 +161,7 @@
         <p class="eyebrow" id="setup-step-label">PROFIL · SCHRITT 1</p>
         <h1 id="setup-title">Erstelle dein Profil</h1>
         <p id="setup-description">Wähle zuerst, wie du WedConnect nutzt.</p>
+        <button class="button button-secondary" type="button" id="wizard-role-change" hidden>Rolle wechseln</button>
         <div class="setup-progress" role="progressbar" aria-label="Fortschritt der Profilerstellung" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="setup-progress-fill"></span></div>
       </div>
       <form id="onboarding-form" novalidate>
@@ -219,6 +220,7 @@
           <article class="account-card">
             <h3>Dein Konto</h3>
             <p id="account-copy">Angemeldet</p>
+            <button class="button button-secondary" type="button" id="role-change" hidden>Rolle wechseln</button>
             <button class="button button-secondary" type="button" data-signout>Abmelden</button>
           </article>
         </section>
@@ -230,7 +232,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-role-reassignment-v26"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-role-change-v27"></script>
 </body>
 </html>
 
