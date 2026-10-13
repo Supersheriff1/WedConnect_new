@@ -271,7 +271,10 @@
     data.id = currentUser.id;
     data.updated_at = new Date().toISOString();
     const { error } = await supabase.from(table).upsert(data);
-    if (error) throw new Error("Die Angaben konnten nicht gespeichert werden. Prüfe bitte Pflichtfelder und Links.");
+    if (error) {
+      const code = error.code ? " (" + error.code + ")" : "";
+      throw new Error("Speichern fehlgeschlagen" + code + ": " + (error.message || "Bitte versuche es erneut."));
+    }
     wizard.data[key] = data;
   }
 
@@ -456,6 +459,10 @@
 
   backButton.addEventListener("click", () => {
     if (wizard.step > (currentRole ? 1 : 0)) {
+      if (wizard.step === 1 || wizard.step === 2) {
+        const key = wizard.role === "couple" ? "couple" : "photographer";
+        Object.assign(wizard.data[key], collectFields());
+      }
       wizard.step -= 1;
       renderWizard();
     }
