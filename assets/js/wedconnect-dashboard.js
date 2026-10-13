@@ -115,7 +115,7 @@
     return field("availability", "Verfügbarkeit", "textarea", "Wie können Paare dich für einen Termin anfragen?", true, ' maxlength="2000"') +
       field("coverage_scope", "Gewünschter Begleitungsumfang", "textarea", "Welche Teile einer Hochzeit möchtest du fotografieren?", true, ' maxlength="1200"') +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' maxlength="300"') +
-      field("website_url", "Website (optional)", "url", "https://…", false, ' maxlength="500"');
+      field("website_url", "Website (optional)", "text", "https://…", false, ' inputmode="url" maxlength="500"');
   }
 
   function renderPhotoStep() {
