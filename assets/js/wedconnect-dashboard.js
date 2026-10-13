@@ -543,8 +543,8 @@
         renderPendingPortfolioPhotos();
         updatePortfolioPhotoCount();
       });
-      actions.append(cropButton, removeButton);
-      card.append(image, caption, actions);
+      actions.append(removeButton, cropButton);
+      card.append(image, actions, caption);
       container.append(card);
     });
     syncMobileGallerySelection(container);
@@ -662,7 +662,7 @@
         }
       });
       actions.append(deleteButton);
-      card.append(image, caption, actions);
+      card.append(image, actions, caption);
       container.append(card);
     }
     syncMobileGallerySelection(container);
@@ -751,8 +751,8 @@
       });
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
-      actions.append(editButton, deleteButton);
-      card.append(image, caption, actions);
+      actions.append(deleteButton, editButton);
+      card.append(image, actions, caption);
       container.append(card);
     }
     syncMobileGallerySelection(container);
