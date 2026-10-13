@@ -1134,9 +1134,11 @@
       for (let index = 0; index < visiblePhotos.length; index += 1) {
         const photo = visiblePhotos[index];
         const highlight = target.placement === "highlight";
-        const photoPath = highlight
+        const photoPath = !isPhotographer
           ? photo.display_path || photo.object_path
-          : photo.object_path;
+          : highlight
+            ? photo.display_path || photo.object_path
+            : photo.object_path;
         const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
         if (error || !data || !data.signedUrl) continue;
         const card = document.createElement("div");
