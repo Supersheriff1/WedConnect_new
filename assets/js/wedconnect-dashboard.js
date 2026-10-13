@@ -358,8 +358,8 @@
     const image = new Image();
     image.onload = () => {
       cropState = { image, sourceUrl, onApply, rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
-      cropCanvas.width = 960;
-      cropCanvas.height = 1200;
+      cropCanvas.width = 900;
+      cropCanvas.height = 1600;
       cropZoom.value = "1";
       drawCrop(cropCanvas, cropState);
       cropDialog.showModal();
@@ -387,8 +387,8 @@
         image.src = sourceUrl;
       });
       const canvas = document.createElement("canvas");
-      canvas.width = 960;
-      canvas.height = 1200;
+      canvas.width = 900;
+      canvas.height = 1600;
       const context = canvas.getContext("2d");
       context.fillStyle = "#25242b";
       context.fillRect(0, 0, canvas.width, canvas.height);
