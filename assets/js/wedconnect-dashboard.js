@@ -82,11 +82,24 @@
       "</div>";
   }
 
+  function choiceField(name, label, options, hint) {
+    const selected = valueOf(name);
+    return '<div class="setup-field"><label for="field-' + name + '">' + label + ' *</label><select id="field-' + name + '" name="' + name + '" data-profile-field required>' +
+      '<option value="">Bitte auswählen</option>' + options.map((option) =>
+        '<option value="' + option[0] + '"' + (selected === option[0] ? " selected" : "") + ">" + option[1] + "</option>"
+      ).join("") + '</select><p class="setup-hint">' + hint + "</p></div>";
+  }
+
   function renderCoupleDetails() {
     return field("schedule", "Geplanter Ablauf", "textarea", "Welche Programmpunkte sind wichtig?", true, ' maxlength="4000"') +
       field("coverage_scope", "Gewünschte Begleitung", "textarea", "Zum Beispiel Trauung und Paarfotos oder vom Getting Ready bis zur Feier.", true, ' maxlength="1200"') +
       field("visual_style", "Bildstil", "textarea", "Welche Bildsprache gefällt euch?", true, ' maxlength="1200"') +
-      field("image_wishes", "Bildwünsche", "textarea", "Welche Menschen, Momente oder Motive sollen festgehalten werden?", true, ' maxlength="2000"');
+      field("image_wishes", "Bildwünsche", "textarea", "Welche Menschen, Momente oder Motive sollen festgehalten werden?", true, ' maxlength="2000"') +
+      choiceField("photographer_usage_preference", "Nutzung der Fotos durch den Fotografen", [
+        ["open", "Grundsätzlich offen"],
+        ["case_by_case", "Nur nach Absprache"],
+        ["no", "Nein"]
+      ], "Eine verbindliche Freigabe wird vor einer Zusammenarbeit separat vereinbart.");
   }
 
   function renderPhotographerBasics() {
@@ -133,6 +146,7 @@
           ["Hochzeitsdatum", data.wedding_date], ["Ort", data.location], ["Gäste", data.guest_count],
           ["Ablauf", data.schedule], ["Begleitung", data.coverage_scope],
           ["Bildstil", data.visual_style], ["Bildwünsche", data.image_wishes],
+          ["Nutzung durch Fotograf", data.photographer_usage_preference === "open" ? "Grundsätzlich offen" : data.photographer_usage_preference === "case_by_case" ? "Nur nach Absprache" : "Nein"],
           ["Fotos", currentPhotoCount("couple") ? "Gemeinsames Foto hochgeladen" : "Fotos beider Personen hochgeladen"]
         ]
       : [
