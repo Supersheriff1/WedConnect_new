@@ -480,7 +480,10 @@
         const selected = form.querySelector('input[name="selected-role"]:checked');
         if (!selected) throw new Error("Wähle Hochzeitspaar oder Fotograf aus.");
         const { data, error } = await supabase.rpc("assign_initial_role", { p_role: selected.value });
-        if (error) throw new Error("Die Rolle konnte nicht gespeichert werden. Bitte versuche es erneut.");
+        if (error) {
+          const code = error.code ? " (" + error.code + ")" : "";
+          throw new Error("Rolle konnte nicht gespeichert werden" + code + ": " + (error.message || "Bitte versuche es erneut."));
+        }
         wizard.role = data || selected.value;
         currentRole = wizard.role;
         wizard.step = 1;
@@ -498,7 +501,8 @@
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) throw new Error("Lade Fotos von beiden Personen hoch.");
           if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 10 Portfoliofotos hoch.");
-          throw new Error("Das Profil konnte nicht abgeschlossen werden. Prüfe bitte alle Angaben und Fotos.");
+          const code = error.code ? " (" + error.code + ")" : "";
+          throw new Error("Profilabschluss fehlgeschlagen" + code + ": " + (message || "Bitte prüfe alle Angaben und Fotos."));
         }
         const table = wizard.role === "couple" ? "couple_profiles" : "photographer_profiles";
         const { data: profile } = await supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle();
