@@ -358,7 +358,7 @@
   }
 
   cropZoom.addEventListener("input", () => {
-    if (!cropState) return;
+    if (!cropState || window.matchMedia("(pointer: coarse)").matches) return;
     cropState.zoom = Number(cropZoom.value);
     drawCrop(cropCanvas, cropState);
   });
@@ -370,7 +370,7 @@
   });
 
   cropCanvas.addEventListener("pointerdown", (event) => {
-    if (!cropState) return;
+    if (!cropState || !event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
     cropDrag = { x: event.clientX, y: event.clientY, offsetX: cropState.offsetX, offsetY: cropState.offsetY };
     cropCanvas.setPointerCapture(event.pointerId);
     cropCanvas.classList.add("is-dragging");
@@ -474,6 +474,7 @@
   });
 
   function makeImageViewable(image, url, label) {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
     image.setAttribute("role", "button");
     image.tabIndex = 0;
     image.setAttribute("aria-label", (label || "Foto") + " groß anzeigen");
