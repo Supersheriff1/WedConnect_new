@@ -209,11 +209,21 @@
       return;
     }
     if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-      finishGoogleReturn(session);
+      if (pendingGoogleReturn) finishGoogleReturn(session);
+      else if (!["confirmed", "password-reset"].includes(authReturn)) goToDashboard();
     }
   });
 
   setMode("signup");
+
+  if (!["confirmed", "password-reset"].includes(authReturn)) {
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!error && data.session) {
+        if (pendingGoogleReturn) finishGoogleReturn(data.session);
+        else goToDashboard();
+      }
+    }).catch(() => {});
+  }
 
   if (authReturn === "confirmed") {
     setMode("signin");
