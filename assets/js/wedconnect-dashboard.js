@@ -162,7 +162,9 @@
 
   function renderWizard() {
     const step = wizard.step;
-    const totalSteps = 5;
+    const firstStep = wizard.role ? 1 : 0;
+    const totalSteps = wizard.role ? 4 : 5;
+    const visibleStep = step - firstStep + 1;
     const titles = step === 0
       ? ["Wähle deine Rolle", "Über euch", "Eure Hochzeit", "Fotos von euch", "Profil prüfen"]
       : wizard.role === "couple"
@@ -178,9 +180,9 @@
             ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 10 Fotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
     document.querySelector("#setup-title").textContent = titles[step];
-    document.querySelector("#setup-step-label").textContent = "PROFIL · SCHRITT " + (step + 1) + " VON " + totalSteps;
+    document.querySelector("#setup-step-label").textContent = "PROFIL · SCHRITT " + visibleStep + " VON " + totalSteps;
     document.querySelector("#setup-description").textContent = descriptions;
-    const percent = Math.round(((step + 1) / totalSteps) * 100);
+    const percent = Math.round((visibleStep / totalSteps) * 100);
     progressFill.style.width = percent + "%";
     progressBar.setAttribute("aria-valuenow", String(percent));
     backButton.hidden = step === 0 || (Boolean(currentRole) && step === 1);
