@@ -189,6 +189,12 @@
       field("website_url", "Website (optional)", "text", "https://…", false, ' inputmode="url" maxlength="500"');
   }
 
+  function photoPicker(name, label) {
+    const id = "photo-picker-" + name;
+    return '<div class="photo-picker"><input class="photo-picker-input" id="' + id + '" type="file" name="' + name + '" accept="image/jpeg,image/png,image/webp" multiple>' +
+      '<label class="button button-secondary photo-picker-button" for="' + id + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg><span>' + label + '</span></label></div>';
+  }
+
   function renderPhotoStep() {
     if (wizard.role === "couple") {
       const jointCount = currentPhotoCount("couple");
@@ -197,18 +203,18 @@
       return '<div class="photo-methods"><label class="photo-method"><input type="radio" name="couple-photo-method" value="joint" checked><span><strong>Ein gemeinsames Foto</strong><br>Beide Personen sind auf dem Foto zu sehen.</span></label>' +
         '<label class="photo-method"><input type="radio" name="couple-photo-method" value="individual"><span><strong>Ein Foto pro Person</strong><br>Lade für beide Personen je ein Foto hoch.</span></label></div>' +
         '<div class="photo-panel" id="joint-photo-panel"><h3>Gemeinsames Foto</h3><p>Beide heiratenden Personen müssen zu sehen sein.</p>' +
-        '<input type="file" name="joint-photos" accept="image/jpeg,image/png,image/webp" multiple><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
+        photoPicker("joint-photos", "Gemeinsames Foto hinzufügen") + '<p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
         '<div class="setup-two-col" id="individual-photo-panels" hidden><div class="photo-panel"><h3>Erste Person</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        '<input type="file" name="partner-one-photos" accept="image/jpeg,image/png,image/webp" multiple><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
+        photoPicker("partner-one-photos", "Foto hinzufügen") + '<p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
         '<div class="photo-panel"><h3>Zweite Person</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        '<input type="file" name="partner-two-photos" accept="image/jpeg,image/png,image/webp" multiple><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+        photoPicker("partner-two-photos", "Foto hinzufügen") + '<p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
         '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
     return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p>Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen. JPG, PNG oder WebP · maximal 2 MB pro Bild.</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
-      '<input type="file" name="portfolio-photos" accept="image/jpeg,image/png,image/webp" multiple>' +
+      photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
       '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
@@ -434,6 +440,30 @@
     }
   });
 
+  function activateMobileGalleryPhoto(container, card, image, label) {
+    if (!container || !card || !image) return;
+    if (!container.querySelector(".is-mobile-main")) card.classList.add("is-mobile-main");
+    const mobile = window.matchMedia("(max-width: 560px)");
+    const selectAsMain = () => {
+      if (!mobile.matches) return;
+      container.querySelectorAll(".portfolio-photo-card, .photo-preview").forEach((photoCard) => {
+        photoCard.classList.toggle("is-mobile-main", photoCard === card);
+      });
+    };
+    image.addEventListener("click", selectAsMain);
+    if (mobile.matches) {
+      image.setAttribute("role", "button");
+      image.tabIndex = 0;
+      image.setAttribute("aria-label", (label || "Foto") + " als Hauptfoto anzeigen");
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectAsMain();
+        }
+      });
+    }
+  }
+
   function renderPendingPortfolioPhotos() {
     const container = document.querySelector("#portfolio-pending-photos");
     if (!container) return;
@@ -445,6 +475,7 @@
       image.src = item.previewUrl;
       image.alt = "Ausgewähltes Stilfoto " + (index + 1);
       makeImageViewable(image, item.previewUrl, image.alt);
+      activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = item.name;
       const actions = document.createElement("div");
@@ -498,7 +529,7 @@
   });
 
   function makeImageViewable(image, url, label) {
-    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(max-width: 560px)").matches) return;
     image.setAttribute("role", "button");
     image.tabIndex = 0;
     image.setAttribute("aria-label", (label || "Foto") + " groß anzeigen");
@@ -551,6 +582,7 @@
       image.src = data.signedUrl;
       image.alt = (labels[photo.photo_type] || "Foto") + " " + (index + 1);
       makeImageViewable(image, data.signedUrl, image.alt);
+      activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = labels[photo.photo_type] || "Foto";
       const actions = document.createElement("div");
@@ -599,6 +631,7 @@
       image.src = displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
       makeImageViewable(image, displayUrl, image.alt);
+      activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = "Stilfoto " + (index + 1);
       const editButton = document.createElement("button");
