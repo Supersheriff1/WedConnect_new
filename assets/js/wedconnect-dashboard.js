@@ -135,6 +135,19 @@
     ["black_white", "Schwarz-Weiß"]
   ];
 
+  const COVERAGE_OPTIONS = [
+    ["pre_wedding", "Pre-Wedding-Shooting"],
+    ["getting_ready", "Getting Ready"],
+    ["ceremony", "Trauung"],
+    ["couple_photos", "Paarfotos"],
+    ["reception", "Agape und Empfang"],
+    ["dinner_speeches", "Essen und Reden"],
+    ["party", "Feier und Party"],
+    ["half_day", "Halbtagesreportage"],
+    ["full_day", "Ganztagesreportage"],
+    ["custom", "Individuelle Kombination"]
+  ];
+
   function selectedValues(name) {
     const value = valueOf(name);
     if (Array.isArray(value)) return value;
@@ -170,8 +183,7 @@
   }
 
   function renderPhotographerDetails() {
-    return field("availability", "Verfügbarkeit", "textarea", "Wie können Paare dich für einen Termin anfragen?", true, ' maxlength="2000"') +
-      field("coverage_scope", "Gewünschter Begleitungsumfang", "textarea", "Welche Teile einer Hochzeit möchtest du fotografieren?", true, ' maxlength="1200"') +
+    return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Abschnitte und Reportage-Formate aus, die du anbietest.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' maxlength="300"') +
       field("website_url", "Website (optional)", "text", "https://…", false, ' inputmode="url" maxlength="500"');
   }
@@ -236,7 +248,7 @@
       : step === 1
         ? (wizard.role === "couple" ? "Wie dürfen wir euch ansprechen und wann heiratet ihr?" : "Wie dürfen wir dich ansprechen?")
         : step === 2
-          ? (wizard.role === "couple" ? "Erzähl kurz von eurer Feier und euren Bildwünschen." : "Beschreibe deine Arbeit und verlinke optional deine Kanäle.")
+          ? (wizard.role === "couple" ? "Erzähl kurz von eurer Feier und euren Bildwünschen." : "Wähle deinen Begleitungsumfang und verlinke optional deine Kanäle.")
           : step === 3
             ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 10 Fotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
@@ -342,6 +354,13 @@
       data.experience = [years !== null ? years + (years === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : "", weddings !== null ? weddings + " fotografierte Hochzeiten" : ""].filter(Boolean).join(" · ");
       data.styles = styles;
       data.visual_style = styleLabels.join(", ");
+      if (wizard.step === 2) {
+        const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
+        const coverageLabels = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]);
+        if (!coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+        data.coverage_options = coverage;
+        data.coverage_scope = coverageLabels.join(", ");
+      }
       data.instagram_url = normalizeInstagram(data.instagram_url || "");
       data.website_url = normalizeWebsite(data.website_url || "");
     }
@@ -583,6 +602,7 @@
           if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
           if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
           if (!values.experience_years && !values.weddings_photographed) throw new Error("Gib Erfahrung in Jahren oder die Anzahl fotografierter Hochzeiten an.");
+          if (wizard.step === 2 && (!values.coverage_options || !values.coverage_options.length)) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
         }
         await saveRoleProfile(values);
         wizard.step += 1;
