@@ -8,26 +8,26 @@ security definer
 set search_path = ''
 as $$
 declare
-  current_user_id uuid := auth.uid();
-  current_role text;
+  v_user_id uuid := auth.uid();
+  v_role text;
   has_couple_profile boolean;
   has_photographer_profile boolean;
   photo_count integer;
 begin
-  if current_user_id is null then
+  if v_user_id is null then
     raise exception using message = 'not_authenticated';
   end if;
 
-  select role into current_role
+  select role into v_role
   from public.profiles
-  where id = current_user_id
+  where id = v_user_id
   for update;
 
-  if current_role is null then
+  if v_role is null then
     select exists (
-      select 1 from public.couple_profiles where id = current_user_id
+      select 1 from public.couple_profiles where id = v_user_id
     ), exists (
-      select 1 from public.photographer_profiles where id = current_user_id
+      select 1 from public.photographer_profiles where id = v_user_id
     )
     into has_couple_profile, has_photographer_profile;
 
@@ -35,23 +35,23 @@ begin
       raise exception using message = 'role_required';
     end if;
 
-    current_role := case
+    v_role := case
       when has_couple_profile then 'couple'
       else 'photographer'
     end;
 
     insert into public.profiles (id, role)
-    values (current_user_id, current_role)
+    values (v_user_id, v_role)
     on conflict (id) do update
       set role = excluded.role
       where public.profiles.profile_status is distinct from 'complete';
   end if;
 
-  if current_role = 'couple' then
+  if v_role = 'couple' then
     if not exists (
       select 1
       from public.couple_profiles
-      where id = current_user_id
+      where id = v_user_id
         and length(trim(coalesce(partner_one_first_name, ''))) between 1 and 80
         and length(trim(coalesce(partner_two_first_name, ''))) between 1 and 80
         and wedding_date is not null
@@ -68,24 +68,24 @@ begin
 
     if not exists (
       select 1 from public.profile_photos
-      where user_id = current_user_id and photo_type = 'couple'
+      where user_id = v_user_id and photo_type = 'couple'
     ) and (
       not exists (
         select 1 from public.profile_photos
-        where user_id = current_user_id and photo_type = 'partner_one'
+        where user_id = v_user_id and photo_type = 'partner_one'
       )
       or not exists (
         select 1 from public.profile_photos
-        where user_id = current_user_id and photo_type = 'partner_two'
+        where user_id = v_user_id and photo_type = 'partner_two'
       )
     ) then
       raise exception using message = 'photos_for_both_partners_required';
     end if;
-  elsif current_role = 'photographer' then
+  elsif v_role = 'photographer' then
     if not exists (
       select 1
       from public.photographer_profiles
-      where id = current_user_id
+      where id = v_user_id
         and length(trim(coalesce(first_name, ''))) between 1 and 80
         and length(trim(coalesce(region, ''))) between 2 and 160
         and length(trim(coalesce(experience, ''))) between 1 and 2000
@@ -101,7 +101,7 @@ begin
 
     select count(*) into photo_count
     from public.profile_photos
-    where user_id = current_user_id and photo_type = 'portfolio';
+    where user_id = v_user_id and photo_type = 'portfolio';
 
     if photo_count < 3 then
       raise exception using message = 'portfolio_requires_3_photos';
@@ -112,7 +112,7 @@ begin
 
   update public.profiles
   set profile_status = 'complete', completed_at = now()
-  where id = current_user_id;
+  where id = v_user_id;
 end;
 $$;
 
