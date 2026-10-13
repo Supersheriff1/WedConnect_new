@@ -598,11 +598,13 @@
       } else if (wizard.step === 1 || wizard.step === 2) {
         if (!form.reportValidity()) return;
         const values = collectFields();
-        if (wizard.role === "photographer") {
+        if (wizard.role === "photographer" && wizard.step === 1) {
           if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
           if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
           if (!values.experience_years && !values.weddings_photographed) throw new Error("Gib Erfahrung in Jahren oder die Anzahl fotografierter Hochzeiten an.");
-          if (wizard.step === 2 && (!values.coverage_options || !values.coverage_options.length)) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+        }
+        if (wizard.role === "photographer" && wizard.step === 2 && (!values.coverage_options || !values.coverage_options.length)) {
+          throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
         }
         await saveRoleProfile(values);
         wizard.step += 1;
