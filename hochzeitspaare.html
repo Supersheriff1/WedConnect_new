@@ -141,28 +141,7 @@
   .public-content-frame > section > .wrap { padding-inline: 24px; }
 }
 
-        .auth-dialog {
-      max-height: calc(100vh - 48px);
-      overflow-y: auto;
-      scrollbar-width: none;
-    }
-    .auth-dialog::-webkit-scrollbar { display: none; }
-    .auth-dialog-head { margin-bottom: 18px; }
-    .auth-intro { margin-bottom: 16px !important; }
-    .auth-form { gap: 11px; }
-    .auth-field { gap: 6px; }
-    .auth-field input { min-height: 46px; }
-    .auth-divider { margin: 14px 0 11px; }
-    .auth-text-button { min-height: 38px; margin-top: 8px; }
-    .auth-status { margin-top: 10px !important; }
-    @media (max-height: 760px) {
-      .auth-dialog { padding: 20px 28px; }
-      .auth-dialog-head { margin-bottom: 13px; }
-      .auth-intro { margin-bottom: 11px !important; }
-      .auth-divider { margin: 10px 0 8px; }
-      .auth-status[data-state="success"], .auth-status[data-state="error"] { padding: 8px 11px; }
-    }
-      max-height: min(90vh, 820px);
+          max-height: min(90vh, 820px);
       overflow-y: auto;
     }
     .auth-dialog h2 { margin-bottom: 10px; }
@@ -258,7 +237,32 @@
       .auth-dialog[open] { animation: none; }
       .auth-close, .auth-field input { transition: none; }
     }
-  </style>
+  
+    .auth-dialog {
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      padding: 20px 28px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .auth-dialog::-webkit-scrollbar { display: none; }
+    .auth-dialog-head { margin-bottom: 12px; }
+    .auth-intro { margin-bottom: 11px !important; }
+    .auth-form { gap: 9px; }
+    .auth-field { gap: 6px; }
+    .auth-field input { min-height: 44px; }
+    .auth-divider { margin: 11px 0 8px; }
+    .auth-text-button { min-height: 38px; margin-top: 5px; }
+    .auth-status { margin-top: 8px !important; }
+    @media (max-height: 760px) {
+      .auth-dialog { padding: 16px 24px; }
+      .auth-dialog-head { margin-bottom: 8px; }
+      .auth-intro { margin-bottom: 8px !important; }
+      .auth-divider { margin: 8px 0 6px; }
+      .auth-status[data-state="success"], .auth-status[data-state="error"] { padding: 8px 10px; }
+      .auth-text-button { min-height: 34px; margin-top: 3px; }
+    }
+</style>
 </head>
 <body>
   <header class="topbar">
