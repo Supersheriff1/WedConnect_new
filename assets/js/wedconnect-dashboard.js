@@ -756,6 +756,7 @@
       }
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
+      card.classList.toggle("is-gallery-only", portfolioPlacement(photo) === "gallery");
       const image = document.createElement("img");
       image.src = portfolioPlacement(photo) === "gallery" ? originalData.signedUrl : displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
