@@ -109,10 +109,19 @@
     .photo-segments{display:none}
     @media(max-width:560px){
       .photo-preview.is-mobile-main,.portfolio-photo-card.is-mobile-main{position:relative}
-      .photo-preview.is-mobile-main .photo-segments,.portfolio-photo-card.is-mobile-main .photo-segments{position:absolute;z-index:4;top:13px;left:15px;right:15px;display:flex;gap:4px;pointer-events:none}
+      .photo-preview.is-mobile-main .photo-segments,.portfolio-photo-card.is-mobile-main .photo-segments{position:absolute;z-index:4;top:13px;left:62px;right:62px;display:flex;gap:4px;pointer-events:none}
       .photo-segments span{height:3px;min-width:0;flex:1;border-radius:3px;background:rgb(255 255 255 / 48%);box-shadow:0 1px 4px rgb(0 0 0 / 28%)}
       .photo-segments span.is-active{background:#fff}
     }
+
+    .portfolio-photo-card{position:relative}
+    .portfolio-photo-actions{position:absolute;z-index:5;top:18px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none}
+    .portfolio-photo-actions .button{width:42px!important;min-width:42px;height:42px;min-height:42px;flex:0 0 42px;display:grid;place-items:center;padding:9px!important;border-color:rgb(255 255 255 / 46%);background:rgb(37 36 43 / 84%);color:var(--ink);backdrop-filter:blur(8px);pointer-events:auto}
+    .portfolio-photo-actions .photo-delete-button{order:-1;justify-self:auto}
+    .portfolio-photo-actions .photo-crop-button{order:1}
+    .photo-crop-button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .portfolio-photo-actions .button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+    @media(max-width:560px){.portfolio-photo-actions{top:18px;left:12px;right:12px}}
 </style>
 </head>
 <body>
@@ -196,7 +205,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photo-segments-v11"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photo-icons-v12"></script>
 </body>
 </html>
 
