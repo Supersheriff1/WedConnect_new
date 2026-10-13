@@ -4,7 +4,8 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 
 ## Project documents
 
-- [Project Bible](docs/PROJECT-BIBLE.md) — product scope, roles, flows, rights, and technical boundaries.
+- [Project Bible v1.2](docs/PROJECT-BIBLE-v1.2.md) — product scope, roles, profile onboarding, rights, and technical boundaries.
+- [Project Bible v1.1](docs/PROJECT-BIBLE-v1.1.md) — previous version.
 - [Design Bible](docs/DESIGN-BIBLE.md) — current visual system for the public website and app.
 - [Supabase setup](supabase/README.md) — authentication configuration and initial database migration.
 
