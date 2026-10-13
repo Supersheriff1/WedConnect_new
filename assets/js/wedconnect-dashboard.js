@@ -770,7 +770,7 @@
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
       actions.append(deleteButton, editButton);
-      card.append(image, actions, caption);
+      card.append(image, actions);
       container.append(card);
     }
     syncMobileGallerySelection(container);
