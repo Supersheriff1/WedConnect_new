@@ -211,7 +211,7 @@
         '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
-    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p class="photo-upload-intro">Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen.</p>' +
+    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
@@ -441,46 +441,51 @@
     }
   });
 
-  function renderPhotoSegments(container) {
-    if (!container) return;
-    const cards = Array.from(container.querySelectorAll(".portfolio-photo-card, .photo-preview"));
-    container.querySelectorAll(".photo-segments").forEach((segments) => segments.remove());
+  function syncMobileGallerySelection(container) {
+    if (!container || !window.matchMedia("(max-width: 560px)").matches) return;
+    const cards = Array.from(container.querySelectorAll(":scope > .portfolio-photo-card, :scope > .photo-preview"));
+    container.querySelectorAll(":scope > .gallery-active-thumbnail").forEach((thumb) => thumb.remove());
     if (!cards.length) return;
     let activeIndex = cards.findIndex((card) => card.classList.contains("is-mobile-main"));
     if (activeIndex < 0) {
       activeIndex = 0;
       cards[0].classList.add("is-mobile-main");
     }
+    const activeCard = cards[activeIndex];
     cards.forEach((card, index) => {
-      const image = card.querySelector("img");
-      if (image) {
-        const baseLabel = image.dataset.galleryLabel || image.alt || "Foto";
-        image.dataset.galleryLabel = baseLabel;
-        image.setAttribute("aria-label", baseLabel + " · Foto " + (index + 1) + " von " + cards.length +
-          (index === activeIndex ? " · angezeigt" : " · antippen zum Anzeigen"));
-      }
+      card.style.order = card === activeCard ? "-1" : String(card.dataset.galleryOrder || index);
     });
-    const segments = document.createElement("div");
-    segments.className = "photo-segments";
-    segments.setAttribute("aria-hidden", "true");
-    cards.forEach((_, index) => {
-      const segment = document.createElement("span");
-      if (index === activeIndex) segment.classList.add("is-active");
-      segments.append(segment);
-    });
-    cards[activeIndex].append(segments);
+    const activeImage = activeCard.querySelector("img");
+    if (!activeImage) return;
+    activeImage.setAttribute("aria-label", (activeImage.alt || "Foto") + " · aktuell ausgewählt");
+    const thumbnail = document.createElement("button");
+    thumbnail.type = "button";
+    thumbnail.className = "gallery-active-thumbnail";
+    thumbnail.setAttribute("aria-current", "true");
+    thumbnail.setAttribute("aria-label", (activeImage.alt || "Foto") + " · ausgewählt");
+    thumbnail.title = "Dieses Foto ist ausgewählt";
+    thumbnail.style.order = String(activeCard.dataset.galleryOrder || activeIndex);
+    const image = document.createElement("img");
+    image.src = activeImage.currentSrc || activeImage.src;
+    image.alt = "";
+    image.setAttribute("aria-hidden", "true");
+    thumbnail.append(image);
+    container.append(thumbnail);
   }
 
   function activateMobileGalleryPhoto(container, card, image, label) {
     if (!container || !card || !image) return;
     if (!container.querySelector(".is-mobile-main")) card.classList.add("is-mobile-main");
+    if (card.dataset.galleryOrder === undefined) {
+      card.dataset.galleryOrder = String(container.querySelectorAll(".portfolio-photo-card, .photo-preview").length);
+    }
     const mobile = window.matchMedia("(max-width: 560px)");
     const selectAsMain = () => {
       if (!mobile.matches) return;
       container.querySelectorAll(".portfolio-photo-card, .photo-preview").forEach((photoCard) => {
         photoCard.classList.toggle("is-mobile-main", photoCard === card);
       });
-      renderPhotoSegments(container);
+      syncMobileGallerySelection(container);
     };
     image.addEventListener("click", selectAsMain);
     if (mobile.matches) {
@@ -542,7 +547,7 @@
       card.append(image, caption, actions);
       container.append(card);
     });
-    renderPhotoSegments(container);
+    syncMobileGallerySelection(container);
   }
 
   function updatePortfolioPhotoCount() {
@@ -660,7 +665,7 @@
       card.append(image, caption, actions);
       container.append(card);
     }
-    renderPhotoSegments(container);
+    syncMobileGallerySelection(container);
     updateCouplePhotoCounts();
   }
 
@@ -750,7 +755,7 @@
       card.append(image, caption, actions);
       container.append(card);
     }
-    renderPhotoSegments(container);
+    syncMobileGallerySelection(container);
     updatePortfolioPhotoCount();
   }
 
