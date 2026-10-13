@@ -109,12 +109,63 @@
       ], "Eine verbindliche Freigabe wird vor einer Zusammenarbeit separat vereinbart.");
   }
 
+  const REGION_OPTIONS = [
+    ["AT", "Ganz Österreich"],
+    ["BGL", "Burgenland"],
+    ["KTN", "Kärnten"],
+    ["NOE", "Niederösterreich"],
+    ["OOE", "Oberösterreich"],
+    ["SBG", "Salzburg"],
+    ["STMK", "Steiermark"],
+    ["TIR", "Tirol"],
+    ["VBG", "Vorarlberg"],
+    ["W", "Wien"]
+  ];
+  const STYLE_OPTIONS = [
+    ["documentary", "Reportage"],
+    ["natural", "Natürlich & authentisch"],
+    ["romantic", "Romantisch"],
+    ["editorial", "Editorial"],
+    ["fine_art", "Fine Art"],
+    ["timeless", "Klassisch & zeitlos"],
+    ["modern", "Modern"],
+    ["moody", "Moody & cinematisch"],
+    ["light_airy", "Hell & luftig"],
+    ["film", "Filmlook / Analog"],
+    ["black_white", "Schwarz-Weiß"]
+  ];
+
+  function selectedValues(name) {
+    const value = valueOf(name);
+    if (Array.isArray(value)) return value;
+    if (!value || typeof value !== "string") return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function multiSelectField(name, label, options, hint) {
+    const selected = selectedValues(name);
+    return '<fieldset class="setup-group select-group"><legend>' + label + ' *</legend>' +
+      '<div class="choice-grid">' + options.map((option) =>
+        '<label class="choice-chip"><input type="checkbox" name="' + name + '" value="' + option[0] +
+        '" data-profile-field data-select-group="' + name + '"' +
+        (selected.includes(option[0]) ? " checked" : "") + '><span>' + option[1] + "</span></label>"
+      ).join("") + '</div><p class="setup-hint">' + hint + "</p></fieldset>";
+  }
+
   function renderPhotographerBasics() {
-    return '<div class="setup-two-col">' +
+    return '<div class="photographer-basics">' +
       field("first_name", "Dein Vorname", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
-      field("region", "Region und Einsatzgebiet", "text", "Zum Beispiel Wien und Niederösterreich", true, ' maxlength="160"') +
-      field("experience", "Erfahrung", "textarea", "Erzähl kurz von deiner bisherigen Arbeit.", true, ' maxlength="2000"') +
-      field("visual_style", "Bildstil", "textarea", "Wie würdest du deine Bildsprache beschreiben?", true, ' maxlength="1200"') +
+      multiSelectField("regions", "Region und Einsatzgebiet", REGION_OPTIONS, "Wähle ein oder mehrere Bundesländer. „Ganz Österreich“ schließt einzelne Bundesländer aus.") +
+      '<div class="experience-grid">' +
+      field("experience_years", "Erfahrung in Jahren", "number", "Optional, wenn du stattdessen Hochzeiten angibst.", false, ' min="0" max="80" step="1" inputmode="numeric"') +
+      field("weddings_photographed", "Fotografierte Hochzeiten", "number", "Optional, wenn du stattdessen Jahre angibst.", false, ' min="0" max="10000" step="1" inputmode="numeric"') +
+      "</div>" +
+      multiSelectField("styles", "Dein Bildstil", STYLE_OPTIONS, "Wähle alle Bildstile, die deine Arbeit beschreiben.") +
       "</div>";
   }
 
@@ -157,8 +208,11 @@
           ["Fotos", currentPhotoCount("couple") ? "Gemeinsames Foto hochgeladen" : "Fotos beider Personen hochgeladen"]
         ]
       : [
-          ["Vorname", data.first_name], ["Region", data.region], ["Erfahrung", data.experience],
-          ["Bildstil", data.visual_style], ["Verfügbarkeit", data.availability],
+          ["Vorname", data.first_name],
+          ["Region", (Array.isArray(data.regions) ? data.regions : []).map((value) => (REGION_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.region],
+          ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
+          ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
+          ["Verfügbarkeit", data.availability],
           ["Begleitung", data.coverage_scope], ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
@@ -220,7 +274,12 @@
   function collectFields() {
     const values = {};
     fields.querySelectorAll("[data-profile-field]").forEach((element) => {
-      values[element.name] = element.value.trim();
+      if (element.type === "checkbox") {
+        if (!values[element.name]) values[element.name] = [];
+        if (element.checked) values[element.name].push(element.value);
+      } else {
+        values[element.name] = element.value.trim();
+      }
     });
     return values;
   }
@@ -265,6 +324,24 @@
     const table = wizard.role === "couple" ? "couple_profiles" : "photographer_profiles";
     const data = Object.assign({}, wizard.data[key], values);
     if (wizard.role === "photographer") {
+      const regions = Array.isArray(data.regions) ? data.regions : [];
+      const styles = Array.isArray(data.styles) ? data.styles : [];
+      const regionLabels = regions.map((value) => (REGION_OPTIONS.find((option) => option[0] === value) || [value, value])[1]);
+      const styleLabels = styles.map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]);
+      const years = data.experience_years === "" || data.experience_years == null ? null : Number(data.experience_years);
+      const weddings = data.weddings_photographed === "" || data.weddings_photographed == null ? null : Number(data.weddings_photographed);
+      if (!regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
+      if (!styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+      if (years === null && weddings === null) throw new Error("Gib Erfahrung in Jahren oder die Anzahl fotografierter Hochzeiten an.");
+      if (years !== null && (!Number.isInteger(years) || years < 0 || years > 80)) throw new Error("Die Erfahrungsjahre müssen zwischen 0 und 80 liegen.");
+      if (weddings !== null && (!Number.isInteger(weddings) || weddings < 0 || weddings > 10000)) throw new Error("Die Anzahl der Hochzeiten muss zwischen 0 und 10.000 liegen.");
+      data.regions = regions;
+      data.region = regionLabels.join(", ");
+      data.experience_years = years;
+      data.weddings_photographed = weddings;
+      data.experience = [years !== null ? years + (years === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : "", weddings !== null ? weddings + " fotografierte Hochzeiten" : ""].filter(Boolean).join(" · ");
+      data.styles = styles;
+      data.visual_style = styleLabels.join(", ");
       data.instagram_url = normalizeInstagram(data.instagram_url || "");
       data.website_url = normalizeWebsite(data.website_url || "");
     }
@@ -457,6 +534,18 @@
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : "") + "</button>";
   }
 
+  fields.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!target.matches('input[type="checkbox"][data-select-group="regions"]')) return;
+    const countrywide = fields.querySelector('input[name="regions"][value="AT"]');
+    if (!countrywide) return;
+    if (target.value === "AT" && target.checked) {
+      fields.querySelectorAll('input[name="regions"]:not([value="AT"])').forEach((input) => { input.checked = false; });
+    } else if (target.value !== "AT" && target.checked) {
+      countrywide.checked = false;
+    }
+  });
+
   backButton.addEventListener("click", () => {
     if (wizard.step > 0) {
       if (wizard.step === 1 || wizard.step === 2) {
@@ -490,6 +579,11 @@
       } else if (wizard.step === 1 || wizard.step === 2) {
         if (!form.reportValidity()) return;
         const values = collectFields();
+        if (wizard.role === "photographer") {
+          if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
+          if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+          if (!values.experience_years && !values.weddings_photographed) throw new Error("Gib Erfahrung in Jahren oder die Anzahl fotografierter Hochzeiten an.");
+        }
         await saveRoleProfile(values);
         wizard.step += 1;
       } else if (wizard.step === 3) {
