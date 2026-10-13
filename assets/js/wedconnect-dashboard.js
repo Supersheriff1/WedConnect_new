@@ -211,7 +211,7 @@
         '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
-    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p>Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen. JPG, PNG oder WebP · maximal 2 MB pro Bild.</p>' +
+    return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Stilfotos</h3><p>Lade mindestens 3 Fotos hoch, die deinen Stil am besten zeigen. JPG, PNG oder WebP · maximal 2 MB pro Bild. Die Profilkarte zeigt das Foto im Hochformat (4:5). Im Zuschnitt siehst du genau, welcher Bildausschnitt später angezeigt wird.</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
@@ -332,8 +332,8 @@
     const image = new Image();
     image.onload = () => {
       cropState = { image, sourceUrl, onApply, rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
-      cropCanvas.width = 1200;
-      cropCanvas.height = 800;
+      cropCanvas.width = 960;
+      cropCanvas.height = 1200;
       cropZoom.value = "1";
       drawCrop(cropCanvas, cropState);
       cropDialog.showModal();
@@ -361,8 +361,8 @@
         image.src = sourceUrl;
       });
       const canvas = document.createElement("canvas");
-      canvas.width = 1200;
-      canvas.height = 800;
+      canvas.width = 960;
+      canvas.height = 1200;
       const context = canvas.getContext("2d");
       context.fillStyle = "#25242b";
       context.fillRect(0, 0, canvas.width, canvas.height);
