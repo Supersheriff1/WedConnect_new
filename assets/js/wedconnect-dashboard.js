@@ -227,7 +227,6 @@
           ["Region", (Array.isArray(data.regions) ? data.regions : []).map((value) => (REGION_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.region],
           ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
           ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
-          ["Verfügbarkeit", data.availability],
           ["Begleitung", data.coverage_scope], ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
@@ -253,7 +252,7 @@
         : step === 2
           ? (wizard.role === "couple" ? "Erzähl kurz von eurer Feier und euren Bildwünschen." : "Wähle deinen Begleitungsumfang und verlinke optional deine Kanäle.")
           : step === 3
-            ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 10 Fotos für dein Portfolio hoch.")
+            ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
     document.querySelector("#setup-title").textContent = titles[step];
     document.querySelector("#setup-step-label").textContent = "PROFIL · SCHRITT " + visibleStep + " VON " + totalSteps;
@@ -422,6 +421,7 @@
       const image = document.createElement("img");
       image.src = item.previewUrl;
       image.alt = "Ausgewähltes Stilfoto " + (index + 1);
+      makeImageViewable(image, item.previewUrl, image.alt);
       const caption = document.createElement("p");
       caption.textContent = item.name;
       const actions = document.createElement("div");
@@ -457,6 +457,36 @@
     if (count) count.textContent = "Bereits hochgeladen: " + currentPhotoCount("portfolio") + " · ausgewählt: " + (wizard.pendingPhotos || []).length + " · mindestens 3";
   }
 
+  const photoViewer = document.querySelector("#photo-viewer");
+  const photoViewerImage = document.querySelector("#photo-viewer-image");
+  const photoViewerClose = document.querySelector("#photo-viewer-close");
+
+  function showPhotoViewer(url, label) {
+    if (!photoViewer || !photoViewerImage) return;
+    photoViewerImage.src = url;
+    photoViewerImage.alt = label || "Foto in Originalansicht";
+    photoViewer.showModal();
+  }
+
+  if (photoViewerClose) photoViewerClose.addEventListener("click", () => photoViewer.close());
+  if (photoViewer) photoViewer.addEventListener("click", (event) => {
+    if (event.target === photoViewer) photoViewer.close();
+  });
+
+  function makeImageViewable(image, url, label) {
+    image.setAttribute("role", "button");
+    image.tabIndex = 0;
+    image.setAttribute("aria-label", (label || "Foto") + " groß anzeigen");
+    image.title = "Tippen oder klicken, um das Foto groß anzuzeigen";
+    image.addEventListener("click", () => showPhotoViewer(url, label));
+    image.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        showPhotoViewer(url, label);
+      }
+    });
+  }
+
   async function loadExistingPortfolioPhotos() {
     const container = document.querySelector("#portfolio-existing-photos");
     if (!container) return;
@@ -470,6 +500,7 @@
       const image = document.createElement("img");
       image.src = data.signedUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
+      makeImageViewable(image, data.signedUrl, image.alt);
       const caption = document.createElement("p");
       caption.textContent = "Stilfoto " + (index + 1);
       const editButton = document.createElement("button");
@@ -741,6 +772,7 @@
       const image = document.createElement("img");
       image.src = data.signedUrl;
       image.alt = labels[photo.photo_type] + " " + (index + 1);
+      makeImageViewable(image, data.signedUrl, image.alt);
       const caption = document.createElement("span");
       caption.textContent = labels[photo.photo_type] || "Foto";
       card.append(image, caption);
@@ -766,7 +798,7 @@
     document.querySelector("#role-eyebrow").textContent = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Dein WedConnect-Konto";
     document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting : "Dein Dashboard";
     document.querySelector("#next-title").textContent = complete ? "Dein Profil ist vollständig" : couple ? "Hochzeitsprofil vervollständigen" : photographer ? "Fotografenprofil vervollständigen" : "Profil anlegen";
-    document.querySelector("#next-copy").textContent = complete ? "Dein Profil ist bereit." : couple ? "Datum, Ort und Bildwünsche" : photographer ? "Region, Portfolio und Verfügbarkeit" : "Wähle zuerst deinen Profiltyp.";
+    document.querySelector("#next-copy").textContent = complete ? "Dein Profil ist bereit." : couple ? "Datum, Ort und Bildwünsche" : photographer ? "Region, Portfolio und Begleitungsumfang" : "Wähle zuerst deinen Profiltyp.";
     document.querySelector("#profile-status").textContent = complete ? "Profil · Vollständig" : currentRole ? "Profil · Noch offen" : "Profil · Noch nicht angelegt";
     document.querySelector("#profile-action").textContent = complete ? "Profil ansehen" : "Profil anlegen";
     document.querySelector("#account-copy").textContent = user.email ? "Angemeldet als " + user.email : "Angemeldet";
@@ -863,6 +895,9 @@
         await uploadSelectedPhotos();
         wizard.step = 4;
       } else if (wizard.step === 4) {
+        const { data: savedRole, error: roleError } = await supabase.rpc("assign_initial_role", { p_role: wizard.role });
+        if (roleError) throw new Error("Deine Profilrolle konnte nicht bestätigt werden: " + (roleError.message || "Bitte versuche es erneut."));
+        if (savedRole && savedRole !== wizard.role) throw new Error("Die gespeicherte Profilrolle stimmt nicht mit deiner Auswahl überein.");
         const { error } = await supabase.rpc("complete_profile");
         if (error) {
           const message = error.message || "";
