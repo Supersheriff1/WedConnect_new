@@ -192,7 +192,7 @@
     const percent = Math.round((visibleStep / totalSteps) * 100);
     progressFill.style.width = percent + "%";
     progressBar.setAttribute("aria-valuenow", String(percent));
-    backButton.hidden = step === 0 || (Boolean(currentRole) && step === 1);
+    backButton.hidden = step === 0;
     nextButton.innerHTML = step === 4 ? 'Profil abschließen <span aria-hidden="true">✓</span>' : 'Weiter <span aria-hidden="true">→</span>';
     errorLine.textContent = "";
     fields.innerHTML = step === 0 ? renderRoleStep()
@@ -458,7 +458,7 @@
   }
 
   backButton.addEventListener("click", () => {
-    if (wizard.step > (currentRole ? 1 : 0)) {
+    if (wizard.step > 0) {
       if (wizard.step === 1 || wizard.step === 2) {
         const key = wizard.role === "couple" ? "couple" : "photographer";
         Object.assign(wizard.data[key], collectFields());
