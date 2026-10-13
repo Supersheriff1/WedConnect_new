@@ -141,7 +141,7 @@
           ["Begleitung", data.coverage_scope], ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
-    return '<div class="setup-summary">' + entries.map((entry) =>
+    return '<div id="photo-preview-grid" class="photo-preview-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) =>
       "<div><strong>" + escapeHtml(entry[0]) + "</strong><span>" + escapeHtml(entry[1]) + "</span></div>"
     ).join("") + "</div>";
   }
@@ -176,6 +176,7 @@
       : step === 1 ? (wizard.role === "couple" ? renderCoupleBasics() : renderPhotographerBasics())
         : step === 2 ? (wizard.role === "couple" ? renderCoupleDetails() : renderPhotographerDetails())
           : step === 3 ? renderPhotoStep() : renderReview();
+    if (step === 4) loadPhotoPreviews();
     if (step === 3 && wizard.role === "couple") {
       document.querySelectorAll('input[name="couple-photo-method"]').forEach((radio) =>
         radio.addEventListener("change", toggleCouplePhotoMethod)
@@ -350,6 +351,28 @@
       .select("photo_type,object_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
     if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden.");
     wizard.photos = data || [];
+  }
+
+  async function loadPhotoPreviews() {
+    const container = document.querySelector("#photo-preview-grid");
+    if (!container) return;
+    container.innerHTML = "";
+    const labels = { couple: "Gemeinsames Foto", partner_one: "Erste Person", partner_two: "Zweite Person", portfolio: "Portfolio" };
+    const photos = wizard.photos;
+    for (let index = 0; index < photos.length; index += 1) {
+      const photo = photos[index];
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photo.object_path, 600);
+      if (error || !data || !data.signedUrl) continue;
+      const card = document.createElement("div");
+      card.className = "photo-preview";
+      const image = document.createElement("img");
+      image.src = data.signedUrl;
+      image.alt = labels[photo.photo_type] + " " + (index + 1);
+      const caption = document.createElement("span");
+      caption.textContent = labels[photo.photo_type] || "Foto";
+      card.append(image, caption);
+      container.append(card);
+    }
   }
 
   function profileGreeting(role, profile) {
