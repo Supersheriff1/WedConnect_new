@@ -327,12 +327,12 @@
     document.querySelector("#setup-title").textContent = titles[step];
     document.querySelector("#setup-step-label").textContent = "PROFIL · SCHRITT " + visibleStep + " VON " + totalSteps;
     document.querySelector("#setup-description").textContent = descriptions;
+    const wizardRoleChangeButton = document.querySelector("#wizard-role-change");
+    if (wizardRoleChangeButton) wizardRoleChangeButton.hidden = !wizard.role || step === 0;
     const percent = Math.round((visibleStep / totalSteps) * 100);
     progressFill.style.width = percent + "%";
     progressBar.setAttribute("aria-valuenow", String(percent));
     backButton.hidden = step === 0;
-    const wizardRoleChangeButton = document.querySelector("#wizard-role-change");
-    if (wizardRoleChangeButton) wizardRoleChangeButton.hidden = !wizard.role || step === 0;
     nextButton.innerHTML = step === 4 ? 'Profil abschließen <span aria-hidden="true">✓</span>' : 'Weiter <span aria-hidden="true">→</span>';
     errorLine.textContent = "";
     fields.innerHTML = step === 0 ? renderRoleStep()
@@ -1171,8 +1171,6 @@
     document.querySelector("#profile-status").textContent = complete ? "Profil · Vollständig" : currentRole ? "Profil · Noch offen" : "Profil · Noch nicht angelegt";
     document.querySelector("#profile-action").textContent = complete ? "Profil ansehen" : "Profil anlegen";
     document.querySelector("#account-copy").textContent = user.email ? "Angemeldet als " + user.email : "Angemeldet";
-    const roleChangeButton = document.querySelector("#role-change");
-    if (roleChangeButton) roleChangeButton.hidden = !currentRole;
     const discoverLabel = couple ? "Fotografen entdecken" : "Hochzeiten entdecken";
     document.querySelector("#desktop-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
@@ -1255,16 +1253,17 @@
           if ((error.message || "").includes("account_role_already_set")) {
             const { data: account } = await supabase.from("profiles")
               .select("role,profile_status").eq("id", currentUser.id).maybeSingle();
+            if (account && account.profile_status === "complete") {
+              throw new Error("Für dieses Konto ist bereits ein vollständiges Profil hinterlegt. Bitte kehre zum Dashboard zurück.");
+            }
             throw new Error("Die Rollenänderung ist in Supabase noch nicht aktiviert. Führe die neue Migration aus und lade die Seite danach neu.");
           }
           const code = error.code ? " (" + error.code + ")" : "";
           throw new Error("Rolle konnte nicht gespeichert werden" + code + ": " + (error.message || "Bitte versuche es erneut."));
         }
-        const previousRole = wizard.role;
-        const nextRole = data || selected.value;
-        const changedRole = previousRole && previousRole !== nextRole;
-        await loadWizard(nextRole, 1);
-        if (changedRole) showNotice("Rolle geändert. Ergänze jetzt dein Profil für " + (nextRole === "couple" ? "Hochzeitspaare" : "Fotografen") + ".");
+        wizard.role = data || selected.value;
+        currentRole = wizard.role;
+        wizard.step = 1;
       } else if (wizard.step === 1 || wizard.step === 2) {
         if (!form.reportValidity()) return;
         const values = collectFields();
@@ -1310,10 +1309,6 @@
   });
 
   document.querySelector("#profile-action").addEventListener("click", () => beginWizard(currentRole, currentRole ? 1 : 0));
-  const roleChangeButton = document.querySelector("#role-change");
-  if (roleChangeButton) roleChangeButton.addEventListener("click", () => beginWizard(currentRole, 0));
-  const wizardRoleChangeButton = document.querySelector("#wizard-role-change");
-  if (wizardRoleChangeButton) wizardRoleChangeButton.addEventListener("click", () => { wizard.step = 0; renderWizard(); });
   document.querySelector("#desktop-nav").addEventListener("click", (event) => {
     if (event.target.closest("[data-profile-setup]")) beginWizard(currentRole, 1);
   });
