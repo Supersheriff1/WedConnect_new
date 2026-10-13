@@ -56,11 +56,11 @@
     .photo-preview span{display:block;margin-top:7px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}
     @media(max-width:560px){.photo-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.photo-preview img{height:120px}}
 
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+    .loading-brand{display:grid;justify-items:center;gap:13px;margin-bottom:12px}.loading-wordmark{color:var(--ink);font-size:25px;font-weight:800;letter-spacing:-.055em;animation:brand-breathe 2.4s ease-in-out infinite}.loading-wordmark span{color:var(--gold)}.loading-connection{height:14px;display:flex;align-items:center;justify-content:center}.loading-connection i{width:7px;height:7px;border:1px solid var(--gold);border-radius:50%;background:var(--surface);animation:node-pulse 1.8s ease-in-out infinite}.loading-connection i:last-child{animation-delay:.9s}.loading-connection b{position:relative;width:32px;height:1px;overflow:hidden;background:var(--border)}.loading-connection b::after{content:"";position:absolute;inset:0 auto 0 0;width:9px;background:var(--gold);animation:link-travel 1.8s ease-in-out infinite}@keyframes brand-breathe{0%,100%{opacity:.82}50%{opacity:1}}@keyframes node-pulse{0%,100%{transform:scale(.78);box-shadow:0 0 0 0 rgb(213 182 122 / 0%)}50%{transform:scale(1);box-shadow:0 0 0 4px rgb(213 182 122 / 12%)}}@keyframes link-travel{0%{transform:translateX(-2px);opacity:.25}50%{opacity:1}100%{transform:translateX(25px);opacity:.25}}\n    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
   </style>
 </head>
 <body>
-  <div id="loading" class="loading"><div class="loading-card"><strong>WedConnect</strong><p>Dein Bereich wird geladen …</p></div></div>
+  <div id="loading" class="loading" role="status" aria-live="polite"><div class="loading-card"><div class="loading-brand"><span class="loading-wordmark" aria-hidden="true">Wed<span>Connect</span></span><span class="loading-connection" aria-hidden="true"><i></i><b></b><i></i></span></div><p>Dein Bereich wird vorbereitet …</p></div></div>
   <main id="onboarding" class="onboarding hidden">
     <header class="setup-topbar">
       <a class="mobile-brand" href="/dashboard.html">Wed<span>Connect</span></a>
