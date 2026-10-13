@@ -21,6 +21,7 @@
   let mode = "signup";
   let busy = false;
   let pendingGoogleReturn = authReturn === "google";
+  let googleAuthInProgress = false;
   let redirecting = false;
 
   if (!config || !config.url || !config.publishableKey || !createClient) {
@@ -95,6 +96,13 @@
     window.location.assign(new URL("dashboard.html", appBaseUrl).toString());
   }
 
+  function finishGoogleReturn(session) {
+    if (!pendingGoogleReturn || !session || redirecting) return;
+    pendingGoogleReturn = false;
+    clearAuthReturn();
+    goToDashboard();
+  }
+
   document.querySelectorAll("[data-signup]").forEach((button) => {
     button.addEventListener("click", () => {
       setMode("signup");
@@ -111,6 +119,8 @@
   });
 
   googleButton.addEventListener("click", async () => {
+    if (googleAuthInProgress) return;
+    googleAuthInProgress = true;
     googleButton.disabled = true;
     setStatus("Weiterleitung zu Google …");
     try {
@@ -120,6 +130,7 @@
       });
       if (error) throw error;
     } catch (error) {
+      googleAuthInProgress = false;
       setStatus(error && error.message ? error.message : "Die Anmeldung mit Google ist gerade nicht verfügbar.", "error");
       googleButton.disabled = false;
     }
@@ -182,10 +193,8 @@
       if (!dialog.open) dialog.showModal();
       return;
     }
-    if (pendingGoogleReturn && (event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-      pendingGoogleReturn = false;
-      clearAuthReturn();
-      goToDashboard();
+    if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+      finishGoogleReturn(session);
     }
   });
 
@@ -215,9 +224,10 @@
           return;
         }
         if (data.session) {
+          finishGoogleReturn(data.session);
+        } else {
           pendingGoogleReturn = false;
-          clearAuthReturn();
-          goToDashboard();
+          setStatus("Google-Anmeldung wurde nicht abgeschlossen. Bitte versuche es erneut.", "error");
         }
       }).catch(() => {
         pendingGoogleReturn = false;
