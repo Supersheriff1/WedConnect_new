@@ -956,6 +956,7 @@
       image.src = data.signedUrl;
       image.alt = labels[photo.photo_type] + " " + (index + 1);
       makeImageViewable(image, data.signedUrl, image.alt);
+      activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("span");
       caption.textContent = labels[photo.photo_type] || "Foto";
       card.append(image, caption);
