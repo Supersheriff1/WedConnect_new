@@ -521,7 +521,7 @@
     wizard.photos = wizard.photos.filter((item) => item.object_path !== photo.object_path);
     const paths = [photo.object_path, photo.display_path].filter(Boolean);
     const { error: storageError } = await supabase.storage.from(photoBucket).remove(paths);
-    if (storageError) throw new Error("Das Foto wurde aus dem Profil entfernt, aber die gespeicherte Datei konnte nicht vollständig gelöscht werden.");
+    return storageError;
   }
 
   function updateCouplePhotoCounts() {
@@ -563,9 +563,10 @@
         if (!window.confirm((labels[photo.photo_type] || "Foto") + " und seine Darstellung endgültig löschen?")) return;
         deleteButton.disabled = true;
         try {
-          await removeProfilePhoto(photo);
+          const storageError = await removeProfilePhoto(photo);
           await loadExistingCouplePhotos();
           updateCouplePhotoCounts();
+          if (storageError) errorLine.textContent = "Das Foto wurde aus dem Profil entfernt. Die gespeicherte Datei konnte nicht vollständig gelöscht werden.";
         } catch (error) {
           errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gelöscht werden.";
         } finally {
@@ -634,7 +635,29 @@
           editButton.disabled = false;
         }
       });
-      card.append(image, caption, editButton);
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "button button-secondary";
+      deleteButton.type = "button";
+      deleteButton.textContent = "Foto löschen";
+      deleteButton.addEventListener("click", async () => {
+        if (!window.confirm("Stilfoto " + (index + 1) + " und sein Zuschnitt endgültig löschen?")) return;
+        deleteButton.disabled = true;
+        editButton.disabled = true;
+        try {
+          const storageError = await removeProfilePhoto(photo);
+          await loadExistingPortfolioPhotos();
+          if (storageError) errorLine.textContent = "Das Foto wurde aus dem Profil entfernt. Die gespeicherte Datei konnte nicht vollständig gelöscht werden.";
+        } catch (error) {
+          errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gelöscht werden.";
+        } finally {
+          deleteButton.disabled = false;
+          editButton.disabled = false;
+        }
+      });
+      const actions = document.createElement("div");
+      actions.className = "portfolio-photo-actions";
+      actions.append(editButton, deleteButton);
+      card.append(image, caption, actions);
       container.append(card);
     }
     updatePortfolioPhotoCount();
