@@ -433,7 +433,7 @@
       const context = canvas.getContext("2d");
       context.fillStyle = "#25242b";
       context.fillRect(0, 0, canvas.width, canvas.height);
-      const scale = Math.min(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+      const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
       const width = image.naturalWidth * scale;
       const height = image.naturalHeight * scale;
       context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
@@ -575,7 +575,8 @@
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
       const image = document.createElement("img");
-      image.src = item.previewUrl;
+      image.src = item.placement === "gallery" ? item.originalPreviewUrl : item.previewUrl;
+      card.classList.toggle("is-gallery-only", item.placement === "gallery");
       image.alt = "Ausgewähltes Stilfoto " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const actions = document.createElement("div");
@@ -595,6 +596,8 @@
       const placementSelect = portfolioPlacementSelect(item.placement || "both", "Verwendung von Stilfoto " + (index + 1));
       placementSelect.addEventListener("change", () => {
         item.placement = placementSelect.value;
+        image.src = item.placement === "gallery" ? item.originalPreviewUrl : item.previewUrl;
+        card.classList.toggle("is-gallery-only", item.placement === "gallery");
         updatePortfolioPhotoCount();
       });
       const removeButton = document.createElement("button");
@@ -754,7 +757,7 @@
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
       const image = document.createElement("img");
-      image.src = displayUrl;
+      image.src = portfolioPlacement(photo) === "gallery" ? originalData.signedUrl : displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const editButton = document.createElement("button");
@@ -828,6 +831,8 @@
           errorLine.textContent = "Die Fotoauswahl konnte nicht gespeichert werden. Bitte prüfe die Supabase-Migration.";
         } else {
           photo.portfolio_placement = placementSelect.value;
+          image.src = placementSelect.value === "gallery" ? originalData.signedUrl : displayUrl;
+          card.classList.toggle("is-gallery-only", placementSelect.value === "gallery");
           updatePortfolioPhotoCount();
         }
         placementSelect.disabled = false;
@@ -848,7 +853,7 @@
     renderPendingPortfolioPhotos();
     loadExistingPortfolioPhotos();
     updatePortfolioPhotoCount();
-    input.addEventListener("change", () => {
+    input.addEventListener("change", async () => {
       errorLine.textContent = "";
       const accepted = ["image/jpeg", "image/png", "image/webp"];
       const additions = [];
@@ -862,7 +867,17 @@
           continue;
         }
         const originalPreviewUrl = URL.createObjectURL(file);
-        additions.push({ file, name: file.name, originalPreviewUrl, previewUrl: originalPreviewUrl, displayFile: null, placement: "both" });
+        try {
+          const displayFile = await createContainedPhoto(file);
+          additions.push({
+            file, name: file.name, originalPreviewUrl,
+            previewUrl: URL.createObjectURL(displayFile),
+            displayFile, placement: "both"
+          });
+        } catch (error) {
+          URL.revokeObjectURL(originalPreviewUrl);
+          errorLine.textContent = error && error.message ? error.message : "Ein Stilfoto konnte nicht vorbereitet werden.";
+        }
       }
       wizard.pendingPhotos = (wizard.pendingPhotos || []).concat(additions);
       input.value = "";
