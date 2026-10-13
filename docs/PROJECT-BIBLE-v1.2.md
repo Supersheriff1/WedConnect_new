@@ -16,7 +16,7 @@ Das Projekt umfasst eine öffentliche Website, die App für beide Rollen, die te
 Die Website erklärt WedConnect, bevor sich jemand registriert:
 
 - Idee und Ablauf des gegenseitigen Matchings
-- Services für Paare und Fotograf:innen
+- Services für Paare und Fotografen
 - Erwartungen und Voraussetzungen für eine TFP-Zusammenarbeit
 - Preise, kostenlose Funktionen und Pro-Angebot
 - häufige Fragen, Hilfe und Kontakt
@@ -86,7 +86,7 @@ Nutzer können Profil- und Portfoliofotos hochladen. Die Fotos werden vor dem Ab
 
 ## 6. Entdecken, Suche und Filter
 
-Paare entdecken Fotograf:innen. Fotograf:innen entdecken Hochzeiten.
+Paare entdecken Fotografen. Fotografen entdecken Hochzeiten.
 
 Die Auswahl kann nach passenden Kriterien eingegrenzt werden, zum Beispiel:
 
@@ -132,7 +132,7 @@ Nach einem Match können die Beteiligten direkt miteinander schreiben. Der Chat 
 
 Als Standard erhält das Hochzeitspaar die vollen Nutzungsrechte an den für es erstellten Fotos.
 
-Die Nutzung durch Fotograf:innen, beispielsweise für Portfolio, Website oder soziale Medien, wird davon getrennt und muss ausdrücklich vereinbart werden. Die Zustimmung und ihr Umfang müssen nachvollziehbar dokumentiert sein.
+Die Nutzung durch Fotografen, beispielsweise für Portfolio, Website oder soziale Medien, wird davon getrennt und muss ausdrücklich vereinbart werden. Die Zustimmung und ihr Umfang müssen nachvollziehbar dokumentiert sein.
 
 **Umsetzung:** Verständliche Rechteauswahl im Profil und eine verbindliche Rechtevereinbarung vor der Zusammenarbeit. Die rechtlichen Texte müssen für den tatsächlichen Betrieb fachlich geprüft werden.
 
@@ -212,7 +212,7 @@ Die vorhandene HTML-Demo dient dazu, Gestaltung und Kernabläufe zu zeigen:
 
 - öffentliche Informationsansicht
 - Rollenwahl und simulierte Anmeldung
-- Paar- und Fotograf:innenansicht
+- Paar- und Fotografenansicht
 - Demo-Profile, Filter und Portfolio-Galerien
 - Interessen und Matches
 - Match-Animation
@@ -221,3 +221,11 @@ Die vorhandene HTML-Demo dient dazu, Gestaltung und Kernabläufe zu zeigen:
 - lokale Speicherung im Browser
 
 Sie ist kein Produktivsystem. Anmeldung, Datenübertragung, Zahlungen und echte Chat-Sicherheit sind darin nicht angebunden.
+
+### Supabase-App
+
+- E-Mail- und Google-Anmeldung verwenden Supabase Auth; die Anmeldung fragt keine Rolle ab.
+- Nach der Anmeldung beginnt die Profilerstellung im Dashboard mit der Rollenwahl.
+- Rollenprofile, Profilstatus und private Fotos werden über Supabase gespeichert.
+- Die Migrationen `20261012160000_init_profiles.sql` und `20261013120000_profile_onboarding.sql` müssen in dieser Reihenfolge ausgeführt werden.
+- Matching und Nachrichten sind noch nicht implementiert.
