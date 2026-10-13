@@ -177,7 +177,7 @@
       showNotice("Abmelden war gerade nicht möglich. Bitte versuche es erneut.");
       button.disabled = false;
     } else {
-      window.location.assign("/?auth=signin");
+      window.location.assign(new URL("index.html?auth=signin", window.location.href).toString());
     }
   }));
 
@@ -189,7 +189,7 @@
     supabase = createClient(config.url, config.publishableKey);
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
-      window.location.replace("/?auth=signin");
+      window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
       return;
     }
 
