@@ -441,6 +441,36 @@
     }
   });
 
+  function renderPhotoSegments(container) {
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll(".portfolio-photo-card, .photo-preview"));
+    container.querySelectorAll(".photo-segments").forEach((segments) => segments.remove());
+    if (!cards.length) return;
+    let activeIndex = cards.findIndex((card) => card.classList.contains("is-mobile-main"));
+    if (activeIndex < 0) {
+      activeIndex = 0;
+      cards[0].classList.add("is-mobile-main");
+    }
+    cards.forEach((card, index) => {
+      const image = card.querySelector("img");
+      if (image) {
+        const baseLabel = image.dataset.galleryLabel || image.alt || "Foto";
+        image.dataset.galleryLabel = baseLabel;
+        image.setAttribute("aria-label", baseLabel + " · Foto " + (index + 1) + " von " + cards.length +
+          (index === activeIndex ? " · angezeigt" : " · antippen zum Anzeigen"));
+      }
+    });
+    const segments = document.createElement("div");
+    segments.className = "photo-segments";
+    segments.setAttribute("aria-hidden", "true");
+    cards.forEach((_, index) => {
+      const segment = document.createElement("span");
+      if (index === activeIndex) segment.classList.add("is-active");
+      segments.append(segment);
+    });
+    cards[activeIndex].append(segments);
+  }
+
   function activateMobileGalleryPhoto(container, card, image, label) {
     if (!container || !card || !image) return;
     if (!container.querySelector(".is-mobile-main")) card.classList.add("is-mobile-main");
@@ -450,6 +480,7 @@
       container.querySelectorAll(".portfolio-photo-card, .photo-preview").forEach((photoCard) => {
         photoCard.classList.toggle("is-mobile-main", photoCard === card);
       });
+      renderPhotoSegments(container);
     };
     image.addEventListener("click", selectAsMain);
     if (mobile.matches) {
@@ -509,6 +540,7 @@
       card.append(image, caption, actions);
       container.append(card);
     });
+    renderPhotoSegments(container);
   }
 
   function updatePortfolioPhotoCount() {
@@ -626,6 +658,7 @@
       card.append(image, caption, actions);
       container.append(card);
     }
+    renderPhotoSegments(container);
     updateCouplePhotoCounts();
   }
 
@@ -713,6 +746,7 @@
       card.append(image, caption, actions);
       container.append(card);
     }
+    renderPhotoSegments(container);
     updatePortfolioPhotoCount();
   }
 
