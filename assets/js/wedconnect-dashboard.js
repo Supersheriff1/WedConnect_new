@@ -185,8 +185,8 @@
 
   function renderPhotographerDetails() {
     return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Abschnitte und Reportage-Formate aus, die du anbietest.") +
-      field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' maxlength="300"') +
-      field("website_url", "Website (optional)", "text", "https://…", false, ' inputmode="url" maxlength="500"');
+      field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
+      field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"');
   }
 
   function photoPicker(name, label) {
@@ -238,9 +238,20 @@
           ["Begleitung", data.coverage_scope], ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
-    return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) =>
-      "<div><strong>" + escapeHtml(entry[0]) + "</strong><span>" + escapeHtml(entry[1]) + "</span></div>"
-    ).join("") + "</div>";
+    return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) => {
+      if ((entry[0] === "Instagram" || entry[0] === "Website") && entry[1] !== "Nicht angegeben") {
+        let display = entry[1];
+        try {
+          const parsed = new URL(entry[1]);
+          display = entry[0] === "Instagram"
+            ? "@" + parsed.pathname.split("/").filter(Boolean)[0]
+            : parsed.hostname.replace(/^www\./i, "");
+        } catch (_) {}
+        const kind = entry[0] === "Instagram" ? "instagram" : "website";
+        return '<div class="setup-summary-social"><strong>' + escapeHtml(entry[0]) + '</strong><span><a class="profile-social-link profile-social-' + kind + '" href="' + escapeHtml(entry[1]) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(display) + '<span aria-hidden="true"> ↗</span></a></span></div>';
+      }
+      return "<div><strong>" + escapeHtml(entry[0]) + "</strong><span>" + escapeHtml(entry[1]) + "</span></div>";
+    }).join("") + "</div>";
   }
 
   function renderWizard() {
@@ -1104,7 +1115,6 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     errorLine.textContent = "";
-    const originalButtonHtml = nextButton.innerHTML;
     nextButton.disabled = true;
     nextButton.innerHTML = wizard.step === 3 ? "Fotos werden hochgeladen …" : wizard.step === 4 ? "Profil wird abgeschlossen …" : "Wird gespeichert …";
     backButton.disabled = true;
@@ -1157,7 +1167,9 @@
       errorLine.textContent = error && error.message ? error.message : "Das hat gerade nicht funktioniert. Bitte versuche es erneut.";
     } finally {
       nextButton.disabled = false;
-      nextButton.innerHTML = originalButtonHtml;
+      nextButton.innerHTML = wizard.step === 4
+        ? 'Profil abschließen <span aria-hidden="true">✓</span>'
+        : 'Weiter <span aria-hidden="true">→</span>';
       backButton.disabled = false;
     }
   });
