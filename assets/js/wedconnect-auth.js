@@ -17,6 +17,7 @@
   const emailInput = document.querySelector("#auth-email");
   let mode = "signup";
   let busy = false;
+  const authReturn = new URLSearchParams(window.location.search).get("auth");
   let pendingGoogleReturn = authReturn === "google";
   const googleModeStorageKey = "wedconnect-google-auth-mode";
 
@@ -205,7 +206,6 @@
 
   setMode("signup");
 
-  const authReturn = new URLSearchParams(window.location.search).get("auth");
   if (authReturn === "confirmed") {
     setMode("signin");
     setStatus("E-Mail bestätigt. Du kannst dich jetzt anmelden.", "success");
