@@ -179,6 +179,7 @@
     .auth-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 27px; }
     .auth-dialog-brand { color: var(--ink); font-size: 17px; font-weight: 700; letter-spacing: -.045em; text-decoration: none; }
     .auth-dialog-brand span { color: var(--gold); }
+    .auth-dialog-brand:focus-visible { outline: none; filter: brightness(1.18); }
     .auth-close { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--raised, #34323a); color: var(--muted); cursor: pointer; transition: color .18s ease, border-color .18s ease, background .18s ease; }
     .auth-close:hover { border-color: var(--gold); background: var(--hover, #3c3943); color: var(--ink); }
     .auth-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
@@ -358,7 +359,7 @@
     <p class="auth-intro" id="auth-intro">Erstelle zuerst dein Konto. Deine Rolle legst du später im Profil fest.</p>
     <form class="auth-form" id="auth-form">
       <label class="auth-field" for="auth-email">E-Mail-Adresse
-        <input id="auth-email" name="email" type="email" autocomplete="email" required>
+        <input id="auth-email" name="email" type="email" autocomplete="email" autofocus required>
       </label>
       <label class="auth-field" id="auth-password-field" for="auth-password">Passwort
         <input id="auth-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
