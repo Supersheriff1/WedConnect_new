@@ -237,7 +237,7 @@
           ["Begleitung", data.coverage_scope], ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
-    return '<div id="photo-preview-grid" class="photo-preview-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) =>
+    return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) =>
       "<div><strong>" + escapeHtml(entry[0]) + "</strong><span>" + escapeHtml(entry[1]) + "</span></div>"
     ).join("") + "</div>";
   }
@@ -387,7 +387,7 @@
   }
 
   cropZoom.addEventListener("input", () => {
-    if (!cropState || window.matchMedia("(pointer: coarse)").matches) return;
+    if (!cropState) return;
     cropState.zoom = Number(cropZoom.value);
     drawCrop(cropCanvas, cropState);
   });
@@ -956,7 +956,6 @@
       image.src = data.signedUrl;
       image.alt = labels[photo.photo_type] + " " + (index + 1);
       makeImageViewable(image, data.signedUrl, image.alt);
-      activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("span");
       caption.textContent = labels[photo.photo_type] || "Foto";
       card.append(image, caption);
