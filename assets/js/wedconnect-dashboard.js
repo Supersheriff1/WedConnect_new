@@ -67,6 +67,43 @@
       (hint ? '<p class="setup-hint">' + hint + "</p>" : "") + "</div>";
   }
 
+  function portfolioPlacement(photo) {
+    return photo && photo.portfolio_placement ? photo.portfolio_placement : "both";
+  }
+
+  function portfolioPhotoCounts() {
+    const portfolio = wizard.photos.filter((photo) => photo.photo_type === "portfolio");
+    const pending = wizard.pendingPhotos || [];
+    const all = [
+      ...portfolio.map((photo) => portfolioPlacement(photo)),
+      ...pending.map((photo) => photo.placement || "both")
+    ];
+    return {
+      total: all.length,
+      highlights: all.filter((placement) => placement === "highlight" || placement === "both").length,
+      gallery: all.filter((placement) => placement === "gallery" || placement === "both").length
+    };
+  }
+
+  function portfolioPlacementSelect(value, label) {
+    const selected = value || "both";
+    const select = document.createElement("select");
+    select.className = "photo-placement-select";
+    select.setAttribute("aria-label", label || "Foto verwenden als");
+    [
+      ["highlight", "Highlight · 4:5"],
+      ["gallery", "Galerie · Original"],
+      ["both", "Highlight + Galerie"]
+    ].forEach(([optionValue, text]) => {
+      const option = document.createElement("option");
+      option.value = optionValue;
+      option.textContent = text;
+      option.selected = selected === optionValue;
+      select.append(option);
+    });
+    return select;
+  }
+
   function currentPhotoCount(type) {
     return wizard.photos.filter((photo) => photo.photo_type === type).length;
   }
@@ -226,7 +263,8 @@
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · 4:5-Highlights</p>' +
+      '<p class="photo-upload-detail">Pro Foto: Highlight, Galerie oder beides · Highlights im Format 4:5</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
@@ -249,10 +287,13 @@
           ["Begleitung", data.coverage_scope],
           ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "negotiable" ? "Verhandelbar" : data.compensation_type === "fixed" ? Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
           ["Zusätzliche Vergütung für Nutzungsrechte", data.usage_rights_compensation === "yes" ? "Ja" : data.usage_rights_compensation === "no" ? "Nein" : "Nicht angegeben"],
-          ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
+          ["Highlights", portfolioPhotoCounts().highlights + " Fotos"], ["Galerie", portfolioPhotoCounts().gallery + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
-    return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotogalerie"></div><div class="setup-summary">' + entries.map((entry) => {
+    const photoReview = wizard.role === "photographer"
+      ? '<div class="profile-review-photos"><section><h3>Highlightfotos · 4:5</h3><div id="photo-highlight-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Highlightfotos"></div></section><section><h3>Galerie · Originalformat</h3><div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotogalerie"></div></section></div>'
+      : '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotovorschau"></div>';
+    return photoReview + '<div class="setup-summary">' + entries.map((entry) => {
       if ((entry[0] === "Instagram" || entry[0] === "Website") && entry[1] !== "Nicht angegeben") {
         let display = entry[1];
         try {
@@ -551,6 +592,11 @@
         item.previewUrl = URL.createObjectURL(blob);
         renderPendingPortfolioPhotos();
       }));
+      const placementSelect = portfolioPlacementSelect(item.placement || "both", "Verwendung von Stilfoto " + (index + 1));
+      placementSelect.addEventListener("change", () => {
+        item.placement = placementSelect.value;
+        updatePortfolioPhotoCount();
+      });
       const removeButton = document.createElement("button");
       removeButton.className = "button button-secondary";
       removeButton.type = "button";
@@ -566,7 +612,7 @@
         updatePortfolioPhotoCount();
       });
       actions.append(removeButton, cropButton);
-      card.append(image, actions);
+      card.append(image, actions, placementSelect);
       container.append(card);
     });
     syncMobileGallerySelection(container);
@@ -574,7 +620,9 @@
 
   function updatePortfolioPhotoCount() {
     const count = document.querySelector("#portfolio-photo-count");
-    if (count) count.textContent = "Bereits hochgeladen: " + currentPhotoCount("portfolio") + " · ausgewählt: " + (wizard.pendingPhotos || []).length + " · mindestens 3";
+    if (!count) return;
+    const totals = portfolioPhotoCounts();
+    count.textContent = "Highlights: " + totals.highlights + " / mindestens 3 · Galerie: " + totals.gallery;
   }
 
   const photoViewer = document.querySelector("#photo-viewer");
@@ -767,10 +815,27 @@
           editButton.disabled = false;
         }
       });
+      const placementSelect = portfolioPlacementSelect(portfolioPlacement(photo), "Verwendung von Stilfoto " + (index + 1));
+      placementSelect.addEventListener("change", async () => {
+        const previous = portfolioPlacement(photo);
+        placementSelect.disabled = true;
+        const { error } = await supabase.from("profile_photos")
+          .update({ portfolio_placement: placementSelect.value })
+          .eq("user_id", currentUser.id)
+          .eq("object_path", photo.object_path);
+        if (error) {
+          placementSelect.value = previous;
+          errorLine.textContent = "Die Fotoauswahl konnte nicht gespeichert werden. Bitte prüfe die Supabase-Migration.";
+        } else {
+          photo.portfolio_placement = placementSelect.value;
+          updatePortfolioPhotoCount();
+        }
+        placementSelect.disabled = false;
+      });
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
       actions.append(deleteButton, editButton);
-      card.append(image, actions);
+      card.append(image, actions, placementSelect);
       container.append(card);
     }
     syncMobileGallerySelection(container);
@@ -797,7 +862,7 @@
           continue;
         }
         const originalPreviewUrl = URL.createObjectURL(file);
-        additions.push({ file, name: file.name, originalPreviewUrl, previewUrl: originalPreviewUrl, displayFile: null });
+        additions.push({ file, name: file.name, originalPreviewUrl, previewUrl: originalPreviewUrl, displayFile: null, placement: "both" });
       }
       wizard.pendingPhotos = (wizard.pendingPhotos || []).concat(additions);
       input.value = "";
@@ -915,7 +980,7 @@
     if (role === "couple") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
         supabase.from("couple_profiles").select("*").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
       ]);
       if (error) throw error;
       if (photoError) throw photoError;
@@ -924,7 +989,7 @@
     } else if (role === "photographer") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
         supabase.from("photographer_profiles").select("*").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
       ]);
       if (error) throw error;
       if (photoError) throw photoError;
@@ -946,7 +1011,7 @@
     }
   }
 
-  async function uploadFile(file, photoType, sortOrder, displayFile) {
+  async function uploadFile(file, photoType, sortOrder, displayFile, portfolioPlacement) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       throw new Error("Bitte lade JPG-, PNG- oder WebP-Bilder hoch.");
     }
@@ -975,7 +1040,8 @@
       photo_type: photoType,
       object_path: objectPath,
       display_path: displayPath,
-      sort_order: sortOrder
+      sort_order: sortOrder,
+      ...(photoType === "portfolio" ? { portfolio_placement: portfolioPlacement || "both" } : {})
     });
     if (rowError) {
       await supabase.storage.from(photoBucket).remove([objectPath, displayPath]);
@@ -1010,17 +1076,17 @@
       }
     } else {
       const pending = wizard.pendingPhotos || [];
-      const existingCount = currentPhotoCount("portfolio");
-      if (existingCount + pending.length < 3) {
-        throw new Error("Für dein Portfolio brauchst du mindestens 3 Stilfotos. Aktuell ausgewählt oder hochgeladen: " + (existingCount + pending.length) + ".");
+      const totals = portfolioPhotoCounts();
+      if (totals.highlights < 3) {
+        throw new Error("Wähle mindestens 3 Fotos als Highlight oder „Highlight + Galerie“ aus.");
       }
       for (const [index, item] of pending.entries()) {
         const displayFile = item.displayFile || await createContainedPhoto(item.file);
-        await uploadFile(item.file, "portfolio", existingCount + index, displayFile);
+        await uploadFile(item.file, "portfolio", existingCount + index, displayFile, item.placement || "both");
       }
     }
     const { data, error } = await supabase.from("profile_photos")
-      .select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
+      .select("photo_type,object_path,display_path,sort_order,portfolio_placement").eq("user_id", currentUser.id).order("sort_order");
     if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden.");
     wizard.photos = data || [];
     if (wizard.role === "photographer") {
@@ -1033,25 +1099,39 @@
   }
 
   async function loadPhotoPreviews() {
-    const container = document.querySelector("#photo-preview-grid");
-    if (!container) return;
-    container.innerHTML = "";
     const labels = { couple: "Gemeinsames Foto", partner_one: "Erste Person", partner_two: "Zweite Person", portfolio: "Portfolio" };
     const photos = wizard.photos;
-    for (let index = 0; index < photos.length; index += 1) {
-      const photo = photos[index];
-      const photoPath = wizard.role === "photographer" && photo.photo_type === "portfolio"
-        ? photo.object_path
-        : photo.display_path || photo.object_path;
-      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
-      if (error || !data || !data.signedUrl) continue;
-      const card = document.createElement("div");
-      card.className = "photo-preview";
-      const image = document.createElement("img");
-      image.src = data.signedUrl;
-      image.alt = labels[photo.photo_type] + " " + (index + 1);
-      card.append(image);
-      container.append(card);
+    const isPhotographer = wizard.role === "photographer";
+    const targets = isPhotographer
+      ? [
+          { container: document.querySelector("#photo-highlight-grid"), placement: "highlight" },
+          { container: document.querySelector("#photo-preview-grid"), placement: "gallery" }
+        ]
+      : [{ container: document.querySelector("#photo-preview-grid"), placement: null }];
+    for (const target of targets) {
+      if (!target.container) continue;
+      target.container.innerHTML = "";
+      const visiblePhotos = photos.filter((photo) => {
+        if (photo.photo_type !== "portfolio" || !target.placement) return true;
+        const placement = portfolioPlacement(photo);
+        return placement === "both" || placement === target.placement;
+      });
+      for (let index = 0; index < visiblePhotos.length; index += 1) {
+        const photo = visiblePhotos[index];
+        const highlight = target.placement === "highlight";
+        const photoPath = highlight
+          ? photo.display_path || photo.object_path
+          : photo.object_path;
+        const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
+        if (error || !data || !data.signedUrl) continue;
+        const card = document.createElement("div");
+        card.className = "photo-preview";
+        const image = document.createElement("img");
+        image.src = data.signedUrl;
+        image.alt = labels[photo.photo_type] + " " + (index + 1);
+        card.append(image);
+        target.container.append(card);
+      }
     }
   }
 
