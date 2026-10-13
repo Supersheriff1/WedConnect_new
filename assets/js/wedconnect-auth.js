@@ -91,7 +91,7 @@
   function goToDashboard() {
     if (redirecting) return;
     redirecting = true;
-    window.location.assign("/dashboard.html");
+    window.location.assign(new URL("dashboard.html", window.location.href).toString());
   }
 
   document.querySelectorAll("[data-signup]").forEach((button) => {
