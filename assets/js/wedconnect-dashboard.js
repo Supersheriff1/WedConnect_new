@@ -172,6 +172,7 @@
   }
 
   function renderPhotographerBasics() {
+    const compensationType = valueOf("compensation_type");
     return '<div class="photographer-basics">' +
       field("first_name", "Dein Vorname", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       multiSelectField("regions", "Region und Einsatzgebiet", REGION_OPTIONS, "Wähle ein oder mehrere Bundesländer. „Ganz Österreich“ schließt einzelne Bundesländer aus.") +
@@ -180,12 +181,6 @@
       field("weddings_photographed", "Fotografierte Hochzeiten", "number", "Optional, wenn du stattdessen Jahre angibst.", false, ' min="0" max="10000" step="1" inputmode="numeric"') +
       "</div>" +
       multiSelectField("styles", "Dein Bildstil", STYLE_OPTIONS, "Wähle alle Bildstile, die deine Arbeit beschreiben.") +
-      "</div>";
-  }
-
-  function renderPhotographerDetails() {
-    const compensationType = valueOf("compensation_type");
-    return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Abschnitte und Reportage-Formate aus, die du anbietest.") +
       choiceField("compensation_type", "Vergütung für deine fotografische Leistung", [
         ["free", "Unentgeltlich"],
         ["fixed", "Fixbetrag"],
@@ -196,6 +191,11 @@
         ["yes", "Ja"],
         ["no", "Nein"]
       ], "Gilt zusätzlich zur Vergütung für den fotografischen Einsatz.") +
+      "</div>";
+  }
+
+  function renderPhotographerDetails() {
+    return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Abschnitte und Reportage-Formate aus, die du anbietest.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
       field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"');
   }
