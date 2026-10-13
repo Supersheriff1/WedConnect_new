@@ -17,10 +17,13 @@
   const emailInput = document.querySelector("#auth-email");
   const authIntro = document.querySelector("#auth-intro");
   const authReturn = new URLSearchParams(window.location.search).get("auth");
+  const googlePendingKey = "wedconnect:google-oauth-pending";
+  let googleReturnInProgress = authReturn === "google";
+  try { googleReturnInProgress = googleReturnInProgress || window.sessionStorage.getItem(googlePendingKey) === "1"; } catch (_) {}
   const appBaseUrl = new URL(".", window.location.href);
   let mode = "signup";
   let busy = false;
-  let pendingGoogleReturn = authReturn === "google";
+  let pendingGoogleReturn = googleReturnInProgress;
   let googleAuthInProgress = false;
   let googleReturnTimer = null;
   let redirecting = false;
@@ -100,6 +103,7 @@
   function finishGoogleReturn(session) {
     if (!pendingGoogleReturn || !session || redirecting) return;
     pendingGoogleReturn = false;
+    try { window.sessionStorage.removeItem(googlePendingKey); } catch (_) {}
     if (googleReturnTimer) {
       window.clearTimeout(googleReturnTimer);
       googleReturnTimer = null;
@@ -126,6 +130,7 @@
   googleButton.addEventListener("click", async () => {
     if (googleAuthInProgress) return;
     googleAuthInProgress = true;
+    try { window.sessionStorage.setItem(googlePendingKey, "1"); } catch (_) {}
     googleButton.disabled = true;
     setStatus("Weiterleitung zu Google …");
     try {
@@ -136,6 +141,7 @@
       if (error) throw error;
     } catch (error) {
       googleAuthInProgress = false;
+      try { window.sessionStorage.removeItem(googlePendingKey); } catch (_) {}
       setStatus(error && error.message ? error.message : "Die Anmeldung mit Google ist gerade nicht verfügbar.", "error");
       googleButton.disabled = false;
     }
@@ -213,11 +219,12 @@
   } else if (authReturn === "password-reset") {
     setMode("recovery-update");
     dialog.showModal();
-  } else if (authReturn === "google") {
+  } else if (pendingGoogleReturn) {
     dialog.showModal();
     const oauthError = googleReturnError();
     if (oauthError) {
       pendingGoogleReturn = false;
+      try { window.sessionStorage.removeItem(googlePendingKey); } catch (_) {}
       setStatus(`Google-Anmeldung fehlgeschlagen: ${oauthError}`, "error");
       clearAuthReturn();
     } else {
@@ -225,6 +232,7 @@
       googleReturnTimer = window.setTimeout(() => {
         if (!pendingGoogleReturn || redirecting) return;
         pendingGoogleReturn = false;
+        try { window.sessionStorage.removeItem(googlePendingKey); } catch (_) {}
         setStatus("Die Anmeldung dauert länger als erwartet. Bitte versuche es erneut.", "error");
       }, 15000);
       supabase.auth.getSession().then(({ data, error }) => {
