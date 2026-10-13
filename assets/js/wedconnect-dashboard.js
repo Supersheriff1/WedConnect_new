@@ -259,7 +259,7 @@
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Galeriefotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Galeriefotos"></div>' +
       photoPicker("portfolio-photos", "Fotos hinzufügen") +
-      '<p class="photo-upload-detail">Markiere 3 bis 10 Fotos mit dem Stern als Highlights.</p>' +
+      '<p class="photo-upload-detail">Highlights erscheinen anderen zuerst in deiner Profilkarte bei Entdecken (4:5). Alle Fotos bleiben in deiner Galerie; markiere 3 bis 10.</p>' +
       '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Galerie: ' + portfolioCount + "</p></div>";
   }
@@ -613,7 +613,7 @@
         renderPendingPortfolioPhotos();
         updatePortfolioPhotoCount();
       });
-      actions.append(highlightButton, removeButton, cropButton);
+      actions.append(highlightButton, cropButton, removeButton);
       card.append(image, actions);
       container.append(card);
     });
@@ -840,7 +840,7 @@
       });
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
-      actions.append(highlightButton, deleteButton, editButton);
+      actions.append(highlightButton, editButton, deleteButton);
       card.append(image, actions);
       container.append(card);
     }
