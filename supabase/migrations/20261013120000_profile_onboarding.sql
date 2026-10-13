@@ -15,6 +15,7 @@ create table if not exists public.couple_profiles (
   coverage_scope text not null check (length(trim(coverage_scope)) between 1 and 1200),
   visual_style text not null check (length(trim(visual_style)) between 1 and 1200),
   image_wishes text not null check (length(trim(image_wishes)) between 1 and 2000),
+  photographer_usage_preference text not null check (photographer_usage_preference in ('open', 'case_by_case', 'no')),
   updated_at timestamptz not null default now()
 );
 
