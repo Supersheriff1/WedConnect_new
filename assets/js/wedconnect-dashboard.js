@@ -169,7 +169,7 @@
     const percent = Math.round(((step + 1) / totalSteps) * 100);
     progressFill.style.width = percent + "%";
     progressBar.setAttribute("aria-valuenow", String(percent));
-    backButton.hidden = step === 0;
+    backButton.hidden = step === 0 || (Boolean(currentRole) && step === 1);
     nextButton.innerHTML = step === 4 ? 'Profil abschließen <span aria-hidden="true">✓</span>' : 'Weiter <span aria-hidden="true">→</span>';
     errorLine.textContent = "";
     fields.innerHTML = step === 0 ? renderRoleStep()
@@ -204,15 +204,36 @@
   function normalizeInstagram(value) {
     const clean = value.trim();
     if (!clean) return null;
-    if (/^https?:\/\//i.test(clean)) return clean;
-    const handle = clean.replace(/^@/, "").replace(/^www\./i, "");
-    return "https://www.instagram.com/" + handle.replace(/^instagram\.com\//i, "").replace(/\/+$/, "") + "/";
+    let url = clean;
+    const lower = clean.toLowerCase();
+    if (!lower.startsWith("https://") && !lower.startsWith("http://")) {
+      let handle = clean.startsWith("@") ? clean.slice(1) : clean;
+      if (handle.toLowerCase().startsWith("www.instagram.com/")) {
+        url = "https://" + handle;
+      } else if (handle.toLowerCase().startsWith("instagram.com/")) {
+        url = "https://www." + handle;
+      } else {
+        url = "https://www.instagram.com/" + handle.replaceAll("/", "") + "/";
+      }
+    }
+    let parsed;
+    try { parsed = new URL(url); } catch (_) { throw new Error("Bitte gib einen gültigen Instagram-Namen oder Link ein."); }
+    if (!["instagram.com", "www.instagram.com"].includes(parsed.hostname.toLowerCase()) || !parsed.pathname.replaceAll("/", "")) {
+      throw new Error("Bitte gib einen gültigen Instagram-Namen oder Link ein.");
+    }
+    return parsed.toString();
   }
 
   function normalizeWebsite(value) {
     const clean = value.trim();
     if (!clean) return null;
-    return /^https?:\/\//i.test(clean) ? clean : "https://" + clean;
+    const url = clean.toLowerCase().startsWith("https://") || clean.toLowerCase().startsWith("http://") ? clean : "https://" + clean;
+    let parsed;
+    try { parsed = new URL(url); } catch (_) { throw new Error("Bitte gib eine gültige Website-Adresse ein."); }
+    if (!["http:", "https:"].includes(parsed.protocol) || !parsed.hostname) {
+      throw new Error("Bitte gib eine gültige Website-Adresse ein.");
+    }
+    return parsed.toString();
   }
 
   async function saveRoleProfile(values) {
@@ -226,7 +247,7 @@
     data.id = currentUser.id;
     data.updated_at = new Date().toISOString();
     const { error } = await supabase.from(table).upsert(data);
-    if (error) throw error;
+    if (error) throw new Error("Die Angaben konnten nicht gespeichert werden. Prüfe bitte Pflichtfelder und Links.");
     wizard.data[key] = data;
   }
 
@@ -397,14 +418,16 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     errorLine.textContent = "";
+    const originalButtonHtml = nextButton.innerHTML;
     nextButton.disabled = true;
+    nextButton.innerHTML = wizard.step === 3 ? "Fotos werden hochgeladen …" : wizard.step === 4 ? "Profil wird abgeschlossen …" : "Wird gespeichert …";
     backButton.disabled = true;
     try {
       if (wizard.step === 0) {
         const selected = form.querySelector('input[name="selected-role"]:checked');
         if (!selected) throw new Error("Wähle Hochzeitspaar oder Fotograf aus.");
         const { data, error } = await supabase.rpc("assign_initial_role", { p_role: selected.value });
-        if (error) throw error;
+        if (error) throw new Error("Die Rolle konnte nicht gespeichert werden. Bitte versuche es erneut.");
         wizard.role = data || selected.value;
         currentRole = wizard.role;
         wizard.step = 1;
@@ -435,6 +458,7 @@
       errorLine.textContent = error && error.message ? error.message : "Das hat gerade nicht funktioniert. Bitte versuche es erneut.";
     } finally {
       nextButton.disabled = false;
+      nextButton.innerHTML = originalButtonHtml;
       backButton.disabled = false;
     }
   });
@@ -473,7 +497,7 @@
     const { data: account, error: profileError } = await supabase
       .from("profiles").select("role,profile_status").eq("id", currentUser.id).maybeSingle();
     if (profileError) {
-      showError("Bitte führe zuerst die neue Supabase-Profilmigration aus.", "Profilsetup noch nicht eingerichtet");
+      showError("Führe in Supabase zuerst die Migration 20261013120000_profile_onboarding.sql aus.", "Profilsetup noch nicht eingerichtet");
       return;
     }
     if (!account || !account.role) {
