@@ -31,8 +31,12 @@ create table if not exists public.photographer_profiles (
   visual_style text not null check (length(trim(visual_style)) between 1 and 1200),
   availability text not null check (length(trim(availability)) between 1 and 2000),
   coverage_scope text not null check (length(trim(coverage_scope)) between 1 and 1200),
-  instagram_url text null check (instagram_url is null or instagram_url ~* '^https?://(www[.])?instagram[.]com/[^[:space:]]+/?
-  website_url text null check (website_url is null or website_url ~* '^https?://[^[:space:]]+$'),
+  instagram_url text null check (
+    instagram_url is null or instagram_url ~* '^https?://(www[.])?instagram[.]com/[^[:space:]]+/?$'
+  ),
+  website_url text null check (
+    website_url is null or website_url ~* '^https?://[^[:space:]]+$'
+  ),
   updated_at timestamptz not null default now()
 );
 
