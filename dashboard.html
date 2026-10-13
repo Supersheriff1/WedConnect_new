@@ -58,6 +58,7 @@
 
     .loading-brand{display:grid;justify-items:center;gap:13px;margin-bottom:12px}.loading-wordmark{color:var(--ink);font-size:25px;font-weight:800;letter-spacing:-.055em;animation:brand-breathe 2.4s ease-in-out infinite}.loading-wordmark span{color:var(--gold)}.loading-connection{height:14px;display:flex;align-items:center;justify-content:center}.loading-connection i{width:7px;height:7px;border:1px solid var(--gold);border-radius:50%;background:var(--surface);animation:node-pulse 1.8s ease-in-out infinite}.loading-connection i:last-child{animation-delay:.9s}.loading-connection b{position:relative;width:32px;height:1px;overflow:hidden;background:var(--border)}.loading-connection b::after{content:"";position:absolute;inset:0 auto 0 0;width:9px;background:var(--gold);animation:link-travel 1.8s ease-in-out infinite}@keyframes brand-breathe{0%,100%{opacity:.82}50%{opacity:1}}@keyframes node-pulse{0%,100%{transform:scale(.78);box-shadow:0 0 0 0 rgb(213 182 122 / 0%)}50%{transform:scale(1);box-shadow:0 0 0 4px rgb(213 182 122 / 12%)}}@keyframes link-travel{0%{transform:translateX(-2px);opacity:.25}50%{opacity:1}100%{transform:translateX(25px);opacity:.25}}\n    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
     .photographer-basics{display:grid;gap:22px}.experience-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.select-group{min-width:0}.select-group legend{margin-bottom:11px}.choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.choice-chip{min-width:0;min-height:48px;display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--body);font-size:12px;font-weight:600;cursor:pointer}.choice-chip:has(input:checked){border-color:var(--gold);background:rgb(213 182 122 / 8%);color:var(--ink)}.choice-chip input{width:16px;height:16px;flex:none;margin:0;accent-color:var(--gold)}.choice-chip span{min-width:0;line-height:1.35}.choice-group .setup-hint{margin-top:8px}@media(max-width:700px){.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.experience-grid{grid-template-columns:1fr}.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.choice-chip{padding:9px 10px;font-size:11px}}
+    .portfolio-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}.portfolio-photo-card{min-width:0;padding:9px;border:1px solid var(--border);border-radius:10px;background:var(--raised)}.portfolio-photo-card img{width:100%;height:150px;display:block;object-fit:cover;border-radius:6px;background:var(--canvas)}.portfolio-photo-card p{margin:8px 0;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.portfolio-photo-actions{display:grid;gap:7px}.portfolio-photo-card .button{width:100%;min-height:40px;padding:8px;font-size:11px}.portfolio-upload-panel>p{margin:0 0 14px}.crop-dialog{width:min(680px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:var(--body);box-shadow:0 24px 80px #09090bcc}.crop-dialog::backdrop{background:rgb(12 12 15 / 82%);backdrop-filter:blur(5px)}.crop-dialog h2{margin:0 0 6px;color:var(--ink);font-size:22px}.crop-dialog p{margin:0 0 14px;color:var(--muted);font-size:13px}.crop-canvas-wrap{width:100%;overflow:hidden;border:1px solid var(--border);border-radius:9px;background:var(--canvas)}#crop-canvas{width:100%;height:auto;display:block;aspect-ratio:3/2;touch-action:none;cursor:grab}#crop-canvas.is-dragging{cursor:grabbing}.crop-controls{display:grid;grid-template-columns:auto minmax(120px,1fr);gap:12px;align-items:center;margin-top:15px}.crop-zoom-control{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}.crop-zoom-control label{color:var(--body);font-size:12px;font-weight:700}.crop-controls label{color:var(--body);font-size:12px;font-weight:700}.crop-zoom-control input[type=range]{width:100%;accent-color:var(--gold)}.crop-dialog-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.crop-dialog-actions .button{flex:1}@media(max-width:560px){.portfolio-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-photo-card img{height:125px}.crop-dialog{padding:16px}.crop-dialog-actions{flex-direction:column-reverse}.crop-controls{grid-template-columns:1fr;gap:7px}.crop-zoom-control{grid-template-columns:auto minmax(0,1fr)}}
   </style>
 </head>
 <body>
@@ -84,6 +85,19 @@
       </form>
     </div>
   </main>
+  <dialog id="crop-dialog" class="crop-dialog" aria-labelledby="crop-title">
+    <h2 id="crop-title">Foto zuschneiden und ausrichten</h2>
+    <p>Ziehe das Foto im Rahmen. Du kannst es vergrößern und drehen.</p>
+    <div class="crop-canvas-wrap"><canvas id="crop-canvas" width="1200" height="800" aria-label="Fotoausschnitt"></canvas></div>
+    <div class="crop-controls">
+      <button class="button button-secondary" type="button" id="crop-rotate">90° drehen</button>
+      <div class="crop-zoom-control"><label for="crop-zoom">Zoom</label><input id="crop-zoom" type="range" min="1" max="3" step="0.01" value="1"></div>
+    </div>
+    <div class="crop-dialog-actions">
+      <button class="button button-secondary" type="button" id="crop-cancel">Abbrechen</button>
+      <button class="button button-primary" type="button" id="crop-save">Zuschnitt übernehmen</button>
+    </div>
+  </dialog>
   <main id="dashboard" class="shell hidden">
     <aside class="sidebar" aria-label="Hauptnavigation">
       <a class="brand" href="/dashboard.html">Wed<span>Connect</span></a>
@@ -126,7 +140,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photographer-coverage-options-v2"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photographer-crop-upload-v1"></script>
 </body>
 </html>
 
