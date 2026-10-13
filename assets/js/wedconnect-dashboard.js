@@ -537,8 +537,6 @@
       image.src = item.previewUrl;
       image.alt = "Ausgewähltes Stilfoto " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
-      const caption = document.createElement("p");
-      caption.textContent = item.name;
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
       const cropButton = document.createElement("button");
@@ -568,7 +566,7 @@
         updatePortfolioPhotoCount();
       });
       actions.append(removeButton, cropButton);
-      card.append(image, actions, caption);
+      card.append(image, actions);
       container.append(card);
     });
     syncMobileGallerySelection(container);
@@ -685,7 +683,7 @@
         }
       });
       actions.append(deleteButton);
-      card.append(image, actions, caption);
+      card.append(image, actions);
       container.append(card);
     }
     syncMobileGallerySelection(container);
@@ -711,8 +709,6 @@
       image.src = displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
-      const caption = document.createElement("p");
-      caption.textContent = "Stilfoto " + (index + 1);
       const editButton = document.createElement("button");
       editButton.className = "button button-secondary photo-crop-button";
       editButton.type = "button";
