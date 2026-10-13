@@ -195,6 +195,7 @@
     setMode("signin");
     setStatus("E-Mail bestätigt. Du kannst dich jetzt anmelden.", "success");
     dialog.showModal();
+    emailInput.focus({ preventScroll: true });
   } else if (authReturn === "password-reset") {
     setMode("recovery-update");
     dialog.showModal();
@@ -229,5 +230,6 @@
   } else if (authReturn === "signin") {
     setMode("signin");
     dialog.showModal();
+    emailInput.focus({ preventScroll: true });
   }
 })();
