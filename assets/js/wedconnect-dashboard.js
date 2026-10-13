@@ -208,7 +208,7 @@
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       '<input type="file" name="portfolio-photos" accept="image/jpeg,image/png,image/webp" multiple>' +
-      '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + ' / 3</p></div>";
+      '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + " / 3</p></div>";
   }
 
   function renderReview() {
