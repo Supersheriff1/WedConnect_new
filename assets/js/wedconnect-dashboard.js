@@ -226,7 +226,7 @@
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Stilfotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Stilfotos"></div>' +
       photoPicker("portfolio-photos", "Stilfotos hinzufügen") +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Hochformat 4:5</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · 4:5-Highlights</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Bereits hochgeladen: ' + portfolioCount + "</p></div>";
   }
 
@@ -252,7 +252,7 @@
           ["Portfolio", currentPhotoCount("portfolio") + " Fotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
-    return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid" aria-label="Fotovorschau"></div><div class="setup-summary">' + entries.map((entry) => {
+    return '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotogalerie"></div><div class="setup-summary">' + entries.map((entry) => {
       if ((entry[0] === "Instagram" || entry[0] === "Website") && entry[1] !== "Nicht angegeben") {
         let display = entry[1];
         try {
@@ -1040,7 +1040,9 @@
     const photos = wizard.photos;
     for (let index = 0; index < photos.length; index += 1) {
       const photo = photos[index];
-      const photoPath = photo.display_path || photo.object_path;
+      const photoPath = wizard.role === "photographer" && photo.photo_type === "portfolio"
+        ? photo.object_path
+        : photo.display_path || photo.object_path;
       const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
       if (error || !data || !data.signedUrl) continue;
       const card = document.createElement("div");
@@ -1048,9 +1050,7 @@
       const image = document.createElement("img");
       image.src = data.signedUrl;
       image.alt = labels[photo.photo_type] + " " + (index + 1);
-      const caption = document.createElement("span");
-      caption.textContent = labels[photo.photo_type] || "Foto";
-      card.append(image, caption);
+      card.append(image);
       container.append(card);
     }
   }
