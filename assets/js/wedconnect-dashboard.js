@@ -697,7 +697,7 @@
     if (role === "couple") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
         supabase.from("couple_profiles").select("*").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("profile_photos").select("photo_type,object_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
       ]);
       if (error) throw error;
       if (photoError) throw photoError;
@@ -706,7 +706,7 @@
     } else if (role === "photographer") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
         supabase.from("photographer_profiles").select("*").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("profile_photos").select("photo_type,object_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
       ]);
       if (error) throw error;
       if (photoError) throw photoError;
