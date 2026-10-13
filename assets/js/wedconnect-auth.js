@@ -17,6 +17,7 @@
   const emailInput = document.querySelector("#auth-email");
   const authIntro = document.querySelector("#auth-intro");
   const authReturn = new URLSearchParams(window.location.search).get("auth");
+  const appBaseUrl = new URL(".", window.location.href);
   let mode = "signup";
   let busy = false;
   let pendingGoogleReturn = authReturn === "google";
@@ -70,7 +71,7 @@
   }
 
   function redirectUrl(state) {
-    const url = new URL(window.location.href);
+    const url = new URL("index.html", appBaseUrl);
     url.searchParams.set("auth", state);
     return url.toString();
   }
@@ -91,7 +92,7 @@
   function goToDashboard() {
     if (redirecting) return;
     redirecting = true;
-    window.location.assign(new URL("dashboard.html", window.location.href).toString());
+    window.location.assign(new URL("dashboard.html", appBaseUrl).toString());
   }
 
   document.querySelectorAll("[data-signup]").forEach((button) => {
