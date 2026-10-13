@@ -343,17 +343,38 @@
     });
   }
 
+  async function createContainedPhoto(file) {
+    const sourceUrl = URL.createObjectURL(file);
+    try {
+      const image = new Image();
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error("Ein Foto konnte nicht für die Vorschau vorbereitet werden."));
+        image.src = sourceUrl;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 800;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#25242b";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const scale = Math.min(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+      const width = image.naturalWidth * scale;
+      const height = image.naturalHeight * scale;
+      context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+      let result = await blobFromCanvas(canvas, 0.86);
+      if (result.size > maxPortfolioPhotoBytes) result = await blobFromCanvas(canvas, 0.68);
+      if (result.size > maxPortfolioPhotoBytes) throw new Error("Die Bilddarstellung ist größer als 2 MB. Bitte wähle ein kleineres Originalfoto.");
+      return new File([result], "wedconnect-display.jpg", { type: "image/jpeg" });
+    } finally {
+      URL.revokeObjectURL(sourceUrl);
+    }
+  }
+
   async function createCroppedPhoto() {
     let result = await blobFromCanvas(cropCanvas, 0.88);
-    if (result.size <= maxPortfolioPhotoBytes) return result;
-    result = await blobFromCanvas(cropCanvas, 0.74);
-    if (result.size <= maxPortfolioPhotoBytes) return result;
-    const reduced = document.createElement("canvas");
-    reduced.width = 900;
-    reduced.height = 600;
-    drawCrop(reduced, cropState);
-    result = await blobFromCanvas(reduced, 0.72);
-    if (result.size > maxPortfolioPhotoBytes) throw new Error("Das zugeschnittene Foto ist noch größer als 2 MB.");
+    if (result.size > maxPortfolioPhotoBytes) result = await blobFromCanvas(cropCanvas, 0.68);
+    if (result.size > maxPortfolioPhotoBytes) throw new Error("Der Bildausschnitt ist noch größer als 2 MB.");
     return result;
   }
 
@@ -429,10 +450,10 @@
       const cropButton = document.createElement("button");
       cropButton.className = "button button-secondary";
       cropButton.type = "button";
-      cropButton.textContent = "Zuschneiden / ausrichten";
+      cropButton.textContent = "Zuschnitt wählen";
       cropButton.addEventListener("click", () => openCropEditor(item.file, async (blob) => {
-        URL.revokeObjectURL(item.previewUrl);
-        item.file = new File([blob], item.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+        if (item.previewUrl && item.previewUrl !== item.originalPreviewUrl) URL.revokeObjectURL(item.previewUrl);
+        item.displayFile = new File([blob], item.name.replace(/\.[^.]+$/, "") + "-display.jpg", { type: "image/jpeg" });
         item.previewUrl = URL.createObjectURL(blob);
         renderPendingPortfolioPhotos();
       }));
@@ -441,7 +462,8 @@
       removeButton.type = "button";
       removeButton.textContent = "Entfernen";
       removeButton.addEventListener("click", () => {
-        URL.revokeObjectURL(item.previewUrl);
+        if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
+        if (item.previewUrl && item.previewUrl !== item.originalPreviewUrl) URL.revokeObjectURL(item.previewUrl);
         wizard.pendingPhotos.splice(index, 1);
         renderPendingPortfolioPhotos();
         updatePortfolioPhotoCount();
@@ -494,32 +516,47 @@
     container.innerHTML = "";
     const portfolio = wizard.photos.filter((photo) => photo.photo_type === "portfolio");
     for (const [index, photo] of portfolio.entries()) {
-      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photo.object_path, 600);
-      if (error || !data || !data.signedUrl) continue;
+      const { data: originalData, error: originalError } = await supabase.storage.from(photoBucket).createSignedUrl(photo.object_path, 600);
+      if (originalError || !originalData || !originalData.signedUrl) continue;
+      let displayUrl = originalData.signedUrl;
+      if (photo.display_path) {
+        const { data: displayData, error: displayError } = await supabase.storage.from(photoBucket).createSignedUrl(photo.display_path, 600);
+        if (!displayError && displayData && displayData.signedUrl) displayUrl = displayData.signedUrl;
+      }
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
       const image = document.createElement("img");
-      image.src = data.signedUrl;
+      image.src = displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
-      makeImageViewable(image, data.signedUrl, image.alt);
+      makeImageViewable(image, displayUrl, image.alt);
       const caption = document.createElement("p");
       caption.textContent = "Stilfoto " + (index + 1);
       const editButton = document.createElement("button");
       editButton.className = "button button-secondary";
       editButton.type = "button";
-      editButton.textContent = "Zuschneiden / ausrichten";
+      editButton.textContent = "Zuschnitt anpassen";
       editButton.addEventListener("click", async () => {
         editButton.disabled = true;
         try {
-          const response = await fetch(data.signedUrl);
-          if (!response.ok) throw new Error("Das Foto konnte nicht geladen werden.");
+          const response = await fetch(originalData.signedUrl);
+          if (!response.ok) throw new Error("Das Originalfoto konnte nicht geladen werden.");
           const sourceBlob = await response.blob();
           openCropEditor(sourceBlob, async (blob) => {
-            const { error: uploadError } = await supabase.storage.from(photoBucket).upload(photo.object_path, blob, {
+            const displayPath = photo.display_path || currentUser.id + "/" + crypto.randomUUID() + "-display.jpg";
+            const { error: uploadError } = await supabase.storage.from(photoBucket).upload(displayPath, blob, {
               contentType: "image/jpeg",
-              upsert: true
+              upsert: Boolean(photo.display_path)
             });
-            if (uploadError) throw new Error("Das zugeschnittene Foto konnte nicht gespeichert werden.");
+            if (uploadError) throw new Error("Der Bildausschnitt konnte nicht gespeichert werden.");
+            const { error: updateError } = await supabase.from("profile_photos")
+              .update({ display_path: displayPath })
+              .eq("user_id", currentUser.id)
+              .eq("object_path", photo.object_path);
+            if (updateError) {
+              if (!photo.display_path) await supabase.storage.from(photoBucket).remove([displayPath]);
+              throw new Error("Der Bildausschnitt konnte nicht mit dem Original verknüpft werden. Bitte prüfe die neue Supabase-Migration.");
+            }
+            photo.display_path = displayPath;
             await loadExistingPortfolioPhotos();
           });
         } catch (error) {
@@ -553,7 +590,8 @@
           errorLine.textContent = "Jedes Stilfoto darf höchstens 2 MB groß sein.";
           continue;
         }
-        additions.push({ file, name: file.name, previewUrl: URL.createObjectURL(file) });
+        const originalPreviewUrl = URL.createObjectURL(file);
+        additions.push({ file, name: file.name, originalPreviewUrl, previewUrl: originalPreviewUrl, displayFile: null });
       }
       wizard.pendingPhotos = (wizard.pendingPhotos || []).concat(additions);
       input.value = "";
@@ -690,7 +728,7 @@
     }
   }
 
-  async function uploadFile(file, photoType, sortOrder) {
+  async function uploadFile(file, photoType, sortOrder, displayFile) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       throw new Error("Bitte lade JPG-, PNG- oder WebP-Bilder hoch.");
     }
@@ -700,19 +738,32 @@
     }
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
     const objectPath = currentUser.id + "/" + crypto.randomUUID() + "." + extension;
+    const displayPath = currentUser.id + "/" + crypto.randomUUID() + "-display.jpg";
     const { error: uploadError } = await supabase.storage.from(photoBucket).upload(objectPath, file, {
       contentType: file.type,
       upsert: false
     });
-    if (uploadError) throw new Error("Ein Foto konnte nicht hochgeladen werden. Bitte prüfe Dateiformat und Größe.");
+    if (uploadError) throw new Error("Das Originalfoto konnte nicht hochgeladen werden. Bitte prüfe Dateiformat und Größe.");
+    const { error: displayError } = await supabase.storage.from(photoBucket).upload(displayPath, displayFile, {
+      contentType: "image/jpeg",
+      upsert: false
+    });
+    if (displayError) {
+      await supabase.storage.from(photoBucket).remove([objectPath]);
+      throw new Error("Die einheitliche Bilddarstellung konnte nicht gespeichert werden.");
+    }
     const { error: rowError } = await supabase.from("profile_photos").insert({
       user_id: currentUser.id,
       photo_type: photoType,
       object_path: objectPath,
+      display_path: displayPath,
       sort_order: sortOrder
     });
     if (rowError) {
-      await supabase.storage.from(photoBucket).remove([objectPath]);
+      await supabase.storage.from(photoBucket).remove([objectPath, displayPath]);
+      if (rowError.message && rowError.message.includes("display_path")) {
+        throw new Error("Bitte führe zuerst die neue Supabase-Migration für die Original- und Darstellungsbilder aus.");
+      }
       throw new Error("Das Foto wurde nicht gespeichert. Bitte versuche es erneut.");
     }
   }
@@ -736,7 +787,8 @@
         ...twoFiles.map((file) => [file, "partner_two"])
       ];
       for (const [index, item] of queue.entries()) {
-        await uploadFile(item[0], item[1], wizard.photos.length + index);
+        const displayFile = await createContainedPhoto(item[0]);
+        await uploadFile(item[0], item[1], wizard.photos.length + index, displayFile);
       }
     } else {
       const pending = wizard.pendingPhotos || [];
@@ -745,15 +797,19 @@
         throw new Error("Für dein Portfolio brauchst du mindestens 3 Stilfotos. Aktuell ausgewählt oder hochgeladen: " + (existingCount + pending.length) + ".");
       }
       for (const [index, item] of pending.entries()) {
-        await uploadFile(item.file, "portfolio", existingCount + index);
+        const displayFile = item.displayFile || await createContainedPhoto(item.file);
+        await uploadFile(item.file, "portfolio", existingCount + index, displayFile);
       }
     }
     const { data, error } = await supabase.from("profile_photos")
-      .select("photo_type,object_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
+      .select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
     if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden.");
     wizard.photos = data || [];
     if (wizard.role === "photographer") {
-      (wizard.pendingPhotos || []).forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      (wizard.pendingPhotos || []).forEach((item) => {
+        if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
+        if (item.previewUrl && item.previewUrl !== item.originalPreviewUrl) URL.revokeObjectURL(item.previewUrl);
+      });
       wizard.pendingPhotos = [];
     }
   }
@@ -766,7 +822,8 @@
     const photos = wizard.photos;
     for (let index = 0; index < photos.length; index += 1) {
       const photo = photos[index];
-      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photo.object_path, 600);
+      const photoPath = photo.display_path || photo.object_path;
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
       if (error || !data || !data.signedUrl) continue;
       const card = document.createElement("div");
       card.className = "photo-preview";
