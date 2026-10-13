@@ -126,6 +126,11 @@
     .profile-social-link span{color:var(--gold)}
     .setup-field .input-with-suffix input{font:400 16px/1.5 var(--sans)}
     @media(max-width:560px){.photo-preview.is-mobile-main img,.portfolio-photo-card.is-mobile-main img{width:100%;height:auto;max-height:none;aspect-ratio:4/5;object-fit:cover;background:transparent}.photo-preview:not(.is-mobile-main) img,.portfolio-photo-card:not(.is-mobile-main) img{aspect-ratio:4/5;object-fit:cover;background:transparent}}
+    .profile-photo-gallery.photo-preview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;gap:14px;overflow:visible;padding:0;scroll-snap-type:none}
+    .profile-photo-gallery .photo-preview{min-width:0;align-self:start;padding:0;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+    .profile-photo-gallery .photo-preview img{width:100%;height:auto;max-height:none;aspect-ratio:auto!important;display:block;object-fit:contain!important;background:transparent;border-radius:0}
+    @media(max-width:700px){.profile-photo-gallery.photo-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+    @media(max-width:420px){.profile-photo-gallery.photo-preview-grid{grid-template-columns:1fr;gap:12px}}
 </style>
 </head>
 <body>
@@ -209,7 +214,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-photo-portrait-4x5-v22"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261013-profile-gallery-full-v23"></script>
 </body>
 </html>
 
