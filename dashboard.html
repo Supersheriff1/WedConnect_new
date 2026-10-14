@@ -189,11 +189,11 @@
     .profile-preview-links{display:flex;flex-wrap:wrap;gap:10px;padding-top:16px}
     .profile-preview-link{display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:999px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none}
     .profile-preview-link:hover{border-color:var(--gold);background:var(--hover);color:var(--ink)}
-    .profile-preview-identity-links{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
-    .profile-preview-identity-links .profile-preview-icon-link{width:27px;height:27px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted)}
-    .profile-preview-identity-links .profile-preview-icon-link:hover{background:rgb(213 182 122 / 10%);color:var(--gold)}
-    .profile-preview-icon-link svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-    .profile-preview-icon-link .icon-dot{fill:currentColor;stroke:none}
+    .profile-preview-identity-links{display:inline-flex;align-items:center;gap:8px;margin-left:auto;padding-top:0}
+    .profile-preview-identity-links .profile-preview-social-chip{width:27px;height:27px;display:grid;place-items:center;flex:none;padding:0;border-radius:999px;color:var(--body);text-decoration:none}
+    .profile-preview-identity-links .profile-preview-social-chip:hover{border-color:rgb(213 182 122 / 60%);background:rgb(213 182 122 / 14%);color:var(--ink)}
+    .profile-preview-identity-links .profile-preview-social-chip svg{width:12px;height:12px;fill:none;stroke:var(--gold);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .profile-preview-identity-links .profile-preview-social-chip .icon-dot{fill:var(--gold);stroke:none}
     .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;border-radius:14px;background:var(--canvas);padding:0;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:none;touch-action:pan-x pan-y}
     .profile-preview-track::-webkit-scrollbar{display:none}
     .profile-preview-photo{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;flex:0 0 100%;width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidden;border-radius:inherit;background:var(--canvas);scroll-snap-align:start;scroll-snap-stop:always;box-shadow:none}
@@ -277,11 +277,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .profile-preview-photo.is-loaded img{opacity:1}
     .profile-preview-indicators{top:25px!important}
     .profile-preview-intro-copy{display:block;-webkit-line-clamp:unset;overflow:visible}
-    @media(max-width:720px){
-      .profile-preview-intro-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
-      .profile-preview-about.is-expanded .profile-preview-intro-copy{-webkit-line-clamp:unset;overflow:visible}
-      .profile-preview-identity-links{padding-top:8px}
-    }
+
 </style>
 </head>
 <body>
