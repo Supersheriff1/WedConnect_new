@@ -2087,6 +2087,7 @@
     } finally { accountPhotoInput.value = ""; }
   });
   if (accountPhotoRemove) accountPhotoRemove.addEventListener("click", async () => {
+    if (!(await confirmPhotoDelete("Möchtest du dein Profilfoto wirklich löschen?"))) return;
     accountPhotoRemove.disabled = true;
     if (accountPhotoStatus) accountPhotoStatus.textContent = "";
     try { await removeAccountPhoto(); }
