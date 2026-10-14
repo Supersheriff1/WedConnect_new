@@ -29,7 +29,7 @@
   let currentRole = "";
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
-  let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], isEditing: false, autoSaveEnabled: false };
+  let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
   let draftAutoSaveTimer = null;
   let draftAutoSavePromise = Promise.resolve();
 
@@ -393,39 +393,95 @@
   }
 
   function attachCouplePhotoControls() {
-    ["joint-photos", "partner-one-photos", "partner-two-photos"].forEach((inputName) => {
+    const inputTypes = {
+      "joint-photos": "couple",
+      "partner-one-photos": "partner_one",
+      "partner-two-photos": "partner_two"
+    };
+    Object.entries(inputTypes).forEach(([inputName, photoType]) => {
       const input = fields.querySelector('[name="' + inputName + '"]');
       if (!input) return;
       input.addEventListener("change", () => {
         errorLine.textContent = "";
         const files = Array.from(input.files || []);
-        if (!files.length) {
-          couplePhotoFeedback(inputName, []);
-          return;
-        }
+        if (!files.length) return;
+        const additions = [];
         try {
           files.forEach((file) => {
-            normalizePhotoFile(file);
-            if (file.size > maxPhotoBytes) {
+            const normalized = normalizePhotoFile(file);
+            if (normalized.size > maxPhotoBytes) {
               throw new Error('„' + file.name + '“ ist größer als 10 MB. Bitte wähle ein kleineres Foto.');
             }
+            additions.push({
+              file: normalized,
+              photoType,
+              name: normalized.name,
+              originalPreviewUrl: URL.createObjectURL(normalized),
+              previewUrl: "",
+              displayFile: null
+            });
           });
-          couplePhotoFeedback(inputName, files);
-        } catch (error) {
+          wizard.pendingCouplePhotos = (wizard.pendingCouplePhotos || []).concat(additions);
           input.value = "";
-          couplePhotoFeedback(inputName, []);
+          renderPendingCouplePhotos();
+          couplePhotoFeedback(inputName, additions);
+        } catch (error) {
+          additions.forEach((item) => URL.revokeObjectURL(item.originalPreviewUrl));
           errorLine.textContent = error && error.message ? error.message : "Das Foto kann nicht verwendet werden.";
         }
       });
     });
   }
 
-  function removeSelectedPhotoFile(input, file) {
-    if (!input || typeof DataTransfer === "undefined") return;
-    const transfer = new DataTransfer();
-    Array.from(input.files || []).filter((candidate) => candidate !== file).forEach((candidate) => transfer.items.add(candidate));
-    input.files = transfer.files;
-    couplePhotoFeedback(input.name, Array.from(input.files || []));
+  function renderPendingCouplePhotos() {
+    const container = document.querySelector("#couple-pending-photos");
+    if (!container) return;
+    container.innerHTML = "";
+    const labels = {
+      couple: "Gemeinsames Foto",
+      partner_one: wizard.data.couple.partner_one_first_name || "Erste Person",
+      partner_two: wizard.data.couple.partner_two_first_name || "Zweite Person"
+    };
+    (wizard.pendingCouplePhotos || []).forEach((item, index) => {
+      const card = document.createElement("article");
+      card.className = "portfolio-photo-card";
+      const image = document.createElement("img");
+      image.src = item.previewUrl || item.originalPreviewUrl;
+      image.alt = labels[item.photoType] + " · Vorschau";
+      activateMobileGalleryPhoto(container, card, image, image.alt);
+      const caption = document.createElement("p");
+      caption.textContent = labels[item.photoType];
+      const actions = document.createElement("div");
+      actions.className = "portfolio-photo-actions";
+      const cropButton = document.createElement("button");
+      cropButton.className = "button button-secondary photo-crop-button";
+      cropButton.type = "button";
+      cropButton.setAttribute("aria-label", "Foto zuschneiden und ausrichten");
+      cropButton.title = "Foto zuschneiden und ausrichten";
+      cropButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg>';
+      cropButton.addEventListener("click", () => openCropEditor(item.file, async (blob) => {
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        item.displayFile = new File([blob], item.name.replace(/\.[^.]+$/, "") + "-display.jpg", { type: "image/jpeg" });
+        item.previewUrl = URL.createObjectURL(blob);
+        renderPendingCouplePhotos();
+      }));
+      const removeButton = document.createElement("button");
+      removeButton.className = "button button-secondary photo-delete-button";
+      removeButton.type = "button";
+      removeButton.setAttribute("aria-label", "Ausgewähltes Foto entfernen");
+      removeButton.title = "Ausgewähltes Foto entfernen";
+      removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l-1-14M9 7V4h6v3"/></svg>';
+      removeButton.addEventListener("click", () => {
+        if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        wizard.pendingCouplePhotos.splice(index, 1);
+        renderPendingCouplePhotos();
+      });
+      actions.append(cropButton, removeButton);
+      card.append(image, caption, actions);
+      container.append(card);
+    });
+    syncMobileGallerySelection(container);
   }
 
   function renderPhotoStep() {
@@ -433,20 +489,18 @@
       const jointCount = currentPhotoCount("couple");
       const oneCount = currentPhotoCount("partner_one");
       const twoCount = currentPhotoCount("partner_two");
-      const individualSelected = jointCount === 0 && (oneCount > 0 || twoCount > 0);
       const coupleProfile = wizard.data.couple || {};
       const firstName = escapeHtml(coupleProfile.partner_one_first_name || "Erste Person");
       const secondName = escapeHtml(coupleProfile.partner_two_first_name || "Zweite Person");
-      return '<div class="photo-methods"><label class="photo-method"><input type="radio" name="couple-photo-method" value="joint"' + (!individualSelected ? " checked" : "") + '><span><strong>Ein gemeinsames Foto</strong><br>Beide Personen sind auf dem Foto zu sehen.</span></label>' +
-        '<label class="photo-method"><input type="radio" name="couple-photo-method" value="individual"' + (individualSelected ? " checked" : "") + '><span><strong>Ein Foto pro Person</strong><br>Lade für beide Personen je ein Foto hoch.</span></label></div>' +
-        '<div class="photo-panel" id="joint-photo-panel"><h3>Gemeinsames Foto</h3><p>Beide Personen müssen zu sehen sein.</p>' +
+      return '<p class="photo-upload-detail photo-instructions">Du kannst den Ausschnitt bei jedem Foto zuschneiden und ausrichten.</p>' +
+        '<div class="photo-panel"><h3>Gemeinsames Foto</h3><p>Beide Personen sind auf dem Foto zu sehen.</p>' +
         photoPicker("joint-photos", "Gemeinsames Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="joint-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
-        '<div class="setup-two-col" id="individual-photo-panels" hidden><div class="photo-panel"><h3>' + firstName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
+        '<div class="setup-two-col couple-individual-photo-panels"><div class="photo-panel"><h3>' + firstName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
         photoPicker("partner-one-photos", "Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-one-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
         '<div class="photo-panel"><h3>' + secondName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
         photoPicker("partner-two-photos", "Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-two-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
-        '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 10 MB pro Foto</p>' +
-        '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
+        '<div id="couple-pending-photos" class="portfolio-photo-grid couple-photo-grid" aria-label="Ausgewählte Fotos"></div>' +
+        '<div id="couple-existing-photos" class="portfolio-photo-grid couple-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
     return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Galerie</h3>' +
@@ -541,12 +595,9 @@
     if (step === 2 && wizard.role === "photographer") updateProfileLinkChecks();
     if (step === 4) loadPhotoPreviews();
     if (step === 3 && wizard.role === "photographer") attachPortfolioPhotoControls();
-    if (step === 3 && wizard.role === "couple") loadExistingCouplePhotos();
     if (step === 3 && wizard.role === "couple") {
-      document.querySelectorAll('input[name="couple-photo-method"]').forEach((radio) =>
-        radio.addEventListener("change", toggleCouplePhotoMethod)
-      );
-      toggleCouplePhotoMethod();
+      renderPendingCouplePhotos();
+      loadExistingCouplePhotos();
       attachCouplePhotoControls();
     }
   }
@@ -1106,32 +1157,81 @@
     const container = document.querySelector("#couple-existing-photos");
     if (!container) return;
     container.innerHTML = "";
-    const labels = { couple: "Gemeinsames Foto", partner_one: "Erste Person", partner_two: "Zweite Person" };
+    const labels = {
+      couple: "Gemeinsames Foto",
+      partner_one: wizard.data.couple.partner_one_first_name || "Erste Person",
+      partner_two: wizard.data.couple.partner_two_first_name || "Zweite Person"
+    };
     const photos = wizard.photos.filter((photo) => photo.photo_type !== "portfolio");
     for (const [index, photo] of photos.entries()) {
-      const path = photo.display_path || photo.object_path;
-      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(path, 600);
-      if (error || !data || !data.signedUrl) continue;
+      const { data: originalData, error: originalError } = await supabase.storage.from(photoBucket).createSignedUrl(photo.object_path, 600);
+      if (originalError || !originalData || !originalData.signedUrl) {
+        errorLine.textContent = "Ein hochgeladenes Foto konnte nicht geladen werden. Bitte prüfe den Speicherzugriff.";
+        continue;
+      }
+      let displayUrl = originalData.signedUrl;
+      if (photo.display_path) {
+        const { data: displayData, error: displayError } = await supabase.storage.from(photoBucket).createSignedUrl(photo.display_path, 600);
+        if (!displayError && displayData && displayData.signedUrl) displayUrl = displayData.signedUrl;
+      }
+      const label = labels[photo.photo_type] || "Foto";
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
       const image = document.createElement("img");
-      image.src = data.signedUrl;
-      image.alt = (labels[photo.photo_type] || "Foto") + " " + (index + 1);
+      image.src = displayUrl;
+      image.alt = label + " " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
-      caption.textContent = labels[photo.photo_type] || "Foto";
+      caption.textContent = label;
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
+      const editButton = document.createElement("button");
+      editButton.className = "button button-secondary photo-crop-button";
+      editButton.type = "button";
+      editButton.setAttribute("aria-label", "Foto zuschneiden und ausrichten");
+      editButton.title = "Foto zuschneiden und ausrichten";
+      editButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg>';
+      editButton.addEventListener("click", async () => {
+        editButton.disabled = true;
+        try {
+          const response = await fetch(originalData.signedUrl);
+          if (!response.ok) throw new Error("Das Originalfoto konnte nicht geladen werden.");
+          const sourceBlob = await response.blob();
+          const sourceFile = new File([sourceBlob], label.replaceAll(" ", "-") + ".jpg", { type: sourceBlob.type || "image/jpeg" });
+          openCropEditor(sourceFile, async (blob) => {
+            const displayPath = photo.display_path || currentUser.id + "/" + crypto.randomUUID() + "-display.jpg";
+            const { error: uploadError } = await supabase.storage.from(photoBucket).upload(displayPath, blob, {
+              contentType: "image/jpeg",
+              upsert: Boolean(photo.display_path)
+            });
+            if (uploadError) throw new Error("Der Zuschnitt konnte nicht gespeichert werden: " + (uploadError.message || "Speicherfehler."));
+            const { error: updateError } = await supabase.from("profile_photos")
+              .update({ display_path: displayPath })
+              .eq("user_id", currentUser.id)
+              .eq("object_path", photo.object_path);
+            if (updateError) {
+              if (!photo.display_path) await supabase.storage.from(photoBucket).remove([displayPath]);
+              throw new Error("Der Zuschnitt wurde erstellt, aber nicht mit dem Foto verknüpft: " + (updateError.message || "Datenbankfehler."));
+            }
+            photo.display_path = displayPath;
+            await loadExistingCouplePhotos();
+          });
+        } catch (error) {
+          errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht bearbeitet werden.";
+        } finally {
+          editButton.disabled = false;
+        }
+      });
       const deleteButton = document.createElement("button");
-      deleteButton.className = "button button-secondary";
+      deleteButton.className = "button button-secondary photo-delete-button";
       deleteButton.type = "button";
-      deleteButton.classList.add("photo-delete-button");
       deleteButton.setAttribute("aria-label", "Foto löschen");
       deleteButton.title = "Foto löschen";
-      deleteButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg>';
+      deleteButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l-1-14M9 7V4h6v3"/></svg>';
       deleteButton.addEventListener("click", async () => {
-        if (!(await confirmPhotoDelete((labels[photo.photo_type] || "Foto") + " und seine Darstellung endgültig löschen?"))) return;
+        if (!(await confirmPhotoDelete(label + " und seinen Zuschnitt endgültig löschen?"))) return;
         deleteButton.disabled = true;
+        editButton.disabled = true;
         try {
           const storageError = await removeProfilePhoto(photo);
           await loadExistingCouplePhotos();
@@ -1141,10 +1241,11 @@
           errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gelöscht werden.";
         } finally {
           deleteButton.disabled = false;
+          editButton.disabled = false;
         }
       });
-      actions.append(deleteButton);
-      card.append(image, actions);
+      actions.append(editButton, deleteButton);
+      card.append(image, caption, actions);
       container.append(card);
     }
     syncMobileGallerySelection(container);
@@ -1465,7 +1566,7 @@
   }
 
   async function loadWizard(role, startStep) {
-    wizard = { step: startStep, role: role || "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], isEditing: false, autoSaveEnabled: false };
+    wizard = { step: startStep, role: role || "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
     currentRole = role || "";
     if (role === "couple") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
@@ -1563,53 +1664,42 @@
   }
 
   async function uploadSelectedPhotos(allowPartial = false) {
-    const methodElement = document.querySelector('input[name="couple-photo-method"]:checked');
     if (wizard.role === "couple") {
-      const method = methodElement ? methodElement.value : "joint";
-      const jointInput = document.querySelector('[name="joint-photos"]');
-      const oneInput = document.querySelector('[name="partner-one-photos"]');
-      const twoInput = document.querySelector('[name="partner-two-photos"]');
-      const jointFiles = method === "joint" && jointInput ? Array.from(jointInput.files) : [];
-      const oneFiles = method === "individual" && oneInput ? Array.from(oneInput.files) : [];
-      const twoFiles = method === "individual" && twoInput ? Array.from(twoInput.files) : [];
-      const hasJoint = currentPhotoCount("couple") > 0 || jointFiles.length > 0;
-      const hasOne = currentPhotoCount("partner_one") > 0 || oneFiles.length > 0;
-      const hasTwo = currentPhotoCount("partner_two") > 0 || twoFiles.length > 0;
-      if (!allowPartial && !hasJoint && !hasOne && !hasTwo) {
-        throw new Error(method === "joint"
-          ? "Wähle ein gemeinsames Foto aus. JPG, PNG und WebP bis 10 MB werden akzeptiert."
-          : "Wähle mindestens ein Personenfoto aus. Das zweite Foto kann danach ergänzt werden.");
+      const pending = wizard.pendingCouplePhotos || [];
+      const hasSavedPhoto = ["couple", "partner_one", "partner_two"].some((type) => currentPhotoCount(type) > 0);
+      if (!allowPartial && !hasSavedPhoto && !pending.length) {
+        throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
       }
-      if (!allowPartial && method === "joint" && !hasJoint && !(hasOne && hasTwo)) {
-        throw new Error("Wähle ein gemeinsames Foto aus oder wechsle zu „Ein Foto pro Person“.");
-      }
-      const queue = [
-        ...jointFiles.map((file) => [jointInput, file, "couple"]),
-        ...oneFiles.map((file) => [oneInput, file, "partner_one"]),
-        ...twoFiles.map((file) => [twoInput, file, "partner_two"])
-      ];
-      for (const [input, originalFile, type] of queue) {
-        const file = normalizePhotoFile(originalFile);
+      let nextSortOrder = wizard.photos.length;
+      for (const item of [...pending]) {
+        const file = normalizePhotoFile(item.file);
         try {
-          const displayFile = await createContainedPhoto(file);
-          await uploadFile(file, type, wizard.photos.length, displayFile);
-          removeSelectedPhotoFile(input, originalFile);
+          if (file.size > maxPhotoBytes) throw new Error("Das Originalfoto ist größer als 10 MB.");
+          const displayFile = item.displayFile || await createContainedPhoto(file);
+          await uploadFile(file, item.photoType, nextSortOrder++, displayFile);
+          if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
+          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+          wizard.pendingCouplePhotos = wizard.pendingCouplePhotos.filter((candidate) => candidate !== item);
+          renderPendingCouplePhotos();
         } catch (error) {
           throw new Error('„' + file.name + '“: ' + (error && error.message ? error.message : "Das Foto konnte nicht verarbeitet werden."));
         }
       }
     } else {
       const pending = wizard.pendingPhotos || [];
-      const totals = portfolioPhotoCounts();
       for (const [index, item] of pending.entries()) {
-        const displayFile = item.displayFile || await createContainedPhoto(item.file);
-        const existingPortfolioCount = wizard.photos.filter((photo) => photo.photo_type === "portfolio").length;
-        await uploadFile(item.file, "portfolio", existingPortfolioCount + index, displayFile);
+        try {
+          const displayFile = item.displayFile || await createContainedPhoto(item.file);
+          const existingPortfolioCount = wizard.photos.filter((photo) => photo.photo_type === "portfolio").length;
+          await uploadFile(item.file, "portfolio", existingPortfolioCount + index, displayFile);
+        } catch (error) {
+          throw new Error('„' + item.file.name + '“: ' + (error && error.message ? error.message : "Das Foto konnte nicht verarbeitet werden."));
+        }
       }
     }
     const { data, error } = await supabase.from("profile_photos")
       .select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
-    if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden.");
+    if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden: " + (error.message || "Datenbankfehler."));
     wizard.photos = data || [];
     if (wizard.role === "photographer") {
       (wizard.pendingPhotos || []).forEach((item) => {
@@ -2206,7 +2296,16 @@
         const { error } = await supabase.rpc("complete_profile_for_role", { p_role: wizard.role });
         if (error) {
           const message = error.message || "";
-          if (message.includes("photos_for_both_partners_required")) throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
+          if (message.includes("photos_for_both_partners_required")) {
+            const couple = wizard.data.couple || {};
+            const hasJoint = currentPhotoCount("couple") > 0;
+            const hasOne = currentPhotoCount("partner_one") > 0;
+            const hasTwo = currentPhotoCount("partner_two") > 0;
+            if (hasJoint) throw new Error("Euer gemeinsames Foto fehlt noch. Ergänze es im Fotoschritt.");
+            if (hasOne && !hasTwo) throw new Error("Es fehlt noch ein Foto für " + (couple.partner_two_first_name || "die zweite Person") + ". Gehe zurück zum Fotoschritt.");
+            if (!hasOne && hasTwo) throw new Error("Es fehlt noch ein Foto für " + (couple.partner_one_first_name || "die erste Person") + ". Gehe zurück zum Fotoschritt.");
+            throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
+          }
           if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, das Bundesland, den Begleitungsumfang und den Bildstil.");
           if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
