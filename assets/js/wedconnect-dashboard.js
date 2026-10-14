@@ -1265,41 +1265,50 @@
     ];
   }
 
-  function fitProfileGalleryPhoto(figure, track) {
-    const image = figure.querySelector("img");
-    const style = window.getComputedStyle(track);
-    const horizontalPadding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-    const verticalPadding = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
-    const availableWidth = Math.max(120, track.clientWidth - horizontalPadding - 20);
-    const availableHeight = Math.max(180, track.clientHeight - verticalPadding - 16);
-    const viewportHeight = Math.max(180, Math.floor(window.innerHeight * 0.58));
-    const maxHeight = Math.min(availableHeight, viewportHeight);
-    const aspect = image && image.naturalWidth && image.naturalHeight
-      ? image.naturalWidth / image.naturalHeight
-      : 0.8;
-    const width = Math.min(availableWidth, maxHeight * aspect);
-    figure.style.width = Math.floor(width) + "px";
-    figure.style.height = Math.floor(width / aspect) + "px";
-  }
-  let profileGalleryResizeObserver=null, profileGalleryImageObserver=null;
-  function setupProfileGallery(gallery,photoCount){
+  let profileGalleryResizeObserver = null;
+  let profileGalleryImageObserver = null;
+  function setupProfileGallery(gallery, photoCount) {
     const track=gallery.querySelector(".profile-preview-track"); if(!track)return;
-    if(profileGalleryResizeObserver)profileGalleryResizeObserver.disconnect();if(profileGalleryImageObserver)profileGalleryImageObserver.disconnect();
-    const figures=Array.from(track.querySelectorAll(".profile-preview-photo")), indicators=gallery.querySelectorAll(".profile-preview-indicator");
-    const previous=gallery.querySelector(".profile-preview-arrow--previous"),next=gallery.querySelector(".profile-preview-arrow--next"),status=gallery.querySelector(".profile-preview-gallery-status");
-    const setActive=index=>{const n=Math.max(0,Math.min(photoCount-1,index));indicators.forEach((b,i)=>{b.classList.toggle("is-active",i===n);b.setAttribute("aria-current",i===n?"true":"false")});if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:""};
-    const currentIndex=()=>{const center=track.scrollLeft+track.clientWidth/2;let nearest=0,distance=Infinity;figures.forEach((f,i)=>{const rect=f.getBoundingClientRect(),trackRect=track.getBoundingClientRect();const d=Math.abs(center-(track.scrollLeft+rect.left-trackRect.left+rect.width/2));if(d<distance){nearest=i;distance=d}});return nearest};
-    const goTo=index=>{const n=Math.max(0,Math.min(figures.length-1,index)),f=figures[n];if(f){const rect=f.getBoundingClientRect(),trackRect=track.getBoundingClientRect();track.scrollTo({left:track.scrollLeft+rect.left-trackRect.left-(track.clientWidth-rect.width)/2,behavior:"smooth"})};setActive(n)};
-    if(previous)previous.addEventListener("click",()=>goTo(currentIndex()-1));if(next)next.addEventListener("click",()=>goTo(currentIndex()+1));
-    indicators.forEach(b=>b.addEventListener("click",()=>goTo(Number(b.dataset.index))));
+    if(profileGalleryResizeObserver)profileGalleryResizeObserver.disconnect();
+    if(profileGalleryImageObserver)profileGalleryImageObserver.disconnect();
+    const figures=Array.from(track.querySelectorAll(".profile-preview-photo"));
+    const indicators=gallery.querySelectorAll(".profile-preview-indicator");
+    const previous=gallery.querySelector(".profile-preview-arrow--previous");
+    const next=gallery.querySelector(".profile-preview-arrow--next");
+    const status=gallery.querySelector(".profile-preview-gallery-status");
+    const setActive=index=>{
+      const n=Math.max(0,Math.min(photoCount-1,index));
+      indicators.forEach((button,i)=>{button.classList.toggle("is-active",i===n);button.setAttribute("aria-current",i===n?"true":"false")});
+      if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;
+      if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:"";
+    };
+    const centerPhoto=(figure,smooth)=>{
+      if(!figure)return;
+      const rect=figure.getBoundingClientRect(),bounds=track.getBoundingClientRect();
+      const left=track.scrollLeft+rect.left-bounds.left-(track.clientWidth-rect.width)/2;
+      if(smooth)track.scrollTo({left,behavior:"smooth"});else track.scrollLeft=left;
+    };
+    const currentIndex=()=>{
+      const center=track.scrollLeft+track.clientWidth/2,bounds=track.getBoundingClientRect();
+      let nearest=0,distance=Infinity;
+      figures.forEach((figure,i)=>{const rect=figure.getBoundingClientRect();const x=track.scrollLeft+rect.left-bounds.left+rect.width/2;const d=Math.abs(center-x);if(d<distance){nearest=i;distance=d}});
+      return nearest;
+    };
+    const goTo=(index,smooth=true)=>{const n=Math.max(0,Math.min(figures.length-1,index));centerPhoto(figures[n],smooth);setActive(n)};
+    if(previous)previous.addEventListener("click",()=>goTo(currentIndex()-1));
+    if(next)next.addEventListener("click",()=>goTo(currentIndex()+1));
+    indicators.forEach(button=>button.addEventListener("click",()=>goTo(Number(button.dataset.index))));
     track.addEventListener("scroll",()=>window.requestAnimationFrame(()=>setActive(currentIndex())),{passive:true});
-    gallery.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){e.preventDefault();goTo(currentIndex()-1)}if(e.key==="ArrowRight"){e.preventDefault();goTo(currentIndex()+1)}});
-    setActive(0);const fit=()=>figures.forEach(f=>fitProfileGalleryPhoto(f,track));fit();if("ResizeObserver"in window){profileGalleryResizeObserver=new ResizeObserver(fit);profileGalleryResizeObserver.observe(track)}
+    gallery.addEventListener("keydown",event=>{if(event.key==="ArrowLeft"){event.preventDefault();goTo(currentIndex()-1)}if(event.key==="ArrowRight"){event.preventDefault();goTo(currentIndex()+1)}});
+    setActive(0);
+    if(figures[0])window.requestAnimationFrame(()=>centerPhoto(figures[0],false));
+    if("ResizeObserver"in window){profileGalleryResizeObserver=new ResizeObserver(()=>{const active=gallery.querySelector(".profile-preview-indicator.is-active");centerPhoto(figures[active?Number(active.dataset.index):0],false)});profileGalleryResizeObserver.observe(track)}
   }
+
   function loadProfileGalleryImages(gallery){
     const track=gallery.querySelector(".profile-preview-track"),images=Array.from(gallery.querySelectorAll("img[data-photo-path]"));if(!images.length||!track)return;
     const queue=[];let active=0;const max=2;
-    function finish(image,failed){if(image.dataset.photoState==="done")return;image.dataset.photoState="done";const figure=image.closest(".profile-preview-photo");if(figure){figure.classList.toggle("is-failed",!!failed);if(!failed){figure.classList.add("is-loaded");fitProfileGalleryPhoto(figure,track)}}active=Math.max(0,active-1);pump()}
+    function finish(image,failed){if(image.dataset.photoState==="done")return;image.dataset.photoState="done";const figure=image.closest(".profile-preview-photo");if(figure){figure.classList.toggle("is-failed",!!failed);if(!failed){figure.classList.add("is-loaded");}}active=Math.max(0,active-1);pump()}
     function pump(){while(active<max&&queue.length){const image=queue.shift();if(image.dataset.photoState)continue;image.dataset.photoState="loading";active++;let settled=false;const settle=f=>{if(!settled){settled=true;finish(image,f)}};image.addEventListener("load",()=>settle(false),{once:true});image.addEventListener("error",()=>settle(true),{once:true});supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath,3600).then(({data,error})=>{if(error||!data||!data.signedUrl){settle(true);return}image.src=data.signedUrl}).catch(()=>settle(true))}}
     const enqueue=list=>{const unseen=list.filter(i=>!i.dataset.photoState&&!queue.includes(i));unseen.sort((a,b)=>images.indexOf(a)-images.indexOf(b));queue.push(...unseen);pump()};
     if("IntersectionObserver"in window){profileGalleryImageObserver=new IntersectionObserver(entries=>{const nearby=entries.filter(e=>e.isIntersecting).map(e=>e.target);nearby.forEach(i=>profileGalleryImageObserver.unobserve(i));enqueue(nearby)},{root:track,rootMargin:"0px 520px",threshold:.01});images.forEach(i=>profileGalleryImageObserver.observe(i))}else enqueue(images)
