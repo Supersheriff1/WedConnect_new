@@ -1265,6 +1265,103 @@
     ];
   }
 
+  function layoutProfileGallery(gallery) {
+    const style = window.getComputedStyle(gallery);
+    const rowHeight = parseFloat(style.gridAutoRows) || 8;
+    const rowGap = parseFloat(style.rowGap) || 10;
+    gallery.querySelectorAll(".profile-preview-photo").forEach((figure) => {
+      const image = figure.querySelector("img");
+      const width = figure.getBoundingClientRect().width;
+      if (!width) return;
+      const ratio = image && image.naturalWidth
+        ? image.naturalHeight / image.naturalWidth
+        : 1.25;
+      const imageHeight = width * ratio;
+      const span = Math.max(1, Math.ceil((imageHeight + rowGap) / (rowHeight + rowGap)));
+      figure.style.gridRowEnd = "span " + span;
+    });
+  }
+
+  let profileGalleryResizeObserver = null;
+
+  function observeProfileGallery(gallery) {
+    if (profileGalleryResizeObserver) profileGalleryResizeObserver.disconnect();
+    layoutProfileGallery(gallery);
+    if ("ResizeObserver" in window) {
+      profileGalleryResizeObserver = new ResizeObserver(() => layoutProfileGallery(gallery));
+      profileGalleryResizeObserver.observe(gallery);
+    }
+  }
+
+  function loadProfileGalleryImages(gallery) {
+    const images = Array.from(gallery.querySelectorAll("img[data-photo-path]"));
+    if (!images.length) return;
+    const queue = [];
+    let activeLoads = 0;
+    const maxConcurrentLoads = 2;
+
+    function finish(image, failed) {
+      if (image.dataset.photoState === "done") return;
+      image.dataset.photoState = "done";
+      const figure = image.closest(".profile-preview-photo");
+      if (figure) {
+        figure.classList.toggle("is-failed", Boolean(failed));
+        if (!failed) figure.classList.add("is-loaded");
+      }
+      layoutProfileGallery(gallery);
+      activeLoads = Math.max(0, activeLoads - 1);
+      pump();
+    }
+
+    function pump() {
+      while (activeLoads < maxConcurrentLoads && queue.length) {
+        const image = queue.shift();
+        if (image.dataset.photoState) continue;
+        image.dataset.photoState = "loading";
+        activeLoads += 1;
+        let settled = false;
+        const settle = (failed) => {
+          if (settled) return;
+          settled = true;
+          finish(image, failed);
+        };
+        image.addEventListener("load", () => settle(false), { once: true });
+        image.addEventListener("error", () => settle(true), { once: true });
+        supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath, 3600)
+          .then(({ data, error }) => {
+            if (error || !data || !data.signedUrl) {
+              settle(true);
+              return;
+            }
+            image.src = data.signedUrl;
+          })
+          .catch(() => settle(true));
+      }
+    }
+
+    function enqueue(imagesToLoad) {
+      const unseen = imagesToLoad.filter((image) =>
+        !image.dataset.photoState && !queue.includes(image)
+      );
+      unseen.sort((a, b) => images.indexOf(a) - images.indexOf(b));
+      queue.push(...unseen);
+      pump();
+    }
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .map((entry) => entry.target);
+        visible.forEach((image) => observer.unobserve(image));
+        enqueue(visible);
+      }, { rootMargin: "480px 0px", threshold: 0.01 });
+      images.forEach((image) => observer.observe(image));
+    } else {
+      enqueue(images);
+    }
+  }
+
   async function renderOwnProfilePreview(role, profile, photos) {
     const container = document.querySelector("#profile-preview");
     if (!container) return;
@@ -1297,21 +1394,24 @@
     const gallery = document.createElement("div");
     gallery.className = "profile-preview-gallery";
     const visiblePhotos = (photos || []).filter((photo) => role !== "photographer" || photo.photo_type === "portfolio");
-    const signedPhotos = await Promise.all(visiblePhotos.map(async (photo, index) => {
+    let renderedCount = 0;
+    visiblePhotos.forEach((photo, index) => {
       const highlight = role === "photographer" && photoIsHighlight(photo);
-      const path = highlight ? photo.display_path || photo.object_path : role === "couple" ? photo.display_path || photo.object_path : photo.object_path;
-      if (!path) return null;
-      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(path, 3600);
-      if (error || !data || !data.signedUrl) return null;
-      return { photo, index, url: data.signedUrl, highlight };
-    }));
-    signedPhotos.filter(Boolean).forEach(({ photo, index, url, highlight }) => {
+      const path = highlight
+        ? photo.display_path || photo.object_path
+        : role === "couple"
+          ? photo.display_path || photo.object_path
+          : photo.object_path;
+      if (!path) return;
       const figure = document.createElement("figure");
-      figure.className = "profile-preview-photo";
+      figure.className = "profile-preview-photo" + (renderedCount === 0 ? " is-featured" : "");
+      figure.style.setProperty("--image-order", String(renderedCount));
       const image = document.createElement("img");
-      image.src = url;
-      image.loading = index > 3 ? "lazy" : "eager";
+      image.dataset.photoPath = path;
+      image.loading = "lazy";
+      image.decoding = "async";
       image.alt = role === "couple" ? "Foto des Hochzeitspaars " + (index + 1) : "Portfoliofoto " + (index + 1);
+      image.addEventListener("load", () => layoutProfileGallery(gallery), { once: true });
       figure.append(image);
       if (highlight) {
         const badge = document.createElement("span");
@@ -1322,6 +1422,7 @@
         figure.append(badge);
       }
       gallery.append(figure);
+      renderedCount += 1;
     });
     if (!gallery.children.length) {
       const empty = document.createElement("p");
@@ -1330,6 +1431,9 @@
       gallery.append(empty);
     }
     card.append(gallery);
+    container.append(card);
+    observeProfileGallery(gallery);
+    loadProfileGalleryImages(gallery);
 
     const details = document.createElement("div");
     details.className = "profile-preview-details";
@@ -1356,7 +1460,6 @@
       });
     }
     if (details.children.length) card.append(details);
-    container.append(card);
   }
 
   async function setupRole(role, user, complete, greeting, profile, photos) {
