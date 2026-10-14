@@ -5,6 +5,7 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 ## Project documents
 
 - [Frozen baseline — 14 October 2026](docs/FROZEN-BASELINE-2026-10-14.md) — current implementation, production deployment, verified boundaries, and open issues.
+- [Reference modules](docs/REFERENCE-MODULES-v1.0.md) — documented current reference for the photographer page, authentication, dashboard, profile management, and public profile.
 - [Change control](docs/CHANGE-CONTROL.md) — freeze rule and safe process for explicitly requested changes.
 - [Documentation architecture](docs/DOCUMENTATION-ARCHITECTURE.md) — proposed modular bibles, asset inventory, and guarded FAQ automation.
 
@@ -19,7 +20,7 @@ The public pages are `index.html`, `hochzeitspaare.html`, and `fotografen.html`.
 
 Email and Google registration use the same role-neutral flow. After authentication, `dashboard.html` opens the profile assistant. Users select **Hochzeitspaar** or **Fotograf** after login, enter the required profile data, upload the required photos, and review the profile. The full dashboard is shown only after the profile is complete.
 
-Run both files in `supabase/migrations` in filename order before testing the onboarding forms and photo uploads. Matching and messages are not implemented yet.
+Run the files in `supabase/migrations` in filename order before testing the onboarding forms and photo uploads. Matching and messages are not implemented yet.
 
 ## Important product boundary
 
