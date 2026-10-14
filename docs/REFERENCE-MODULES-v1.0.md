@@ -93,13 +93,13 @@ Das Formular erfasst die Vornamen beider heiratenden Personen, Datum, Ort/Locati
 
 Das Formular erfasst Vorname, mehrfach auswählbare Einsatzgebiete inklusive Ganz Österreich, Erfahrung in Jahren und/oder fotografierten Hochzeiten, Bildstil (einschließlich Boho), Vergütung (unentgeltlich oder Fixbetrag) sowie gewünschten Begleitungsumfang. Der Begleitungsumfang beschreibt, welche Hochzeitsabschnitte der Fotograf für das eigene Portfolio noch fotografieren möchte. Instagram und Website sind optional; der Code normalisiert die Eingabe zu einem Link und bietet eine Vorschau zum Öffnen.
 
-Die Galerie unterstützt laut Code bis zu 20 Fotos, mindestens 3 sind für den Abschluss vorgesehen, und 3 bis 5 Fotos können als Highlights markiert werden. Die Auswahl und Anzeige der Highlightmarkierung gehört in die Galerieansicht. Verfügbarkeit ist keine Profilangabe. Fotos sind JPG/JPEG, PNG und WebP; Portfoliofotos sind auf 2 MB pro Datei begrenzt. Der Profilfoto-Upload ist eine separate Account-Funktion mit rundem Zuschnitt.
+Die Galerie umfasst bis zu 20 gleichwertige normale Fotos; es gibt keine Highlight-Auswahl oder -Markierung. Mindestens 3 Fotos sind für den Profilabschluss vorgesehen. Verfügbarkeit ist keine Profilangabe. Fotos sind JPG/JPEG, PNG und WebP; Portfoliofotos sind auf 2 MB pro Datei begrenzt. Der Profilfoto-Upload ist eine separate Account-Funktion mit rundem Zuschnitt.
 
 ### Wichtiger Abgleich mit älteren Dokumenten
 
 `PROJECT-BIBLE-v1.2.md` enthält an mehreren Stellen frühere Planungswerte und Regeln (u. a. Verfügbarkeit, mindestens 10 Portfoliofotos, 10-MB-Angabe und eine nicht wechselbare Rollenvergabe). Diese Aussagen stimmen nicht mit den späteren Nutzerentscheidungen und dem Baseline-Code überein. Sie sind als historische/ersetzte Spezifikation zu behandeln und dürfen nicht als aktueller Funktionsumfang übernommen werden. Eine bereinigte Product Bible ist ein eigener nächster Dokumentationsschritt.
 
-**Noch zu prüfen:** Rollenwechsel-Auswirkungen auf das jeweils andere Rollenprofil; ob bestehende Daten erhalten bleiben; Schritt-für-Schritt-Speichern; Reload und Fortsetzen; Rollen- und Abschluss-RPCs; Foto-Upload, Löschen, Reihenfolge, Zuschnitt, Highlights und Profile-Completion mit den tatsächlich eingesetzten Supabase-Policies.
+**Noch zu prüfen:** Rollenwechsel-Auswirkungen auf das jeweils andere Rollenprofil; ob bestehende Daten erhalten bleiben; Schritt-für-Schritt-Speichern; Reload und Fortsetzen; Rollen- und Abschluss-RPCs; Foto-Upload, Löschen, Reihenfolge, Zuschnitt und Profile-Completion mit den tatsächlich eingesetzten Supabase-Policies.
 
 ## 5. Öffentliches Profil
 
