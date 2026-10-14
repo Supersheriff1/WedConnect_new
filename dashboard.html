@@ -326,6 +326,12 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     body.is-gallery-fullscreen{overflow:hidden!important}
     #fullscreen-gallery-dialog{position:fixed;inset:0;box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:#0c0c0f;color:var(--ink);overflow:hidden}
     #fullscreen-gallery-dialog::backdrop{background:#0c0c0f}
+    #fullscreen-rotate-hint{position:fixed;z-index:20;top:calc(58px + env(safe-area-inset-top));left:50%;display:flex;align-items:center;gap:9px;max-width:calc(100vw - 32px);padding:9px 13px;border:1px solid rgb(255 255 255 / 18%);border-radius:999px;background:rgb(30 29 35 / 78%);color:#fff;font:600 12px/1.2 var(--sans);letter-spacing:.01em;box-shadow:0 4px 18px #0004;backdrop-filter:blur(9px);transform:translateX(-50%);pointer-events:none;animation:rotate-hint-in .25s ease-out both}
+    #fullscreen-rotate-hint[hidden]{display:none!important}
+    #fullscreen-rotate-hint svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;animation:rotate-hint-icon 2.4s ease-in-out infinite}
+    @keyframes rotate-hint-in{from{opacity:0;translate:0 -5px}to{opacity:1;translate:0 0}}
+    @keyframes rotate-hint-icon{0%,15%,100%{transform:rotate(0)}45%,70%{transform:rotate(90deg)}}
+    @media(min-width:721px),(pointer:fine){#fullscreen-rotate-hint{display:none!important}}
     #fullscreen-gallery-dialog .profile-preview-gallery.is-fullscreen{position:relative!important;inset:auto!important;box-sizing:border-box;width:100vw!important;height:100dvh!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
     #fullscreen-gallery-dialog .profile-preview-track{position:absolute!important;inset:0!important;box-sizing:border-box;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;min-width:0!important;aspect-ratio:auto!important;display:flex!important;align-items:stretch!important;gap:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow-x:auto!important;overflow-y:hidden!important}
     #fullscreen-gallery-dialog .profile-preview-photo{position:relative!important;box-sizing:border-box!important;display:block!important;flex:0 0 100vw!important;width:100vw!important;height:100dvh!important;min-width:100vw!important;max-width:100vw!important;min-height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
@@ -387,7 +393,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     </div>
   </dialog>
   <dialog id="delete-photo-dialog" class="delete-photo-dialog" aria-labelledby="delete-photo-title"><form method="dialog" class="delete-photo-content"><span class="delete-photo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg></span><h2 id="delete-photo-title">Foto löschen?</h2><p id="delete-photo-message">Möchtest du dieses Foto wirklich löschen?</p><div class="delete-photo-actions"><button class="button button-secondary" type="submit" value="cancel">Abbrechen</button><button class="button button-primary delete-photo-confirm" type="submit" value="confirm">Foto löschen</button></div></form></dialog>
-  <dialog id="fullscreen-gallery-dialog" class="fullscreen-gallery-dialog" aria-label="Profilfotos im Vollbild"></dialog>
+  <dialog id="fullscreen-gallery-dialog" class="fullscreen-gallery-dialog" aria-label="Profilfotos im Vollbild"><div id="fullscreen-rotate-hint" role="status" aria-live="polite" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="4" width="8" height="15" rx="1.7"/><path d="M11 16h2M5 9a7 7 0 0 1 2-4m-2 4 2-1m-2 1-1-2m15 8a7 7 0 0 1-2 4m2-4-2 1m2-1 1 2"/></svg><span>Handy drehen für Querformat</span></div></dialog>
   <dialog id="photo-viewer" class="photo-viewer" aria-label="Foto in Originalansicht"><button id="photo-viewer-close" class="button button-secondary photo-viewer-close" type="button" aria-label="Foto schließen" title="Foto schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><img id="photo-viewer-image" alt=""></dialog>
     <dialog id="crop-dialog" class="crop-dialog" aria-labelledby="crop-title">
     <h2 id="crop-title">Foto zuschneiden und ausrichten</h2>
@@ -438,7 +444,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-fullscreen-fallback-v64"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-fullscreen-rotate-hint-v65"></script>
 </body>
 </html>
 
