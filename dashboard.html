@@ -194,6 +194,10 @@
     .profile-preview-links{display:flex;flex-wrap:wrap;gap:10px;padding-top:16px}
     .profile-preview-link{display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:999px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none}
     .profile-preview-link:hover{border-color:var(--gold);background:var(--hover);color:var(--ink)}
+    .profile-preview-identity-links .profile-preview-icon-link{width:34px;height:34px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted)}
+    .profile-preview-identity-links .profile-preview-icon-link:hover{background:rgb(213 182 122 / 10%);color:var(--gold)}
+    .profile-preview-icon-link svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .profile-preview-icon-link .icon-dot{fill:currentColor;stroke:none}
     .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;border-radius:14px;background:var(--canvas);padding:0;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:none;touch-action:pan-x pan-y}
     .profile-preview-track::-webkit-scrollbar{display:none}
     .profile-preview-photo{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;flex:0 0 100%;width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidden;border-radius:inherit;background:var(--canvas);scroll-snap-align:start;scroll-snap-stop:always;box-shadow:none}
@@ -259,6 +263,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .setup-autosave-status{margin:0 0 12px;color:var(--muted);font-size:11px;line-height:1.4}
     .setup-autosave-status.is-error{color:#e3a09a}
     #onboarding.profile-edit-overlay{position:fixed;z-index:15;inset:0 0 0 248px;min-height:100dvh;overflow-y:auto;background:var(--canvas)}
+    #onboarding.profile-edit-overlay .setup-topbar{display:none}
     #dashboard.is-editing-profile .sidebar{z-index:20}
     @media(max-width:720px){
       #onboarding.profile-edit-overlay{inset:64px 0 78px;min-height:0}
@@ -289,7 +294,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="onboarding" class="onboarding hidden">
     <header class="setup-topbar">
       <a class="mobile-brand" href="/dashboard.html">Wed<span>Connect</span></a>
-      <div class="setup-topbar-actions"><button id="profile-edit-exit" class="button button-secondary" type="button" hidden>Zurück zur Übersicht</button><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
+      <div class="setup-topbar-actions"><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
     </header>
     <div class="setup-content">
       <div class="setup-heading">
