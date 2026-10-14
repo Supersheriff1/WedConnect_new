@@ -279,7 +279,20 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .profile-preview-indicators{top:25px!important}
     .profile-preview-intro-copy{display:block;-webkit-line-clamp:unset;overflow:visible}
 
-</style>
+    .profile-preview-fullscreen{position:absolute;right:28px;bottom:14px;z-index:8;width:40px;height:40px;display:grid;place-items:center;padding:0;border:1px solid rgb(255 255 255 / 48%);border-radius:50%;background:rgb(30 29 35 / 78%);color:var(--ink);backdrop-filter:blur(8px);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}
+    .profile-preview-fullscreen:hover{border-color:var(--gold);background:var(--gold);color:var(--gold-ink)}
+    .profile-preview-fullscreen svg,.photo-viewer-close svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .profile-preview-gallery:fullscreen,.profile-preview-gallery:-webkit-full-screen{width:100vw;height:100dvh;max-width:none;margin:0;padding:0;border:0;border-radius:0;background:#0c0c0f;box-shadow:none}
+    .profile-preview-gallery:fullscreen .profile-preview-track,.profile-preview-gallery:-webkit-full-screen .profile-preview-track{width:100vw;height:100dvh;aspect-ratio:auto;max-height:100dvh;border-radius:0;background:#0c0c0f}
+    .profile-preview-gallery:fullscreen .profile-preview-photo,.profile-preview-gallery:-webkit-full-screen .profile-preview-photo{flex-basis:100vw;width:100vw;height:100dvh;background:#0c0c0f}
+    .profile-preview-gallery:fullscreen .profile-preview-photo img,.profile-preview-gallery:-webkit-full-screen .profile-preview-photo img{object-fit:contain!important}
+    .profile-preview-gallery:fullscreen .profile-preview-indicators,.profile-preview-gallery:-webkit-full-screen .profile-preview-indicators{top:calc(16px + env(safe-area-inset-top))!important;left:16px;right:64px}
+    .profile-preview-gallery:fullscreen .profile-preview-gallery-controls,.profile-preview-gallery:-webkit-full-screen .profile-preview-gallery-controls{width:100%;padding:0 14px}
+    .profile-preview-gallery:fullscreen .profile-preview-overlay,.profile-preview-gallery:-webkit-full-screen .profile-preview-overlay{display:none}
+    .profile-preview-gallery:fullscreen .profile-preview-fullscreen,.profile-preview-gallery:-webkit-full-screen .profile-preview-fullscreen{right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:44px;height:44px}
+    .photo-viewer-close{display:grid;place-items:center;width:42px;min-width:42px;padding:0}
+    @media(max-width:720px){.profile-preview-fullscreen{right:22px;bottom:12px;width:38px;height:38px}}
+  </style>
 </head>
 <body>
   <div id="loading" class="loading" role="status" aria-live="polite"><div class="loading-card"><div class="loading-brand"><span class="loading-wordmark" aria-hidden="true">Wed<span>Connect</span></span><span class="loading-connection" aria-hidden="true"><i></i><b></b><i></i></span></div><p>Dein Bereich wird vorbereitet …</p></div></div>
@@ -325,7 +338,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     </div>
   </dialog>
   <dialog id="delete-photo-dialog" class="delete-photo-dialog" aria-labelledby="delete-photo-title"><form method="dialog" class="delete-photo-content"><span class="delete-photo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg></span><h2 id="delete-photo-title">Foto löschen?</h2><p id="delete-photo-message">Möchtest du dieses Foto wirklich löschen?</p><div class="delete-photo-actions"><button class="button button-secondary" type="submit" value="cancel">Abbrechen</button><button class="button button-primary delete-photo-confirm" type="submit" value="confirm">Foto löschen</button></div></form></dialog>
-  <dialog id="photo-viewer" class="photo-viewer" aria-label="Foto in Originalansicht"><button id="photo-viewer-close" class="button button-secondary photo-viewer-close" type="button" aria-label="Foto schließen">Schließen</button><img id="photo-viewer-image" alt=""></dialog>
+  <dialog id="photo-viewer" class="photo-viewer" aria-label="Foto in Originalansicht"><button id="photo-viewer-close" class="button button-secondary photo-viewer-close" type="button" aria-label="Foto schließen" title="Foto schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><img id="photo-viewer-image" alt=""></dialog>
     <dialog id="crop-dialog" class="crop-dialog" aria-labelledby="crop-title">
     <h2 id="crop-title">Foto zuschneiden und ausrichten</h2>
     <p>Verschiebe und drehe das Foto, bis der sichtbare Hochformat-Ausschnitt passt.</p>
