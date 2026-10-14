@@ -1277,11 +1277,11 @@
       const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
       const styles = Array.isArray(data.styles) ? data.styles : [];
       const regionCode = data.region_code || "";
-      if (!allowIncomplete && !COUPLE_REGION_OPTIONS.some((option) => option[0] === regionCode)) {
+      if (!allowIncomplete && wizard.step === 1 && !COUPLE_REGION_OPTIONS.some((option) => option[0] === regionCode)) {
         throw new Error("Wähle das Bundesland eurer Hochzeit aus.");
       }
-      if (!allowIncomplete && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
-      if (!allowIncomplete && !styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+      if (!allowIncomplete && wizard.step === 2 && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+      if (!allowIncomplete && wizard.step === 2 && !styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
       data.region_code = regionCode;
       data.coverage_options = coverage;
       data.styles = styles;
