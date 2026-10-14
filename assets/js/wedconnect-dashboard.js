@@ -735,7 +735,6 @@
     gallery.parentNode.insertBefore(fullscreenGalleryPlaceholder, gallery);
     activeFullscreenGallery = gallery;
     gallery.classList.add("is-fullscreen");
-    if (profileGalleryImageObserver) profileGalleryImageObserver.disconnect();
     fullscreenGalleryDialog.append(gallery);
     document.body.classList.add("is-gallery-fullscreen");
     fullscreenGalleryDialog.showModal();
@@ -753,6 +752,9 @@
       const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(originalPath, 3600);
       if (error || !data || !data.signedUrl || activeFullscreenGallery !== gallery) return;
       image.dataset.fullscreenUrl = data.signedUrl;
+      image.addEventListener("error", () => {
+        if (activeFullscreenGallery === gallery && image.dataset.displayUrl) image.src = image.dataset.displayUrl;
+      }, { once: true });
       image.src = data.signedUrl;
     }));
   }
@@ -763,8 +765,10 @@
     const selectedIndex = Number(gallery.dataset.fullscreenIndex || 0);
     gallery.classList.remove("is-fullscreen");
     Array.from(gallery.querySelectorAll("img[data-photo-path]")).forEach((image) => {
-      if (image.dataset.displayUrl) image.src = image.dataset.displayUrl;
-      else {
+      if (image.dataset.displayUrl) {
+        image.src = image.dataset.displayUrl;
+        image.dataset.photoState = "done";
+      } else {
         image.removeAttribute("src");
         delete image.dataset.photoState;
       }
@@ -1573,14 +1577,78 @@
     }
   }
 
-  function loadProfileGalleryImages(gallery){
-    const track=gallery.querySelector(".profile-preview-track"),images=Array.from(gallery.querySelectorAll("img[data-photo-path]"));if(!images.length||!track)return;
-    const queue=[];let active=0;const max=2;
-    function finish(image,failed){if(image.dataset.photoState==="done")return;image.dataset.photoState="done";const figure=image.closest(".profile-preview-photo");if(figure){figure.classList.toggle("is-failed",!!failed);if(!failed){figure.classList.add("is-loaded");}}active=Math.max(0,active-1);pump()}
-    function pump(){while(active<max&&queue.length){const image=queue.shift();if(image.dataset.photoState)continue;image.dataset.photoState="loading";active++;let settled=false;const settle=f=>{if(!settled){settled=true;finish(image,f)}};image.addEventListener("load",()=>settle(false),{once:true});image.addEventListener("error",()=>settle(true),{once:true});supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath,3600).then(({data,error})=>{if(error||!data||!data.signedUrl){settle(true);return}image.dataset.displayUrl=data.signedUrl;if(gallery.classList.contains("is-fullscreen")){settle(false);return}image.src=data.signedUrl}).catch(()=>settle(true))}}
-    const enqueue=list=>{const unseen=list.filter(i=>!i.dataset.photoState&&!queue.includes(i));unseen.sort((a,b)=>images.indexOf(a)-images.indexOf(b));queue.push(...unseen);pump()};
-    if("IntersectionObserver"in window){profileGalleryImageObserver=new IntersectionObserver(entries=>{const nearby=entries.filter(e=>e.isIntersecting).map(e=>e.target);nearby.forEach(i=>profileGalleryImageObserver.unobserve(i));enqueue(nearby)},{root:track,rootMargin:"0px 520px",threshold:.01});images.forEach(i=>profileGalleryImageObserver.observe(i))}else enqueue(images)
+  function loadProfileGalleryImages(gallery) {
+    const track = gallery.querySelector(".profile-preview-track");
+    const images = Array.from(gallery.querySelectorAll("img[data-photo-path]"));
+    if (!images.length || !track) return;
+
+    if (gallery._wedconnectImageScrollHandler) {
+      track.removeEventListener("scroll", gallery._wedconnectImageScrollHandler);
+    }
+    const queue = [];
+    let active = 0;
+    const maxConcurrent = 2;
+
+    function finish(image, failed) {
+      if (gallery.classList.contains("is-fullscreen")) {
+        delete image.dataset.photoState;
+      } else {
+        image.dataset.photoState = "done";
+        const figure = image.closest(".profile-preview-photo");
+        if (figure) {
+          figure.classList.toggle("is-failed", Boolean(failed));
+          if (!failed) figure.classList.add("is-loaded");
+        }
+      }
+      active = Math.max(0, active - 1);
+      pump();
+    }
+
+    function pump() {
+      while (active < maxConcurrent && queue.length) {
+        const image = queue.shift();
+        if (image.dataset.photoState || !image.isConnected) continue;
+        image.dataset.photoState = "loading";
+        active += 1;
+        let settled = false;
+        const settle = (failed) => {
+          if (settled) return;
+          settled = true;
+          finish(image, failed);
+        };
+        image.addEventListener("load", () => settle(false), { once: true });
+        image.addEventListener("error", () => settle(true), { once: true });
+        supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath, 3600)
+          .then(({ data, error }) => {
+            if (error || !data || !data.signedUrl) {
+              settle(true);
+              return;
+            }
+            image.dataset.displayUrl = data.signedUrl;
+            if (!gallery.classList.contains("is-fullscreen")) image.src = data.signedUrl;
+            else settle(false);
+          })
+          .catch(() => settle(true));
+      }
+    }
+
+    function enqueueNearby() {
+      const width = track.clientWidth || 1;
+      const current = Math.max(0, Math.round(track.scrollLeft / width));
+      const first = Math.max(0, current - 1);
+      const last = Math.min(images.length, current + 3);
+      const nearby = images.slice(first, last);
+      nearby.forEach((image) => {
+        if (!image.dataset.photoState && !queue.includes(image)) queue.push(image);
+      });
+      pump();
+    }
+
+    gallery._wedconnectImageScrollHandler = enqueueNearby;
+    track.addEventListener("scroll", enqueueNearby, { passive: true });
+    enqueueNearby();
   }
+
   async function renderOwnProfilePreview(role, profile, photos) {
     const container = document.querySelector("#profile-preview");
     if (!container) return;
