@@ -635,6 +635,22 @@
     photoViewer.showModal();
   }
 
+  function syncProfileFullscreenButtons() {
+    document.querySelectorAll(".profile-preview-fullscreen").forEach((button) => {
+      const gallery = button.closest(".profile-preview-gallery");
+      const isFullscreen = Boolean(gallery && (document.fullscreenElement === gallery || document.webkitFullscreenElement === gallery));
+      button.classList.toggle("is-fullscreen", isFullscreen);
+      button.setAttribute("aria-label", isFullscreen ? "Vollbild schließen" : "Galerie im Vollbild anzeigen");
+      button.title = isFullscreen ? "Vollbild schließen" : "Galerie im Vollbild anzeigen";
+      button.innerHTML = isFullscreen
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
+    });
+  }
+
+  document.addEventListener("fullscreenchange", syncProfileFullscreenButtons);
+  document.addEventListener("webkitfullscreenchange", syncProfileFullscreenButtons);
+
   if (photoViewerClose) photoViewerClose.addEventListener("click", () => photoViewer.close());
   if (photoViewer) photoViewer.addEventListener("click", (event) => {
     if (event.target === photoViewer) photoViewer.close();
@@ -1449,6 +1465,36 @@
     overlay.append(actions);
     controls.append(previous, next);
     gallery.append(track, controls, indicatorGroup, status, overlay);
+    if (renderedCount) {
+      const fullscreenButton = document.createElement("button");
+      fullscreenButton.type = "button";
+      fullscreenButton.className = "profile-preview-fullscreen";
+      fullscreenButton.setAttribute("aria-label", "Galerie im Vollbild anzeigen");
+      fullscreenButton.title = "Galerie im Vollbild anzeigen";
+      fullscreenButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
+      fullscreenButton.addEventListener("click", async () => {
+        const isFullscreen = document.fullscreenElement === gallery || document.webkitFullscreenElement === gallery;
+        if (isFullscreen) {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          return;
+        }
+        try {
+          if (gallery.requestFullscreen) await gallery.requestFullscreen();
+          else if (gallery.webkitRequestFullscreen) gallery.webkitRequestFullscreen();
+          else {
+            const activeIndex = Math.round(track.scrollLeft / (track.clientWidth || 1));
+            const image = track.querySelectorAll("img")[activeIndex];
+            if (image && image.src) showPhotoViewer(image.src, image.alt);
+          }
+        } catch (_) {
+          const activeIndex = Math.round(track.scrollLeft / (track.clientWidth || 1));
+          const image = track.querySelectorAll("img")[activeIndex];
+          if (image && image.src) showPhotoViewer(image.src, image.alt);
+        }
+      });
+      gallery.append(fullscreenButton);
+    }
 
     const detailsData = profileDetailRows(role, profile);
     const metadata = document.createElement("div");
