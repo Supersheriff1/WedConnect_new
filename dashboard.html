@@ -66,7 +66,7 @@
     .crop-dialog.avatar-crop{width:min(540px,calc(100% - 24px))}
     .crop-dialog.avatar-crop .crop-canvas-wrap{position:relative;width:min(100%,48dvh,460px);aspect-ratio:1;margin:2px auto 0;overflow:visible;border:0;border-radius:0;background:transparent}
     .crop-dialog.avatar-crop #crop-canvas{width:100%;height:100%;aspect-ratio:1;border-radius:0}
-    .crop-dialog.avatar-crop .crop-canvas-wrap::after{content:"";position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;box-shadow:0 0 0 999px rgb(12 12 15 / 48%);pointer-events:none}
+    .crop-dialog.avatar-crop .crop-canvas-wrap::after{content:"";position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;background:radial-gradient(circle at center,transparent 69.5%,rgb(12 12 15 / 48%) 70%);pointer-events:none}
     .crop-dialog.avatar-crop .crop-dialog-actions{margin-top:15px}
     .crop-dialog .crop-error{margin:7px 0 0;color:#e3a09a;font-size:12px}
     @media(max-width:560px){.crop-dialog.avatar-crop{width:100vw;height:auto;max-height:100dvh;margin:auto 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-radius:16px}.crop-dialog.avatar-crop .crop-canvas-wrap{width:min(100%,46dvh,420px)}}.crop-controls{display:grid;grid-template-columns:auto minmax(120px,1fr);gap:12px;align-items:center;margin-top:15px}.crop-zoom-control{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}.crop-zoom-control label{color:var(--body);font-size:12px;font-weight:700}.crop-controls label{color:var(--body);font-size:12px;font-weight:700}.crop-zoom-control input[type=range]{width:100%;accent-color:var(--gold)}.crop-dialog .button{font-weight:700;box-shadow:0 2px 0 rgb(0 0 0 / 18%)}.crop-dialog .button-secondary{border-color:#77717e;background:#45424c;color:var(--ink)}.crop-dialog .button-secondary:hover{border-color:var(--gold);background:#514c57}.crop-dialog .button-primary{border-color:#ebd29d;background:var(--gold);color:var(--gold-ink)}.crop-dialog .button:disabled{opacity:.72;cursor:wait}.crop-zoom-control input[type=range]{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--gold),#817b87);cursor:pointer}.crop-zoom-control input[type=range]::-webkit-slider-thumb{width:22px;height:22px;border:3px solid var(--canvas);border-radius:50%;background:var(--gold);box-shadow:0 0 0 1px var(--gold);-webkit-appearance:none}.crop-zoom-control input[type=range]::-moz-range-thumb{width:16px;height:16px;border:3px solid var(--canvas);border-radius:50%;background:var(--gold);box-shadow:0 0 0 1px var(--gold)}.crop-dialog-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.crop-dialog-actions .button{flex:1}
@@ -489,7 +489,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-avatar-recrop-controls-v77"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-avatar-crop-contrast-v78"></script>
 </body>
 </html>
 
