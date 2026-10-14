@@ -26,6 +26,7 @@
     .setup-progress{height:5px;overflow:hidden;border-radius:5px;background:var(--raised)}.setup-progress span{display:block;width:0;height:100%;background:var(--gold);transition:width .2s}
     .setup-fields{display:grid;gap:18px}.setup-field{display:grid;gap:7px}.setup-field label,.setup-group legend{color:var(--ink);font-size:14px;font-weight:700}
     .setup-field input,.setup-field textarea,.setup-field select{width:100%;min-height:50px;padding:12px 14px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--ink);font:400 16px/1.5 var(--sans)}
+    #field-compensation_type{font-size:14px}
     .setup-field textarea{min-height:112px;resize:vertical}.setup-field input:focus,.setup-field textarea:focus,.setup-field select:focus{outline:2px solid var(--gold);outline-offset:2px}
     .setup-hint{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
     .setup-two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -233,7 +234,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-gallery-copy-position-v34"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-compensation-cleanup-v35"></script>
 </body>
 </html>
 
