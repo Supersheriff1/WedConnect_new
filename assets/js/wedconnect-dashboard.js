@@ -2118,7 +2118,19 @@
         await uploadSelectedPhotos();
         wizard.step = 4;
       } else if (wizard.step === 4) {
-        const { error } = await supabase.rpc("complete_profile_for_role", { p_role: wizard.role });
+        if (!["couple", "photographer"].includes(wizard.role)) {
+          throw new Error("Bitte gehe zurück und wähle zuerst deine Rolle aus.");
+        }
+        const { error: roleError } = await supabase.rpc("assign_initial_role", { p_role: wizard.role });
+        if (roleError) {
+          const roleMessage = roleError.message || "";
+          const roleCode = roleError.code ? " (" + roleError.code + ")" : "";
+          if (roleMessage.includes("account_role_already_set")) {
+            throw new Error("Die gespeicherte Rolle stimmt nicht mit deinem Profil überein. Bitte lade das Dashboard neu und wähle deine Rolle erneut.");
+          }
+          throw new Error("Deine Rolle konnte nicht gespeichert werden" + roleCode + ": " + (roleMessage || "Bitte versuche es erneut."));
+        }
+        const { error } = await supabase.rpc("complete_profile");
         if (error) {
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
