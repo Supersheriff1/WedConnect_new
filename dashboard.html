@@ -191,8 +191,9 @@
     .profile-preview-links{display:flex;flex-wrap:wrap;gap:10px;padding-top:16px}
     .profile-preview-link{display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:999px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none}
     .profile-preview-link:hover{border-color:var(--gold);background:var(--hover);color:var(--ink)}
-    .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;overflow:hidden;border-radius:14px;background:var(--canvas);padding:0}
-    .profile-preview-photo{box-sizing:border-box;position:absolute;inset:0;isolation:isolate;display:grid;place-items:center;width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidden;border-radius:inherit;background:var(--canvas);box-shadow:none}
+    .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;border-radius:14px;background:var(--canvas);padding:0;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:none;touch-action:pan-x pan-y}
+    .profile-preview-track::-webkit-scrollbar{display:none}
+    .profile-preview-photo{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;flex:0 0 100%;width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidden;border-radius:inherit;background:var(--canvas);scroll-snap-align:start;scroll-snap-stop:always;box-shadow:none}
     .profile-preview-photo[hidden]{display:none!important}
     .profile-preview-photo:hover{box-shadow:none}
     .profile-preview-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,#302f38 8%,#3c3943 18%,#302f38 33%);background-size:200% 100%;animation:gallery-shimmer 1.5s linear infinite}
@@ -205,7 +206,7 @@
     .profile-preview-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .profile-preview-arrow:hover:not(:disabled){background:var(--gold);color:#201b12}
     .profile-preview-arrow:disabled{opacity:.35;cursor:default}
-    .profile-preview-indicators{position:absolute;top:14px;left:32px;right:32px;z-index:4;display:flex;gap:5px;width:auto;padding:4px 6px;border-radius:999px;background:rgb(20 19 23 / 25%);backdrop-filter:blur(6px)}
+    .profile-preview-indicators{position:absolute;top:20px;left:32px;right:32px;z-index:4;display:flex;gap:5px;width:auto;padding:4px 6px;border-radius:999px;background:rgb(20 19 23 / 25%);backdrop-filter:blur(6px)}
     .profile-preview-indicator{height:3px;min-width:12px;flex:1;padding:0;border:0;border-radius:8px;background:rgb(255 255 255 / 38%);cursor:pointer;transition:background .2s ease}
     .profile-preview-indicator.is-active{background:#fff}
     
@@ -345,7 +346,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-info-v54"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-swipe-v55"></script>
 </body>
 </html>
 
