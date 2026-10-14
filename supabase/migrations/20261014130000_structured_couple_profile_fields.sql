@@ -72,10 +72,8 @@ begin
         and region_code in ('BGL','KTN','NOE','OOE','SBG','STMK','TIR','VBG','W')
         and cardinality(coverage_options) >= 1
         and cardinality(styles) >= 1
-        and length(trim(coalesce(schedule, ''))) between 1 and 4000
         and length(trim(coalesce(coverage_scope, ''))) between 1 and 1200
         and length(trim(coalesce(visual_style, ''))) between 1 and 1200
-        and length(trim(coalesce(image_wishes, ''))) between 1 and 2000
         and photographer_usage_preference in ('open', 'case_by_case', 'no')
     ) then
       raise exception using message = 'couple_profile_incomplete';
