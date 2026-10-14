@@ -6,6 +6,7 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 
 - [Frozen baseline — 14 October 2026](docs/FROZEN-BASELINE-2026-10-14.md) — current implementation, production deployment, verified boundaries, and open issues.
 - [Reference modules](docs/REFERENCE-MODULES-v1.0.md) — documented current reference for the photographer page, authentication, dashboard, profile management, and public profile.
+- [Screenshot- und Prüfmatrix v1.0](docs/SCREENSHOT-MATRIX-v1.0.md) — Viewports, Testzustände und sichere Screenshot-Dokumentation.
 - [Change control](docs/CHANGE-CONTROL.md) — freeze rule and safe process for explicitly requested changes.
 - [Documentation architecture](docs/DOCUMENTATION-ARCHITECTURE.md) — proposed modular bibles, asset inventory, and guarded FAQ automation.
 
