@@ -91,10 +91,6 @@
       "</div></fieldset>";
   }
 
-  function renderAccountPhoto() {
-    return '<section class="account-photo-field" aria-labelledby="account-photo-title"><div class="account-photo-preview" id="account-photo-preview" aria-hidden="true"></div><div class="account-photo-copy"><strong id="account-photo-title">Dein Profilfoto</strong><p>Optional · JPG, PNG oder WebP · maximal 2 MB</p><label class="button button-secondary account-photo-pick" for="account-photo-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/><path d="M19 4v4m-2-2h4"/></svg><span>Foto auswählen</span></label><input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp"><button id="account-photo-remove" class="account-photo-remove" type="button" hidden>Foto entfernen</button></div></section>';
-  }
-
   async function renderAccountAvatar() {
     const button = document.querySelector("#avatar");
     if (!button) return;
@@ -133,6 +129,8 @@
       preview.append(fallback);
     }
     if (remove) remove.hidden = !accountAvatarPath;
+    const avatarOpenLabel = document.querySelector("#account-avatar-open-label");
+    if (avatarOpenLabel) avatarOpenLabel.textContent = accountAvatarPath ? "Profilfoto ändern" : "Profilfoto hinzufügen";
   }
 
   async function uploadAccountPhoto(file) {
@@ -164,7 +162,7 @@
   }
 
   function renderCoupleBasics() {
-    return renderAccountPhoto() + '<div class="setup-two-col">'
+    return '<div class="setup-two-col">' +
       field("partner_one_first_name", "Vorname der ersten Person", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       field("partner_two_first_name", "Vorname der zweiten Person", "text", "", true, ' maxlength="80"') +
       field("wedding_date", "Hochzeitsdatum", "date", "", true, "") +
@@ -258,7 +256,7 @@
 
   function renderPhotographerBasics() {
     const compensationType = valueOf("compensation_type");
-    return renderAccountPhoto() + '<div class="photographer-basics">' +
+    return '<div class="photographer-basics">' +
       field("first_name", "Dein Vorname", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       multiSelectField("regions", "Region und Einsatzgebiet", REGION_OPTIONS, "Wähle ein oder mehrere Bundesländer. „Ganz Österreich“ schließt einzelne Bundesländer aus.") +
       '<div class="experience-grid">' +
@@ -411,29 +409,6 @@
       : step === 1 ? (wizard.role === "couple" ? renderCoupleBasics() : renderPhotographerBasics())
         : step === 2 ? (wizard.role === "couple" ? renderCoupleDetails() : renderPhotographerDetails())
           : step === 3 ? renderPhotoStep() : renderReview();
-    if (step === 1) {
-      refreshAccountPhotoPreview();
-      const avatarInput = document.querySelector("#account-photo-input");
-      const removeAvatar = document.querySelector("#account-photo-remove");
-      if (avatarInput) avatarInput.addEventListener("change", async () => {
-        const file = avatarInput.files && avatarInput.files[0];
-        if (!file) return;
-        errorLine.textContent = "";
-        try {
-          if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
-          if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
-          openCropEditor(file, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto), { avatar: true });
-        } catch (error) {
-          errorLine.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht vorbereitet werden.";
-        } finally { avatarInput.value = ""; }
-      });
-      if (removeAvatar) removeAvatar.addEventListener("click", async () => {
-        removeAvatar.disabled = true;
-        try { await removeAccountPhoto(); }
-        catch (error) { errorLine.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht entfernt werden."; }
-        finally { removeAvatar.disabled = false; }
-      });
-    }
     if (step === 2 && wizard.role === "photographer") updateProfileLinkChecks();
     if (step === 4) loadPhotoPreviews();
     if (step === 3 && wizard.role === "photographer") attachPortfolioPhotoControls();
@@ -485,11 +460,13 @@
   const cropCanvas = document.querySelector("#crop-canvas");
   const cropZoom = document.querySelector("#crop-zoom");
   const cropSave = document.querySelector("#crop-save");
+  const cropErrorLine = document.querySelector("#crop-error");
   const cropRotate = document.querySelector("#crop-rotate");
   let cropDrag = null;
 
   function openCropEditor(blob, onApply, options = {}) {
     const isAvatarCrop = Boolean(options.avatar);
+    if (cropErrorLine) cropErrorLine.textContent = "";
     const sourceUrl = URL.createObjectURL(blob);
     const image = new Image();
     image.onload = () => {
@@ -509,7 +486,7 @@
     };
     image.onerror = () => {
       URL.revokeObjectURL(sourceUrl);
-      errorLine.textContent = "Das Foto konnte nicht geöffnet werden.";
+      if (cropErrorLine) cropErrorLine.textContent = "Das Foto konnte nicht geöffnet werden.";
     };
     image.src = sourceUrl;
   }
@@ -602,7 +579,7 @@
       await cropState.onApply(blob);
       cropDialog.close();
     } catch (error) {
-      errorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gespeichert werden.";
+      if (cropErrorLine) cropErrorLine.textContent = error && error.message ? error.message : "Das Foto konnte nicht gespeichert werden.";
     } finally {
       cropSave.disabled = false;
       cropSave.textContent = "Zuschnitt übernehmen";
@@ -2081,11 +2058,41 @@
   const accountTrigger = document.querySelector("#account-open");
   const settingsTrigger = document.querySelector("#settings-open");
   const mobileAccountTrigger = document.querySelector("#avatar");
+  const accountPhotoDialog = document.querySelector("#account-photo-dialog");
+  const accountPhotoInput = document.querySelector("#account-photo-input");
+  const accountPhotoRemove = document.querySelector("#account-photo-remove");
+  const accountPhotoStatus = document.querySelector("#account-photo-status");
+  const accountAvatarOpen = document.querySelector("#account-avatar-open");
   function openWorkspaceDialog(dialog) {
     if (dialog && !dialog.open) dialog.showModal();
   }
   if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
+  if (accountAvatarOpen) accountAvatarOpen.addEventListener("click", () => {
+    if (accountDialog && accountDialog.open) accountDialog.close();
+    if (accountPhotoStatus) accountPhotoStatus.textContent = "";
+    refreshAccountPhotoPreview();
+    openWorkspaceDialog(accountPhotoDialog);
+  });
+  if (accountPhotoInput) accountPhotoInput.addEventListener("change", () => {
+    const file = accountPhotoInput.files && accountPhotoInput.files[0];
+    if (!file) return;
+    if (accountPhotoStatus) accountPhotoStatus.textContent = "";
+    try {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
+      if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
+      openCropEditor(file, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto), { avatar: true });
+    } catch (error) {
+      if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht vorbereitet werden.";
+    } finally { accountPhotoInput.value = ""; }
+  });
+  if (accountPhotoRemove) accountPhotoRemove.addEventListener("click", async () => {
+    accountPhotoRemove.disabled = true;
+    if (accountPhotoStatus) accountPhotoStatus.textContent = "";
+    try { await removeAccountPhoto(); }
+    catch (error) { if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht entfernt werden."; }
+    finally { accountPhotoRemove.disabled = false; }
+  });
   if (settingsTrigger) settingsTrigger.addEventListener("click", () => openWorkspaceDialog(settingsDialog));
   document.querySelector("#account-settings-open").addEventListener("click", () => {
     if (accountDialog.open) accountDialog.close();
