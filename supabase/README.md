@@ -4,10 +4,15 @@ WedConnect uses Supabase Auth for sign-in and account creation. Run the database
 
 ## Database migrations
 
-1. `migrations/20261012160000_init_profiles.sql` creates the private account profile and the one-time role assignment function.
-2. `migrations/20261013120000_profile_onboarding.sql` adds role-specific profiles, completion status, row-level security, and a private photo bucket.
+Run every file in `migrations/` in filename order.
 
-The second migration creates `couple_profiles`, `photographer_profiles`, and `profile_photos`. The photo bucket accepts JPEG, PNG, and WebP up to 10 MB per image. Incomplete profile records and photos remain private. After completion, profile details and photos can be read by signed-in WedConnect users.
+Key migrations:
+
+- `20261012160000_init_profiles.sql` creates the private account profile and the initial role-assignment function.
+- `20261013120000_profile_onboarding.sql` adds role-specific profiles, profile photos, row-level security, and the private photo bucket.
+- `20261014130000_structured_couple_profile_fields.sql` adds the couple's federal state and structured coverage/style choices, and ensures the optional public introduction columns exist. The new choices are required before a new couple profile can be completed.
+
+The photo bucket accepts JPEG, PNG, and WebP up to 10 MB per image. Incomplete profile records and photos remain private. After completion, profile details and photos can be read by signed-in WedConnect users.
 
 ## Authentication
 
