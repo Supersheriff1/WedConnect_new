@@ -133,10 +133,10 @@
     if (avatarOpenLabel) avatarOpenLabel.textContent = accountAvatarPath ? "Profilfoto ändern" : "Profilfoto hinzufügen";
   }
 
-  function avatarSourcePathFor(path) {
-    if (!path) return "";
+  function avatarSourcePathsFor(path) {
+    if (!path) return [];
     const match = path.match(/^(.*)\/avatar-([^.\/]+)\.[^.]+$/);
-    return match ? match[1] + "/avatar-source-" + match[2] : "";
+    return match ? [match[1] + "/avatar-" + match[2] + "-source", match[1] + "/avatar-source-" + match[2]] : [];
   }
 
   async function uploadAccountPhoto(file, originalPhoto = null) {
@@ -145,16 +145,14 @@
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
     const photoId = crypto.randomUUID();
     const path = currentUser.id + "/avatar-" + photoId + "." + extension;
-    const sourcePath = originalPhoto ? currentUser.id + "/avatar-source-" + photoId : "";
+    const sourcePath = originalPhoto ? currentUser.id + "/avatar-" + photoId + "-source" : "";
     const bucket = supabase.storage.from(photoBucket);
     const { error: uploadError } = await bucket.upload(path, file, { contentType: file.type, upsert: false });
     if (uploadError) throw new Error("Das Profilfoto konnte nicht hochgeladen werden.");
+    let originalSaved = false;
     if (originalPhoto) {
       const { error: sourceError } = await bucket.upload(sourcePath, originalPhoto, { contentType: originalPhoto.type || "image/jpeg", upsert: false });
-      if (sourceError) {
-        await bucket.remove([path]);
-        throw new Error("Das Originalfoto konnte nicht für spätere Zuschnittänderungen gespeichert werden.");
-      }
+      originalSaved = !sourceError;
     }
     const previousPath = accountAvatarPath;
     const { error: rowError } = await supabase.from("profile_avatars").upsert({ user_id: currentUser.id, object_path: path, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
@@ -164,7 +162,9 @@
     }
     accountAvatarPath = path;
     await renderAccountAvatar();
-    if (previousPath) await bucket.remove([previousPath, avatarSourcePathFor(previousPath)].filter(Boolean));
+    if (previousPath) await bucket.remove([previousPath, ...avatarSourcePathsFor(previousPath)]);
+    const photoStatus = document.querySelector("#account-photo-status");
+    if (originalPhoto && !originalSaved && photoStatus) photoStatus.textContent = "Profilfoto gespeichert. Das Original konnte nicht für spätere Zuschnittänderungen gesichert werden.";
   }
 
   async function removeAccountPhoto() {
@@ -174,7 +174,7 @@
     if (error) throw new Error("Das Profilfoto konnte nicht entfernt werden.");
     accountAvatarPath = "";
     await renderAccountAvatar();
-    await supabase.storage.from(photoBucket).remove([previousPath, avatarSourcePathFor(previousPath)].filter(Boolean));
+    await supabase.storage.from(photoBucket).remove([previousPath, ...avatarSourcePathsFor(previousPath)]);
   }
 
   function renderCoupleBasics() {
@@ -2094,11 +2094,13 @@
     accountPhotoPreview.disabled = true;
     try {
       const bucket = supabase.storage.from(photoBucket);
-      const sourcePath = avatarSourcePathFor(accountAvatarPath);
-      let { data, error } = sourcePath ? await bucket.download(sourcePath) : { data: null, error: true };
-      if (error || !data) {
-        ({ data, error } = await bucket.download(accountAvatarPath));
+      let data = null;
+      let error = null;
+      for (const sourcePath of avatarSourcePathsFor(accountAvatarPath)) {
+        const result = await bucket.download(sourcePath);
+        if (!result.error && result.data) { data = result.data; break; }
       }
+      if (!data) ({ data, error } = await bucket.download(accountAvatarPath));
       if (error || !data) throw new Error("Das Profilfoto konnte nicht zum Ausrichten geöffnet werden.");
       openCropEditor(data, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto, data), { avatar: true });
     } catch (error) {
