@@ -1212,17 +1212,39 @@
     return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "long", year: "numeric" }).format(date);
   }
 
-  function addPreviewDetail(container, label, value, wide = false) {
+  const PREVIEW_ICONS = {
+    pin: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    camera: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10H2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="3"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
+    users: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v1"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>',
+    sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></svg>',
+    euro: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5a7 7 0 0 0-4-1.2A7 7 0 0 0 8 10v4a7 7 0 0 0 7 6.2 7 7 0 0 0 4-1.2M5 10h10M5 14h9"/></svg>'
+  };
+
+  function addPreviewChip(container, icon, label, value) {
     if (value === null || value === undefined || String(value).trim() === "") return;
-    const item = document.createElement("div");
-    item.className = "profile-preview-detail" + (wide ? " is-wide" : "");
-    const title = document.createElement("span");
-    title.className = "profile-preview-detail-label";
-    title.textContent = label;
-    const content = document.createElement("p");
-    content.textContent = String(value);
-    item.append(title, content);
+    const item = document.createElement("span");
+    item.className = "profile-preview-chip";
+    item.innerHTML = PREVIEW_ICONS[icon] || "";
+    const text = document.createElement("span");
+    text.textContent = String(value);
+    item.append(text);
+    item.setAttribute("aria-label", label + ": " + String(value));
     container.append(item);
+  }
+
+  function addPreviewSection(container, title, value, className) {
+    if (value === null || value === undefined || String(value).trim() === "") return;
+    const section = document.createElement("section");
+    section.className = "profile-preview-section" + (className ? " " + className : "");
+    const heading = document.createElement("h4");
+    heading.textContent = title;
+    const copy = document.createElement("p");
+    copy.textContent = String(value);
+    section.append(heading, copy);
+    container.append(section);
   }
 
   function profileDetailRows(role, profile) {
@@ -1232,21 +1254,25 @@
         : profile.photographer_usage_preference === "case_by_case"
           ? "Nur nach Absprache"
           : profile.photographer_usage_preference === "no" ? "Nein" : "";
-      return [
-        ["Hochzeitsdatum", profileDate(profile.wedding_date)],
-        ["Ort oder Location", profile.location],
-        ["Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""],
-        ["Gewünschte Begleitung", profile.coverage_scope, true],
-        ["Ablauf", profile.schedule, true],
-        ["Bildstil", profile.visual_style, true],
-        ["Bildwünsche", profile.image_wishes, true],
-        ["Nutzung durch den Fotografen", preference, true]
-      ];
+      return {
+        chips: [
+          ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
+          ["pin", "Ort", profile.location],
+          ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
+        ],
+        sections: [
+          ["Gewünschte Begleitung", profile.coverage_scope],
+          ["Ablauf", profile.schedule],
+          ["Bildstil", profile.visual_style],
+          ["Bildwünsche", profile.image_wishes],
+          ["Nutzung durch den Fotografen", preference]
+        ]
+      };
     }
     const years = profile.experience_years === null || profile.experience_years === undefined || profile.experience_years === ""
-      ? "" : profile.experience_years + (Number(profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung");
+      ? "" : profile.experience_years + (Number(profile.experience_years) === 1 ? " Jahr" : " Jahre");
     const weddings = profile.weddings_photographed === null || profile.weddings_photographed === undefined || profile.weddings_photographed === ""
-      ? "" : profile.weddings_photographed + " fotografierte Hochzeiten";
+      ? "" : profile.weddings_photographed + " Hochzeiten";
     const experience = [years, weddings].filter(Boolean).join(" · ") || profile.experience || "";
     const regions = profileLabels(profile.regions, REGION_OPTIONS) || profile.region || "";
     const styles = profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style || "";
@@ -1256,13 +1282,16 @@
       : profile.compensation_type === "fixed" && profile.compensation_amount_eur
         ? Number(profile.compensation_amount_eur).toLocaleString("de-AT") + " €"
         : "";
-    return [
-      ["Einsatzgebiet", regions, true],
-      ["Erfahrung", experience],
-      ["Bildstil", styles, true],
-      ["Begleitungsumfang", coverage, true],
-      ["Vergütung", compensation]
-    ];
+    return {
+      chips: [
+        ["pin", "Einsatzgebiet", regions],
+        ["camera", "Erfahrung", experience],
+        ["sparkle", "Bildstil", styles],
+        ["clock", "Begleitungsumfang", coverage],
+        ["euro", "Vergütung", compensation]
+      ],
+      sections: []
+    };
   }
 
   let profileGalleryResizeObserver = null;
@@ -1319,34 +1348,12 @@
     container.innerHTML = "";
     const card = document.createElement("article");
     card.className = "profile-preview-card";
-    const heading = document.createElement("header");
-    heading.className = "profile-preview-identity";
-    const roleLabel = document.createElement("span");
-    roleLabel.className = "profile-preview-role";
-    roleLabel.textContent = role === "couple" ? "Hochzeitspaar" : "Fotograf";
-    const name = document.createElement("h3");
-    name.textContent = role === "couple"
-      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ")
-      : profile.first_name || "Dein Profil";
-    heading.append(roleLabel, name);
-    card.append(heading);
 
-    if (profile.public_intro && String(profile.public_intro).trim()) {
-      const intro = document.createElement("p");
-      intro.className = "profile-preview-intro";
-      intro.textContent = String(profile.public_intro).trim();
-      card.append(intro);
-    }
-
-    const galleryTitle = document.createElement("h4");
-    galleryTitle.className = "profile-preview-gallery-title";
-    galleryTitle.textContent = role === "couple" ? "Eure Fotos" : "Portfolio";
-    card.append(galleryTitle);
+    const visiblePhotos = (photos || []).filter((photo) => role !== "photographer" || photo.photo_type === "portfolio");
     const gallery = document.createElement("div");
     gallery.className = "profile-preview-gallery";
     gallery.tabIndex = 0;
     gallery.setAttribute("aria-label", role === "couple" ? "Fotos des Hochzeitspaars" : "Portfoliofotos");
-    const visiblePhotos = (photos || []).filter((photo) => role !== "photographer" || photo.photo_type === "portfolio");
     const track = document.createElement("div");
     track.className = "profile-preview-track";
     const controls = document.createElement("div"); controls.className = "profile-preview-gallery-controls";
@@ -1356,11 +1363,7 @@
     let renderedCount = 0;
     visiblePhotos.forEach((photo, index) => {
       const highlight = role === "photographer" && photoIsHighlight(photo);
-      const path = highlight
-        ? photo.display_path || photo.object_path
-        : role === "couple"
-          ? photo.display_path || photo.object_path
-          : photo.object_path;
+      const path = highlight ? photo.display_path || photo.object_path : role === "couple" ? photo.display_path || photo.object_path : photo.object_path;
       if (!path) return;
       const figure = document.createElement("figure");
       figure.className = "profile-preview-photo" + (renderedCount === 0 ? " is-featured" : "");
@@ -1394,34 +1397,56 @@
       indicator.setAttribute("aria-label", "Foto " + (index + 1) + " anzeigen"); indicatorGroup.append(indicator);
     }
     const status = document.createElement("span"); status.className = "profile-preview-gallery-status"; status.setAttribute("aria-live", "polite");
-    controls.append(previous, next); gallery.append(controls, indicatorGroup, status, track);
-    card.append(gallery); container.append(card); setupProfileGallery(gallery, renderedCount); loadProfileGalleryImages(gallery);
+    controls.append(previous, next);
+    gallery.append(controls, indicatorGroup, status, track);
 
-    const details = document.createElement("div");
-    details.className = "profile-preview-details";
-    profileDetailRows(role, profile).forEach(([label, value, wide]) => addPreviewDetail(details, label, value, wide));
+    const identity = document.createElement("header");
+    identity.className = "profile-preview-identity";
+    const roleLabel = document.createElement("span");
+    roleLabel.className = "profile-preview-role";
+    roleLabel.textContent = role === "couple" ? "Hochzeitspaar" : "Fotograf";
+    const name = document.createElement("h3");
+    name.textContent = role === "couple"
+      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ")
+      : profile.first_name || "Dein Profil";
+    identity.append(roleLabel, name);
+
+    const detailsData = profileDetailRows(role, profile);
+    const metadata = document.createElement("div");
+    metadata.className = "profile-preview-metadata";
+    detailsData.chips.forEach(([icon, label, value]) => addPreviewChip(metadata, icon, label, value));
+
+    const content = document.createElement("div");
+    content.className = "profile-preview-content";
+    content.append(identity);
+    if (metadata.children.length) content.append(metadata);
+    if (profile.public_intro && String(profile.public_intro).trim()) {
+      addPreviewSection(content, role === "couple" ? "Über euch" : "Über mich", String(profile.public_intro).trim(), "profile-preview-about");
+    }
+    detailsData.sections.forEach(([title, value]) => addPreviewSection(content, title, value));
     if (role === "photographer") {
+      const links = document.createElement("div");
+      links.className = "profile-preview-links";
       [["Instagram", profile.instagram_url, normalizeInstagram], ["Website", profile.website_url, normalizeWebsite]].forEach(([label, value, normalize]) => {
         if (!value) return;
         try {
           const url = normalize(value);
           if (!url) return;
-          const item = document.createElement("div");
-          item.className = "profile-preview-detail profile-preview-social";
-          const title = document.createElement("span");
-          title.className = "profile-preview-detail-label";
-          title.textContent = label;
           const link = document.createElement("a");
+          link.className = "profile-preview-link";
           link.href = url;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = label === "Instagram" ? "Instagram-Profil öffnen ↗" : "Website öffnen ↗";
-          item.append(title, link);
-          details.append(item);
+          link.textContent = label === "Instagram" ? "Instagram ↗" : "Website ↗";
+          links.append(link);
         } catch (_) {}
       });
+      if (links.children.length) content.append(links);
     }
-    if (details.children.length) card.append(details);
+    card.append(gallery, content);
+    container.append(card);
+    setupProfileGallery(gallery, renderedCount);
+    loadProfileGalleryImages(gallery);
   }
 
   async function setupRole(role, user, complete, greeting, profile, photos) {
