@@ -1030,6 +1030,9 @@
     onboarding.classList.add("hidden");
     onboarding.classList.remove("profile-edit-overlay");
     dashboard.classList.remove("is-editing-profile");
+    wizard.autoSaveEnabled = false;
+    wizard.isEditing = false;
+    setActiveNavigation("home");
   }
 
   async function loadWizard(role, startStep) {
@@ -1062,6 +1065,7 @@
       onboarding.classList.add("profile-edit-overlay");
       dashboard.classList.remove("hidden");
       dashboard.classList.add("is-editing-profile");
+      setActiveNavigation("profile");
     } else {
       onboarding.classList.remove("profile-edit-overlay");
       dashboard.classList.add("hidden");
@@ -1469,11 +1473,15 @@
           const url = normalize(value);
           if (!url) return;
           const link = document.createElement("a");
-          link.className = "profile-preview-link";
+          link.className = "profile-preview-link profile-preview-icon-link";
           link.href = url;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = label === "Instagram" ? "Instagram ↗" : "Website ↗";
+          link.setAttribute("aria-label", label === "Instagram" ? "Instagram-Profil öffnen" : "Website öffnen");
+          link.title = label;
+          link.innerHTML = label === "Instagram"
+            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r=".9" class="icon-dot"/></svg>'
+            : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18M4.5 7.5h15M4.5 16.5h15"/></svg>';
           links.append(link);
         } catch (_) {}
       });
@@ -1584,9 +1592,21 @@
   function navItem(label, icon, active, disabled) {
     const state = active ? 'aria-current="page"' : disabled
       ? 'disabled aria-disabled="true"' : icon === "profile" ? 'data-profile-setup' : "";
-    return '<button class="nav-link' + (active ? " active" : "") + '" type="button" ' + state + ">" +
+    return '<button class="nav-link' + (active ? " active" : "") + '" type="button" data-nav-item="' + icon + '" ' + state + ">" +
       icons[icon] + "<span>" + label + "</span>" +
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : "") + "</button>";
+  }
+
+  function setActiveNavigation(icon) {
+    [document.querySelector("#desktop-nav"), document.querySelector("#mobile-nav")].forEach((nav) => {
+      if (!nav) return;
+      nav.querySelectorAll("[data-nav-item]").forEach((item) => {
+        const active = item.dataset.navItem === icon;
+        item.classList.toggle("active", active);
+        if (active) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
+    });
   }
 
   fields.addEventListener("input", (event) => {
@@ -1619,7 +1639,6 @@
     }
   });
 
-  document.querySelector("#profile-edit-exit").addEventListener("click", closeProfileEditor);
 
   backButton.addEventListener("click", async () => {
     await flushDraftAutoSave();
