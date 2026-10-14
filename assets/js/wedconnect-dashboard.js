@@ -1304,6 +1304,7 @@
 
   let profileGalleryResizeObserver = null;
   let profileGalleryImageObserver = null;
+  let profileDetailsResizeHandler = null;
   function setupProfileGallery(gallery, photoCount) {
     const track = gallery.querySelector(".profile-preview-track");
     if (!track) return;
@@ -1333,7 +1334,7 @@
       const targetIndex = Math.max(0, Math.min(figures.length - 1, index));
       const target = figures[targetIndex];
       if (!target) return;
-      track.scrollTo({ left: target.offsetLeft, behavior: smooth ? "smooth" : "auto" });
+      track.scrollTo({ left: targetIndex * track.clientWidth, behavior: smooth ? "smooth" : "auto" });
       setActive(targetIndex);
     };
     const updateActiveFromScroll = () => {
@@ -1459,6 +1460,25 @@
       detailsData.keyFacts.filter(([, , value]) => value).forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
       content.append(keyFacts);
     }
+    if (role === "photographer") {
+      const links = document.createElement("div");
+      links.className = "profile-preview-links profile-preview-identity-links";
+      [["Instagram", profile.instagram_url, normalizeInstagram], ["Website", profile.website_url, normalizeWebsite]].forEach(([label, value, normalize]) => {
+        if (!value) return;
+        try {
+          const url = normalize(value);
+          if (!url) return;
+          const link = document.createElement("a");
+          link.className = "profile-preview-link";
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = label === "Instagram" ? "Instagram ↗" : "Website ↗";
+          links.append(link);
+        } catch (_) {}
+      });
+      if (links.children.length) content.append(links);
+    }
 
     const about = document.createElement("section");
     about.className = "profile-preview-about";
@@ -1489,33 +1509,31 @@
     additional.hidden = true;
     if (metadata.children.length) additional.append(metadata);
     detailsData.sections.forEach(([title, value]) => addPreviewSection(additional, title, value));
-    if (role === "photographer") {
-      const links = document.createElement("div");
-      links.className = "profile-preview-links";
-      [["Instagram", profile.instagram_url, normalizeInstagram], ["Website", profile.website_url, normalizeWebsite]].forEach(([label, value, normalize]) => {
-        if (!value) return;
-        try {
-          const url = normalize(value);
-          if (!url) return;
-          const link = document.createElement("a");
-          link.className = "profile-preview-link";
-          link.href = url;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = label === "Instagram" ? "Instagram ↗" : "Website ↗";
-          links.append(link);
-        } catch (_) {}
-      });
-      if (links.children.length) additional.append(links);
-    }
+    let detailsExpanded = false;
+    const mobileDetails = window.matchMedia("(max-width: 720px)");
+    const syncDetailsForViewport = () => {
+      const mobile = mobileDetails.matches;
+      infoButton.hidden = !mobile;
+      if (!mobile) {
+        additional.hidden = false;
+        about.classList.add("is-expanded");
+        return;
+      }
+      additional.hidden = !detailsExpanded;
+      about.classList.toggle("is-expanded", detailsExpanded);
+    };
     infoButton.addEventListener("click", () => {
-      const expanded = infoButton.getAttribute("aria-expanded") !== "true";
-      infoButton.setAttribute("aria-expanded", expanded ? "true" : "false");
-      infoButton.setAttribute("aria-label", expanded ? "Weitere Profilinformationen ausblenden" : "Weitere Profilinformationen anzeigen");
-      infoButton.title = expanded ? "Profilinformationen ausblenden" : "Weitere Profilinformationen";
-      about.classList.toggle("is-expanded", expanded);
-      additional.hidden = !expanded;
+      detailsExpanded = !detailsExpanded;
+      infoButton.setAttribute("aria-expanded", detailsExpanded ? "true" : "false");
+      infoButton.setAttribute("aria-label", detailsExpanded ? "Weitere Profilinformationen ausblenden" : "Weitere Profilinformationen anzeigen");
+      infoButton.title = detailsExpanded ? "Profilinformationen ausblenden" : "Weitere Profilinformationen";
+      about.classList.toggle("is-expanded", detailsExpanded);
+      additional.hidden = !detailsExpanded;
     });
+    if (profileDetailsResizeHandler) window.removeEventListener("resize", profileDetailsResizeHandler);
+    profileDetailsResizeHandler = syncDetailsForViewport;
+    window.addEventListener("resize", profileDetailsResizeHandler, { passive: true });
+    syncDetailsForViewport();
     content.append(about, additional);
     card.append(gallery, content);
     container.append(card);
