@@ -1400,14 +1400,11 @@
 
     const identity = document.createElement("header");
     identity.className = "profile-preview-identity";
-    const roleLabel = document.createElement("span");
-    roleLabel.className = "profile-preview-role";
-    roleLabel.textContent = role === "couple" ? "Hochzeitspaar" : "Fotograf";
     const name = document.createElement("h3");
     name.textContent = role === "couple"
       ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ")
       : profile.first_name || "Dein Profil";
-    identity.append(roleLabel, name);
+    identity.append(name);
 
     const overlay = document.createElement("div");
     overlay.className = "profile-preview-overlay";
@@ -1428,7 +1425,7 @@
     likeButton.title = "Wird in Entdecken verfügbar sein";
     likeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>';
     actions.append(passButton, likeButton);
-    overlay.append(identity, actions);
+    overlay.append(actions);
     controls.append(previous, next);
     gallery.append(track, controls, indicatorGroup, status, overlay);
 
@@ -1439,11 +1436,37 @@
 
     const content = document.createElement("div");
     content.className = "profile-preview-content";
-    if (profile.public_intro && String(profile.public_intro).trim()) {
-      addPreviewSection(content, role === "couple" ? "Über euch" : "Über mich", String(profile.public_intro).trim(), "profile-preview-about");
+    content.append(identity);
+
+    const about = document.createElement("section");
+    about.className = "profile-preview-about";
+    const aboutHeader = document.createElement("div");
+    aboutHeader.className = "profile-preview-about-header";
+    const aboutTitle = document.createElement("h4");
+    aboutTitle.textContent = role === "couple" ? "Über euch" : "Über mich";
+    const infoButton = document.createElement("button");
+    infoButton.className = "profile-preview-info-button";
+    infoButton.type = "button";
+    infoButton.setAttribute("aria-expanded", "false");
+    infoButton.setAttribute("aria-label", "Weitere Profilinformationen anzeigen");
+    infoButton.title = "Weitere Profilinformationen";
+    infoButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>';
+    aboutHeader.append(aboutTitle, infoButton);
+    about.append(aboutHeader);
+
+    const introText = String(profile.public_intro || "").trim();
+    if (introText) {
+      const intro = document.createElement("p");
+      intro.className = "profile-preview-intro-copy";
+      intro.textContent = introText;
+      about.append(intro);
     }
-    if (metadata.children.length) content.append(metadata);
-    detailsData.sections.forEach(([title, value]) => addPreviewSection(content, title, value));
+
+    const additional = document.createElement("div");
+    additional.className = "profile-preview-additional";
+    additional.hidden = true;
+    if (metadata.children.length) additional.append(metadata);
+    detailsData.sections.forEach(([title, value]) => addPreviewSection(additional, title, value));
     if (role === "photographer") {
       const links = document.createElement("div");
       links.className = "profile-preview-links";
@@ -1461,8 +1484,17 @@
           links.append(link);
         } catch (_) {}
       });
-      if (links.children.length) content.append(links);
+      if (links.children.length) additional.append(links);
     }
+    infoButton.addEventListener("click", () => {
+      const expanded = infoButton.getAttribute("aria-expanded") !== "true";
+      infoButton.setAttribute("aria-expanded", expanded ? "true" : "false");
+      infoButton.setAttribute("aria-label", expanded ? "Weitere Profilinformationen ausblenden" : "Weitere Profilinformationen anzeigen");
+      infoButton.title = expanded ? "Profilinformationen ausblenden" : "Weitere Profilinformationen";
+      about.classList.toggle("is-expanded", expanded);
+      additional.hidden = !expanded;
+    });
+    content.append(about, additional);
     card.append(gallery, content);
     container.append(card);
     setupProfileGallery(gallery, renderedCount);
