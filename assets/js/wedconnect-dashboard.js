@@ -1182,33 +1182,189 @@
 
   function profileGreeting(role, profile) {
     if (role === "couple" && profile) {
-      return (profile.partner_one_first_name || "") + " und " + (profile.partner_two_first_name || "");
+      return [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ");
     }
     return profile && profile.first_name ? profile.first_name : "";
   }
 
-  function setupRole(role, user, complete, greeting) {
+  function profileArray(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== "string" || !value.trim()) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : value.split(",").map((item) => item.trim()).filter(Boolean);
+    } catch (_) {
+      return value.split(",").map((item) => item.trim()).filter(Boolean);
+    }
+  }
+
+  function profileLabels(values, options) {
+    return profileArray(values).map((value) => (options.find((option) => option[0] === value) || [value, value])[1]).join(", ");
+  }
+
+  function profileDate(value) {
+    if (!value) return "";
+    const date = new Date(value + "T00:00:00");
+    return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "long", year: "numeric" }).format(date);
+  }
+
+  function addPreviewDetail(container, label, value, wide = false) {
+    if (value === null || value === undefined || String(value).trim() === "") return;
+    const item = document.createElement("div");
+    item.className = "profile-preview-detail" + (wide ? " is-wide" : "");
+    const title = document.createElement("span");
+    title.className = "profile-preview-detail-label";
+    title.textContent = label;
+    const content = document.createElement("p");
+    content.textContent = String(value);
+    item.append(title, content);
+    container.append(item);
+  }
+
+  function profileDetailRows(role, profile) {
+    if (role === "couple") {
+      const preference = profile.photographer_usage_preference === "open"
+        ? "Grundsätzlich offen"
+        : profile.photographer_usage_preference === "case_by_case"
+          ? "Nur nach Absprache"
+          : profile.photographer_usage_preference === "no" ? "Nein" : "";
+      return [
+        ["Hochzeitsdatum", profileDate(profile.wedding_date)],
+        ["Ort oder Location", profile.location],
+        ["Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""],
+        ["Gewünschte Begleitung", profile.coverage_scope, true],
+        ["Ablauf", profile.schedule, true],
+        ["Bildstil", profile.visual_style, true],
+        ["Bildwünsche", profile.image_wishes, true],
+        ["Nutzung durch den Fotografen", preference, true]
+      ];
+    }
+    const years = profile.experience_years === null || profile.experience_years === undefined || profile.experience_years === ""
+      ? "" : profile.experience_years + (Number(profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung");
+    const weddings = profile.weddings_photographed === null || profile.weddings_photographed === undefined || profile.weddings_photographed === ""
+      ? "" : profile.weddings_photographed + " fotografierte Hochzeiten";
+    const experience = [years, weddings].filter(Boolean).join(" · ") || profile.experience || "";
+    const regions = profileLabels(profile.regions, REGION_OPTIONS) || profile.region || "";
+    const styles = profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style || "";
+    const coverage = profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope || "";
+    const compensation = profile.compensation_type === "free"
+      ? "Unentgeltlich"
+      : profile.compensation_type === "fixed" && profile.compensation_amount_eur
+        ? Number(profile.compensation_amount_eur).toLocaleString("de-AT") + " €"
+        : "";
+    return [
+      ["Einsatzgebiet", regions, true],
+      ["Erfahrung", experience],
+      ["Bildstil", styles, true],
+      ["Begleitungsumfang", coverage, true],
+      ["Vergütung", compensation]
+    ];
+  }
+
+  async function renderOwnProfilePreview(role, profile, photos) {
+    const container = document.querySelector("#profile-preview");
+    if (!container) return;
+    container.innerHTML = "";
+    const card = document.createElement("article");
+    card.className = "profile-preview-card";
+    const heading = document.createElement("header");
+    heading.className = "profile-preview-identity";
+    const roleLabel = document.createElement("span");
+    roleLabel.className = "profile-preview-role";
+    roleLabel.textContent = role === "couple" ? "Hochzeitspaar" : "Fotograf";
+    const name = document.createElement("h3");
+    name.textContent = role === "couple"
+      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ")
+      : profile.first_name || "Dein Profil";
+    heading.append(roleLabel, name);
+    card.append(heading);
+
+    const galleryTitle = document.createElement("h4");
+    galleryTitle.className = "profile-preview-gallery-title";
+    galleryTitle.textContent = role === "couple" ? "Eure Fotos" : "Portfolio";
+    card.append(galleryTitle);
+    const gallery = document.createElement("div");
+    gallery.className = "profile-preview-gallery";
+    const visiblePhotos = (photos || []).filter((photo) => role !== "photographer" || photo.photo_type === "portfolio");
+    const signedPhotos = await Promise.all(visiblePhotos.map(async (photo, index) => {
+      const highlight = role === "photographer" && photoIsHighlight(photo);
+      const path = highlight ? photo.display_path || photo.object_path : role === "couple" ? photo.display_path || photo.object_path : photo.object_path;
+      if (!path) return null;
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(path, 3600);
+      if (error || !data || !data.signedUrl) return null;
+      return { photo, index, url: data.signedUrl, highlight };
+    }));
+    signedPhotos.filter(Boolean).forEach(({ photo, index, url, highlight }) => {
+      const figure = document.createElement("figure");
+      figure.className = "profile-preview-photo";
+      const image = document.createElement("img");
+      image.src = url;
+      image.loading = index > 3 ? "lazy" : "eager";
+      image.alt = role === "couple" ? "Foto des Hochzeitspaars " + (index + 1) : "Portfoliofoto " + (index + 1);
+      figure.append(image);
+      if (highlight) {
+        const badge = document.createElement("span");
+        badge.className = "profile-preview-highlight";
+        badge.setAttribute("aria-label", "Highlight");
+        badge.title = "Highlight";
+        badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.36l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"/></svg>';
+        figure.append(badge);
+      }
+      gallery.append(figure);
+    });
+    if (!gallery.children.length) {
+      const empty = document.createElement("p");
+      empty.className = "profile-preview-empty";
+      empty.textContent = "Noch keine Profilfotos vorhanden.";
+      gallery.append(empty);
+    }
+    card.append(gallery);
+
+    const details = document.createElement("div");
+    details.className = "profile-preview-details";
+    profileDetailRows(role, profile).forEach(([label, value, wide]) => addPreviewDetail(details, label, value, wide));
+    if (role === "photographer") {
+      [["Instagram", profile.instagram_url, normalizeInstagram], ["Website", profile.website_url, normalizeWebsite]].forEach(([label, value, normalize]) => {
+        if (!value) return;
+        try {
+          const url = normalize(value);
+          if (!url) return;
+          const item = document.createElement("div");
+          item.className = "profile-preview-detail profile-preview-social";
+          const title = document.createElement("span");
+          title.className = "profile-preview-detail-label";
+          title.textContent = label;
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = label === "Instagram" ? "Instagram-Profil öffnen ↗" : "Website öffnen ↗";
+          item.append(title, link);
+          details.append(item);
+        } catch (_) {}
+      });
+    }
+    if (details.children.length) card.append(details);
+    container.append(card);
+  }
+
+  async function setupRole(role, user, complete, greeting, profile, photos) {
     currentRole = role === "couple" || role === "photographer" ? role : "";
     const couple = currentRole === "couple";
     const photographer = currentRole === "photographer";
     const roleName = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Profil einrichten";
     document.querySelector("#side-role").textContent = roleName;
-    document.querySelector("#side-email").textContent = user.email || "";
     document.querySelector("#avatar").textContent = (greeting || user.email || "W").slice(0, 1).toUpperCase();
+    document.querySelector("#account-email").textContent = user.email || "E-Mail nicht verfügbar";
+    document.querySelector("#account-role-label").textContent = roleName;
     document.querySelector("#role-eyebrow").textContent = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Dein WedConnect-Konto";
-    document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting : "Dein Dashboard";
-    document.querySelector("#next-title").textContent = complete ? "Dein Profil ist vollständig" : couple ? "Hochzeitsprofil vervollständigen" : photographer ? "Fotografenprofil vervollständigen" : "Profil anlegen";
-    document.querySelector("#next-copy").textContent = complete ? "Dein Profil ist bereit." : couple ? "Datum, Ort und Bildwünsche" : photographer ? "Region, Portfolio und Begleitungsumfang" : "Wähle zuerst deinen Profiltyp.";
-    document.querySelector("#profile-status").textContent = complete ? "Profil · Vollständig" : currentRole ? "Profil · Noch offen" : "Profil · Noch nicht angelegt";
-    document.querySelector("#profile-action").textContent = complete ? "Profil ansehen" : "Profil anlegen";
-    document.querySelector("#account-copy").textContent = user.email ? "Angemeldet als " + user.email : "Angemeldet";
-    const roleChangeButton = document.querySelector("#role-change");
-    if (roleChangeButton) roleChangeButton.hidden = !currentRole;
-    const discoverLabel = couple ? "Fotografen entdecken" : "Hochzeiten entdecken";
+    document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting + "!" : "Willkommen!";
+    document.querySelector("#profile-status").textContent = complete ? "Profil vollständig" : "Profil noch offen";
+    document.querySelector("#profile-action").textContent = "Profil bearbeiten";
     document.querySelector("#desktop-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
       navItem("Profil", "profile", false, !currentRole) +
-      navItem(discoverLabel, "discover", false, true) +
+      navItem(couple ? "Fotografen entdecken" : "Hochzeiten entdecken", "discover", false, true) +
       navItem("Matches", "matches", false, true) +
       navItem("Nachrichten", "messages", false, true);
     document.querySelector("#mobile-nav").innerHTML =
@@ -1217,6 +1373,7 @@
       navItem("Entdecken", "discover", false, true) +
       navItem("Matches", "matches", false, true) +
       navItem("Nachrichten", "messages", false, true);
+    await renderOwnProfilePreview(currentRole, profile || {}, photos || []);
     loading.classList.add("hidden");
     onboarding.classList.add("hidden");
     dashboard.classList.remove("hidden");
@@ -1327,9 +1484,14 @@
           throw new Error("Profilabschluss fehlgeschlagen" + code + ": " + (message || "Bitte prüfe alle Angaben und Fotos."));
         }
         const table = wizard.role === "couple" ? "couple_profiles" : "photographer_profiles";
-        const { data: profile } = await supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle();
-        setupRole(wizard.role, currentUser, true, profileGreeting(wizard.role, profile || wizard.data[wizard.role]));
-        showNotice("Profil vollständig.");
+        const [{ data: profile, error: profileError }, { data: photos, error: photoError }] = await Promise.all([
+          supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle(),
+          supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
+        ]);
+        if (profileError) throw new Error("Dein Profil wurde gespeichert, konnte aber nicht angezeigt werden.");
+        await setupRole(wizard.role, currentUser, true, profileGreeting(wizard.role, profile || wizard.data[wizard.role]), profile, photoError ? [] : photos || []);
+        if (photoError) showNotice("Dein Profil ist vollständig. Einige Fotos konnten nicht geladen werden.");
+        else showNotice("Profil vollständig.");
         return;
       }
       renderWizard();
@@ -1344,9 +1506,35 @@
     }
   });
 
+  const accountDialog = document.querySelector("#account-dialog");
+  const settingsDialog = document.querySelector("#settings-dialog");
+  const accountTrigger = document.querySelector("#account-open");
+  const settingsTrigger = document.querySelector("#settings-open");
+  const mobileAccountTrigger = document.querySelector("#avatar");
+  function openWorkspaceDialog(dialog) {
+    if (dialog && !dialog.open) dialog.showModal();
+  }
   document.querySelector("#profile-action").addEventListener("click", () => beginWizard(currentRole, currentRole ? 1 : 0));
-  const roleChangeButton = document.querySelector("#role-change");
-  if (roleChangeButton) roleChangeButton.addEventListener("click", () => beginWizard(currentRole, 0));
+  if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
+  if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
+  if (settingsTrigger) settingsTrigger.addEventListener("click", () => openWorkspaceDialog(settingsDialog));
+  document.querySelector("#account-settings-open").addEventListener("click", () => {
+    if (accountDialog.open) accountDialog.close();
+    openWorkspaceDialog(settingsDialog);
+  });
+  document.querySelector("#account-profile-edit").addEventListener("click", () => {
+    if (accountDialog.open) accountDialog.close();
+    beginWizard(currentRole, currentRole ? 1 : 0);
+  });
+  document.querySelector("#account-role-change").addEventListener("click", () => {
+    if (accountDialog.open) accountDialog.close();
+    beginWizard(currentRole, 0);
+  });
+  document.querySelectorAll("[data-dialog-close]").forEach((button) => button.addEventListener("click", () => {
+    const dialog = button.closest("dialog");
+    if (dialog && dialog.open) dialog.close();
+  }));
+
   document.querySelector("#desktop-nav").addEventListener("click", (event) => {
     if (event.target.closest("[data-profile-setup]")) beginWizard(currentRole, 1);
   });
@@ -1421,13 +1609,17 @@
       return;
     }
     const table = account.role === "couple" ? "couple_profiles" : "photographer_profiles";
-    const { data: profile, error } = await supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle();
+    const [{ data: profile, error }, { data: photos, error: photoError }] = await Promise.all([
+      supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle(),
+      supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
+    ]);
     if (error) {
       showError("Dein Profil konnte nicht geladen werden.", "Profil nicht erreichbar");
       return;
     }
     await keepLoadingVisible();
-    setupRole(account.role, currentUser, true, profileGreeting(account.role, profile));
+    if (photoError) showNotice("Einige Profilfotos konnten nicht geladen werden.");
+    await setupRole(account.role, currentUser, true, profileGreeting(account.role, profile), profile, photoError ? [] : photos || []);
     supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
     });
