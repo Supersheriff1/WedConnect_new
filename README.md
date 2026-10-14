@@ -4,6 +4,10 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 
 ## Project documents
 
+- [Frozen baseline — 14 October 2026](docs/FROZEN-BASELINE-2026-10-14.md) — current implementation, production deployment, verified boundaries, and open issues.
+- [Change control](docs/CHANGE-CONTROL.md) — freeze rule and safe process for explicitly requested changes.
+- [Documentation architecture](docs/DOCUMENTATION-ARCHITECTURE.md) — proposed modular bibles, asset inventory, and guarded FAQ automation.
+
 - [Project Bible v1.2](docs/PROJECT-BIBLE-v1.2.md) — product scope, roles, profile onboarding, rights, and technical boundaries.
 - [Project Bible v1.1](docs/PROJECT-BIBLE-v1.1.md) — previous version.
 - [Design Bible](docs/DESIGN-BIBLE.md) — current visual system.
