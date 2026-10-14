@@ -148,6 +148,7 @@
     .profile-photo-gallery .photo-preview{position:relative}
     .photo-highlight-badge{position:absolute;z-index:1;top:9px;right:9px;width:30px;height:30px;display:grid!important;place-items:center;margin:0!important;border:1px solid rgb(213 182 122 / 70%);border-radius:50%;background:rgb(37 36 43 / 88%);color:var(--gold)}
     .photo-highlight-badge svg{width:16px;height:16px;fill:currentColor}
+    @media(max-width:700px){.profile-photo-gallery .photo-preview .photo-highlight-badge{position:absolute!important;top:8px!important;right:8px!important;z-index:20!important;width:30px;height:30px;display:grid!important;place-items:center!important;margin:0!important;background:rgb(37 36 43 / 92%)!important;color:var(--gold)!important;pointer-events:none}}
     @media(max-width:560px){.portfolio-photo-actions .button{width:42px!important;min-width:42px}}
   </style>
 </head>
@@ -233,7 +234,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-remove-wizard-role-v36"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-mobile-highlight-badge-v37"></script>
 </body>
 </html>
 
