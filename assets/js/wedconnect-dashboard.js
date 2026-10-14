@@ -16,7 +16,6 @@
   const maxPhotoBytes = 10 * 1024 * 1024;
   const maxPortfolioPhotoBytes = 2 * 1024 * 1024;
   const maxPortfolioPhotos = 20;
-  const maxPortfolioHighlights = 5;
   const loadingStartedAt = performance.now();
   const minimumLoadingTime = 1800;
 
@@ -69,37 +68,10 @@
       (hint ? '<p class="setup-hint">' + hint + "</p>" : "") + "</div>";
   }
 
-  function photoIsHighlight(photo) {
-    if (photo && typeof photo.is_highlight === "boolean") return photo.is_highlight;
-    const placement = photo && photo.portfolio_placement;
-    return !placement || placement === "highlight" || placement === "both";
-  }
-
   function portfolioPhotoCounts() {
     const portfolio = wizard.photos.filter((photo) => photo.photo_type === "portfolio");
     const pending = wizard.pendingPhotos || [];
-    return {
-      total: portfolio.length + pending.length,
-      highlights: portfolio.filter(photoIsHighlight).length + pending.filter(photoIsHighlight).length,
-      gallery: portfolio.length + pending.length
-    };
-  }
-
-  function setHighlightButton(button, active, label) {
-    button.classList.toggle("is-highlight", active);
-    button.setAttribute("aria-pressed", active ? "true" : "false");
-    button.setAttribute("aria-label", label + (active ? " · als Highlight markiert" : " · als Highlight markieren"));
-    button.title = active ? "Highlight entfernen" : "Als Highlight markieren";
-    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.36l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"/></svg>';
-  }
-
-  function createHighlightButton(active, label, onToggle) {
-    const button = document.createElement("button");
-    button.className = "button button-secondary photo-highlight-button";
-    button.type = "button";
-    setHighlightButton(button, active, label);
-    button.addEventListener("click", onToggle);
-    return button;
+    return { total: portfolio.length + pending.length, gallery: portfolio.length + pending.length };
   }
 
   function currentPhotoCount(type) {
@@ -278,12 +250,11 @@
     }
     const portfolioCount = currentPhotoCount("portfolio");
     return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Galerie</h3>' +
-      '<p class="photo-upload-detail photo-instructions">Insgesamt kannst du bis zu 20 Fotos hochladen. Davon markierst du 3 bis 5 als Highlights. Diese werden bei „Entdecken“ auf deiner Profilkarte angezeigt.</p>' +
+      '<p class="photo-upload-detail photo-instructions">Lade mindestens 3 und bis zu 20 Fotos hoch, die deinen Stil am besten zeigen. Alle Fotos werden gemeinsam in deinem Profil angezeigt.</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Galeriefotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Galeriefotos"></div>' +
       photoPicker("portfolio-photos", "Fotos hinzufügen") +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Highlights im Hochformat (4:5)</p>' +
-      '<p class="photo-count" id="portfolio-highlight-count">Highlights: 0 / 5 ausgewählt · mindestens 3</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Galerie: ' + portfolioCount + ' / 20 Fotos</p></div>';
   }
 
@@ -306,12 +277,12 @@
           ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
           ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
           ["Begleitung", data.coverage_scope],
-          ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "fixed" ? Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
-          ["Highlights", portfolioPhotoCounts().highlights + " von " + portfolioPhotoCounts().gallery + " Galeriefotos"],
+          ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "fixed" ? "Fixbetrag " + Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
+          ["Fotos", portfolioPhotoCounts().gallery + " Fotos in der Galerie"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
     const photoReview = wizard.role === "photographer"
-      ? '<div class="profile-review-photos"><section><h3>Galerie · Stern markiert Highlights</h3><div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotogalerie mit markierten Highlights"></div></section></div>'
+      ? '<div class="profile-review-photos"><section><h3>Deine Galerie</h3><div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotogalerie"></div></section></div>'
       : '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotovorschau"></div>';
     return photoReview + '<div class="setup-summary">' + entries.filter((entry) => entry[1] !== null && entry[1] !== undefined && String(entry[1]).trim() !== "").map((entry) => {
       if ((entry[0] === "Instagram" || entry[0] === "Website") && entry[1] !== "Nicht angegeben") {
@@ -596,7 +567,7 @@
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
       const image = document.createElement("img");
-      image.src = photoIsHighlight(item) ? item.previewUrl : item.originalPreviewUrl;
+      image.src = item.previewUrl || item.originalPreviewUrl;
       image.alt = "Ausgewähltes Stilfoto " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const actions = document.createElement("div");
@@ -613,17 +584,6 @@
         item.previewUrl = URL.createObjectURL(blob);
         renderPendingPortfolioPhotos();
       }));
-      const highlightButton = createHighlightButton(photoIsHighlight(item), "Foto " + (index + 1), () => {
-        const next = !photoIsHighlight(item);
-        if (next && portfolioPhotoCounts().highlights >= maxPortfolioHighlights) {
-          errorLine.textContent = "Du kannst höchstens " + maxPortfolioHighlights + " Fotos als Highlight markieren.";
-          return;
-        }
-        item.is_highlight = next;
-        image.src = next ? item.previewUrl : item.originalPreviewUrl;
-        setHighlightButton(highlightButton, next, "Foto " + (index + 1));
-        updatePortfolioPhotoCount();
-      });
       const removeButton = document.createElement("button");
       removeButton.className = "button button-secondary";
       removeButton.type = "button";
@@ -638,7 +598,7 @@
         renderPendingPortfolioPhotos();
         updatePortfolioPhotoCount();
       });
-      actions.append(highlightButton, cropButton, removeButton);
+      actions.append(cropButton, removeButton);
       card.append(image, actions);
       container.append(card);
     });
@@ -647,11 +607,9 @@
 
   function updatePortfolioPhotoCount() {
     const galleryCount = document.querySelector("#portfolio-photo-count");
-    const highlightCount = document.querySelector("#portfolio-highlight-count");
-    if (!galleryCount || !highlightCount) return;
+    if (!galleryCount) return;
     const totals = portfolioPhotoCounts();
     galleryCount.textContent = "Galerie: " + totals.gallery + " / " + maxPortfolioPhotos + " Fotos";
-    highlightCount.textContent = "Highlights: " + totals.highlights + " / " + maxPortfolioHighlights + " ausgewählt · mindestens 3";
     const input = document.querySelector('[name="portfolio-photos"]');
     const picker = input && input.nextElementSibling;
     if (input) input.disabled = totals.gallery >= maxPortfolioPhotos;
@@ -790,7 +748,7 @@
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
       const image = document.createElement("img");
-      image.src = photoIsHighlight(photo) ? displayUrl : originalData.signedUrl;
+      image.src = displayUrl;
       image.alt = "Hochgeladenes Stilfoto " + (index + 1);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const editButton = document.createElement("button");
@@ -851,30 +809,9 @@
           editButton.disabled = false;
         }
       });
-      const highlightButton = createHighlightButton(photoIsHighlight(photo), "Foto " + (index + 1), async () => {
-        const next = !photoIsHighlight(photo);
-        if (next && portfolioPhotoCounts().highlights >= maxPortfolioHighlights) {
-          errorLine.textContent = "Du kannst höchstens " + maxPortfolioHighlights + " Fotos als Highlight markieren.";
-          return;
-        }
-        highlightButton.disabled = true;
-        const { error } = await supabase.from("profile_photos")
-          .update({ is_highlight: next })
-          .eq("user_id", currentUser.id)
-          .eq("object_path", photo.object_path);
-        if (error) {
-          errorLine.textContent = "Die Highlight-Auswahl konnte nicht gespeichert werden. Bitte führe die neue Supabase-Migration aus.";
-        } else {
-          photo.is_highlight = next;
-          image.src = next ? displayUrl : originalData.signedUrl;
-          setHighlightButton(highlightButton, next, "Foto " + (index + 1));
-          updatePortfolioPhotoCount();
-        }
-        highlightButton.disabled = false;
-      });
       const actions = document.createElement("div");
       actions.className = "portfolio-photo-actions";
-      actions.append(highlightButton, editButton, deleteButton);
+      actions.append(editButton, deleteButton);
       card.append(image, actions);
       container.append(card);
     }
@@ -892,7 +829,6 @@
       errorLine.textContent = "";
       const accepted = ["image/jpeg", "image/png", "image/webp"];
       const additions = [];
-      let highlightSlots = Math.max(0, maxPortfolioHighlights - portfolioPhotoCounts().highlights);
       const remainingGallerySlots = Math.max(0, maxPortfolioPhotos - portfolioPhotoCounts().gallery);
       for (const file of Array.from(input.files || [])) {
         if (additions.length >= remainingGallerySlots) {
@@ -913,9 +849,8 @@
           additions.push({
             file, name: file.name, originalPreviewUrl,
             previewUrl: URL.createObjectURL(displayFile),
-            displayFile, is_highlight: highlightSlots > 0
+            displayFile
           });
-          if (highlightSlots > 0) highlightSlots -= 1;
         } catch (error) {
           URL.revokeObjectURL(originalPreviewUrl);
           errorLine.textContent = error && error.message ? error.message : "Ein Stilfoto konnte nicht vorbereitet werden.";
@@ -1034,7 +969,7 @@
     if (role === "couple") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
         supabase.from("couple_profiles").select("*").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
       ]);
       if (error) throw error;
       if (photoError) throw photoError;
@@ -1043,7 +978,7 @@
     } else if (role === "photographer") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
         supabase.from("photographer_profiles").select("*").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
       ]);
       if (error) throw error;
       if (photoError) throw photoError;
@@ -1065,7 +1000,7 @@
     }
   }
 
-  async function uploadFile(file, photoType, sortOrder, displayFile, isHighlight) {
+  async function uploadFile(file, photoType, sortOrder, displayFile) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       throw new Error("Bitte lade JPG-, PNG- oder WebP-Bilder hoch.");
     }
@@ -1094,8 +1029,7 @@
       photo_type: photoType,
       object_path: objectPath,
       display_path: displayPath,
-      sort_order: sortOrder,
-      ...(photoType === "portfolio" ? { is_highlight: Boolean(isHighlight) } : {})
+      sort_order: sortOrder
     });
     if (rowError) {
       await supabase.storage.from(photoBucket).remove([objectPath, displayPath]);
@@ -1131,17 +1065,14 @@
     } else {
       const pending = wizard.pendingPhotos || [];
       const totals = portfolioPhotoCounts();
-      if (totals.highlights < 3) {
-        throw new Error("Markiere mindestens 3 Fotos mit dem Stern als Highlight.");
-      }
       for (const [index, item] of pending.entries()) {
         const displayFile = item.displayFile || await createContainedPhoto(item.file);
         const existingPortfolioCount = wizard.photos.filter((photo) => photo.photo_type === "portfolio").length;
-        await uploadFile(item.file, "portfolio", existingPortfolioCount + index, displayFile, photoIsHighlight(item));
+        await uploadFile(item.file, "portfolio", existingPortfolioCount + index, displayFile);
       }
     }
     const { data, error } = await supabase.from("profile_photos")
-      .select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order");
+      .select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order");
     if (error) throw new Error("Die Fotoliste konnte nicht aktualisiert werden.");
     wizard.photos = data || [];
     if (wizard.role === "photographer") {
@@ -1171,15 +1102,7 @@
       const image = document.createElement("img");
       image.src = data.signedUrl;
       image.alt = labels[photo.photo_type] + " " + (index + 1);
-      if (isPhotographer && photoIsHighlight(photo)) {
-        const badge = document.createElement("span");
-        badge.className = "photo-highlight-badge";
-        badge.setAttribute("aria-label", "Highlight");
-        badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.36l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"/></svg>';
-        card.append(image, badge);
-      } else {
-        card.append(image);
-      }
+      card.append(image);
       container.append(card);
     }
   }
@@ -1273,24 +1196,25 @@
       ? "" : profile.experience_years + (Number(profile.experience_years) === 1 ? " Jahr" : " Jahre");
     const weddings = profile.weddings_photographed === null || profile.weddings_photographed === undefined || profile.weddings_photographed === ""
       ? "" : profile.weddings_photographed + " Hochzeiten";
-    const experience = [years, weddings].filter(Boolean).join(" · ") || profile.experience || "";
     const regions = profileLabels(profile.regions, REGION_OPTIONS) || profile.region || "";
     const styles = profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style || "";
     const coverage = profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope || "";
     const compensation = profile.compensation_type === "free"
       ? "Unentgeltlich"
       : profile.compensation_type === "fixed" && profile.compensation_amount_eur
-        ? Number(profile.compensation_amount_eur).toLocaleString("de-AT") + " €"
-        : "";
+        ? "Entgeltlich · " + Number(profile.compensation_amount_eur).toLocaleString("de-AT") + " €"
+        : profile.compensation_type === "fixed" ? "Entgeltlich" : "";
     return {
-      chips: [
-        ["pin", "Einsatzgebiet", regions],
-        ["camera", "Erfahrung", experience],
-        ["sparkle", "Bildstil", styles],
-        ["clock", "Begleitungsumfang", coverage],
+      keyFacts: [
+        ["camera", "Erfahrung", years],
         ["euro", "Vergütung", compensation]
       ],
-      sections: []
+      chips: [
+        ["pin", "Einsatzgebiet", regions],
+        ["sparkle", "Bildstil", styles],
+        ["clock", "Begleitungsumfang", coverage]
+      ],
+      sections: weddings ? [["Fotografierte Hochzeiten", weddings]] : []
     };
   }
 
@@ -1379,8 +1303,7 @@
     const indicatorGroup = document.createElement("div"); indicatorGroup.className = "profile-preview-indicators"; indicatorGroup.setAttribute("role","group"); indicatorGroup.setAttribute("aria-label","Foto auswählen");
     let renderedCount = 0;
     visiblePhotos.forEach((photo, index) => {
-      const highlight = role === "photographer" && photoIsHighlight(photo);
-      const path = highlight ? photo.display_path || photo.object_path : role === "couple" ? photo.display_path || photo.object_path : photo.object_path;
+      const path = photo.display_path || photo.object_path;
       if (!path) return;
       const figure = document.createElement("figure");
       figure.className = "profile-preview-photo" + (renderedCount === 0 ? " is-featured" : "");
@@ -1391,14 +1314,6 @@
       image.decoding = "async";
       image.alt = role === "couple" ? "Foto des Hochzeitspaars " + (index + 1) : "Portfoliofoto " + (index + 1);
       figure.append(image);
-      if (highlight) {
-        const badge = document.createElement("span");
-        badge.className = "profile-preview-highlight";
-        badge.setAttribute("aria-label", "Highlight");
-        badge.title = "Highlight";
-        badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.36l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"/></svg>';
-        figure.append(badge);
-      }
       track.append(figure);
       renderedCount += 1;
     });
@@ -1454,6 +1369,12 @@
     const content = document.createElement("div");
     content.className = "profile-preview-content";
     content.append(identity);
+    if (role === "photographer" && detailsData.keyFacts && detailsData.keyFacts.some((fact) => fact[2])) {
+      const keyFacts = document.createElement("div");
+      keyFacts.className = "profile-preview-key-facts";
+      detailsData.keyFacts.filter(([, , value]) => value).forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
+      content.append(keyFacts);
+    }
 
     const about = document.createElement("section");
     about.className = "profile-preview-about";
@@ -1655,7 +1576,7 @@
         const table = wizard.role === "couple" ? "couple_profiles" : "photographer_profiles";
         const [{ data: profile, error: profileError }, { data: photos, error: photoError }] = await Promise.all([
           supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle(),
-          supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
+          supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
         ]);
         if (profileError) throw new Error("Dein Profil wurde gespeichert, konnte aber nicht angezeigt werden.");
         await setupRole(wizard.role, currentUser, true, profileGreeting(wizard.role, profile || wizard.data[wizard.role]), profile, photoError ? [] : photos || []);
@@ -1779,7 +1700,7 @@
     const table = account.role === "couple" ? "couple_profiles" : "photographer_profiles";
     const [{ data: profile, error }, { data: photos, error: photoError }] = await Promise.all([
       supabase.from(table).select("*").eq("id", currentUser.id).maybeSingle(),
-      supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order,is_highlight,portfolio_placement").eq("user_id", currentUser.id).order("sort_order")
+      supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", currentUser.id).order("sort_order")
     ]);
     if (error) {
       showError("Dein Profil konnte nicht geladen werden.", "Profil nicht erreichbar");
