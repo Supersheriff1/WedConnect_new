@@ -726,23 +726,50 @@
   const orientationGuard = document.querySelector("#orientation-guard");
   const narrowLandscape = window.matchMedia("(orientation: landscape) and (max-height: 600px) and (pointer: coarse)");
 
-  function openGalleryFullscreen(gallery) {
+  async function openGalleryFullscreen(gallery) {
     if (!fullscreenGalleryDialog || !gallery || fullscreenGalleryDialog.open) return;
+    const track = gallery.querySelector(".profile-preview-track");
+    const previousWidth = track ? track.clientWidth : 1;
+    gallery.dataset.fullscreenIndex = String(track ? Math.round(track.scrollLeft / previousWidth) : 0);
     fullscreenGalleryPlaceholder = document.createComment("WedConnect gallery location");
     gallery.parentNode.insertBefore(fullscreenGalleryPlaceholder, gallery);
     activeFullscreenGallery = gallery;
     gallery.classList.add("is-fullscreen");
+    if (profileGalleryImageObserver) profileGalleryImageObserver.disconnect();
     fullscreenGalleryDialog.append(gallery);
     document.body.classList.add("is-gallery-fullscreen");
     fullscreenGalleryDialog.showModal();
     syncProfileFullscreenButtons();
     syncOrientationGuard();
+
+    requestAnimationFrame(() => {
+      if (activeFullscreenGallery !== gallery || !track) return;
+      track.scrollLeft = Number(gallery.dataset.fullscreenIndex || 0) * track.clientWidth;
+    });
+    const images = Array.from(gallery.querySelectorAll("img[data-original-photo-path]"));
+    await Promise.all(images.map(async (image) => {
+      const originalPath = image.dataset.originalPhotoPath;
+      if (!originalPath) return;
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(originalPath, 3600);
+      if (error || !data || !data.signedUrl || activeFullscreenGallery !== gallery) return;
+      image.dataset.fullscreenUrl = data.signedUrl;
+      image.src = data.signedUrl;
+    }));
   }
 
   function closeGalleryFullscreen() {
     if (!activeFullscreenGallery) return;
     const gallery = activeFullscreenGallery;
+    const selectedIndex = Number(gallery.dataset.fullscreenIndex || 0);
     gallery.classList.remove("is-fullscreen");
+    Array.from(gallery.querySelectorAll("img[data-photo-path]")).forEach((image) => {
+      if (image.dataset.displayUrl) image.src = image.dataset.displayUrl;
+      else {
+        image.removeAttribute("src");
+        delete image.dataset.photoState;
+      }
+      delete image.dataset.fullscreenUrl;
+    });
     if (fullscreenGalleryPlaceholder && fullscreenGalleryPlaceholder.parentNode) {
       fullscreenGalleryPlaceholder.parentNode.insertBefore(gallery, fullscreenGalleryPlaceholder);
       fullscreenGalleryPlaceholder.remove();
@@ -751,6 +778,9 @@
     fullscreenGalleryPlaceholder = null;
     document.body.classList.remove("is-gallery-fullscreen");
     if (fullscreenGalleryDialog && fullscreenGalleryDialog.open) fullscreenGalleryDialog.close();
+    const track = gallery.querySelector(".profile-preview-track");
+    if (track) requestAnimationFrame(() => { track.scrollLeft = selectedIndex * track.clientWidth; });
+    loadProfileGalleryImages(gallery);
     syncProfileFullscreenButtons();
     syncOrientationGuard();
   }
@@ -1547,7 +1577,7 @@
     const track=gallery.querySelector(".profile-preview-track"),images=Array.from(gallery.querySelectorAll("img[data-photo-path]"));if(!images.length||!track)return;
     const queue=[];let active=0;const max=2;
     function finish(image,failed){if(image.dataset.photoState==="done")return;image.dataset.photoState="done";const figure=image.closest(".profile-preview-photo");if(figure){figure.classList.toggle("is-failed",!!failed);if(!failed){figure.classList.add("is-loaded");}}active=Math.max(0,active-1);pump()}
-    function pump(){while(active<max&&queue.length){const image=queue.shift();if(image.dataset.photoState)continue;image.dataset.photoState="loading";active++;let settled=false;const settle=f=>{if(!settled){settled=true;finish(image,f)}};image.addEventListener("load",()=>settle(false),{once:true});image.addEventListener("error",()=>settle(true),{once:true});supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath,3600).then(({data,error})=>{if(error||!data||!data.signedUrl){settle(true);return}image.src=data.signedUrl}).catch(()=>settle(true))}}
+    function pump(){while(active<max&&queue.length){const image=queue.shift();if(image.dataset.photoState)continue;image.dataset.photoState="loading";active++;let settled=false;const settle=f=>{if(!settled){settled=true;finish(image,f)}};image.addEventListener("load",()=>settle(false),{once:true});image.addEventListener("error",()=>settle(true),{once:true});supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath,3600).then(({data,error})=>{if(error||!data||!data.signedUrl){settle(true);return}image.dataset.displayUrl=data.signedUrl;if(gallery.classList.contains("is-fullscreen")){settle(false);return}image.src=data.signedUrl}).catch(()=>settle(true))}}
     const enqueue=list=>{const unseen=list.filter(i=>!i.dataset.photoState&&!queue.includes(i));unseen.sort((a,b)=>images.indexOf(a)-images.indexOf(b));queue.push(...unseen);pump()};
     if("IntersectionObserver"in window){profileGalleryImageObserver=new IntersectionObserver(entries=>{const nearby=entries.filter(e=>e.isIntersecting).map(e=>e.target);nearby.forEach(i=>profileGalleryImageObserver.unobserve(i));enqueue(nearby)},{root:track,rootMargin:"0px 520px",threshold:.01});images.forEach(i=>profileGalleryImageObserver.observe(i))}else enqueue(images)
   }
@@ -1578,6 +1608,7 @@
       figure.style.setProperty("--image-order", String(renderedCount));
       const image = document.createElement("img");
       image.dataset.photoPath = path;
+      image.dataset.originalPhotoPath = photo.object_path || path;
       image.loading = "lazy";
       image.decoding = "async";
       image.alt = role === "couple" ? "Foto des Hochzeitspaars " + (index + 1) : "Portfoliofoto " + (index + 1);
