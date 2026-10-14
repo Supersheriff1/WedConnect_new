@@ -726,6 +726,16 @@
   const orientationGuard = document.querySelector("#orientation-guard");
   const narrowLandscape = window.matchMedia("(orientation: landscape) and (max-height: 600px) and (pointer: coarse)");
 
+  async function getSignedPhotoUrl(path) {
+    if (!path) return "";
+    try {
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(path, 3600);
+      return !error && data && data.signedUrl ? data.signedUrl : "";
+    } catch (_) {
+      return "";
+    }
+  }
+
   async function openGalleryFullscreen(gallery) {
     if (!fullscreenGalleryDialog || !gallery || fullscreenGalleryDialog.open) return;
     const track = gallery.querySelector(".profile-preview-track");
@@ -747,15 +757,21 @@
     });
     const images = Array.from(gallery.querySelectorAll("img[data-original-photo-path]"));
     await Promise.all(images.map(async (image) => {
-      const originalPath = image.dataset.originalPhotoPath;
-      if (!originalPath) return;
-      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(originalPath, 3600);
-      if (error || !data || !data.signedUrl || activeFullscreenGallery !== gallery) return;
-      image.dataset.fullscreenUrl = data.signedUrl;
+      const displayUrl = image.dataset.displayUrl || await getSignedPhotoUrl(image.dataset.photoPath);
+      if (activeFullscreenGallery !== gallery) return;
+      if (displayUrl) {
+        image.dataset.displayUrl = displayUrl;
+        image.src = displayUrl;
+      }
+
+      const originalUrl = await getSignedPhotoUrl(image.dataset.originalPhotoPath);
+      if (activeFullscreenGallery !== gallery) return;
+      if (!originalUrl) return;
+      image.dataset.fullscreenUrl = originalUrl;
       image.addEventListener("error", () => {
         if (activeFullscreenGallery === gallery && image.dataset.displayUrl) image.src = image.dataset.displayUrl;
       }, { once: true });
-      image.src = data.signedUrl;
+      image.src = originalUrl;
     }));
   }
 
