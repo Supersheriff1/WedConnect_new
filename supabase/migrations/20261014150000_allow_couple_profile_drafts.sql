@@ -7,6 +7,12 @@ alter table public.couple_profiles
   drop constraint if exists couple_profiles_image_wishes_check;
 
 alter table public.couple_profiles
+  drop constraint if exists couple_profiles_schedule_max_length,
+  drop constraint if exists couple_profiles_coverage_scope_max_length,
+  drop constraint if exists couple_profiles_visual_style_max_length,
+  drop constraint if exists couple_profiles_image_wishes_max_length;
+
+alter table public.couple_profiles
   add constraint couple_profiles_schedule_max_length
     check (schedule is null or length(schedule) <= 4000),
   add constraint couple_profiles_coverage_scope_max_length
