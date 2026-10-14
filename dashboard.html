@@ -266,6 +266,22 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       #dashboard.is-editing-profile .mobile-nav{z-index:30}
       #onboarding.profile-edit-overlay .setup-topbar{position:sticky;top:0;z-index:2}
     }
+
+    /* Keep the image viewport as the only rounded and clipped layer. */
+    .profile-preview-track{overflow-x:auto!important;overflow-y:hidden!important;border-radius:14px;background:var(--surface);isolation:isolate}
+    .profile-preview-photo{border:0!important;border-radius:0!important;clip-path:none!important;background:transparent!important;box-shadow:none!important;animation:none!important;transform:none!important}
+    .profile-preview-photo::before{display:none!important;content:none!important}
+    .profile-preview-photo img{border:0!important;border-radius:0!important;box-shadow:none!important}
+    .profile-preview-photo.is-loaded{animation:none!important;transform:none!important}
+    .profile-preview-photo.is-loaded img{opacity:1}
+    .profile-preview-indicators{top:25px!important}
+    .profile-preview-info-button[hidden]{display:none!important}
+    .profile-preview-intro-copy{display:block;-webkit-line-clamp:unset;overflow:visible}
+    @media(max-width:720px){
+      .profile-preview-intro-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+      .profile-preview-about.is-expanded .profile-preview-intro-copy{-webkit-line-clamp:unset;overflow:visible}
+      .profile-preview-identity-links{padding-top:8px}
+    }
 </style>
 </head>
 <body>
@@ -362,7 +378,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-autosave-v57"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-responsive-v58"></script>
 </body>
 </html>
 
