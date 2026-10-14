@@ -726,6 +726,7 @@
   function syncOrientationGuard() {
     const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
     const photoIsExpanded = Boolean(
+      document.querySelector(".profile-preview-gallery.is-fullscreen") ||
       (fullscreenElement && fullscreenElement.classList.contains("profile-preview-gallery")) ||
       (photoViewer && photoViewer.open)
     );
@@ -750,7 +751,7 @@
   function syncProfileFullscreenButtons() {
     document.querySelectorAll(".profile-preview-fullscreen").forEach((button) => {
       const gallery = button.closest(".profile-preview-gallery");
-      const isFullscreen = Boolean(gallery && (document.fullscreenElement === gallery || document.webkitFullscreenElement === gallery));
+      const isFullscreen = Boolean(gallery && (gallery.classList.contains("is-fullscreen") || document.fullscreenElement === gallery || document.webkitFullscreenElement === gallery));
       button.classList.toggle("is-fullscreen", isFullscreen);
       button.setAttribute("aria-label", isFullscreen ? "Vollbild schließen" : "Galerie im Vollbild anzeigen");
       button.title = isFullscreen ? "Vollbild schließen" : "Galerie im Vollbild anzeigen";
@@ -759,6 +760,16 @@
         : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
     });
   }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const openGallery = document.querySelector(".profile-preview-gallery.is-fullscreen");
+    if (!openGallery) return;
+    openGallery.classList.remove("is-fullscreen");
+    document.body.classList.remove("is-gallery-fullscreen");
+    syncProfileFullscreenButtons();
+    syncOrientationGuard();
+  });
 
   document.addEventListener("fullscreenchange", () => {
     syncProfileFullscreenButtons();
@@ -1591,26 +1602,15 @@
       fullscreenButton.setAttribute("aria-label", "Galerie im Vollbild anzeigen");
       fullscreenButton.title = "Galerie im Vollbild anzeigen";
       fullscreenButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
-      fullscreenButton.addEventListener("click", async () => {
-        const isFullscreen = document.fullscreenElement === gallery || document.webkitFullscreenElement === gallery;
-        if (isFullscreen) {
-          if (document.exitFullscreen) await document.exitFullscreen();
-          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-          return;
+      fullscreenButton.addEventListener("click", () => {
+        const entering = !gallery.classList.contains("is-fullscreen");
+        if (entering) {
+          document.querySelectorAll(".profile-preview-gallery.is-fullscreen").forEach((openGallery) => openGallery.classList.remove("is-fullscreen"));
         }
-        try {
-          if (gallery.requestFullscreen) await gallery.requestFullscreen();
-          else if (gallery.webkitRequestFullscreen) gallery.webkitRequestFullscreen();
-          else {
-            const activeIndex = Math.round(track.scrollLeft / (track.clientWidth || 1));
-            const image = track.querySelectorAll("img")[activeIndex];
-            if (image && image.src) showPhotoViewer(image.src, image.alt);
-          }
-        } catch (_) {
-          const activeIndex = Math.round(track.scrollLeft / (track.clientWidth || 1));
-          const image = track.querySelectorAll("img")[activeIndex];
-          if (image && image.src) showPhotoViewer(image.src, image.alt);
-        }
+        gallery.classList.toggle("is-fullscreen", entering);
+        document.body.classList.toggle("is-gallery-fullscreen", entering);
+        syncProfileFullscreenButtons();
+        syncOrientationGuard();
       });
       gallery.append(fullscreenButton);
     }
