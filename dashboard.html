@@ -253,8 +253,11 @@
     .account-photo-pick{min-height:39px;display:inline-flex;align-items:center;gap:8px;margin-top:4px;padding:8px 13px;border-color:rgb(213 182 122 / 52%);color:var(--gold);font-size:12px;font-weight:700;letter-spacing:.01em}
     .account-photo-pick svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .account-photo-pick:hover{border-color:var(--gold);background:rgb(213 182 122 / 10%);color:var(--ink)}
-    .account-photo-remove{padding:0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:11px;cursor:pointer}
-    .account-photo-remove:hover{color:var(--ink)}
+    .account-photo-actions{display:flex;align-items:center;justify-content:center;gap:10px}
+    .account-photo-remove{width:39px;height:39px;display:grid;place-items:center;padding:0;border:1px solid rgb(227 160 154 / 35%);border-radius:50%;background:rgb(227 160 154 / 7%);color:#e3a09a;cursor:pointer;transition:background .2s,border-color .2s}
+    .account-photo-remove svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .account-photo-remove:hover{border-color:#e3a09a;background:rgb(227 160 154 / 16%)}
+    .account-photo-remove:disabled{opacity:.55;cursor:wait}
     .account-avatar-open{width:100%;justify-content:flex-start}
     .account-avatar-open svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .account-photo-editor{display:grid;justify-items:center;gap:12px;text-align:center}
@@ -417,9 +420,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       <div class="account-photo-editor">
         <div class="account-photo-preview" id="account-photo-preview" aria-hidden="true"><span>＋</span></div>
         <p>Dein Foto erscheint rund im Menü und im Chat. Im nächsten Schritt richtest du den Ausschnitt aus.</p>
-        <input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
-        <label class="button button-secondary account-photo-pick" for="account-photo-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/><path d="M19 4v4m-2-2h4"/></svg><span>Foto auswählen</span></label>
-        <button id="account-photo-remove" class="account-photo-remove" type="button" hidden>Profilfoto entfernen</button>
+        <div class="account-photo-actions">
+          <input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+          <label class="button button-secondary account-photo-pick" for="account-photo-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/><path d="M19 4v4m-2-2h4"/></svg><span>Foto auswählen</span></label>
+          <button id="account-photo-remove" class="account-photo-remove" type="button" aria-label="Profilfoto löschen" title="Profilfoto löschen" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg></button>
+        </div>
         <p class="account-photo-hint">JPG, PNG oder WebP · maximal 2 MB</p>
         <p id="account-photo-status" class="account-photo-status" role="status" aria-live="polite"></p>
       </div>
@@ -484,7 +489,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-account-photo-picker-single-button-v74"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-avatar-delete-confirm-v75"></script>
 </body>
 </html>
 
