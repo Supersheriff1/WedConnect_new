@@ -135,7 +135,8 @@
   }
 
   function renderCoupleDetails() {
-    return field("schedule", "Geplanter Ablauf", "textarea", "Welche Programmpunkte sind wichtig?", true, ' maxlength="4000"') +
+    return field("public_intro", "Eure Vorstellung", "textarea", "Erzählt kurz, wer ihr seid. Dieser Text erscheint über euren Fotos im Profil.", false, ' maxlength="1200"') +
+      field("schedule", "Geplanter Ablauf", "textarea", "Welche Programmpunkte sind wichtig?", true, ' maxlength="4000"') +
       field("coverage_scope", "Gewünschte Begleitung", "textarea", "Zum Beispiel Trauung und Paarfotos oder vom Getting Ready bis zur Feier.", true, ' maxlength="1200"') +
       field("visual_style", "Bildstil", "textarea", "Welche Bildsprache gefällt euch?", true, ' maxlength="1200"') +
       field("image_wishes", "Bildwünsche", "textarea", "Welche Menschen, Momente oder Motive sollen festgehalten werden?", true, ' maxlength="2000"') +
@@ -226,7 +227,8 @@
   }
 
   function renderPhotographerDetails() {
-    return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Teile einer Hochzeit aus, die dir für dein Portfolio noch fehlen und die du gerne fotografieren möchtest.") +
+    return field("public_intro", "Deine Vorstellung", "textarea", "Stell dich und deine Arbeit kurz vor. Dieser Text erscheint über deinen Fotos im Profil.", false, ' maxlength="1200"') +
+      multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Teile einer Hochzeit aus, die dir für dein Portfolio noch fehlen und die du gerne fotografieren möchtest.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
       '<a class="profile-social-link setup-link-check" id="instagram-link-check" target="_blank" rel="noopener noreferrer" hidden>Instagram-Profil öffnen ↗</a>' +
       field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"') +
@@ -290,6 +292,7 @@
     const entries = wizard.role === "couple"
       ? [
           ["Vornamen", data.partner_one_first_name + " und " + data.partner_two_first_name],
+          ["Vorstellung", data.public_intro],
           ["Hochzeitsdatum", data.wedding_date], ["Ort", data.location], ["Gäste", data.guest_count],
           ["Ablauf", data.schedule], ["Begleitung", data.coverage_scope],
           ["Bildstil", data.visual_style], ["Bildwünsche", data.image_wishes],
@@ -298,6 +301,7 @@
         ]
       : [
           ["Vorname", data.first_name],
+          ["Vorstellung", data.public_intro],
           ["Region", (Array.isArray(data.regions) ? data.regions : []).map((value) => (REGION_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.region],
           ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
           ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
@@ -309,7 +313,7 @@
     const photoReview = wizard.role === "photographer"
       ? '<div class="profile-review-photos"><section><h3>Galerie · Stern markiert Highlights</h3><div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotogalerie mit markierten Highlights"></div></section></div>'
       : '<div id="photo-preview-grid" class="photo-preview-grid review-photo-grid profile-photo-gallery" aria-label="Fotovorschau"></div>';
-    return photoReview + '<div class="setup-summary">' + entries.map((entry) => {
+    return photoReview + '<div class="setup-summary">' + entries.filter((entry) => entry[1] !== null && entry[1] !== undefined && String(entry[1]).trim() !== "").map((entry) => {
       if ((entry[0] === "Instagram" || entry[0] === "Website") && entry[1] !== "Nicht angegeben") {
         let display = entry[1];
         try {
@@ -1278,6 +1282,13 @@
       : profile.first_name || "Dein Profil";
     heading.append(roleLabel, name);
     card.append(heading);
+
+    if (profile.public_intro && String(profile.public_intro).trim()) {
+      const intro = document.createElement("p");
+      intro.className = "profile-preview-intro";
+      intro.textContent = String(profile.public_intro).trim();
+      card.append(intro);
+    }
 
     const galleryTitle = document.createElement("h4");
     galleryTitle.className = "profile-preview-gallery-title";
