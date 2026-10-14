@@ -229,42 +229,17 @@
     return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Teile einer Hochzeit aus, die dir für dein Portfolio noch fehlen und die du gerne fotografieren möchtest.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
       '<a class="profile-social-link setup-link-check" id="instagram-link-check" target="_blank" rel="noopener noreferrer" hidden>Instagram-Profil öffnen ↗</a>' +
-      '<small id="instagram-check-status" class="link-check-status" role="status" aria-live="polite" hidden></small>' +
       field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"') +
-      '<a class="profile-social-link setup-link-check" id="website-link-check" target="_blank" rel="noopener noreferrer" hidden>Website öffnen ↗</a>' +
-      '<small id="website-check-status" class="link-check-status" role="status" aria-live="polite" hidden></small>';
-  }
-
-  const profileLinkChecks = new Map();
-
-  function setLinkCheckStatus(name, message, state) {
-    const status = document.querySelector(name === "instagram_url" ? "#instagram-check-status" : "#website-check-status");
-    if (!status) return;
-    status.textContent = message || "";
-    status.dataset.state = state || "";
-    status.hidden = !message;
-  }
-
-  function cancelLinkCheck(name) {
-    const state = profileLinkChecks.get(name);
-    if (!state) return;
-    window.clearTimeout(state.timer);
-    if (state.controller) state.controller.abort();
-    state.controller = null;
-  }
-
-  function getNormalizedLink(name, value) {
-    return name === "instagram_url" ? normalizeInstagram(value) : normalizeWebsite(value);
+      '<a class="profile-social-link setup-link-check" id="website-link-check" target="_blank" rel="noopener noreferrer" hidden>Website öffnen ↗</a>';
   }
 
   function updateLinkCheck(name) {
+    const isInstagram = name === "instagram_url";
     const field = fields.querySelector('[name="' + name + '"]');
-    const link = document.querySelector(name === "instagram_url" ? "#instagram-link-check" : "#website-link-check");
+    const link = document.querySelector(isInstagram ? "#instagram-link-check" : "#website-link-check");
     if (!field || !link) return;
-    cancelLinkCheck(name);
-    setLinkCheckStatus(name, "", "");
     try {
-      const url = getNormalizedLink(name, field.value);
+      const url = isInstagram ? normalizeInstagram(field.value) : normalizeWebsite(field.value);
       link.href = url || "";
       link.hidden = !url;
     } catch (_) {
@@ -273,64 +248,9 @@
     }
   }
 
-  async function runLinkCheck(name, url, state) {
-    const controller = new AbortController();
-    state.controller = controller;
-    try {
-      const response = await fetch("/api/check-profile-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: name === "instagram_url" ? "instagram" : "website", url }),
-        signal: controller.signal
-      });
-      if (!response.ok) throw new Error("Link-Prüfung nicht verfügbar");
-      const result = await response.json();
-      const field = fields.querySelector('[name="' + name + '"]');
-      if (!field || getNormalizedLink(name, field.value) !== url) return;
-      setLinkCheckStatus(name, result.message || "Prüfung nicht eindeutig möglich.", result.status || "unknown");
-    } catch (error) {
-      if (error.name === "AbortError") return;
-      const field = fields.querySelector('[name="' + name + '"]');
-      if (!field) return;
-      try {
-        if (getNormalizedLink(name, field.value) === url) setLinkCheckStatus(name, "Prüfung derzeit nicht möglich.", "unknown");
-      } catch (_) {}
-    } finally {
-      if (state.controller === controller) state.controller = null;
-    }
-  }
-
-  function scheduleLinkCheck(name, delay = 850) {
-    const field = fields.querySelector('[name="' + name + '"]');
-    if (!field) return;
-    let url;
-    try {
-      url = getNormalizedLink(name, field.value);
-    } catch (_) {
-      setLinkCheckStatus(name, "", "");
-      return;
-    }
-    if (!url) {
-      setLinkCheckStatus(name, "", "");
-      return;
-    }
-    let state = profileLinkChecks.get(name);
-    if (!state) {
-      state = { timer: null, controller: null, url: "" };
-      profileLinkChecks.set(name, state);
-    }
-    cancelLinkCheck(name);
-    state.url = url;
-    setLinkCheckStatus(name, "Wird im Hintergrund geprüft …", "checking");
-    state.timer = window.setTimeout(() => runLinkCheck(name, url, state), delay);
-  }
-
   function updateProfileLinkChecks() {
-    ["instagram_url", "website_url"].forEach((name) => {
-      updateLinkCheck(name);
-      const field = fields.querySelector('[name="' + name + '"]');
-      if (field && field.value.trim()) scheduleLinkCheck(name, 300);
-    });
+    updateLinkCheck("instagram_url");
+    updateLinkCheck("website_url");
   }
 
   function photoPicker(name, label) {
@@ -1321,7 +1241,6 @@
   fields.addEventListener("input", (event) => {
     if (event.target.name === "instagram_url" || event.target.name === "website_url") {
       updateLinkCheck(event.target.name);
-      scheduleLinkCheck(event.target.name);
     }
   });
 
