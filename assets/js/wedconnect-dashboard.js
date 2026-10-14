@@ -228,7 +228,29 @@
   function renderPhotographerDetails() {
     return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Teile einer Hochzeit aus, die dir für dein Portfolio noch fehlen und die du gerne fotografieren möchtest.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
-      field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"');
+      '<a class="profile-social-link setup-link-check" id="instagram-link-check" target="_blank" rel="noopener noreferrer" hidden>Instagram-Profil öffnen ↗</a>' +
+      field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"') +
+      '<a class="profile-social-link setup-link-check" id="website-link-check" target="_blank" rel="noopener noreferrer" hidden>Website öffnen ↗</a>';
+  }
+
+  function updateLinkCheck(name) {
+    const isInstagram = name === "instagram_url";
+    const field = fields.querySelector('[name="' + name + '"]');
+    const link = document.querySelector(isInstagram ? "#instagram-link-check" : "#website-link-check");
+    if (!field || !link) return;
+    try {
+      const url = isInstagram ? normalizeInstagram(field.value) : normalizeWebsite(field.value);
+      link.href = url || "";
+      link.hidden = !url;
+    } catch (_) {
+      link.removeAttribute("href");
+      link.hidden = true;
+    }
+  }
+
+  function updateProfileLinkChecks() {
+    updateLinkCheck("instagram_url");
+    updateLinkCheck("website_url");
   }
 
   function photoPicker(name, label) {
@@ -335,6 +357,7 @@
       : step === 1 ? (wizard.role === "couple" ? renderCoupleBasics() : renderPhotographerBasics())
         : step === 2 ? (wizard.role === "couple" ? renderCoupleDetails() : renderPhotographerDetails())
           : step === 3 ? renderPhotoStep() : renderReview();
+    if (step === 2 && wizard.role === "photographer") updateProfileLinkChecks();
     if (step === 4) loadPhotoPreviews();
     if (step === 3 && wizard.role === "photographer") attachPortfolioPhotoControls();
     if (step === 3 && wizard.role === "couple") loadExistingCouplePhotos();
@@ -1214,6 +1237,12 @@
       icons[icon] + "<span>" + label + "</span>" +
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : "") + "</button>";
   }
+
+  fields.addEventListener("input", (event) => {
+    if (event.target.name === "instagram_url" || event.target.name === "website_url") {
+      updateLinkCheck(event.target.name);
+    }
+  });
 
   fields.addEventListener("change", (event) => {
     const target = event.target;
