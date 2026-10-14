@@ -93,7 +93,7 @@ Das Formular erfasst die Vornamen beider heiratenden Personen, Datum, Ort/Locati
 
 Das Formular erfasst Vorname, mehrfach auswählbare Einsatzgebiete inklusive Ganz Österreich, Erfahrung in Jahren und/oder fotografierten Hochzeiten, Bildstil (einschließlich Boho), Vergütung (unentgeltlich oder Fixbetrag) sowie gewünschten Begleitungsumfang. Der Begleitungsumfang beschreibt, welche Hochzeitsabschnitte der Fotograf für das eigene Portfolio noch fotografieren möchte. Instagram und Website sind optional; der Code normalisiert die Eingabe zu einem Link und bietet eine Vorschau zum Öffnen.
 
-Die Galerie umfasst bis zu 20 gleichwertige normale Fotos; es gibt keine Highlight-Auswahl oder -Markierung. Mindestens 3 Fotos sind für den Profilabschluss vorgesehen. Verfügbarkeit ist keine Profilangabe. Fotos sind JPG/JPEG, PNG und WebP; Portfoliofotos sind auf 2 MB pro Datei begrenzt. Der Profilfoto-Upload ist eine separate Account-Funktion mit rundem Zuschnitt.
+Die Produktregel sieht eine Galerie mit bis zu 20 gleichwertigen normalen Fotos und keine Highlight-Auswahl oder -Markierung vor. Mindestens 3 Fotos sind für den Profilabschluss vorgesehen. In der Baseline enthält das Dashboard-HTML noch ungenutzte Highlight-CSS-Selektoren und eine ältere Migration bewahrt ein Datenbankfeld; das Dashboard-JavaScript enthält keine Auswahl- oder Anzeigelogik dafür. Verfügbarkeit ist keine Profilangabe. Fotos sind JPG/JPEG, PNG und WebP; Portfoliofotos sind auf 2 MB pro Datei begrenzt. Der Profilfoto-Upload ist eine separate Account-Funktion mit rundem Zuschnitt.
 
 ### Wichtiger Abgleich mit älteren Dokumenten
 
