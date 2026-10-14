@@ -2068,6 +2068,22 @@
   }
   if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
+  const accountPhotoPreview = document.querySelector("#account-photo-preview");
+  if (accountPhotoPreview) accountPhotoPreview.addEventListener("click", async () => {
+    if (!accountAvatarPath) {
+      if (accountPhotoInput) accountPhotoInput.click();
+      return;
+    }
+    if (accountPhotoStatus) accountPhotoStatus.textContent = "";
+    accountPhotoPreview.disabled = true;
+    try {
+      const { data, error } = await supabase.storage.from(photoBucket).download(accountAvatarPath);
+      if (error || !data) throw new Error("Das Profilfoto konnte nicht zum Ausrichten geöffnet werden.");
+      openCropEditor(data, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto), { avatar: true });
+    } catch (error) {
+      if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht geöffnet werden.";
+    } finally { accountPhotoPreview.disabled = false; }
+  });
   if (accountAvatarOpen) accountAvatarOpen.addEventListener("click", () => {
     if (accountDialog && accountDialog.open) accountDialog.close();
     if (accountPhotoStatus) accountPhotoStatus.textContent = "";
