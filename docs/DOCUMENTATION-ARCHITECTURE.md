@@ -13,7 +13,7 @@ Eine große Bibel wird schnell widersprüchlich. Viele kleine Bibles ohne klare 
 | Projektstatus und Baseline | Commit, Deployment, vorhandene Funktionen, bekannte Lücken | Mit `FROZEN-BASELINE-2026-10-14.md` begonnen |
 | Product Bible | Zielgruppe, Rollen, Regeln, Profilfelder, Matching, Rechte, Freigaben | Vorhandene Projektbibeln zusammenführen und Widersprüche markieren |
 | Public Website Design Bible | Farben, Typografie, Raster, Komponenten der öffentlichen Seiten | Bestehend: `docs/DESIGN-BIBLE.md` |
-| App Design Bible | Dashboard, Onboarding, Account, Dialoge, Uploads und mobile Zustände | Neu erstellen; aktuelle App zuerst dokumentieren, nicht umbauen |
+| App Design Bible | Dashboard, Onboarding, Account, Dialoge, Uploads und mobile Zustände | Erstellt: `docs/APP-DESIGN-BIBLE-v1.0.md`; dokumentiert den eingefrorenen Stand und offene Abweichungen |
 | Brand Voice & Content Bible | Schreibstil, Begriffe, Tonalität, UI-Wörter, CTA und exakte Seitentexte | Neu erstellen; Seiteninhalte aus dem eingefrorenen Commit übernehmen |
 | UX- und Ablaufkatalog | Login, Profilanlage, Bearbeitung, Fotos, Rollenwechsel und Fehlerzustände | Aus den tatsächlich implementierten Abläufen ableiten |
 | Technical Architecture & Data Dictionary | Auth, Tabellen, RLS, Storage, SQL-Migrationen, Redirects und Grenzen | Bestehende Migrationen und Supabase-Anleitungen als Grundlage |
@@ -66,11 +66,8 @@ Automatische Veröffentlichung, das ungeprüfte Trainieren mit Kundeninhalten od
 
 ## Nächste Dokumentationsschritte
 
-1. Diesen Baseline-Snapshot samt bekannter offener Punkte fertigstellen.
-2. Screenshot-Matrix und Inhaltsinventar aufnehmen.
-3. App Design Bible aus dem Live-Code und tatsächlichen Ansichten dokumentieren.
-4. Brand Voice & Content Bible mit den exakten aktuellen Texten erstellen.
-5. Product Bible gegen Code und Nutzerentscheidungen abgleichen; veraltete Aussagen als ersetzt kennzeichnen.
-6. Migrationen, Supabase Storage und Policies inventarisieren.
-7. Icons und Illustrationen katalogisieren, ohne sie zu verändern.
-8. Erst danach Automationen planen; die Produkt-Baseline bleibt bis zu einem ausdrücklichen Auftrag unangetastet.
+1. Screenshot-Matrix für Desktop, Tablet und Mobilgeräte mit neutralen Testdaten ergänzen.
+2. Brand Voice & Content Bible mit den exakten aktuellen Texten erstellen.
+3. Auth, Migrationen, Supabase Storage, Tabellen und Policies als Technical Architecture & Data Dictionary dokumentieren.
+4. Icons und Illustrationen katalogisieren, ohne sie zu verändern oder zu verschieben.
+5. Danach erst Automationen planen; die Produkt-Baseline bleibt bis zu einem ausdrücklichen Auftrag unangetastet.
