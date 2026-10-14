@@ -9,7 +9,8 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 - [Change control](docs/CHANGE-CONTROL.md) — freeze rule and safe process for explicitly requested changes.
 - [Documentation architecture](docs/DOCUMENTATION-ARCHITECTURE.md) — proposed modular bibles, asset inventory, and guarded FAQ automation.
 
-- [Project Bible v1.2](docs/PROJECT-BIBLE-v1.2.md) — product scope, roles, profile onboarding, rights, and technical boundaries.
+- [Project Bible v1.3](docs/PROJECT-BIBLE-v1.3.md) — current product decisions and implementation status.
+- [Project Bible v1.2](docs/PROJECT-BIBLE-v1.2.md) — previous version, retained for history.
 - [Project Bible v1.1](docs/PROJECT-BIBLE-v1.1.md) — previous version.
 - [Design Bible](docs/DESIGN-BIBLE.md) — current visual system.
 - [Supabase setup](supabase/README.md) — authentication and database setup.
