@@ -43,6 +43,9 @@
     .photo-panel h3{margin:0 0 6px;color:var(--ink);font-size:16px}.photo-panel p{margin:0 0 14px;color:var(--muted);font-size:13px}
     .photo-panel input[type=file]{width:100%;min-height:48px;color:var(--body);font-size:13px}
     .photo-count{margin-top:8px!important;color:var(--gold)!important}
+    .photo-upload-hint{margin:7px 0 0!important;color:var(--muted)!important;font-size:11px!important;line-height:1.4}
+    .photo-selection-feedback{margin:6px 0 0!important;color:var(--ink)!important;font-size:12px!important;line-height:1.45}
+    .photo-selection-feedback:empty{display:none}
     .photo-methods{display:grid;gap:12px;margin-bottom:18px}.photo-method{display:flex;align-items:flex-start;gap:10px;color:var(--body);font-size:14px}
     .photo-method input{accent-color:var(--gold);margin-top:4px}
     .setup-summary{display:grid;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
@@ -489,7 +492,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-nav-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-couple-photo-upload-v1"></script>
 </body>
 </html>
 
