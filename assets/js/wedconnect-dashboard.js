@@ -223,8 +223,9 @@
       field("partner_one_first_name", "Vorname der ersten Person", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       field("partner_two_first_name", "Vorname der zweiten Person", "text", "", true, ' maxlength="80"') +
       field("wedding_date", "Hochzeitsdatum", "date", "", true, "") +
-      field("location", "Ort oder Location", "text", "Zum Beispiel Wien oder Schloss Belvedere", true, ' maxlength="160"') +
-      field("guest_count", "Ungefähre Gästezahl", "number", "", true, ' min="1" max="5000"') +
+      choiceField("region_code", "Bundesland", COUPLE_REGION_OPTIONS, "Für die Zuordnung zu Fotografen.") +
+      field("location", "Ort oder Location", "text", "Zum Beispiel Wien oder Schloss Belvedere", true, ' autocomplete="address-level2" maxlength="160"') +
+      field("guest_count", "Ungefähre Gästezahl", "number", "", true, ' min="1" max="5000" step="1" inputmode="numeric"') +
       "</div>";
   }
 
@@ -238,16 +239,18 @@
   }
 
   function renderCoupleDetails() {
-    return field("public_intro", "Eure Vorstellung", "textarea", "Erzählt kurz, wer ihr seid. Dieser Text erscheint über euren Fotos im Profil.", false, ' maxlength="1200"') +
-      field("schedule", "Geplanter Ablauf", "textarea", "Welche Programmpunkte sind wichtig?", true, ' maxlength="4000"') +
-      field("coverage_scope", "Gewünschte Begleitung", "textarea", "Zum Beispiel Trauung und Paarfotos oder vom Getting Ready bis zur Feier.", true, ' maxlength="1200"') +
-      field("visual_style", "Bildstil", "textarea", "Welche Bildsprache gefällt euch?", true, ' maxlength="1200"') +
-      field("image_wishes", "Bildwünsche", "textarea", "Welche Menschen, Momente oder Motive sollen festgehalten werden?", true, ' maxlength="2000"') +
-      choiceField("photographer_usage_preference", "Nutzung der Fotos durch den Fotografen", [
+    return field("public_intro", "Eure Vorstellung", "textarea", "Optional · erscheint in eurem Profil.", false, ' maxlength="1200"') +
+      multiSelectField("coverage_options", "Gewünschte Begleitung", COVERAGE_OPTIONS, "Wählt alle Abschnitte aus, die fotografisch begleitet werden sollen.") +
+      multiSelectField("styles", "Bildstil", STYLE_OPTIONS, "Wählt alle Bildstile, die euch gefallen.") +
+      '<div class="setup-two-col">' +
+      field("schedule", "Ablauf", "textarea", "Zum Beispiel: Trauung um 14 Uhr, Paarfotos um 15 Uhr, Feier ab 17 Uhr.", true, ' maxlength="4000" placeholder="Die wichtigsten Programmpunkte und ungefähren Uhrzeiten"') +
+      field("image_wishes", "Bildwünsche", "textarea", "Besondere Menschen, Momente oder Motive.", true, ' maxlength="2000" placeholder="Was soll dem Fotografen besonders wichtig sein?"') +
+      "</div>" +
+      choiceField("photographer_usage_preference", "Fotos durch den Fotografen nutzbar?", [
         ["open", "Grundsätzlich offen"],
         ["case_by_case", "Nur nach Absprache"],
         ["no", "Nein"]
-      ], "Eine verbindliche Freigabe wird vor einer Zusammenarbeit separat vereinbart.");
+      ], "Die konkrete Freigabe wird separat vereinbart.");
   }
 
   const REGION_OPTIONS = [
@@ -262,6 +265,7 @@
     ["VBG", "Vorarlberg"],
     ["W", "Wien"]
   ];
+  const COUPLE_REGION_OPTIONS = REGION_OPTIONS.filter((option) => option[0] !== "AT");
   const STYLE_OPTIONS = [
     ["documentary", "Reportage"],
     ["natural", "Natürlich & authentisch"],
@@ -369,14 +373,19 @@
       const jointCount = currentPhotoCount("couple");
       const oneCount = currentPhotoCount("partner_one");
       const twoCount = currentPhotoCount("partner_two");
-      return '<div class="photo-methods"><label class="photo-method"><input type="radio" name="couple-photo-method" value="joint" checked><span><strong>Ein gemeinsames Foto</strong><br>Beide Personen sind auf dem Foto zu sehen.</span></label>' +
-        '<label class="photo-method"><input type="radio" name="couple-photo-method" value="individual"><span><strong>Ein Foto pro Person</strong><br>Lade für beide Personen je ein Foto hoch.</span></label></div>' +
-        '<div class="photo-panel" id="joint-photo-panel"><h3>Gemeinsames Foto</h3><p>Beide heiratenden Personen müssen zu sehen sein.</p>' +
+      const individualSelected = jointCount === 0 && (oneCount > 0 || twoCount > 0);
+      const coupleProfile = wizard.data.couple || {};
+      const firstName = escapeHtml(coupleProfile.partner_one_first_name || "Erste Person");
+      const secondName = escapeHtml(coupleProfile.partner_two_first_name || "Zweite Person");
+      return '<div class="photo-methods"><label class="photo-method"><input type="radio" name="couple-photo-method" value="joint"' + (!individualSelected ? " checked" : "") + '><span><strong>Ein gemeinsames Foto</strong><br>Beide Personen sind auf dem Foto zu sehen.</span></label>' +
+        '<label class="photo-method"><input type="radio" name="couple-photo-method" value="individual"' + (individualSelected ? " checked" : "") + '><span><strong>Ein Foto pro Person</strong><br>Lade für beide Personen je ein Foto hoch.</span></label></div>' +
+        '<div class="photo-panel" id="joint-photo-panel"><h3>Gemeinsames Foto</h3><p>Beide Personen müssen zu sehen sein.</p>' +
         photoPicker("joint-photos", "Gemeinsames Foto hinzufügen") + '<p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
-        '<div class="setup-two-col" id="individual-photo-panels" hidden><div class="photo-panel"><h3>Erste Person</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
+        '<div class="setup-two-col" id="individual-photo-panels" hidden><div class="photo-panel"><h3>' + firstName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
         photoPicker("partner-one-photos", "Foto hinzufügen") + '<p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
-        '<div class="photo-panel"><h3>Zweite Person</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
+        '<div class="photo-panel"><h3>' + secondName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
         photoPicker("partner-two-photos", "Foto hinzufügen") + '<p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+        '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 10 MB pro Foto</p>' +
         '<div id="couple-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
     const portfolioCount = currentPhotoCount("portfolio");
@@ -395,9 +404,12 @@
       ? [
           ["Vornamen", data.partner_one_first_name + " und " + data.partner_two_first_name],
           ["Vorstellung", data.public_intro],
-          ["Hochzeitsdatum", data.wedding_date], ["Ort", data.location], ["Gäste", data.guest_count],
-          ["Ablauf", data.schedule], ["Begleitung", data.coverage_scope],
-          ["Bildstil", data.visual_style], ["Bildwünsche", data.image_wishes],
+          ["Hochzeitsdatum", data.wedding_date],
+          ["Bundesland", coupleRegionLabel(data.region_code)],
+          ["Ort oder Location", data.location], ["Gäste", data.guest_count],
+          ["Gewünschte Begleitung", profileLabels(data.coverage_options, COVERAGE_OPTIONS) || data.coverage_scope],
+          ["Bildstil", profileLabels(data.styles, STYLE_OPTIONS) || data.visual_style],
+          ["Ablauf", data.schedule], ["Bildwünsche", data.image_wishes],
           ["Nutzung durch Fotograf", data.photographer_usage_preference === "open" ? "Grundsätzlich offen" : data.photographer_usage_preference === "case_by_case" ? "Nur nach Absprache" : "Nein"],
           ["Fotos", currentPhotoCount("couple") ? "Gemeinsames Foto hochgeladen" : "Fotos beider Personen hochgeladen"]
         ]
@@ -1261,6 +1273,21 @@
     const key = wizard.role === "couple" ? "couple" : "photographer";
     const table = wizard.role === "couple" ? "couple_profiles" : "photographer_profiles";
     const data = Object.assign({}, wizard.data[key], values);
+    if (wizard.role === "couple") {
+      const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
+      const styles = Array.isArray(data.styles) ? data.styles : [];
+      const regionCode = data.region_code || "";
+      if (!allowIncomplete && !COUPLE_REGION_OPTIONS.some((option) => option[0] === regionCode)) {
+        throw new Error("Wähle das Bundesland eurer Hochzeit aus.");
+      }
+      if (!allowIncomplete && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+      if (!allowIncomplete && !styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+      data.region_code = regionCode;
+      data.coverage_options = coverage;
+      data.styles = styles;
+      data.coverage_scope = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
+      data.visual_style = styles.map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
+    }
     if (wizard.role === "photographer") {
       const regions = Array.isArray(data.regions) ? data.regions : [];
       const styles = Array.isArray(data.styles) ? data.styles : [];
@@ -1558,6 +1585,10 @@
     return profileArray(values).map((value) => (options.find((option) => option[0] === value) || [value, value])[1]).join(", ");
   }
 
+  function coupleRegionLabel(value) {
+    return (COUPLE_REGION_OPTIONS.find((option) => option[0] === value) || ["", ""])[1] || "";
+  }
+
   function profileDate(value) {
     if (!value) return "";
     const date = new Date(value + "T00:00:00");
@@ -1606,16 +1637,18 @@
         : profile.photographer_usage_preference === "case_by_case"
           ? "Nur nach Absprache"
           : profile.photographer_usage_preference === "no" ? "Nein" : "";
+      const region = coupleRegionLabel(profile.region_code);
+      const location = [profile.location, region].filter(Boolean).join(", ");
       return {
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
-          ["pin", "Ort", profile.location],
+          ["pin", "Ort", location],
           ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
         ],
         sections: [
-          ["Gewünschte Begleitung", profile.coverage_scope],
+          ["Gewünschte Begleitung", profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope],
           ["Ablauf", profile.schedule],
-          ["Bildstil", profile.visual_style],
+          ["Bildstil", profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style],
           ["Bildwünsche", profile.image_wishes],
           ["Nutzung durch den Fotografen", preference]
         ]
@@ -2066,6 +2099,10 @@
       } else if (wizard.step === 1 || wizard.step === 2) {
         if (!form.reportValidity()) return;
         const values = collectFields();
+        if (wizard.role === "couple" && wizard.step === 2) {
+          if (!values.coverage_options || !values.coverage_options.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+          if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+        }
         if (wizard.role === "photographer" && wizard.step === 1) {
           if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
           if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
@@ -2084,7 +2121,8 @@
         const { error } = await supabase.rpc("complete_profile_for_role", { p_role: wizard.role });
         if (error) {
           const message = error.message || "";
-          if (message.includes("photos_for_both_partners_required")) throw new Error("Lade Fotos von beiden Personen hoch.");
+          if (message.includes("photos_for_both_partners_required")) throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
+          if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, das Bundesland, den Begleitungsumfang und den Bildstil.");
           if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           const code = error.code ? " (" + error.code + ")" : "";
