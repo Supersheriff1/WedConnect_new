@@ -322,6 +322,19 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-gallery-controls{position:fixed!important;top:50%!important;left:50%!important;width:100vw!important;max-width:none!important;padding:0 14px!important;transform:translate(-50%,-50%)!important;z-index:9!important}
     #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-fullscreen{position:fixed!important;top:auto!important;right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;z-index:11!important;width:28px!important;height:28px!important}
     #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-fullscreen svg{width:14px!important;height:14px!important}
+    /* The gallery is moved into this top-layer dialog in fullscreen. This gives the photo the real viewport, independent of the portrait profile card. */
+    body.is-gallery-fullscreen{overflow:hidden!important}
+    #fullscreen-gallery-dialog{position:fixed;inset:0;box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:#0c0c0f;color:var(--ink);overflow:hidden}
+    #fullscreen-gallery-dialog::backdrop{background:#0c0c0f}
+    #fullscreen-gallery-dialog .profile-preview-gallery.is-fullscreen{position:relative!important;inset:auto!important;box-sizing:border-box;width:100vw!important;height:100dvh!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
+    #fullscreen-gallery-dialog .profile-preview-track{position:absolute!important;inset:0!important;box-sizing:border-box;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;min-width:0!important;aspect-ratio:auto!important;display:flex!important;align-items:stretch!important;gap:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow-x:auto!important;overflow-y:hidden!important}
+    #fullscreen-gallery-dialog .profile-preview-photo{position:relative!important;box-sizing:border-box!important;display:block!important;flex:0 0 100vw!important;width:100vw!important;height:100dvh!important;min-width:100vw!important;max-width:100vw!important;min-height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
+    #fullscreen-gallery-dialog .profile-preview-photo img{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;object-fit:contain!important;object-position:center center!important}
+    #fullscreen-gallery-dialog .profile-preview-overlay{display:none!important}
+    #fullscreen-gallery-dialog .profile-preview-indicators{top:calc(16px + env(safe-area-inset-top))!important;left:16px!important;right:58px!important;z-index:10!important}
+    #fullscreen-gallery-dialog .profile-preview-gallery-controls{position:fixed!important;top:50%!important;left:50%!important;width:100vw!important;max-width:none!important;padding:0 14px!important;transform:translate(-50%,-50%)!important;z-index:9!important}
+    #fullscreen-gallery-dialog .profile-preview-fullscreen{position:fixed!important;top:auto!important;right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;z-index:11!important;width:28px!important;height:28px!important}
+    #fullscreen-gallery-dialog .profile-preview-fullscreen svg{width:14px!important;height:14px!important}
 </style>
 </head>
 <body>
@@ -374,6 +387,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     </div>
   </dialog>
   <dialog id="delete-photo-dialog" class="delete-photo-dialog" aria-labelledby="delete-photo-title"><form method="dialog" class="delete-photo-content"><span class="delete-photo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg></span><h2 id="delete-photo-title">Foto löschen?</h2><p id="delete-photo-message">Möchtest du dieses Foto wirklich löschen?</p><div class="delete-photo-actions"><button class="button button-secondary" type="submit" value="cancel">Abbrechen</button><button class="button button-primary delete-photo-confirm" type="submit" value="confirm">Foto löschen</button></div></form></dialog>
+  <dialog id="fullscreen-gallery-dialog" class="fullscreen-gallery-dialog" aria-label="Profilfotos im Vollbild"></dialog>
   <dialog id="photo-viewer" class="photo-viewer" aria-label="Foto in Originalansicht"><button id="photo-viewer-close" class="button button-secondary photo-viewer-close" type="button" aria-label="Foto schließen" title="Foto schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><img id="photo-viewer-image" alt=""></dialog>
     <dialog id="crop-dialog" class="crop-dialog" aria-labelledby="crop-title">
     <h2 id="crop-title">Foto zuschneiden und ausrichten</h2>
@@ -424,7 +438,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-custom-fullscreen-v60"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-viewport-gallery-v61"></script>
 </body>
 </html>
 
