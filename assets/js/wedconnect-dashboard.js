@@ -263,7 +263,7 @@
       photoPicker("portfolio-photos", "Fotos hinzufügen") +
       '<p class="photo-upload-detail photo-instructions">Insgesamt kannst du bis zu 20 Fotos hochladen. Davon markierst du 3 bis 5 als Highlights. Diese werden bei „Entdecken“ auf deiner Profilkarte angezeigt.</p>' +
       '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Highlights im Hochformat (4:5)</p>' +
-      '<p class="photo-count" id="portfolio-highlight-count">Highlights: 0 / 10 ausgewählt · mindestens 3</p>' +
+      '<p class="photo-count" id="portfolio-highlight-count">Highlights: 0 / 5 ausgewählt · mindestens 3</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Galerie: ' + portfolioCount + ' / 20 Fotos</p></div>';
   }
 
