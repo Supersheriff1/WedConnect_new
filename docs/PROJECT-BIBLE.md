@@ -1,222 +1,85 @@
 # WedConnect · Project Bible
 
-**Version:** 2.2  
-**Stand:** 13. Oktober 2026  
+**Version:** 2.3  
+**Stand:** 14. Oktober 2026  
+**Status:** maßgebliche Produkt- und Projektentscheidungen
 
-## 1. Ziel des Projekts
+## Zweck und Vorrang
 
-WedConnect ist eine Plattform, die Hochzeitspaare mit Hochzeitsfotograf:innen für mögliche TFP-Zusammenarbeiten verbindet. Beide Seiten stellen sich vor, prüfen passende Profile und entscheiden selbst, ob sie Interesse haben.
+Diese Bible hält fest, was WedConnect ist und welche Produktentscheidungen gelten. Sie beschreibt nicht automatisch, was im Code bereits fertig ist. Dafür ist [`IMPLEMENTATION-STATUS.md`](IMPLEMENTATION-STATUS.md) maßgeblich. Die [`IDEAS-BIBLE.md`](IDEAS-BIBLE.md) enthält ausdrücklich unverbindliche Vorschläge.
 
-Ein Match entsteht erst, wenn beide Seiten Interesse zeigen. Es ist der Beginn eines Gesprächs und noch keine Buchungszusage. Umfang, Gegenleistung, Lieferung und Bildrechte werden vor einer Zusammenarbeit ausdrücklich vereinbart.
+Bei Änderungen an eingefrorenen Bereichen braucht es eine ausdrückliche Anweisung von Ali. Brainstorming, technische Dokumentation oder eine Änderung an einer anderen Seite gelten nicht als Freigabe.
 
-Das Projekt umfasst eine öffentliche Website, die App für beide Rollen, die technische Plattform dahinter sowie Betrieb, Sicherheit und rechtliche Grundlagen.
+## Produkt
 
-## 2. Öffentliche Website
+WedConnect verbindet Hochzeitspaare mit Fotografen für mögliche TFP-Zusammenarbeiten. Beide Seiten sehen passende Profile und entscheiden selbst, ob sie Interesse zeigen. Ein beidseitiges Interesse ist ein Match und eröffnet ein Gespräch; es ist keine Buchungszusage. Umfang, Gegenleistung, Lieferung und Nutzungsrechte werden vor einer Zusammenarbeit ausdrücklich vereinbart.
 
-Die Website erklärt WedConnect, bevor sich jemand registriert:
+## Öffentliche Website
 
-- Idee und Ablauf des gegenseitigen Matchings
-- Services für Paare und Fotograf:innen
-- Erwartungen und Voraussetzungen für eine TFP-Zusammenarbeit
-- Preise, kostenlose Funktionen und Pro-Angebot
-- häufige Fragen, Hilfe und Kontakt
-- rechtliche Informationen und Datenschutz
-- klare Einstiege zur Registrierung und App
+- `fotografen.html` ist der eingefrorene Designmaster der öffentlichen Website. Ohne ausdrückliche Freigabe wird diese Seite nicht verändert.
+- `index.html` und `hochzeitspaare.html` übernehmen das freigegebene visuelle System. Ihre Texte sind noch nicht final und dürfen später inhaltlich überarbeitet werden.
+- Die aktuelle maßgebliche Spezifikation für die öffentliche Website ist [`DESIGN-BIBLE.md`](DESIGN-BIBLE.md), Version 2.3.
+- Dashboard und eingeloggte App haben einen eigenen Standard in [`APP-DESIGN-BIBLE.md`](APP-DESIGN-BIBLE.md).
 
-Die Seite „Für Fotografen“ ist der verbindliche Designmaster für die öffentliche WedConnect-Website. Startseite und Hochzeitspaare-Seite sind visuell an diesen Stand angeglichen und übernehmen Gestaltung, Typografie, Außenrahmen und Abstände. Ihr Design ist freigegeben; ihre Texte sind noch frühe Entwürfe und ausdrücklich nicht eingefroren. Die jeweils gültigen visuellen Regeln stehen in der aktuellen Design Bible unter `docs/DESIGN-BIBLE.md`. Das eingeloggte Dashboard und die App folgen ihrem eigenen Designstandard.\n\nDer Abschnitt „Der Ausgangspunkt“ erklärt, warum erfahrene Fotografen oft zu wenige veröffentlichbare Bilder im Portfolio haben. Die Illustration `assets/illustrations/fotografen-portfolio-gap.webp` zeigt eine leicht frustrierte Fotografin mit einem nahezu frontal ausgerichteten Album. Auf der linken Seite ist genau ein großes, aufrecht stehendes Hochzeitsfoto im Hochformat zu sehen; die rechte Albumseite bleibt leer. Keine verdrehten oder schräg liegenden Fotos. Im gemeinsamen Panel stehen Styled Shoots, Workshops und echte Hochzeiten als drei icon-geführte Alternativen mit ihren jeweiligen Hürden. Die Icons bewegen sich mit gut wahrnehmbarer, aber ruhiger Animation und versetztem Rhythmus; bei aktivierter Betriebssystemeinstellung für reduzierte Bewegung bleibt die Animation aus. Auf Desktop verbindet das Bild den Einstiegstext visuell mit der Alternativenreihe; auf kleinen Ansichten stehen Bild und Inhalte untereinander.
+## Anmeldung, Rollen und Freischaltung
 
-**Umsetzung:** Öffentlich zugängliche, mobiloptimierte Website mit getrennten Informationsseiten und klaren Übergängen zur App. Preise und Pro-Leistungen müssen vor Veröffentlichung festgelegt werden.
+1. Anmeldung und Registrierung sind für alle gleich und rollenfrei. E-Mail/Passwort und Google nutzen denselben Einstieg.
+2. Nach erfolgreicher Anmeldung geht es ins Dashboard.
+3. Bei der ersten Profilerstellung wählt die Person dort **Hochzeitspaar** oder **Fotograf**.
+4. Anschließend wird das passende Profil erstellt. Entdecken, Likes/Interesse, Matches und Nachrichten dürfen erst nach vollständigem Profil freigeschaltet werden.
 
-## 3. Registrierung und Konten
+Die Rolle gehört zum WedConnect-Profil, nicht zum Anmeldeformular. Ein Rollenwechsel darf nicht stillschweigend Informationen des jeweils anderen Rollenprofils vernichten. Der gewünschte Umgang mit gleichzeitig vorhandenen Profilen ist vor einer Änderung an Datenmodell oder Oberfläche gesondert festzulegen.
 
-Registrierung und Anmeldung sind für alle Personen identisch. Es wird dabei keine Rolle abgefragt.
+## Profile
 
-Nach erfolgreicher Anmeldung führt WedConnect alle Nutzer:innen ins Dashboard. Erst beim Anlegen des Profils wählen sie, ob sie ein Hochzeitsprofil oder ein Fotograf:innenprofil erstellen. Daraus ergibt sich das rollenabhängige Onboarding.
+### Hochzeitspaar
 
-Vorgesehene Anmeldewege:
+Erfasst werden die Vornamen beider heiratenden Personen, Hochzeitsdatum, Bundesland, Ort/Location, ungefähre Gästezahl, Ablauf, gewünschter Begleitungsumfang, Stil und Bildwünsche sowie die Haltung zur Veröffentlichung der entstandenen Bilder durch den Fotografen.
 
-- E-Mail und Passwort
-- Google
-- Apple
-- weitere verbreitete Anbieter nach Bedarf
+Beide Personen müssen im Profil erkennbar sein: zulässig ist ein gemeinsames Foto oder je ein eigenes Foto pro Person. Fotos können beim Hochladen zugeschnitten und ausgerichtet werden; Original und angezeigte Fassung werden getrennt behandelt.
 
-Dazu kommen Konto- und Profilverwaltung, Abmeldung, Passwort- beziehungsweise Kontowiederherstellung, Datenschutzinformationen und Kontolöschung.
+### Fotograf
 
-**Umsetzung:** Authentifizierungsdienst mit verifizierten Konten und sicherer Sitzungsverwaltung. Rolle und Profiltyp werden erst im Dashboard bei der Profilanlage festgelegt.
+Erfasst werden Vorname, Einsatzgebiet in Österreich (mehrere Bundesländer oder ganz Österreich), Erfahrung in Jahren und/oder Anzahl fotografierter Hochzeiten, Bildstil (einschließlich Boho), gewünschter Begleitungsumfang, persönliche Vorstellung, Galerie und Vergütungswunsch. Instagram und Website sind optional.
 
-## 4. Onboarding und Profile
+Der Begleitungsumfang beschreibt Hochzeitsabschnitte und Reportageformate, die der Fotograf für sein Portfolio gerne umsetzen möchte. Eine Verfügbarkeitsabfrage ist nicht Bestandteil des Fotografenprofils.
 
-Nach der Anmeldung wählen Nutzer:innen im Dashboard ihren Profiltyp und legen das passende Profil an. Entdecken, Matches, Nachrichten und Matching-Aktionen bleiben gesperrt, bis alle erforderlichen Profilangaben vollständig sind. Der Profilstatus und die Freigabe müssen serverseitig geprüft werden; eine reine UI-Sperre reicht für den produktiven Betrieb nicht aus.
+Der Vergütungswunsch für die fotografische Leistung hat nur die Optionen **Unentgeltlich** und **Fixbetrag** (mit Betrag). Ein separates Feld für zusätzliche Vergütung der Nutzungsrechte ist nicht vorgesehen.
 
-### Hochzeitsprofil
+Die Galerie besteht aus bis zu 20 normalen Fotos. Es gibt keine Highlight-Auswahl oder Stern-Markierung. Fotos können zugeschnitten, ausgerichtet, angesehen und gelöscht werden. Mindestanforderungen für den Profilabschluss sind in Oberfläche und Datenbank konsistent zu halten.
 
-Paare geben Informationen an, die Fotograf:innen bei ihrer Auswahl helfen:
+### Ansprache und Vorstellung
 
-- Hochzeitsdatum und zeitlicher Ablauf
-- Location, Ort und Region
-- Gästezahl und Art der Feier
-- gewünschter Umfang der Begleitung
-- Stil- und Bildwünsche
-- mögliche Motive und besondere Rahmenbedingungen
-- Bereitschaft zur Nutzung der entstandenen Bilder durch Fotograf:innen
+Alle beteiligten Personen werden im Produkt mit Vornamen angesprochen. Profile enthalten eine persönliche Vorstellung, sofern das jeweilige Onboarding sie vorsieht. Kontaktdaten und soziale Links bleiben optional und werden nur als passende Symbole angezeigt, wenn sie hinterlegt sind.
 
-Die Angaben sollen Fotograf:innen ermöglichen einzuschätzen, ob Location, Paar, Feier und Bildmöglichkeiten zu ihrem Portfolio passen.
+## Entdecken, Interesse und Kommunikation
 
-### Fotograf:innenprofil
+- Paaren werden Fotografenprofile gezeigt; Fotografen sehen Hochzeitsprofile.
+- Fotos stehen im Mittelpunkt des öffentlichen Profils. Details sind darunter übersichtlich angeordnet.
+- Interesse ist keine Buchung. Nur beidseitiges Interesse erzeugt ein Match.
+- Nach einem Match können die Beteiligten offene Fragen zu Ablauf, Umfang, Vergütung, Lieferung und Bildrechten klären.
 
-Fotograf:innen präsentieren:
+Matching, Like-Status, Chat und Benachrichtigungen gelten erst dann als umgesetzt, wenn der aktuelle Implementierungsstand sowohl die Oberfläche als auch die Datenflüsse bestätigt.
 
-- Name, Profilbild und berufliche Bezeichnung
-- Region und mögliche Einsatzgebiete
-- Erfahrung und bisherige Hochzeitsarbeit
-- Stil und bevorzugte Bildsprache
-- Portfolio und Referenzbilder
-- Verfügbarkeit und gewünschte Arten von Hochzeiten
-- angebotenen Umfang und Erwartungen
+## Konto und Hilfe
 
-Paare sollen besonders Erfahrung, Referenzbilder und Portfolio beurteilen können. Fotograf:innen entscheiden selbst, welche Hochzeiten sie interessieren.
+Der Bereich **Konto und Einstellungen** ist der erweiterbare Ort für Kontodaten, Profilfoto, Rollenverwaltung, Hilfe und spätere Einstellungen. Die Hauptnavigation bleibt während der Profilbearbeitung erreichbar. Erklärungen im Dashboard sind kurz und selbsterklärend; ausführliche Hilfetexte gehören in einen eigenen Hilfe-Bereich.
 
-**Umsetzung:** Rollenabhängige Formulare, Pflichtfelder, Profilstatus, Vorschau und Bearbeitung. Angaben können im Onboarding ergänzt und später aktualisiert werden.
+## Arbeits- und Änderungsregeln
 
-## 5. Foto-Upload und Galerien
+- Vor einer Änderung zuerst den betroffenen Code und den Implementierungsstand prüfen.
+- Bei einer Abweichung zwischen gewünschtem Stand und Code die Abweichung dokumentieren; nicht stillschweigend eine der beiden Quellen umdeuten.
+- Eingefrorene Seite, Texte oder Interaktionen nur auf ausdrückliche Anweisung verändern.
+- Neue Ideen bleiben in der Ideen-Bible, bis sie ausdrücklich entschieden und in diese Bible oder eine Design-Bible übernommen wurden.
+- Zu jeder umgesetzten Funktionsänderung gehören ein aktualisierter Implementierungsstand und gegebenenfalls eine passende Migration.
 
-Nutzer:innen können mehrere Profil- und Portfoliofotos hochladen.
+## Dokumentenübersicht
 
-- Vorschau vor Veröffentlichung
-- Bild einpassen oder einen Ausschnitt wählen
-- Bildreihenfolge festlegen
-- Fotos in Profilen horizontal per Wischgeste durchblättern
-- Bedienung zusätzlich über Pfeile und Tastatur
-- Bildposition und Galerieposition sichtbar machen
-- Profile und Portfoliofotos auf Desktop und Mobilgerät anzeigen
-
-**Bildregel:** In der App wird grundsätzlich der vollständige Bildausschnitt gezeigt. Ein beim Upload gewählter Ausschnitt dient der dafür vorgesehenen Darstellung und darf nicht zu einem unbemerkten Verlust des Originals führen.
-
-**Umsetzung:** Bildspeicher mit getrenntem Original und Darstellungsversionen, Uploadbegrenzungen, Formatprüfung, Größenoptimierung und Galeriekomponente mit contain-Darstellung.
-
-## 6. Entdecken, Suche und Filter
-
-Paare entdecken Fotograf:innen. Fotograf:innen entdecken Hochzeiten.
-
-Die Auswahl kann nach passenden Kriterien eingegrenzt werden, zum Beispiel:
-
-- Region und Einsatzgebiet
-- Datum und Verfügbarkeit
-- Stil
-- Erfahrung
-- Gästezahl und Hochzeitsrahmen
-- gewünschter Umfang und Interessen
-
-Die Karten zeigen wichtige Eckdaten. Eine Detailansicht bietet mehr Informationen und eine größere Galerie.
-
-**Umsetzung:** Serverseitige Suche und Filter auf veröffentlichten Profilen; nur passende und sichtbare Profile werden angezeigt.
-
-## 7. Interesse, Rückzug und Matching
-
-- Nutzer:innen können Interesse an einem Profil zeigen.
-- Eingehendes Interesse ist sichtbar.
-- Ein Match entsteht nur durch beidseitiges Interesse.
-- Ein bereits gesendetes Interesse kann zurückgezogen werden.
-- Vor dem Rückzug erscheint ein Bestätigungsdialog.
-- Nach einem Match wird der Chat angeboten.
-
-**Eigene Match-Animation:** Eine kurze, eigenständige Animation mit zwei Bildkarten und einer goldenen Verbindungslinie. Sie soll ruhig und hochwertig wirken und nicht dem bekannten Swipe- oder Tinder-Stil folgen. Bei aktivierter Systemeinstellung zur Bewegungsreduzierung wird sie reduziert.
-
-**Umsetzung:** Match-Zustände werden serverseitig verwaltet. Aktionen müssen wiederholbar und synchron über alle Geräte funktionieren.
-
-## 8. Chat und Vereinbarungen
-
-Nach einem Match können die Beteiligten direkt miteinander schreiben. Der Chat dient dazu, vor einer verbindlichen Zusage mindestens diese Punkte zu klären:
-
-- Dauer und Ablauf
-- Bildanzahl und Bildbearbeitung
-- Lieferung und Lieferzeit
-- Preis oder sonstige Gegenleistung
-- Nutzungsrechte
-- Portfolio- und Veröffentlichungsfreigabe
-- Ausfall- und Änderungsregelungen
-
-**Umsetzung:** Gespräche sind nur für die beiden Match-Konten zugänglich. Die Sicherheitsarchitektur muss sichere Übertragung, Zugriffskontrollen, Speicherung, Backups und Supportzugriffe berücksichtigen. Ende-zu-Ende-Verschlüsselung ist als Architekturentscheidung zu prüfen. Eine absolute Garantie, dass niemand mitlesen kann, sollte nicht behauptet werden; Ziel ist eine nach dem Stand der Technik geschützte Kommunikation.
-
-## 9. Nutzungsrechte
-
-Als Standard erhält das Hochzeitspaar die vollen Nutzungsrechte an den für es erstellten Fotos.
-
-Die Nutzung durch Fotograf:innen, beispielsweise für Portfolio, Website oder soziale Medien, wird davon getrennt und muss ausdrücklich vereinbart werden. Die Zustimmung und ihr Umfang müssen nachvollziehbar dokumentiert sein.
-
-**Umsetzung:** Verständliche Rechteauswahl im Profil und eine verbindliche Rechtevereinbarung vor der Zusammenarbeit. Die rechtlichen Texte müssen für den tatsächlichen Betrieb fachlich geprüft werden.
-
-## 10. Profil- und Kontoverwaltung
-
-Der Kontobereich umfasst:
-
-- Profil ansehen und bearbeiten
-- Abmeldung
-- Hilfe und Kontakt
-- WedConnect empfehlen und Freund:innen einladen
-- Pro-Account ansehen und verwalten
-- Zahlungsinformationen und Belege
-- Impressum und rechtliche Informationen
-- Datenschutz
-- Kontolöschung
-
-**Umsetzung:** Kontobereich mit rollenabhängigen Profileinstellungen, Datenschutz- und Sicherheitsoptionen, Zahlungsverwaltung und nachvollziehbarem Löschablauf.
-
-## 11. Pro-Account und Zahlungen
-
-Das Pro-Angebot soll in App und Website verständlich darstellen:
-
-- welche Zusatzfunktionen enthalten sind
-- Preis und Abrechnungsintervall
-- Kündigung und Verlängerung
-- Zahlungsarten und Belege
-
-**Umsetzung:** Erst nach Festlegung des Geschäftsmodells wird ein Zahlungsanbieter angebunden. Es gibt derzeit noch keine verbindlich festgelegten Pro-Funktionen oder Preise.
-
-## 12. Benachrichtigungen und Status
-
-Nutzer:innen sehen wichtige Ereignisse und Aufgaben:
-
-- Profil unvollständig
-- Interesse gesendet oder erhalten
-- Match entstanden
-- neue Nachricht
-- offene Vereinbarung
-- Änderungen am Konto oder Abo
-
-**Umsetzung:** In-App-Mitteilungen; E-Mail- oder Push-Benachrichtigungen nach Einwilligung und Konfiguration.
-
-## 13. Administration und Moderation
-
-Für einen öffentlichen Betrieb braucht WedConnect Werkzeuge zur Verwaltung und zum Schutz der Plattform:
-
-- Profile und Inhalte prüfen
-- Meldungen und Beschwerden bearbeiten
-- Nutzer:innen sperren oder freischalten
-- rechtswidrige oder unzulässige Inhalte entfernen
-- Supportfälle nachvollziehbar bearbeiten
-- Plattformaktivität und technische Fehler überwachen
-
-**Umsetzung:** Geschützter Administrationsbereich mit Rollen- und Berechtigungskonzept, Protokollierung und klaren Bearbeitungsabläufen.
-
-## 14. Designstandard
-
-Für die öffentliche Website gilt die aktuelle Design Bible `docs/DESIGN-BIBLE.md`, Version 2.3. Der eingefrorene Designmaster ist „Für Fotografen“. Startseite und Hochzeitspaare-Seite übernehmen den visuellen Stand einschließlich des gemeinsamen Außenrahmens. Ihre Texte bleiben bis zu einer gesonderten Freigabe Entwürfe. Das Dashboard und die eingeloggte App sind von diesem Website-Designstandard ausgenommen.
-
-## 15. Technische Umsetzung
-
-### Aktueller Implementierungsstand
-
-- Die öffentlichen Seiten `index.html`, `fotografen.html` und `hochzeitspaare.html` sind statische HTML-Seiten.
-- Das Design von Startseite und Hochzeitspaare-Seite ist an den eingefrorenen Fotografen-Master angeglichen.
-- Die Texte auf der Startseite und der Seite für Hochzeitspaare sind frühe Entwürfe und nicht Teil des eingefrorenen Designstands.
-- Die Supabase-Auth-Oberfläche ist in den Profil-Dialogen für Hochzeitspaare und Fotografen eingebunden.
-- Die erste Datenbankmigration für private Profile und Rollen liegt unter `supabase/migrations`; sie muss noch im Projekt ausgeführt werden.
-- Google OAuth und Redirect-URLs sind im Supabase-Dashboard noch zu konfigurieren.
-- Profil-Onboarding und Matching sind noch nicht implementiert.
-
-### Aktueller Auth-Schritt
-
-E-Mail/Passwort, E-Mail-Bestätigung, Passwortzurücksetzung und die Schaltfläche für Google sind mit Supabase Auth verbunden. Die Seite gibt die Rolle Hochzeitspaar oder Fotograf beim Registrieren vor. Ein Google-Konto erhält seine Rolle nach der Rückkehr über eine abgesicherte Einmal-Funktion. Die SQL-Migration muss vor Tests in Supabase ausgeführt werden. Google-Zugangsdaten und Redirect-URLs werden anschließend im Supabase-Dashboard konfiguriert.
-
-Die Browser-App verwendet ausschließlich den öffentlichen Supabase Publishable Key. Ein Secret Key oder Datenbankpasswort darf nie in HTML, JavaScript oder im Browser gespeichert werden. Rollen- und Profildaten erhalten Row-Level-Security-Policies; die erste Migration erlaubt nur den eigenen privaten Profil-Datensatz.
+| Dokument | Zuständigkeit |
+|---|---|
+| `PROJECT-BIBLE.md` | Produktregeln und verbindliche Entscheidungen |
+| `DESIGN-BIBLE.md` | Eingefrorene öffentliche Website |
+| `APP-DESIGN-BIBLE.md` | Design- und Interaktionsregeln der eingeloggten App |
+| `IMPLEMENTATION-STATUS.md` | Code, Datenbank, Verifikation und Abweichungen |
+| `IDEAS-BIBLE.md` | Unverbindliche Ideen |
+| `START-HERE.md` | Übergabe und Einstieg in einen neuen Chat |
