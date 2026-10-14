@@ -839,8 +839,8 @@
     const indicatorGroup = gallery.querySelector(".profile-preview-indicators");
     const track = gallery.querySelector(".profile-preview-track");
     if (!indicatorGroup || !track) return;
-    const landscapeMobile = window.matchMedia && window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
-    if (!landscapeMobile) {
+    const fullscreenMobile = gallery.classList.contains("is-fullscreen") && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if (!fullscreenMobile) {
       indicatorGroup.style.removeProperty("--gallery-indicator-left");
       indicatorGroup.style.removeProperty("--gallery-indicator-width");
       indicatorGroup.style.removeProperty("--gallery-indicator-top");
