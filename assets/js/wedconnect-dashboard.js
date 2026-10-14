@@ -127,8 +127,9 @@
 
   function choiceField(name, label, options, hint) {
     const selected = valueOf(name);
+    const hasSelection = options.some((option) => option[0] === selected);
     return '<div class="setup-field"><label for="field-' + name + '">' + label + ' *</label><select id="field-' + name + '" name="' + name + '" data-profile-field required>' +
-      '<option value="">Bitte auswählen</option>' + options.map((option) =>
+      '<option value=""' + (!hasSelection ? " selected" : "") + '>Bitte auswählen</option>' + options.map((option) =>
         '<option value="' + option[0] + '"' + (selected === option[0] ? " selected" : "") + ">" + option[1] + "</option>"
       ).join("") + '</select><p class="setup-hint">' + hint + "</p></div>";
   }
@@ -218,14 +219,9 @@
       multiSelectField("styles", "Dein Bildstil", STYLE_OPTIONS, "Wähle alle Bildstile, die deine Arbeit beschreiben.") +
       choiceField("compensation_type", "Vergütung für deine fotografische Leistung", [
         ["free", "Unentgeltlich"],
-        ["fixed", "Fixbetrag"],
-        ["negotiable", "Verhandelbar"]
+        ["fixed", "Fixbetrag"]
       ], "Lege fest, welche Vergütung du für deinen fotografischen Einsatz erwartest.") +
       '<div id="compensation-amount-wrap" class="setup-field"' + (compensationType === "fixed" ? "" : " hidden") + '><label for="field-compensation_amount_eur">Gewünschter Betrag in Euro *</label><div class="input-with-suffix"><input id="field-compensation_amount_eur" name="compensation_amount_eur" data-profile-field type="number" min="1" max="100000" step="1" inputmode="numeric" value="' + escapeHtml(valueOf("compensation_amount_eur")) + '"' + (compensationType === "fixed" ? " required" : "") + '><span>€</span></div></div>' +
-      choiceField("usage_rights_compensation", "Zusätzliche Vergütung für die Nutzungsrechte?", [
-        ["yes", "Ja"],
-        ["no", "Nein"]
-      ], "Gilt zusätzlich zur Vergütung für den fotografischen Einsatz.") +
       "</div>";
   }
 
@@ -284,8 +280,7 @@
           ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
           ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
           ["Begleitung", data.coverage_scope],
-          ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "negotiable" ? "Verhandelbar" : data.compensation_type === "fixed" ? Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
-          ["Zusätzliche Vergütung für Nutzungsrechte", data.usage_rights_compensation === "yes" ? "Ja" : data.usage_rights_compensation === "no" ? "Nein" : "Nicht angegeben"],
+          ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "fixed" ? Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
           ["Highlights", portfolioPhotoCounts().highlights + " von " + portfolioPhotoCounts().gallery + " Galeriefotos"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
@@ -986,7 +981,7 @@
         data.coverage_options = coverage;
         data.coverage_scope = coverageLabels.join(", ");
       }
-      if (!["free", "fixed", "negotiable"].includes(data.compensation_type)) {
+      if (!["free", "fixed"].includes(data.compensation_type)) {
         throw new Error("Wähle deine gewünschte Vergütung aus.");
       }
       const amount = data.compensation_amount_eur === "" || data.compensation_amount_eur == null ? null : Number(data.compensation_amount_eur);
@@ -995,9 +990,6 @@
       }
       if (data.compensation_type !== "fixed") data.compensation_amount_eur = null;
       else data.compensation_amount_eur = amount;
-      if (!["yes", "no"].includes(data.usage_rights_compensation)) {
-        throw new Error("Gib an, ob du für die Nutzungsrechte zusätzlich entlohnt werden möchtest.");
-      }
       data.instagram_url = normalizeInstagram(data.instagram_url || "");
       data.website_url = normalizeWebsite(data.website_url || "");
     }
