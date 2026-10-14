@@ -15,6 +15,7 @@
   const progressFill = document.querySelector("#setup-progress-fill");
   const maxPhotoBytes = 10 * 1024 * 1024;
   const maxPortfolioPhotoBytes = 2 * 1024 * 1024;
+  const maxPortfolioPhotos = 20;
   const loadingStartedAt = performance.now();
   const minimumLoadingTime = 1800;
 
@@ -256,12 +257,13 @@
     }
     const portfolioCount = currentPhotoCount("portfolio");
     return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Galerie</h3>' +
-      '<p class="photo-upload-detail">Lade deine Fotos in die Galerie hoch. Markiere davon mindestens 3 und höchstens 10 als Highlights. Diese Highlights werden bei „Entdecken“ auf deiner Profilkarte im Hochformat (4:5) angezeigt.</p>' +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Galeriefotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Galeriefotos"></div>' +
       photoPicker("portfolio-photos", "Fotos hinzufügen") +
-      '<p class="photo-count" id="portfolio-photo-count">Galerie: ' + portfolioCount + "</p></div>";
+      '<p class="photo-upload-detail">Bis zu 20 Fotos insgesamt. Davon kannst du 3 bis 10 als Highlights markieren. Diese werden bei „Entdecken“ auf deiner Profilkarte angezeigt.</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild · Highlights im Hochformat (4:5)</p>' +
+      '<p class="photo-count" id="portfolio-highlight-count">Highlights: 0 / 10 ausgewählt · mindestens 3</p>' +
+      '<p class="photo-count" id="portfolio-photo-count">Galerie: ' + portfolioCount + ' / 20 Fotos</p></div>';
   }
 
   function renderReview() {
@@ -623,10 +625,19 @@
   }
 
   function updatePortfolioPhotoCount() {
-    const count = document.querySelector("#portfolio-photo-count");
-    if (!count) return;
+    const galleryCount = document.querySelector("#portfolio-photo-count");
+    const highlightCount = document.querySelector("#portfolio-highlight-count");
+    if (!galleryCount || !highlightCount) return;
     const totals = portfolioPhotoCounts();
-    count.textContent = "Galerie: " + totals.gallery + " · Highlights: " + totals.highlights + " / 3–10";
+    galleryCount.textContent = "Galerie: " + totals.gallery + " / " + maxPortfolioPhotos + " Fotos";
+    highlightCount.textContent = "Highlights: " + totals.highlights + " / 10 ausgewählt · mindestens 3";
+    const input = document.querySelector('[name="portfolio-photos"]');
+    const picker = input && input.nextElementSibling;
+    if (input) input.disabled = totals.gallery >= maxPortfolioPhotos;
+    if (picker) {
+      picker.setAttribute("aria-disabled", totals.gallery >= maxPortfolioPhotos ? "true" : "false");
+      picker.classList.toggle("is-disabled", totals.gallery >= maxPortfolioPhotos);
+    }
   }
 
   const photoViewer = document.querySelector("#photo-viewer");
@@ -861,7 +872,12 @@
       const accepted = ["image/jpeg", "image/png", "image/webp"];
       const additions = [];
       let highlightSlots = Math.max(0, 10 - portfolioPhotoCounts().highlights);
+      const remainingGallerySlots = Math.max(0, maxPortfolioPhotos - portfolioPhotoCounts().gallery);
       for (const file of Array.from(input.files || [])) {
+        if (additions.length >= remainingGallerySlots) {
+          errorLine.textContent = "Du kannst insgesamt höchstens " + maxPortfolioPhotos + " Fotos hochladen.";
+          continue;
+        }
         if (!accepted.includes(file.type)) {
           errorLine.textContent = "Akzeptiert werden JPG-, PNG- und WebP-Dateien.";
           continue;
