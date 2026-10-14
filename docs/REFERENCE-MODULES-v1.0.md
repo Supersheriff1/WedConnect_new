@@ -138,6 +138,8 @@ Diese Prüfung hat keine persönlichen Kontodaten eingegeben oder verändert. Ei
 
 ## Screenshot- und Testmatrix (offen)
 
+Die detaillierte Viewport-, Zustands- und Ablagematrix steht in der [Screenshot- und Prüfmatrix v1.0](SCREENSHOT-MATRIX-v1.0.md). Sie ist eine Vorlage; die meisten Aufnahmen und Tests sind noch offen.
+
 Die fünf Referenzmodule werden nach Möglichkeit mit realen Testkonten und neutralisierten Beispieldaten aufgenommen. Keine Kundendaten oder privaten Profilfotos in Dokumentations-Screenshots verwenden.
 
 | Modul | Beleg, der noch fehlt |
