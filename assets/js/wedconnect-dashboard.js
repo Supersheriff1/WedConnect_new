@@ -139,6 +139,20 @@
     return match ? [match[1] + "/avatar-" + match[2] + "-source", match[1] + "/avatar-source-" + match[2]] : [];
   }
 
+  function validateAccountPhoto(file) {
+    if (!file) throw new Error("Bitte wähle zuerst ein Foto aus.");
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      const detectedType = file.type || "nicht erkennbar";
+      throw new Error("„" + file.name + "“ hat das Format " + detectedType + ". Unterstützt werden JPG, PNG und WebP.");
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      const sizeInMb = (file.size / (1024 * 1024)).toFixed(1).replace(".", ",");
+      throw new Error("„" + file.name + "“ ist " + sizeInMb + " MB groß. Erlaubt sind höchstens 2 MB.");
+    }
+    return true;
+  }
+
   function accountPhotoErrorMessage(action, error) {
     const message = String(error && (error.message || error.error_description) || error || "").trim();
     const code = String(error && (error.code || error.statusCode) || "").trim();
@@ -165,8 +179,7 @@
   }
 
   async function uploadAccountPhoto(file, originalPhoto = null) {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
-    if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
+    validateAccountPhoto(file);
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
     const photoId = crypto.randomUUID();
     const path = currentUser.id + "/avatar-" + photoId + "." + extension;
@@ -530,7 +543,10 @@
     };
     image.onerror = () => {
       URL.revokeObjectURL(sourceUrl);
-      if (cropErrorLine) cropErrorLine.textContent = "Das Foto konnte nicht geöffnet werden.";
+      const message = "„" + (blob.name || "Das ausgewählte Foto") + "“ konnte nicht geöffnet werden. Bitte speichere das Bild als JPG, PNG oder WebP und versuche es erneut.";
+      if (cropErrorLine) cropErrorLine.textContent = message;
+      const photoStatus = document.querySelector("#account-photo-status");
+      if (photoStatus) photoStatus.textContent = message;
     };
     image.src = sourceUrl;
   }
@@ -2146,11 +2162,10 @@
     if (!file) return;
     if (accountPhotoStatus) accountPhotoStatus.textContent = "";
     try {
-      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
-      if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
+      validateAccountPhoto(file);
       openCropEditor(file, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto, file), { avatar: true });
     } catch (error) {
-      if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht vorbereitet werden.";
+      if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht vorbereitet werden. Bitte versuche es erneut.";
     } finally { accountPhotoInput.value = ""; }
   });
   if (accountPhotoRemove) accountPhotoRemove.addEventListener("click", async () => {
