@@ -60,7 +60,7 @@ Visuelle Dateien liegen derzeit unter `assets/illustrations/`. Ein eigenes, voll
 - Die Person wählt dort zuerst Hochzeitspaar oder Fotograf.
 - Der Profil-Assistent speichert Schritte und zeigt rollenabhängige Felder.
 - Fotografenprofile enthalten unter anderem Einsatzgebiete, Erfahrung, Bildstil, Vergütung, optionale Social-Links, Vorstellungstext und Galerie.
-- Die Galerie unterstützt bis zu 20 Fotos; 3 bis 5 davon können als Highlights markiert werden.
+- Die Galerie ist für bis zu 20 gleichwertige normale Fotos ausgelegt; es gibt keine Highlight-Funktion. Mindestens 3 Fotos sind für den Profilabschluss vorgesehen. Eine ältere SQL-Migration enthält noch ein Highlight-Feld, das nicht zur aktuellen Produktfunktion gehört.
 - Für Galerie- und Profilfotos bestehen Vorschau-, Lösch-, Anordnungs- oder Zuschnittabläufe je nach Oberfläche.
 - Das persönliche Account-Profilfoto wird im Account-Bereich verwaltet. Der Zuschnitt ist rund; die Oberfläche zeigt unterstützte Formate und das 2-MB-Limit.
 - Profilfoto-Fehler sollen im Dialog mit verständlichem Grund erscheinen. Dieser Uploadpfad braucht noch echte Tests mit mehreren Bildformaten und Größen.
