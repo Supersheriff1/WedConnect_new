@@ -1439,10 +1439,10 @@
 
     const content = document.createElement("div");
     content.className = "profile-preview-content";
-    if (metadata.children.length) content.append(metadata);
     if (profile.public_intro && String(profile.public_intro).trim()) {
       addPreviewSection(content, role === "couple" ? "Über euch" : "Über mich", String(profile.public_intro).trim(), "profile-preview-about");
     }
+    if (metadata.children.length) content.append(metadata);
     detailsData.sections.forEach(([title, value]) => addPreviewSection(content, title, value));
     if (role === "photographer") {
       const links = document.createElement("div");
