@@ -833,8 +833,8 @@
       });
       const highlightButton = createHighlightButton(photoIsHighlight(photo), "Foto " + (index + 1), async () => {
         const next = !photoIsHighlight(photo);
-        if (next && portfolioPhotoCounts().highlights >= 10) {
-          errorLine.textContent = "Du kannst höchstens 10 Fotos als Highlight markieren.";
+        if (next && portfolioPhotoCounts().highlights >= maxPortfolioHighlights) {
+          errorLine.textContent = "Du kannst höchstens " + maxPortfolioHighlights + " Fotos als Highlight markieren.";
           return;
         }
         highlightButton.disabled = true;
