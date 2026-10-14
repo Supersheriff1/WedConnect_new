@@ -191,15 +191,15 @@
     .profile-preview-links{display:flex;flex-wrap:wrap;gap:10px;padding-top:16px}
     .profile-preview-link{display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:999px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none}
     .profile-preview-link:hover{border-color:var(--gold);background:var(--hover);color:var(--ink)}
-    .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:none;touch-action:pan-x pan-y;padding:0}
-    .profile-preview-track::-webkit-scrollbar{display:none}
-    .profile-preview-photo{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;flex:0 0 100%;width:100%;min-width:0;min-height:0;margin:0;overflow:hidden;clip-path:inset(0 round 14px);scroll-snap-align:center;scroll-snap-stop:always;border:0;border-radius:14px;background:var(--canvas);box-shadow:none;transition:none}
+    .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;overflow:hidden;border-radius:14px;background:var(--canvas);padding:0}
+    .profile-preview-photo{box-sizing:border-box;position:absolute;inset:0;isolation:isolate;display:grid;place-items:center;width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidden;border-radius:inherit;background:var(--canvas);box-shadow:none}
+    .profile-preview-photo[hidden]{display:none!important}
     .profile-preview-photo:hover{box-shadow:none}
     .profile-preview-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,#302f38 8%,#3c3943 18%,#302f38 33%);background-size:200% 100%;animation:gallery-shimmer 1.5s linear infinite}
     .profile-preview-photo.is-loaded::before,.profile-preview-photo.is-failed::before{display:none}
     .profile-preview-photo img{position:absolute;inset:0;width:100%;height:100%;display:block;border:0;border-radius:inherit;object-fit:cover;object-position:center center;opacity:0;transition:opacity .35s ease}
     .profile-preview-photo.is-loaded img{opacity:1}
-    .profile-preview-photo.is-loaded{animation:gallery-reveal .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:min(calc(var(--image-order,0) * 35ms),210ms)}
+    .profile-preview-photo.is-loaded{animation:gallery-reveal .42s cubic-bezier(.2,.7,.2,1) both}
     .profile-preview-gallery-controls{position:absolute;top:50%;left:50%;z-index:2;width:min(100%,560px);display:flex;justify-content:space-between;padding:0 8px;transform:translate(-50%,-50%);pointer-events:none}
     .profile-preview-arrow{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgb(213 182 122 / 48%);border-radius:50%;background:rgb(30 29 35 / 86%);color:var(--ink);box-shadow:0 5px 20px #09090b65;cursor:pointer;pointer-events:auto;transition:background .2s ease,opacity .2s ease}
     .profile-preview-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -241,13 +241,13 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #dashboard .content{margin:0;padding:30px 18px 38px}
 #dashboard .profile-preview-card{margin-inline:0}
 #dashboard .profile-preview-gallery{width:100%;max-width:650px;margin-inline:auto;padding:12px 12px 0}
-#dashboard .profile-preview-track{width:100%;max-width:100%;gap:0}
+#dashboard .profile-preview-track{width:100%;max-width:100%}
 #dashboard .profile-preview-intro{max-width:100%;white-space:normal;overflow-wrap:anywhere}
 }
 @media(max-width:390px){
 #dashboard .content{padding-right:14px;padding-left:14px}
 #dashboard .profile-preview-gallery{max-width:100%;padding:10px 10px 0}
-#dashboard .profile-preview-track{padding-right:0;padding-left:0;height:auto;aspect-ratio:4/5;gap:0}
+#dashboard .profile-preview-track{padding-right:0;padding-left:0;height:auto;aspect-ratio:4/5}
 #dashboard .profile-preview-card{border-radius:14px}
 }
   </style>
