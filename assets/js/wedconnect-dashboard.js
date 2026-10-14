@@ -169,7 +169,8 @@
     ["moody", "Moody & cinematisch"],
     ["light_airy", "Hell & luftig"],
     ["film", "Filmlook / Analog"],
-    ["black_white", "Schwarz-Weiß"]
+    ["black_white", "Schwarz-Weiß"],
+    ["boho", "Boho"]
   ];
 
   const COVERAGE_OPTIONS = [
@@ -181,8 +182,7 @@
     ["dinner_speeches", "Essen und Reden"],
     ["party", "Feier und Party"],
     ["half_day", "Halbtagesreportage"],
-    ["full_day", "Ganztagesreportage"],
-    ["custom", "Individuelle Kombination"]
+    ["full_day", "Ganztagesreportage"]
   ];
 
   function selectedValues(name) {
@@ -226,7 +226,7 @@
   }
 
   function renderPhotographerDetails() {
-    return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Abschnitte und Reportage-Formate aus, die du anbietest.") +
+    return multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Teile einer Hochzeit aus, die dir für dein Portfolio noch fehlen und die du gerne fotografieren möchtest.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
       field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"');
   }
@@ -318,7 +318,7 @@
       : step === 1
         ? (wizard.role === "couple" ? "Wie dürfen wir euch ansprechen und wann heiratet ihr?" : "Wie dürfen wir dich ansprechen?")
         : step === 2
-          ? (wizard.role === "couple" ? "Erzähl kurz von eurer Feier und euren Bildwünschen." : "Wähle deinen Begleitungsumfang und verlinke optional deine Kanäle.")
+          ? (wizard.role === "couple" ? "Erzähl kurz von eurer Feier und euren Bildwünschen." : "Wähle aus, was dir für dein Portfolio noch fehlt und du gerne fotografieren möchtest, zum Beispiel ein Getting Ready, die Trauung oder eine Ganztagesreportage. Instagram und Website kannst du optional ergänzen.")
           : step === 3
             ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
