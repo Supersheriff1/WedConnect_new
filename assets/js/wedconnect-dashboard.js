@@ -627,6 +627,25 @@
   const photoViewer = document.querySelector("#photo-viewer");
   const photoViewerImage = document.querySelector("#photo-viewer-image");
   const photoViewerClose = document.querySelector("#photo-viewer-close");
+  const orientationGuard = document.querySelector("#orientation-guard");
+  const narrowLandscape = window.matchMedia("(orientation: landscape) and (max-height: 600px) and (pointer: coarse)");
+
+  function syncOrientationGuard() {
+    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+    const photoIsExpanded = Boolean(
+      (fullscreenElement && fullscreenElement.classList.contains("profile-preview-gallery")) ||
+      (photoViewer && photoViewer.open)
+    );
+    const mustReturnToPortrait = narrowLandscape.matches && !photoIsExpanded;
+    document.body.classList.toggle("is-portrait-required", mustReturnToPortrait);
+    if (orientationGuard) orientationGuard.setAttribute("aria-hidden", mustReturnToPortrait ? "false" : "true");
+  }
+
+  window.addEventListener("orientationchange", syncOrientationGuard);
+  window.addEventListener("resize", syncOrientationGuard, { passive: true });
+  if (narrowLandscape.addEventListener) narrowLandscape.addEventListener("change", syncOrientationGuard);
+  else if (narrowLandscape.addListener) narrowLandscape.addListener(syncOrientationGuard);
+  syncOrientationGuard();
 
   function showPhotoViewer(url, label) {
     if (!photoViewer || !photoViewerImage) return;
@@ -648,10 +667,17 @@
     });
   }
 
-  document.addEventListener("fullscreenchange", syncProfileFullscreenButtons);
-  document.addEventListener("webkitfullscreenchange", syncProfileFullscreenButtons);
+  document.addEventListener("fullscreenchange", () => {
+    syncProfileFullscreenButtons();
+    syncOrientationGuard();
+  });
+  document.addEventListener("webkitfullscreenchange", () => {
+    syncProfileFullscreenButtons();
+    syncOrientationGuard();
+  });
 
   if (photoViewerClose) photoViewerClose.addEventListener("click", () => photoViewer.close());
+  if (photoViewer) photoViewer.addEventListener("close", syncOrientationGuard);
   if (photoViewer) photoViewer.addEventListener("click", (event) => {
     if (event.target === photoViewer) photoViewer.close();
   });
