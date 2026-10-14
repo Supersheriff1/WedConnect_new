@@ -1,22 +1,21 @@
 # WedConnect
 
-WedConnect connects wedding couples and wedding photographers for potential TFP collaborations. A match means mutual interest and opens a conversation; it is not a booking confirmation.
+WedConnect connects wedding couples and photographers for potential TFP collaborations. Mutual interest starts a conversation; it is not a booking confirmation.
 
-## Project documents
+## Start here
 
-- [Project Bible v1.2](docs/PROJECT-BIBLE-v1.2.md) — product scope, roles, profile onboarding, rights, and technical boundaries.
-- [Project Bible v1.1](docs/PROJECT-BIBLE-v1.1.md) — previous version.
-- [Design Bible](docs/DESIGN-BIBLE.md) — current visual system.
-- [Supabase setup](supabase/README.md) — authentication and database setup.
+- [START-HERE](docs/START-HERE.md) — handoff for new work sessions
+- [Project Bible](docs/PROJECT-BIBLE.md) — binding product decisions
+- [Public Design Bible](docs/DESIGN-BIBLE.md) — frozen public website standard
+- [App Design Bible](docs/APP-DESIGN-BIBLE.md) — dashboard and logged-in app
+- [Implementation Status](docs/IMPLEMENTATION-STATUS.md) — code, Supabase and verification
+- [Ideas Bible](docs/IDEAS-BIBLE.md) — nonbinding idea pool
+- [Supabase setup](supabase/README.md) — database and authentication setup
+
+`docs/PROJECT-BIBLE-v1.1.md` and `docs/PROJECT-BIBLE-v1.2.md` are historical snapshots. Use `docs/PROJECT-BIBLE.md` as the current source.
 
 ## Current repository state
 
-The public pages are `index.html`, `hochzeitspaare.html`, and `fotografen.html`. The photographer page remains unchanged.
+Public pages are `index.html`, `hochzeitspaare.html` and `fotografen.html`. `fotografen.html` is frozen as the visual master; the home and couple page content may still be revised.
 
-Email and Google registration use the same role-neutral flow. After authentication, `dashboard.html` opens the profile assistant. Users select **Hochzeitspaar** or **Fotograf** after login, enter the required profile data, upload the required photos, and review the profile. The full dashboard is shown only after the profile is complete.
-
-Run both files in `supabase/migrations` in filename order before testing the onboarding forms and photo uploads. Matching and messages are not implemented yet.
-
-## Important product boundary
-
-A mutual match starts a conversation, not a booking. Scope, compensation, delivery, and image usage rights must be explicitly agreed before collaboration.
+Email and Google sign-in use the same role-neutral flow. After authentication, users choose a role during profile creation in `dashboard.html`. The profile must be complete before discovery and matching are opened. Matching and messages are not implemented in the currently reviewed code; see the implementation status for known gaps between the accepted product direction and repository code.
