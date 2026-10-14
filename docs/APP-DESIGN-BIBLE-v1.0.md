@@ -143,7 +143,7 @@ Das eigene Profilfoto wird getrennt von der Portfolio-Galerie im Account-Bereich
 
 ### Bekannte Abweichung in der eingefrorenen Code-Baseline
 
-Die Produktentscheidung lautet: **keine Highlights**. Der am 14. Oktober dokumentierte Dashboard-Code enthält jedoch noch alte Stern-Buttons, Highlight-Badges und zugehörige Datenbankreste. Diese Elemente sind ein nicht bereinigter Altbestand und widersprechen der aktuellen Produktentscheidung. Sie werden in dieser Bible nicht als gewünschtes Gestaltungselement geführt. Der eingefrorene Produktcode wurde bei der Dokumentationsarbeit nicht geändert. Eine Entfernung ist ein eigener, ausdrücklich zu beauftragender Produktfix.
+Die Produktentscheidung lautet: **keine Highlights**. Das Dashboard-JavaScript der Baseline enthält keine Highlight-Auswahl- oder Anzeigelogik. Im HTML stehen noch nicht verwendete CSS-Selektoren für Stern-Buttons und Highlight-Badges; eine ältere Migration bewahrt zusätzlich ein Datenbankfeld. Diese technischen Reste sind keine Produktfunktion und werden hier nicht als gewünschtes Gestaltungselement geführt. Der eingefrorene Produktcode wurde bei der Dokumentationsarbeit nicht geändert. Eine Bereinigung der Reste wäre ein eigener Produktfix.
 
 ## 8. Texte und Bedienzustände
 
