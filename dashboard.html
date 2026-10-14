@@ -68,6 +68,7 @@
     .crop-dialog.avatar-crop #crop-canvas{width:100%;height:100%;aspect-ratio:1;border-radius:0}
     .crop-dialog.avatar-crop .crop-canvas-wrap::after{content:"";position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;box-shadow:0 0 0 999px rgb(12 12 15 / 48%);pointer-events:none}
     .crop-dialog.avatar-crop .crop-dialog-actions{margin-top:15px}
+    .crop-dialog .crop-error{margin:7px 0 0;color:#e3a09a;font-size:12px}
     @media(max-width:560px){.crop-dialog.avatar-crop{width:100vw;height:auto;max-height:100dvh;margin:auto 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-radius:16px}.crop-dialog.avatar-crop .crop-canvas-wrap{width:min(100%,46dvh,420px)}}.crop-controls{display:grid;grid-template-columns:auto minmax(120px,1fr);gap:12px;align-items:center;margin-top:15px}.crop-zoom-control{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}.crop-zoom-control label{color:var(--body);font-size:12px;font-weight:700}.crop-controls label{color:var(--body);font-size:12px;font-weight:700}.crop-zoom-control input[type=range]{width:100%;accent-color:var(--gold)}.crop-dialog-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.crop-dialog-actions .button{flex:1}
     @media(max-width:560px){.portfolio-photo-grid{grid-auto-flow:column;grid-auto-columns:minmax(78vw,1fr);grid-template-columns:none;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}.portfolio-photo-card{scroll-snap-align:start}.portfolio-photo-card img{max-height:none}.crop-dialog{width:100vw;max-width:none;height:100dvh;max-height:100dvh;margin:0;padding:calc(12px + env(safe-area-inset-top)) 18px calc(12px + env(safe-area-inset-bottom));border-radius:0;overflow:auto}.crop-dialog[open]{display:flex;flex-direction:column;justify-content:center;gap:10px}.crop-dialog h2{font-size:20px}.crop-dialog p{margin:0 0 4px;font-size:13px}.crop-canvas-wrap{max-height:45dvh}.crop-controls{grid-template-columns:1fr;gap:9px;margin-top:0}.crop-zoom-control{display:grid;grid-template-columns:42px minmax(0,1fr);min-height:44px;gap:12px;align-items:center}.crop-zoom-control input[type=range]{min-width:0;min-height:38px;touch-action:pan-x}.crop-dialog-actions{flex-direction:row;gap:10px;margin-top:auto}.crop-dialog-actions .button{min-height:50px;padding:9px 10px;font-size:13px}}
   
@@ -252,6 +253,18 @@
     .account-photo-pick:hover{border-color:var(--gold);background:rgb(213 182 122 / 10%);color:var(--ink)}
     .account-photo-remove{padding:0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:11px;cursor:pointer}
     .account-photo-remove:hover{color:var(--ink)}
+    .account-avatar-open{width:100%;justify-content:flex-start}
+    .account-avatar-open svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .account-photo-editor{display:grid;justify-items:center;gap:12px;text-align:center}
+    .account-photo-editor .account-photo-preview{width:116px;height:116px;flex-basis:116px;margin:4px 0 2px}
+    .account-photo-editor>p{max-width:340px;margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+    .account-photo-editor .account-photo-pick{margin-top:3px}
+    .account-photo-editor .account-photo-remove{margin-top:2px}
+    .account-photo-editor .account-photo-hint{font-size:10px}
+    .account-photo-status,.crop-error{min-height:18px;margin:0!important;color:#e3a09a;font-size:12px!important}
+    .crop-error:empty{min-height:0}
+    .crop-error{padding:0 2px}
+    @media(max-width:520px){.account-photo-editor .account-photo-preview{width:104px;height:104px;flex-basis:104px}}
     @media(max-width:520px){.account-photo-field{align-items:flex-start;gap:12px;padding:13px}.account-photo-preview{width:58px;height:58px;flex-basis:58px}}
     @media(max-width:720px){.overview-profile{margin-top:24px}.overview-profile-heading{align-items:flex-start;flex-direction:column}.overview-profile-heading>.button{width:100%}workspace-dialog{width:100%;max-height:calc(100dvh - 16px);margin:auto 0 0;border-radius:16px 16px 0 0}.workspace-dialog-content{padding:24px 20px calc(22px + env(safe-area-inset-bottom))}}
   
@@ -388,10 +401,25 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="account-dialog-title">Konto</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
       <div class="account-summary"><span id="account-role-label">Dein Bereich</span><strong id="account-email">Angemeldet</strong></div>
       <div class="workspace-dialog-actions">
+        <button class="button button-secondary account-avatar-open" type="button" id="account-avatar-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span id="account-avatar-open-label">Profilfoto hinzufügen</span></button>
         <button class="button button-secondary" type="button" id="account-profile-edit">Profil bearbeiten</button>
         <button class="button button-secondary" type="button" id="account-role-change">Rolle wechseln</button>
         <button class="button button-secondary" type="button" id="account-settings-open">Einstellungen</button>
         <button class="button button-secondary" type="button" data-signout>Abmelden</button>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="account-photo-dialog" class="workspace-dialog account-photo-dialog" aria-labelledby="account-photo-dialog-title">
+    <div class="workspace-dialog-content">
+      <header class="workspace-dialog-header"><div><p class="eyebrow">KONTO</p><h2 id="account-photo-dialog-title">Profilfoto</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
+      <div class="account-photo-editor">
+        <div class="account-photo-preview" id="account-photo-preview" aria-hidden="true"><span>＋</span></div>
+        <p>Dein Foto erscheint rund im Menü und im Chat. Im nächsten Schritt richtest du den Ausschnitt aus.</p>
+        <label class="button button-secondary account-photo-pick" for="account-photo-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/><path d="M19 4v4m-2-2h4"/></svg><span>Foto auswählen</span></label>
+        <input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+        <button id="account-photo-remove" class="account-photo-remove" type="button" hidden>Profilfoto entfernen</button>
+        <p class="account-photo-hint">JPG, PNG oder WebP · maximal 2 MB</p>
+        <p id="account-photo-status" class="account-photo-status" role="status" aria-live="polite"></p>
       </div>
     </div>
   </dialog>
@@ -408,6 +436,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     <h2 id="crop-title">Foto zuschneiden und ausrichten</h2>
     <p class="crop-intro">Verschiebe und drehe das Foto, bis der sichtbare Hochformat-Ausschnitt passt.</p>
     <div class="crop-canvas-wrap"><canvas id="crop-canvas" width="960" height="1200" aria-label="Fotoausschnitt"></canvas></div>
+    <p id="crop-error" class="crop-error" role="alert" aria-live="polite"></p>
     <div class="crop-controls">
       <button class="button button-secondary" type="button" id="crop-rotate">90° drehen</button>
       <div class="crop-zoom-control"><label for="crop-zoom">Zoom</label><input id="crop-zoom" type="range" min="0.5" max="3" step="0.01" value="1"></div>
@@ -453,7 +482,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-avatar-circle-crop-v72"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-account-profile-photo-dialog-v73"></script>
 </body>
 </html>
 
