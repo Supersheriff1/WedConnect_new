@@ -311,6 +311,17 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .orientation-guard-card{width:min(340px,100%);display:grid;justify-items:center;gap:18px}
     .orientation-guard-card svg{width:54px;height:54px;fill:none;stroke:var(--gold);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .orientation-guard-card p{margin:0;font-size:16px;font-weight:600;line-height:1.55}
+    /* Use an in-app fullscreen layer on mobile so the browser does not show its native fullscreen prompt. */
+    body.is-gallery-fullscreen{overflow:hidden!important}
+    #dashboard .profile-preview-gallery.is-fullscreen{position:fixed!important;inset:0!important;z-index:1200;box-sizing:border-box;width:100vw!important;height:100dvh!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-track{position:absolute!important;inset:0!important;box-sizing:border-box;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;min-width:0!important;aspect-ratio:auto!important;display:flex!important;align-items:stretch!important;gap:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow-x:auto!important;overflow-y:hidden!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-photo{position:relative!important;box-sizing:border-box!important;display:block!important;flex:0 0 100%!important;width:100%!important;height:100%!important;min-width:100%!important;max-width:100%!important;min-height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-photo img{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;object-fit:contain!important;object-position:center center!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-overlay{display:none!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-indicators{top:calc(16px + env(safe-area-inset-top))!important;left:16px!important;right:58px!important;z-index:10!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-gallery-controls{position:fixed!important;top:50%!important;left:50%!important;width:100vw!important;max-width:none!important;padding:0 14px!important;transform:translate(-50%,-50%)!important;z-index:9!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-fullscreen{position:fixed!important;top:auto!important;right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;z-index:11!important;width:28px!important;height:28px!important}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-fullscreen svg{width:14px!important;height:14px!important}
 </style>
 </head>
 <body>
@@ -413,7 +424,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-account-avatar-fullscreen-v59"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-custom-fullscreen-v60"></script>
 </body>
 </html>
 
