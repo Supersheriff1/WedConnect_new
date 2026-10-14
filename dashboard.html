@@ -173,7 +173,8 @@
 
     .profile-preview-content{padding:0 clamp(20px,3vw,34px) 26px}
     .profile-preview-key-facts{display:flex;flex-wrap:wrap;gap:8px;margin:-2px 0 12px}
-    .profile-preview-key-facts .profile-preview-chip{padding:7px 10px;background:rgb(213 182 122 / 9%);font-weight:600}
+    .profile-preview-key-facts .profile-preview-chip{gap:6px;padding:6px 9px;background:rgb(213 182 122 / 9%);font-size:11px;font-weight:600}
+    .profile-preview-key-facts .profile-preview-chip svg{width:12px;height:12px}
     .profile-preview-about{padding:10px 0 14px;border-top:1px solid var(--border)}
     .profile-preview-about-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
     .profile-preview-about-header h4{margin:0;color:var(--muted);font:500 9px var(--mono);letter-spacing:.09em;text-transform:uppercase}
@@ -208,7 +209,7 @@
     .profile-preview-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .profile-preview-arrow:hover:not(:disabled){background:var(--gold);color:#201b12}
     .profile-preview-arrow:disabled{opacity:.35;cursor:default}
-    .profile-preview-indicators{position:absolute;top:20px;left:32px;right:32px;z-index:4;display:flex;gap:5px;width:auto;padding:4px 6px;border-radius:999px;background:rgb(20 19 23 / 25%);backdrop-filter:blur(6px)}
+    .profile-preview-indicators{position:absolute;top:25px;left:32px;right:32px;z-index:4;display:flex;gap:5px;width:auto;padding:4px 6px;border-radius:999px;background:rgb(20 19 23 / 25%);backdrop-filter:blur(6px)}
     .profile-preview-indicator{height:3px;min-width:12px;flex:1;padding:0;border:0;border-radius:8px;background:rgb(255 255 255 / 38%);cursor:pointer;transition:background .2s ease}
     .profile-preview-indicator.is-active{background:#fff}
     
@@ -253,14 +254,26 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #dashboard .profile-preview-track{padding-right:0;padding-left:0;height:auto;aspect-ratio:4/5}
 #dashboard .profile-preview-card{border-radius:14px}
 }
-  </style>
+  
+    .setup-topbar-actions{display:flex;align-items:center;gap:10px}
+    .setup-autosave-status{margin:0 0 12px;color:var(--muted);font-size:11px;line-height:1.4}
+    .setup-autosave-status.is-error{color:#e3a09a}
+    #onboarding.profile-edit-overlay{position:fixed;z-index:15;inset:0 0 0 248px;min-height:100dvh;overflow-y:auto;background:var(--canvas)}
+    #dashboard.is-editing-profile .sidebar{z-index:20}
+    @media(max-width:720px){
+      #onboarding.profile-edit-overlay{inset:64px 0 78px;min-height:0}
+      #dashboard.is-editing-profile .topbar{position:relative;z-index:20}
+      #dashboard.is-editing-profile .mobile-nav{z-index:30}
+      #onboarding.profile-edit-overlay .setup-topbar{position:sticky;top:0;z-index:2}
+    }
+</style>
 </head>
 <body>
   <div id="loading" class="loading" role="status" aria-live="polite"><div class="loading-card"><div class="loading-brand"><span class="loading-wordmark" aria-hidden="true">Wed<span>Connect</span></span><span class="loading-connection" aria-hidden="true"><i></i><b></b><i></i></span></div><p>Dein Bereich wird vorbereitet …</p></div></div>
   <main id="onboarding" class="onboarding hidden">
     <header class="setup-topbar">
       <a class="mobile-brand" href="/dashboard.html">Wed<span>Connect</span></a>
-      <button class="button button-secondary" type="button" data-signout>Abmelden</button>
+      <div class="setup-topbar-actions"><button id="profile-edit-exit" class="button button-secondary" type="button" hidden>Zurück zur Übersicht</button><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
     </header>
     <div class="setup-content">
       <div class="setup-heading">
@@ -272,6 +285,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       <form id="onboarding-form" novalidate>
         <div id="setup-fields" class="setup-fields"></div>
         <p id="setup-error" class="setup-error" role="status" aria-live="polite"></p>
+        <p id="setup-autosave-status" class="setup-autosave-status" role="status" aria-live="polite" hidden></p>
         <div class="wizard-actions">
           <button class="button button-secondary" type="button" id="setup-back" hidden>Zurück</button>
           <button class="button button-primary" type="submit" id="setup-next">Weiter <span aria-hidden="true">→</span></button>
@@ -348,7 +362,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-explore-v56"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-profile-autosave-v57"></script>
 </body>
 </html>
 
