@@ -256,11 +256,11 @@
     }
     const portfolioCount = currentPhotoCount("portfolio");
     return '<div class="photo-panel portfolio-upload-panel"><h3>Deine Galerie</h3>' +
+      '<p class="photo-upload-detail">Markiere mit dem Stern 3 bis 10 Fotos als Highlights. Diese erscheinen zuerst auf deiner Profilkarte bei „Entdecken“ und werden dort im Hochformat (4:5) angezeigt. Alle Fotos bleiben außerdem in deiner Galerie.</p>' +
+      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild</p>' +
       '<div id="portfolio-existing-photos" class="portfolio-photo-grid" aria-label="Bereits hochgeladene Galeriefotos"></div>' +
       '<div id="portfolio-pending-photos" class="portfolio-photo-grid" aria-label="Ausgewählte Galeriefotos"></div>' +
       photoPicker("portfolio-photos", "Fotos hinzufügen") +
-      '<p class="photo-upload-detail">Highlights erscheinen anderen zuerst in deiner Profilkarte bei Entdecken (4:5). Alle Fotos bleiben in deiner Galerie; markiere 3 bis 10.</p>' +
-      '<p class="photo-upload-detail">JPG, PNG oder WebP · maximal 2 MB pro Bild</p>' +
       '<p class="photo-count" id="portfolio-photo-count">Galerie: ' + portfolioCount + "</p></div>";
   }
 
