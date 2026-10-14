@@ -122,3 +122,43 @@ $$;
 
 revoke all on function public.complete_profile() from public, anon;
 grant execute on function public.complete_profile() to authenticated;
+
+
+-- Complete the profile atomically with the role selected in the onboarding flow.
+-- This repairs accounts whose role was not persisted before the profile save.
+create or replace function public.complete_profile_for_role(p_role text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  current_user_id uuid := auth.uid();
+begin
+  if current_user_id is null then
+    raise exception using message = 'not_authenticated';
+  end if;
+
+  if p_role not in ('couple', 'photographer') then
+    raise exception using message = 'invalid_role';
+  end if;
+
+  insert into public.profiles (id, role)
+  values (current_user_id, p_role)
+  on conflict (id) do update
+    set role = excluded.role,
+        profile_status = case
+          when public.profiles.role is distinct from excluded.role then 'incomplete'
+          else public.profiles.profile_status
+        end,
+        completed_at = case
+          when public.profiles.role is distinct from excluded.role then null
+          else public.profiles.completed_at
+        end;
+
+  perform public.complete_profile();
+end;
+$$;
+
+revoke all on function public.complete_profile_for_role(text) from public, anon;
+grant execute on function public.complete_profile_for_role(text) to authenticated;
