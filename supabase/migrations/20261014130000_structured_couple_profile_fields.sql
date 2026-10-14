@@ -1,4 +1,12 @@
 -- Structured matching fields for wedding-couple profiles.
+-- The public introduction is optional and also used by photographer profiles.
+alter table public.couple_profiles
+  add column if not exists public_intro text,
+  add column if not exists region_code text not null default ''; 
+
+alter table public.photographer_profiles
+  add column if not exists public_intro text;
+
 alter table public.couple_profiles
   add column if not exists region_code text not null default '',
   add column if not exists coverage_options text[] not null default '{}',
