@@ -125,6 +125,7 @@
     .setup-field input.social-link-input:focus{border-color:var(--gold)}
     .profile-social-link{display:inline-flex;align-items:center;gap:5px;color:var(--gold);font-weight:700;text-decoration:none;overflow-wrap:anywhere;transition:color .15s ease}
     .profile-social-link:hover{color:var(--ink);text-decoration:underline}
+    .setup-link-check{justify-self:start;margin-top:-12px;margin-bottom:4px;font-size:12px}.setup-link-check[hidden]{display:none}
     .profile-social-link span{color:var(--gold)}
     .setup-field .input-with-suffix input{font:400 16px/1.5 var(--sans)}
     @media(max-width:560px){.photo-preview.is-mobile-main img,.portfolio-photo-card.is-mobile-main img{width:100%;height:auto;max-height:none;aspect-ratio:4/5;object-fit:cover;background:transparent}.photo-preview:not(.is-mobile-main) img,.portfolio-photo-card:not(.is-mobile-main) img{aspect-ratio:4/5;object-fit:cover;background:transparent}}
@@ -234,7 +235,7 @@
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-photographer-coverage-v38"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-link-check-v39"></script>
 </body>
 </html>
 
