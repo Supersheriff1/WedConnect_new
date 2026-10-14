@@ -27,7 +27,9 @@
   let supabase;
   let currentUser = null;
   let currentRole = "";
-  let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [] };
+  let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], isEditing: false, autoSaveEnabled: false };
+  let draftAutoSaveTimer = null;
+  let draftAutoSavePromise = Promise.resolve();
 
   function showError(message, title = "Dashboard konnte nicht geladen werden") {
     loading.classList.add("hidden");
@@ -319,6 +321,9 @@
           : step === 3
             ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
+    const profileEditExit = document.querySelector("#profile-edit-exit");
+    if (profileEditExit) profileEditExit.hidden = !wizard.isEditing;
+    setDraftAutoSaveStatus(wizard.isEditing ? "Änderungen werden automatisch gespeichert" : "");
     document.querySelector("#setup-title").textContent = titles[step];
     document.querySelector("#setup-step-label").textContent = "PROFIL · SCHRITT " + visibleStep + " VON " + totalSteps;
     document.querySelector("#setup-description").textContent = descriptions;
@@ -911,7 +916,7 @@
     return parsed.toString();
   }
 
-  async function saveRoleProfile(values) {
+  async function saveRoleProfile(values, allowIncomplete = false) {
     const key = wizard.role === "couple" ? "couple" : "photographer";
     const table = wizard.role === "couple" ? "couple_profiles" : "photographer_profiles";
     const data = Object.assign({}, wizard.data[key], values);
@@ -922,9 +927,9 @@
       const styleLabels = styles.map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]);
       const years = data.experience_years === "" || data.experience_years == null ? null : Number(data.experience_years);
       const weddings = data.weddings_photographed === "" || data.weddings_photographed == null ? null : Number(data.weddings_photographed);
-      if (!regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
-      if (!styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
-      if (years === null && weddings === null) throw new Error("Gib Erfahrung in Jahren oder die Anzahl fotografierter Hochzeiten an.");
+      if (!allowIncomplete && !regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
+      if (!allowIncomplete && !styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+      if (!allowIncomplete && years === null && weddings === null) throw new Error("Gib Erfahrung in Jahren oder die Anzahl fotografierter Hochzeiten an.");
       if (years !== null && (!Number.isInteger(years) || years < 0 || years > 80)) throw new Error("Die Erfahrungsjahre müssen zwischen 0 und 80 liegen.");
       if (weddings !== null && (!Number.isInteger(weddings) || weddings < 0 || weddings > 10000)) throw new Error("Die Anzahl der Hochzeiten muss zwischen 0 und 10.000 liegen.");
       data.regions = regions;
@@ -937,21 +942,26 @@
       if (wizard.step === 2) {
         const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
         const coverageLabels = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]);
-        if (!coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+        if (!allowIncomplete && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
         data.coverage_options = coverage;
         data.coverage_scope = coverageLabels.join(", ");
       }
-      if (!["free", "fixed"].includes(data.compensation_type)) {
+      if (!allowIncomplete && !["free", "fixed"].includes(data.compensation_type)) {
         throw new Error("Wähle deine gewünschte Vergütung aus.");
       }
       const amount = data.compensation_amount_eur === "" || data.compensation_amount_eur == null ? null : Number(data.compensation_amount_eur);
-      if (data.compensation_type === "fixed" && (!Number.isInteger(amount) || amount < 1 || amount > 100000)) {
+      if (!allowIncomplete && data.compensation_type === "fixed" && (!Number.isInteger(amount) || amount < 1 || amount > 100000)) {
         throw new Error("Gib einen Betrag zwischen 1 und 100.000 Euro ein.");
       }
       if (data.compensation_type !== "fixed") data.compensation_amount_eur = null;
       else data.compensation_amount_eur = amount;
-      data.instagram_url = normalizeInstagram(data.instagram_url || "");
-      data.website_url = normalizeWebsite(data.website_url || "");
+      if (allowIncomplete) {
+        try { data.instagram_url = normalizeInstagram(data.instagram_url || ""); } catch (_) {}
+        try { data.website_url = normalizeWebsite(data.website_url || ""); } catch (_) {}
+      } else {
+        data.instagram_url = normalizeInstagram(data.instagram_url || "");
+        data.website_url = normalizeWebsite(data.website_url || "");
+      }
     }
     data.id = currentUser.id;
     data.updated_at = new Date().toISOString();
@@ -963,8 +973,67 @@
     wizard.data[key] = data;
   }
 
+  function setDraftAutoSaveStatus(message, failed = false) {
+    const status = document.querySelector("#setup-autosave-status");
+    if (!status) return;
+    status.textContent = message;
+    status.classList.toggle("is-error", failed);
+    status.hidden = !message;
+  }
+
+  function scheduleDraftAutoSave() {
+    if (!wizard.autoSaveEnabled || ![1, 2].includes(wizard.step)) return;
+    window.clearTimeout(draftAutoSaveTimer);
+    setDraftAutoSaveStatus("Speichert Änderungen …");
+    draftAutoSaveTimer = window.setTimeout(() => {
+      draftAutoSaveTimer = null;
+      const values = collectFields();
+      draftAutoSavePromise = draftAutoSavePromise.catch(() => {}).then(() => saveRoleProfile(values, true));
+      draftAutoSavePromise.then(() => setDraftAutoSaveStatus("Automatisch gespeichert")).catch((error) => {
+        setDraftAutoSaveStatus("Speichern fehlgeschlagen", true);
+        showNotice(error && error.message ? error.message : "Deine Änderungen konnten nicht gespeichert werden.");
+      });
+    }, 450);
+  }
+
+  async function flushDraftAutoSave() {
+    if (!wizard.autoSaveEnabled || ![1, 2].includes(wizard.step)) return;
+    if (draftAutoSaveTimer) {
+      window.clearTimeout(draftAutoSaveTimer);
+      draftAutoSaveTimer = null;
+      const values = collectFields();
+      draftAutoSavePromise = draftAutoSavePromise.catch(() => {}).then(() => saveRoleProfile(values, true));
+    }
+    try {
+      await draftAutoSavePromise;
+      setDraftAutoSaveStatus("Automatisch gespeichert");
+    } catch (error) {
+      setDraftAutoSaveStatus("Speichern fehlgeschlagen", true);
+      showNotice(error && error.message ? error.message : "Deine Änderungen konnten nicht gespeichert werden.");
+    }
+  }
+
+  async function closeProfileEditor() {
+    if (!wizard.isEditing) return;
+    await flushDraftAutoSave();
+    if (wizard.step === 3) {
+      try {
+        await uploadSelectedPhotos(true);
+      } catch (error) {
+        showNotice(error && error.message ? error.message : "Einige Fotoänderungen konnten nicht gespeichert werden.");
+      }
+    }
+    const profile = wizard.data[wizard.role === "couple" ? "couple" : "photographer"] || {};
+    await renderOwnProfilePreview(wizard.role, profile, wizard.photos || []);
+    const greeting = profileGreeting(wizard.role, profile);
+    document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting + "!" : "Willkommen!";
+    onboarding.classList.add("hidden");
+    onboarding.classList.remove("profile-edit-overlay");
+    dashboard.classList.remove("is-editing-profile");
+  }
+
   async function loadWizard(role, startStep) {
-    wizard = { step: startStep, role: role || "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [] };
+    wizard = { step: startStep, role: role || "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], isEditing: false, autoSaveEnabled: false };
     currentRole = role || "";
     if (role === "couple") {
       const [{ data, error }, { data: photos, error: photoError }] = await Promise.all([
@@ -985,8 +1054,19 @@
       wizard.data.photographer = data || {};
       wizard.photos = photos || [];
     }
+    const activeProfile = role === "couple" ? wizard.data.couple : role === "photographer" ? wizard.data.photographer : null;
+    wizard.isEditing = Boolean(role && startStep > 0 && activeProfile && Object.keys(activeProfile).length > 0);
+    wizard.autoSaveEnabled = wizard.isEditing;
     onboarding.classList.remove("hidden");
-    dashboard.classList.add("hidden");
+    if (wizard.isEditing) {
+      onboarding.classList.add("profile-edit-overlay");
+      dashboard.classList.remove("hidden");
+      dashboard.classList.add("is-editing-profile");
+    } else {
+      onboarding.classList.remove("profile-edit-overlay");
+      dashboard.classList.add("hidden");
+      dashboard.classList.remove("is-editing-profile");
+    }
     loading.classList.add("hidden");
     errorState.classList.add("hidden");
     renderWizard();
@@ -994,6 +1074,10 @@
 
   async function beginWizard(role, step) {
     try {
+      if (wizard.isEditing) {
+        await flushDraftAutoSave();
+        if (wizard.step === 3) await uploadSelectedPhotos(true);
+      }
       await loadWizard(role, step);
     } catch (_) {
       showError("Dein Profil konnte nicht geladen werden. Bitte versuche es erneut.", "Profil nicht erreichbar");
@@ -1040,7 +1124,7 @@
     }
   }
 
-  async function uploadSelectedPhotos() {
+  async function uploadSelectedPhotos(allowPartial = false) {
     const methodElement = document.querySelector('input[name="couple-photo-method"]:checked');
     if (wizard.role === "couple") {
       const method = methodElement ? methodElement.value : "joint";
@@ -1050,7 +1134,7 @@
       const hasJoint = currentPhotoCount("couple") > 0 || jointFiles.length > 0;
       const hasOne = currentPhotoCount("partner_one") > 0 || oneFiles.length > 0;
       const hasTwo = currentPhotoCount("partner_two") > 0 || twoFiles.length > 0;
-      if (!hasJoint && !(hasOne && hasTwo)) {
+      if (!allowPartial && !hasJoint && !(hasOne && hasTwo)) {
         throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
       }
       const queue = [
@@ -1440,6 +1524,8 @@
   }
 
   async function setupRole(role, user, complete, greeting, profile, photos) {
+    onboarding.classList.remove("profile-edit-overlay");
+    dashboard.classList.remove("is-editing-profile");
     currentRole = role === "couple" || role === "photographer" ? role : "";
     const couple = currentRole === "couple";
     const photographer = currentRole === "photographer";
@@ -1489,10 +1575,12 @@
     if (event.target.name === "instagram_url" || event.target.name === "website_url") {
       updateLinkCheck(event.target.name);
     }
+    scheduleDraftAutoSave();
   });
 
   fields.addEventListener("change", (event) => {
     const target = event.target;
+    scheduleDraftAutoSave();
     if (target.matches('select[name="compensation_type"]')) {
       const amountWrap = fields.querySelector("#compensation-amount-wrap");
       const amountInput = fields.querySelector('input[name="compensation_amount_eur"]');
@@ -1513,7 +1601,10 @@
     }
   });
 
-  backButton.addEventListener("click", () => {
+  document.querySelector("#profile-edit-exit").addEventListener("click", closeProfileEditor);
+
+  backButton.addEventListener("click", async () => {
+    await flushDraftAutoSave();
     if (wizard.step > 0) {
       if (wizard.step === 1 || wizard.step === 2) {
         const key = wizard.role === "couple" ? "couple" : "photographer";
@@ -1558,6 +1649,7 @@
         if (wizard.role === "photographer" && wizard.step === 2 && (!values.coverage_options || !values.coverage_options.length)) {
           throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
         }
+        await flushDraftAutoSave();
         await saveRoleProfile(values);
         wizard.step += 1;
       } else if (wizard.step === 3) {
@@ -1624,14 +1716,28 @@
     if (dialog && dialog.open) dialog.close();
   }));
 
-  document.querySelector("#desktop-nav").addEventListener("click", (event) => {
-    if (event.target.closest("[data-profile-setup]")) beginWizard(currentRole, 1);
+  document.querySelector("#desktop-nav").addEventListener("click", async (event) => {
+    if (event.target.closest("[data-profile-setup]")) {
+      if (!wizard.isEditing) beginWizard(currentRole, 1);
+      return;
+    }
+    if (wizard.isEditing && event.target.closest(".nav-link")) await closeProfileEditor();
   });
-  document.querySelector("#mobile-nav").addEventListener("click", (event) => {
-    if (event.target.closest("[data-profile-setup]")) beginWizard(currentRole, 1);
+  document.querySelector("#mobile-nav").addEventListener("click", async (event) => {
+    if (event.target.closest("[data-profile-setup]")) {
+      if (!wizard.isEditing) beginWizard(currentRole, 1);
+      return;
+    }
+    if (wizard.isEditing && event.target.closest(".nav-link")) await closeProfileEditor();
   });
 
   document.querySelectorAll("[data-signout]").forEach((button) => button.addEventListener("click", async () => {
+    if (wizard.isEditing) {
+      await flushDraftAutoSave();
+      if (wizard.step === 3) {
+        try { await uploadSelectedPhotos(true); } catch (_) {}
+      }
+    }
     button.disabled = true;
     const { error } = await supabase.auth.signOut();
     if (error) {
