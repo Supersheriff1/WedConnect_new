@@ -133,22 +133,38 @@
     if (avatarOpenLabel) avatarOpenLabel.textContent = accountAvatarPath ? "Profilfoto ändern" : "Profilfoto hinzufügen";
   }
 
-  async function uploadAccountPhoto(file) {
+  function avatarSourcePathFor(path) {
+    if (!path) return "";
+    const match = path.match(/^(.*)\/avatar-([^.\/]+)\.[^.]+$/);
+    return match ? match[1] + "/avatar-source-" + match[2] : "";
+  }
+
+  async function uploadAccountPhoto(file, originalPhoto = null) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
     if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
-    const path = currentUser.id + "/avatar-" + crypto.randomUUID() + "." + extension;
-    const { error: uploadError } = await supabase.storage.from(photoBucket).upload(path, file, { contentType: file.type, upsert: false });
+    const photoId = crypto.randomUUID();
+    const path = currentUser.id + "/avatar-" + photoId + "." + extension;
+    const sourcePath = originalPhoto ? currentUser.id + "/avatar-source-" + photoId : "";
+    const bucket = supabase.storage.from(photoBucket);
+    const { error: uploadError } = await bucket.upload(path, file, { contentType: file.type, upsert: false });
     if (uploadError) throw new Error("Das Profilfoto konnte nicht hochgeladen werden.");
+    if (originalPhoto) {
+      const { error: sourceError } = await bucket.upload(sourcePath, originalPhoto, { contentType: originalPhoto.type || "image/jpeg", upsert: false });
+      if (sourceError) {
+        await bucket.remove([path]);
+        throw new Error("Das Originalfoto konnte nicht für spätere Zuschnittänderungen gespeichert werden.");
+      }
+    }
     const previousPath = accountAvatarPath;
     const { error: rowError } = await supabase.from("profile_avatars").upsert({ user_id: currentUser.id, object_path: path, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
     if (rowError) {
-      await supabase.storage.from(photoBucket).remove([path]);
+      await bucket.remove([path, sourcePath].filter(Boolean));
       throw new Error("Das Profilfoto konnte nicht gespeichert werden. Bitte spiele zuerst die Avatar-Migration in Supabase ein.");
     }
     accountAvatarPath = path;
     await renderAccountAvatar();
-    if (previousPath) await supabase.storage.from(photoBucket).remove([previousPath]);
+    if (previousPath) await bucket.remove([previousPath, avatarSourcePathFor(previousPath)].filter(Boolean));
   }
 
   async function removeAccountPhoto() {
@@ -158,7 +174,7 @@
     if (error) throw new Error("Das Profilfoto konnte nicht entfernt werden.");
     accountAvatarPath = "";
     await renderAccountAvatar();
-    await supabase.storage.from(photoBucket).remove([previousPath]);
+    await supabase.storage.from(photoBucket).remove([previousPath, avatarSourcePathFor(previousPath)].filter(Boolean));
   }
 
   function renderCoupleBasics() {
@@ -2077,9 +2093,14 @@
     if (accountPhotoStatus) accountPhotoStatus.textContent = "";
     accountPhotoPreview.disabled = true;
     try {
-      const { data, error } = await supabase.storage.from(photoBucket).download(accountAvatarPath);
+      const bucket = supabase.storage.from(photoBucket);
+      const sourcePath = avatarSourcePathFor(accountAvatarPath);
+      let { data, error } = sourcePath ? await bucket.download(sourcePath) : { data: null, error: true };
+      if (error || !data) {
+        ({ data, error } = await bucket.download(accountAvatarPath));
+      }
       if (error || !data) throw new Error("Das Profilfoto konnte nicht zum Ausrichten geöffnet werden.");
-      openCropEditor(data, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto), { avatar: true });
+      openCropEditor(data, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto, data), { avatar: true });
     } catch (error) {
       if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht geöffnet werden.";
     } finally { accountPhotoPreview.disabled = false; }
@@ -2097,7 +2118,7 @@
     try {
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
       if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
-      openCropEditor(file, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto), { avatar: true });
+      openCropEditor(file, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto, file), { avatar: true });
     } catch (error) {
       if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht vorbereitet werden.";
     } finally { accountPhotoInput.value = ""; }
