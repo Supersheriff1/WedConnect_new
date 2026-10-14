@@ -68,7 +68,7 @@
     #crop-canvas{aspect-ratio:4/5}
     .photo-picker{display:flex;align-items:center;margin:12px 0 16px}
     .photo-picker-input{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-    .photo-picker-button{cursor:pointer}
+    .photo-picker-button{cursor:pointer}.photo-picker-button.is-disabled{opacity:.45;cursor:not-allowed}
     .photo-picker-button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .photo-picker-input:focus-visible+.photo-picker-button{outline:3px solid var(--gold);outline-offset:3px}
     @media(max-width:560px){
