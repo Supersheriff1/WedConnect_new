@@ -1266,15 +1266,20 @@
   }
 
   function fitProfileGalleryPhoto(figure, track) {
+    const image = figure.querySelector("img");
     const style = window.getComputedStyle(track);
     const horizontalPadding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
     const verticalPadding = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
-    const availableWidth = Math.max(160, track.clientWidth - horizontalPadding - 12);
-    const availableHeight = Math.max(220, track.clientHeight - verticalPadding - 12);
-    const frameRatio = 4 / 5;
-    const width = Math.min(520, availableWidth, availableHeight * frameRatio);
+    const availableWidth = Math.max(120, track.clientWidth - horizontalPadding - 20);
+    const availableHeight = Math.max(180, track.clientHeight - verticalPadding - 16);
+    const viewportHeight = Math.max(180, Math.floor(window.innerHeight * 0.58));
+    const maxHeight = Math.min(availableHeight, viewportHeight);
+    const aspect = image && image.naturalWidth && image.naturalHeight
+      ? image.naturalWidth / image.naturalHeight
+      : 0.8;
+    const width = Math.min(availableWidth, maxHeight * aspect);
     figure.style.width = Math.floor(width) + "px";
-    figure.style.height = Math.floor(width / frameRatio) + "px";
+    figure.style.height = Math.floor(width / aspect) + "px";
   }
   let profileGalleryResizeObserver=null, profileGalleryImageObserver=null;
   function setupProfileGallery(gallery,photoCount){
