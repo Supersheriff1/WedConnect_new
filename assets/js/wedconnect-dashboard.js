@@ -1397,8 +1397,6 @@
       indicator.setAttribute("aria-label", "Foto " + (index + 1) + " anzeigen"); indicatorGroup.append(indicator);
     }
     const status = document.createElement("span"); status.className = "profile-preview-gallery-status"; status.setAttribute("aria-live", "polite");
-    controls.append(previous, next);
-    gallery.append(track, controls, indicatorGroup, status, overlay);
 
     const identity = document.createElement("header");
     identity.className = "profile-preview-identity";
@@ -1431,6 +1429,8 @@
     likeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>';
     actions.append(passButton, likeButton);
     overlay.append(identity, actions);
+    controls.append(previous, next);
+    gallery.append(track, controls, indicatorGroup, status, overlay);
 
     const detailsData = profileDetailRows(role, profile);
     const metadata = document.createElement("div");
