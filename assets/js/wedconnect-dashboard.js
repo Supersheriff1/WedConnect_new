@@ -805,6 +805,10 @@
     syncOrientationGuard();
   }
 
+  const fullscreenRotateHint = document.querySelector("#fullscreen-rotate-hint");
+  const canPromptToRotate = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  const portraitViewport = window.matchMedia ? window.matchMedia("(orientation: portrait)") : { matches: true };
+
   function syncOrientationGuard() {
     const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
     const photoIsExpanded = Boolean(
@@ -813,6 +817,8 @@
       (photoViewer && photoViewer.open)
     );
     const mustReturnToPortrait = narrowLandscape.matches && !photoIsExpanded;
+    const galleryIsFullscreen = Boolean(document.querySelector(".profile-preview-gallery.is-fullscreen"));
+    if (fullscreenRotateHint) fullscreenRotateHint.hidden = !(galleryIsFullscreen && canPromptToRotate && portraitViewport.matches);
     document.body.classList.toggle("is-portrait-required", mustReturnToPortrait);
     if (orientationGuard) orientationGuard.setAttribute("aria-hidden", mustReturnToPortrait ? "false" : "true");
   }
