@@ -139,6 +139,31 @@
     return match ? [match[1] + "/avatar-" + match[2] + "-source", match[1] + "/avatar-source-" + match[2]] : [];
   }
 
+  function accountPhotoErrorMessage(action, error) {
+    const message = String(error && (error.message || error.error_description) || error || "").trim();
+    const code = String(error && (error.code || error.statusCode) || "").trim();
+    const detail = [code, message].filter(Boolean).join(" · ");
+    const normalized = detail.toLowerCase();
+    if (/too large|payload too large|exceed.*size|file size|413/.test(normalized)) {
+      return "Das Foto ist zu groß. Bitte verwende ein Bild mit maximal 2 MB.";
+    }
+    if (/bucket.*not found|no such bucket/.test(normalized)) {
+      return "Der Fotospeicher ist in Supabase nicht eingerichtet. Bitte prüfe den Bucket „wedconnect-profile-photos“.";
+    }
+    if (/row-level security|rls|permission denied|not authorized|unauthorized/.test(normalized)) {
+      return "Supabase hat den Zugriff auf den Fotospeicher verweigert. Bitte prüfe die Storage-Berechtigungen für den angemeldeten Account." + (detail ? " (" + detail + ")" : "");
+    }
+    if (/profile_avatars|relation .* does not exist|schema cache/.test(normalized)) {
+      return "Die Profilfoto-Tabelle fehlt oder ist nicht erreichbar. Bitte prüfe die Profilfoto-Migration in Supabase." + (detail ? " (" + detail + ")" : "");
+    }
+    const fallback = action === "save"
+      ? "Das Profilfoto konnte nicht in deinem Konto gespeichert werden."
+      : action === "read"
+        ? "Das Profilfoto konnte nicht aus dem Speicher geladen werden."
+        : "Das Profilfoto konnte nicht hochgeladen werden.";
+    return detail ? fallback + " Supabase meldet: " + detail : fallback + " Bitte versuche es erneut.";
+  }
+
   async function uploadAccountPhoto(file, originalPhoto = null) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
     if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
@@ -148,7 +173,7 @@
     const sourcePath = originalPhoto ? currentUser.id + "/avatar-" + photoId + "-source" : "";
     const bucket = supabase.storage.from(photoBucket);
     const { error: uploadError } = await bucket.upload(path, file, { contentType: file.type, upsert: false });
-    if (uploadError) throw new Error("Das Profilfoto konnte nicht hochgeladen werden.");
+    if (uploadError) throw new Error(accountPhotoErrorMessage("upload", uploadError));
     let originalSaved = false;
     if (originalPhoto) {
       const { error: sourceError } = await bucket.upload(sourcePath, originalPhoto, { contentType: originalPhoto.type || "image/jpeg", upsert: false });
@@ -158,20 +183,23 @@
     const { error: rowError } = await supabase.from("profile_avatars").upsert({ user_id: currentUser.id, object_path: path, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
     if (rowError) {
       await bucket.remove([path, sourcePath].filter(Boolean));
-      throw new Error("Das Profilfoto konnte nicht gespeichert werden. Bitte spiele zuerst die Avatar-Migration in Supabase ein.");
+      throw new Error(accountPhotoErrorMessage("save", rowError));
     }
     accountAvatarPath = path;
     await renderAccountAvatar();
     if (previousPath) await bucket.remove([previousPath, ...avatarSourcePathsFor(previousPath)]);
     const photoStatus = document.querySelector("#account-photo-status");
-    if (originalPhoto && !originalSaved && photoStatus) photoStatus.textContent = "Profilfoto gespeichert. Das Original konnte nicht für spätere Zuschnittänderungen gesichert werden.";
+    if (originalPhoto && !originalSaved && photoStatus) {
+      const sourceResult = await bucket.download(sourcePath);
+      photoStatus.textContent = "Profilfoto gespeichert. Das Original konnte nicht für spätere Zuschnittänderungen gesichert werden." + (sourceResult.error ? " Supabase meldet: " + accountPhotoErrorMessage("upload", sourceResult.error) : "");
+    }
   }
 
   async function removeAccountPhoto() {
     if (!accountAvatarPath) return;
     const previousPath = accountAvatarPath;
     const { error } = await supabase.from("profile_avatars").delete().eq("user_id", currentUser.id);
-    if (error) throw new Error("Das Profilfoto konnte nicht entfernt werden.");
+    if (error) throw new Error(accountPhotoErrorMessage("save", error));
     accountAvatarPath = "";
     await renderAccountAvatar();
     await supabase.storage.from(photoBucket).remove([previousPath, ...avatarSourcePathsFor(previousPath)]);
@@ -2101,7 +2129,7 @@
         if (!result.error && result.data) { data = result.data; break; }
       }
       if (!data) ({ data, error } = await bucket.download(accountAvatarPath));
-      if (error || !data) throw new Error("Das Profilfoto konnte nicht zum Ausrichten geöffnet werden.");
+      if (error || !data) throw new Error(accountPhotoErrorMessage("read", error));
       openCropEditor(data, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto, data), { avatar: true });
     } catch (error) {
       if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht geöffnet werden.";
