@@ -1297,41 +1297,40 @@
   let profileGalleryResizeObserver = null;
   let profileGalleryImageObserver = null;
   function setupProfileGallery(gallery, photoCount) {
-    const track=gallery.querySelector(".profile-preview-track"); if(!track)return;
-    if(profileGalleryResizeObserver)profileGalleryResizeObserver.disconnect();
-    if(profileGalleryImageObserver)profileGalleryImageObserver.disconnect();
-    const figures=Array.from(track.querySelectorAll(".profile-preview-photo"));
-    const indicators=gallery.querySelectorAll(".profile-preview-indicator");
-    const previous=gallery.querySelector(".profile-preview-arrow--previous");
-    const next=gallery.querySelector(".profile-preview-arrow--next");
-    const status=gallery.querySelector(".profile-preview-gallery-status");
-    const setActive=index=>{
-      const n=Math.max(0,Math.min(photoCount-1,index));
-      indicators.forEach((button,i)=>{button.classList.toggle("is-active",i===n);button.setAttribute("aria-current",i===n?"true":"false")});
-      if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;
-      if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:"";
+    const track = gallery.querySelector(".profile-preview-track");
+    if (!track) return;
+    if (profileGalleryResizeObserver) profileGalleryResizeObserver.disconnect();
+    if (profileGalleryImageObserver) profileGalleryImageObserver.disconnect();
+    const figures = Array.from(track.querySelectorAll(".profile-preview-photo"));
+    const indicators = Array.from(gallery.querySelectorAll(".profile-preview-indicator"));
+    const previous = gallery.querySelector(".profile-preview-arrow--previous");
+    const next = gallery.querySelector(".profile-preview-arrow--next");
+    const status = gallery.querySelector(".profile-preview-gallery-status");
+    let activeIndex = 0;
+
+    const setActive = (index) => {
+      activeIndex = Math.max(0, Math.min(figures.length - 1, index));
+      figures.forEach((figure, i) => {
+        figure.hidden = i !== activeIndex;
+        figure.setAttribute("aria-hidden", i === activeIndex ? "false" : "true");
+      });
+      indicators.forEach((button, i) => {
+        button.classList.toggle("is-active", i === activeIndex);
+        button.setAttribute("aria-current", i === activeIndex ? "true" : "false");
+      });
+      if (previous) previous.disabled = activeIndex <= 0;
+      if (next) next.disabled = activeIndex >= figures.length - 1;
+      if (status) status.textContent = figures.length ? (activeIndex + 1) + " von " + figures.length : "";
     };
-    const centerPhoto=(figure,smooth)=>{
-      if(!figure)return;
-      const rect=figure.getBoundingClientRect(),bounds=track.getBoundingClientRect();
-      const left=track.scrollLeft+rect.left-bounds.left-(track.clientWidth-rect.width)/2;
-      if(smooth)track.scrollTo({left,behavior:"smooth"});else track.scrollLeft=left;
-    };
-    const currentIndex=()=>{
-      const center=track.scrollLeft+track.clientWidth/2,bounds=track.getBoundingClientRect();
-      let nearest=0,distance=Infinity;
-      figures.forEach((figure,i)=>{const rect=figure.getBoundingClientRect();const x=track.scrollLeft+rect.left-bounds.left+rect.width/2;const d=Math.abs(center-x);if(d<distance){nearest=i;distance=d}});
-      return nearest;
-    };
-    const goTo=(index,smooth=true)=>{const n=Math.max(0,Math.min(figures.length-1,index));centerPhoto(figures[n],smooth);setActive(n)};
-    if(previous)previous.addEventListener("click",()=>goTo(currentIndex()-1));
-    if(next)next.addEventListener("click",()=>goTo(currentIndex()+1));
-    indicators.forEach(button=>button.addEventListener("click",()=>goTo(Number(button.dataset.index))));
-    track.addEventListener("scroll",()=>window.requestAnimationFrame(()=>setActive(currentIndex())),{passive:true});
-    gallery.addEventListener("keydown",event=>{if(event.key==="ArrowLeft"){event.preventDefault();goTo(currentIndex()-1)}if(event.key==="ArrowRight"){event.preventDefault();goTo(currentIndex()+1)}});
-    setActive(0);
-    if(figures[0])window.requestAnimationFrame(()=>centerPhoto(figures[0],false));
-    if("ResizeObserver"in window){profileGalleryResizeObserver=new ResizeObserver(()=>{const active=gallery.querySelector(".profile-preview-indicator.is-active");centerPhoto(figures[active?Number(active.dataset.index):0],false)});profileGalleryResizeObserver.observe(track)}
+    const goTo = (index) => setActive(index);
+    if (previous) previous.addEventListener("click", () => goTo(activeIndex - 1));
+    if (next) next.addEventListener("click", () => goTo(activeIndex + 1));
+    indicators.forEach((button) => button.addEventListener("click", () => goTo(Number(button.dataset.index))));
+    gallery.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") { event.preventDefault(); goTo(activeIndex - 1); }
+      if (event.key === "ArrowRight") { event.preventDefault(); goTo(activeIndex + 1); }
+    });
+    if (figures.length) setActive(0);
   }
 
   function loadProfileGalleryImages(gallery){
