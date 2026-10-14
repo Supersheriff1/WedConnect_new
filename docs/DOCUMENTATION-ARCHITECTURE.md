@@ -10,7 +10,8 @@ Eine große Bibel wird schnell widersprüchlich. Viele kleine Bibles ohne klare 
 
 | Dokument | Zuständigkeit | Ausgangslage |
 |---|---|---|
-| Projektstatus und Baseline | Commit, Deployment, vorhandene Funktionen, bekannte Lücken | Mit `FROZEN-BASELINE-2026-10-14.md` begonnen |
+| Projektstatus und Baseline | Commit, Deployment, vorhandene Funktionen, bekannte Lücken | `FROZEN-BASELINE-2026-10-14.md` |
+| Screenshot- und Prüfmatrix | Viewports, UI-Zustände, Belegpfade und Prüfergebnisse | Vorlage erstellt: `SCREENSHOT-MATRIX-v1.0.md`; Aufnahmen noch offen |
 | Product Bible | Zielgruppe, Rollen, Regeln, Profilfelder, Matching, Rechte, Freigaben | Vorhandene Projektbibeln zusammenführen und Widersprüche markieren |
 | Public Website Design Bible | Farben, Typografie, Raster, Komponenten der öffentlichen Seiten | Bestehend: `docs/DESIGN-BIBLE.md` |
 | App Design Bible | Dashboard, Onboarding, Account, Dialoge, Uploads und mobile Zustände | Erstellt: `docs/APP-DESIGN-BIBLE-v1.0.md`; dokumentiert den eingefrorenen Stand und offene Abweichungen |
@@ -66,7 +67,7 @@ Automatische Veröffentlichung, das ungeprüfte Trainieren mit Kundeninhalten od
 
 ## Nächste Dokumentationsschritte
 
-1. Screenshot-Matrix für Desktop, Tablet und Mobilgeräte mit neutralen Testdaten ergänzen.
+1. Screenshot-Matrix in den öffentlichen und eingeloggten Bereichen mit neutralen Testdaten ausfüllen.
 2. Brand Voice & Content Bible mit den exakten aktuellen Texten erstellen.
 3. Auth, Migrationen, Supabase Storage, Tabellen und Policies als Technical Architecture & Data Dictionary dokumentieren.
 4. Icons und Illustrationen katalogisieren, ohne sie zu verändern oder zu verschieben.
