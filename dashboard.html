@@ -266,7 +266,7 @@
     .account-photo-editor .account-photo-pick{margin-top:3px}
     .account-photo-editor .account-photo-remove{margin-top:2px}
     .account-photo-editor .account-photo-hint{font-size:10px}
-    .account-photo-status,.crop-error{min-height:18px;margin:0!important;color:#e3a09a;font-size:12px!important}
+    .account-photo-status,.crop-error{min-height:18px;margin:0!important;color:#e3a09a;font-size:12px!important}.account-photo-status:not(:empty),.crop-error:not(:empty){display:block;width:100%;padding:10px 12px!important;border:1px solid rgb(227 160 154 / 42%);border-radius:8px;background:rgb(227 160 154 / 9%);text-align:left;line-height:1.5}
     .crop-error:empty{min-height:0}
     .crop-error{padding:0 2px}
     @media(max-width:520px){.account-photo-editor .account-photo-preview{width:104px;height:104px;flex-basis:104px}}
@@ -421,7 +421,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         <button class="account-photo-preview" id="account-photo-preview" type="button" aria-label="Profilfoto ausrichten"><span>＋</span></button>
         <p>Dein Foto erscheint rund im Menü und im Chat. Im nächsten Schritt richtest du den Ausschnitt aus.</p>
         <div class="account-photo-actions">
-          <input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+          <input id="account-photo-input" class="visually-hidden" type="file" accept="image/*">
           <label class="button button-secondary account-photo-pick" for="account-photo-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/><path d="M19 4v4m-2-2h4"/></svg><span>Foto auswählen</span></label>
           <button id="account-photo-remove" class="account-photo-remove" type="button" aria-label="Profilfoto löschen" title="Profilfoto löschen" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg></button>
         </div>
@@ -489,7 +489,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-avatar-error-details-v81"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-avatar-file-errors-v82"></script>
 </body>
 </html>
 
