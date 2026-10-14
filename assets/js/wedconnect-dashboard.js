@@ -1149,9 +1149,10 @@
         badge.className = "photo-highlight-badge";
         badge.setAttribute("aria-label", "Highlight");
         badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.36l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"/></svg>';
-        card.append(badge);
+        card.append(image, badge);
+      } else {
+        card.append(image);
       }
-      card.append(image);
       container.append(card);
     }
   }
