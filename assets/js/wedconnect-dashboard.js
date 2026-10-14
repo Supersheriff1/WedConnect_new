@@ -27,6 +27,8 @@
   let supabase;
   let currentUser = null;
   let currentRole = "";
+  let accountAvatarPath = "";
+  let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], isEditing: false, autoSaveEnabled: false };
   let draftAutoSaveTimer = null;
   let draftAutoSavePromise = Promise.resolve();
@@ -89,8 +91,80 @@
       "</div></fieldset>";
   }
 
+  function renderAccountPhoto() {
+    return '<section class="account-photo-field" aria-labelledby="account-photo-title"><div class="account-photo-preview" id="account-photo-preview" aria-hidden="true"></div><div class="account-photo-copy"><strong id="account-photo-title">Dein Profilfoto</strong><p>Optional · JPG, PNG oder WebP · maximal 2 MB</p><label class="button button-secondary account-photo-pick" for="account-photo-input">Foto auswählen</label><input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp"><button id="account-photo-remove" class="account-photo-remove" type="button" hidden>Foto entfernen</button></div></section>';
+  }
+
+  async function renderAccountAvatar() {
+    const button = document.querySelector("#avatar");
+    if (!button) return;
+    button.replaceChildren();
+    if (accountAvatarPath) {
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(accountAvatarPath, 3600);
+      if (!error && data && data.signedUrl) {
+        accountAvatarUrl = data.signedUrl;
+        const image = document.createElement("img");
+        image.src = accountAvatarUrl;
+        image.alt = "";
+        image.className = "account-avatar-image";
+        button.append(image);
+        refreshAccountPhotoPreview();
+        return;
+      }
+    }
+    accountAvatarUrl = "";
+    button.textContent = ((currentUser && currentUser.user_metadata && currentUser.user_metadata.first_name) || currentUser && currentUser.email || "W").slice(0, 1).toUpperCase();
+    refreshAccountPhotoPreview();
+  }
+
+  function refreshAccountPhotoPreview() {
+    const preview = document.querySelector("#account-photo-preview");
+    const remove = document.querySelector("#account-photo-remove");
+    if (!preview) return;
+    preview.replaceChildren();
+    if (accountAvatarUrl) {
+      const image = document.createElement("img");
+      image.src = accountAvatarUrl;
+      image.alt = "";
+      preview.append(image);
+    } else {
+      const fallback = document.createElement("span");
+      fallback.textContent = "＋";
+      preview.append(fallback);
+    }
+    if (remove) remove.hidden = !accountAvatarPath;
+  }
+
+  async function uploadAccountPhoto(file) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
+    if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
+    const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
+    const path = currentUser.id + "/avatar-" + crypto.randomUUID() + "." + extension;
+    const { error: uploadError } = await supabase.storage.from(photoBucket).upload(path, file, { contentType: file.type, upsert: false });
+    if (uploadError) throw new Error("Das Profilfoto konnte nicht hochgeladen werden.");
+    const previousPath = accountAvatarPath;
+    const { error: rowError } = await supabase.from("profile_avatars").upsert({ user_id: currentUser.id, object_path: path, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    if (rowError) {
+      await supabase.storage.from(photoBucket).remove([path]);
+      throw new Error("Das Profilfoto konnte nicht gespeichert werden. Bitte spiele zuerst die Avatar-Migration in Supabase ein.");
+    }
+    accountAvatarPath = path;
+    await renderAccountAvatar();
+    if (previousPath) await supabase.storage.from(photoBucket).remove([previousPath]);
+  }
+
+  async function removeAccountPhoto() {
+    if (!accountAvatarPath) return;
+    const previousPath = accountAvatarPath;
+    const { error } = await supabase.from("profile_avatars").delete().eq("user_id", currentUser.id);
+    if (error) throw new Error("Das Profilfoto konnte nicht entfernt werden.");
+    accountAvatarPath = "";
+    await renderAccountAvatar();
+    await supabase.storage.from(photoBucket).remove([previousPath]);
+  }
+
   function renderCoupleBasics() {
-    return '<div class="setup-two-col">' +
+    return renderAccountPhoto() + '<div class="setup-two-col">'
       field("partner_one_first_name", "Vorname der ersten Person", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       field("partner_two_first_name", "Vorname der zweiten Person", "text", "", true, ' maxlength="80"') +
       field("wedding_date", "Hochzeitsdatum", "date", "", true, "") +
@@ -184,7 +258,7 @@
 
   function renderPhotographerBasics() {
     const compensationType = valueOf("compensation_type");
-    return '<div class="photographer-basics">' +
+    return renderAccountPhoto() + '<div class="photographer-basics">' +
       field("first_name", "Dein Vorname", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       multiSelectField("regions", "Region und Einsatzgebiet", REGION_OPTIONS, "Wähle ein oder mehrere Bundesländer. „Ganz Österreich“ schließt einzelne Bundesländer aus.") +
       '<div class="experience-grid">' +
@@ -337,6 +411,25 @@
       : step === 1 ? (wizard.role === "couple" ? renderCoupleBasics() : renderPhotographerBasics())
         : step === 2 ? (wizard.role === "couple" ? renderCoupleDetails() : renderPhotographerDetails())
           : step === 3 ? renderPhotoStep() : renderReview();
+    if (step === 1) {
+      refreshAccountPhotoPreview();
+      const avatarInput = document.querySelector("#account-photo-input");
+      const removeAvatar = document.querySelector("#account-photo-remove");
+      if (avatarInput) avatarInput.addEventListener("change", async () => {
+        const file = avatarInput.files && avatarInput.files[0];
+        if (!file) return;
+        errorLine.textContent = "";
+        try { await uploadAccountPhoto(file); }
+        catch (error) { errorLine.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht gespeichert werden."; }
+        finally { avatarInput.value = ""; }
+      });
+      if (removeAvatar) removeAvatar.addEventListener("click", async () => {
+        removeAvatar.disabled = true;
+        try { await removeAccountPhoto(); }
+        catch (error) { errorLine.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht entfernt werden."; }
+        finally { removeAvatar.disabled = false; }
+      });
+    }
     if (step === 2 && wizard.role === "photographer") updateProfileLinkChecks();
     if (step === 4) loadPhotoPreviews();
     if (step === 3 && wizard.role === "photographer") attachPortfolioPhotoControls();
@@ -1598,7 +1691,7 @@
     const photographer = currentRole === "photographer";
     const roleName = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Profil einrichten";
     document.querySelector("#side-role").textContent = roleName;
-    document.querySelector("#avatar").textContent = (greeting || user.email || "W").slice(0, 1).toUpperCase();
+    await renderAccountAvatar();
     document.querySelector("#account-email").textContent = user.email || "E-Mail nicht verfügbar";
     document.querySelector("#account-role-label").textContent = roleName;
     document.querySelector("#role-eyebrow").textContent = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Dein WedConnect-Konto";
@@ -1865,6 +1958,11 @@
       return;
     }
     currentUser = session.user;
+    try {
+      const { data: avatar, error: avatarError } = await supabase.from("profile_avatars").select("object_path").eq("user_id", currentUser.id).maybeSingle();
+      if (!avatarError && avatar) accountAvatarPath = avatar.object_path || "";
+      if (accountAvatarPath) await renderAccountAvatar();
+    } catch (_) { /* Avatar migration can be applied independently of sign-in. */ }
     const { data: account, error: profileError } = await supabase
       .from("profiles").select("role,profile_status").eq("id", currentUser.id).maybeSingle();
     if (profileError) {
