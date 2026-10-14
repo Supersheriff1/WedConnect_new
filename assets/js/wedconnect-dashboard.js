@@ -736,6 +736,13 @@
     }
   }
 
+  function markGalleryImageLoaded(image) {
+    const figure = image && image.closest(".profile-preview-photo");
+    if (!figure) return;
+    figure.classList.add("is-loaded");
+    figure.classList.remove("is-failed");
+  }
+
   async function openGalleryFullscreen(gallery) {
     if (!fullscreenGalleryDialog || !gallery || fullscreenGalleryDialog.open) return;
     const track = gallery.querySelector(".profile-preview-track");
@@ -774,7 +781,10 @@
       if (activeFullscreenGallery !== gallery) return;
       if (!originalUrl) return;
       image.dataset.fullscreenUrl = originalUrl;
-      image.addEventListener("load", () => syncFullscreenGalleryIndicators(gallery), { once: true });
+      image.addEventListener("load", () => {
+        markGalleryImageLoaded(image);
+        syncFullscreenGalleryIndicators(gallery);
+      }, { once: true });
       image.addEventListener("error", () => {
         if (activeFullscreenGallery === gallery && image.dataset.displayUrl) image.src = image.dataset.displayUrl;
       }, { once: true });
@@ -789,7 +799,9 @@
     gallery.classList.remove("is-fullscreen");
     Array.from(gallery.querySelectorAll("img[data-photo-path]")).forEach((image) => {
       if (image.dataset.displayUrl) {
+        image.addEventListener("load", () => markGalleryImageLoaded(image), { once: true });
         image.src = image.dataset.displayUrl;
+        if (image.complete && image.naturalWidth) markGalleryImageLoaded(image);
         image.dataset.photoState = "done";
       } else {
         image.removeAttribute("src");
