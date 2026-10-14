@@ -1277,8 +1277,8 @@
     const figures=Array.from(track.querySelectorAll(".profile-preview-photo")), indicators=gallery.querySelectorAll(".profile-preview-indicator");
     const previous=gallery.querySelector(".profile-preview-arrow--previous"),next=gallery.querySelector(".profile-preview-arrow--next"),status=gallery.querySelector(".profile-preview-gallery-status");
     const setActive=index=>{const n=Math.max(0,Math.min(photoCount-1,index));indicators.forEach((b,i)=>{b.classList.toggle("is-active",i===n);b.setAttribute("aria-current",i===n?"true":"false")});if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:""};
-    const currentIndex=()=>{const center=track.scrollLeft+track.clientWidth/2;let nearest=0,distance=Infinity;figures.forEach((f,i)=>{const d=Math.abs(center-(f.offsetLeft+f.offsetWidth/2));if(d<distance){nearest=i;distance=d}});return nearest};
-    const goTo=index=>{const n=Math.max(0,Math.min(figures.length-1,index)),f=figures[n];if(f)track.scrollTo({left:f.offsetLeft-(track.clientWidth-f.offsetWidth)/2,behavior:"smooth"});setActive(n)};
+    const currentIndex=()=>{const center=track.scrollLeft+track.clientWidth/2;let nearest=0,distance=Infinity;figures.forEach((f,i)=>{const rect=f.getBoundingClientRect(),trackRect=track.getBoundingClientRect();const d=Math.abs(center-(track.scrollLeft+rect.left-trackRect.left+rect.width/2));if(d<distance){nearest=i;distance=d}});return nearest};
+    const goTo=index=>{const n=Math.max(0,Math.min(figures.length-1,index)),f=figures[n];if(f){const rect=f.getBoundingClientRect(),trackRect=track.getBoundingClientRect();track.scrollTo({left:track.scrollLeft+rect.left-trackRect.left-(track.clientWidth-rect.width)/2,behavior:"smooth"})};setActive(n)};
     if(previous)previous.addEventListener("click",()=>goTo(currentIndex()-1));if(next)next.addEventListener("click",()=>goTo(currentIndex()+1));
     indicators.forEach(b=>b.addEventListener("click",()=>goTo(Number(b.dataset.index))));
     track.addEventListener("scroll",()=>window.requestAnimationFrame(()=>setActive(currentIndex())),{passive:true});
