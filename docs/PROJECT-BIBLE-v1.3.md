@@ -103,19 +103,17 @@ Eine eigene zusätzliche Vergütung für Nutzungsrechte wird nicht abgefragt. Ko
 - Eine Galerie kann bis zu 20 Portfoliofotos enthalten.
 - Mindestens 3 Portfoliofotos sind Voraussetzung für den Profilabschluss.
 - Portfoliofotos akzeptieren JPG/JPEG, PNG und WebP; die Oberfläche begrenzt jedes Bild auf 2 MB.
-- Alle Portfoliofotos gehören in dieselbe öffentliche Galerie.
-- Fotografen können innerhalb dieser Galerie 3 bis 5 Bilder als **Highlights** auswählen. Diese Auswahl ist für die Profilkarte in „Entdecken“ vorgesehen; hervorgehobene Fotos bleiben Teil der Galerie.
-- Für Highlights ist in der Profilkarte das Hochformat 4:5 vorgesehen. Der Bildausschnitt soll beim Zuschneiden so erkennbar sein, wie er später angezeigt wird.
+- Alle Portfoliofotos gehören in dieselbe öffentliche Galerie und sind gleichwertig.
+- Es gibt keine Highlight-Fotos und keine gesonderte Auswahl oder Markierung.
+- Die Galerie umfasst bis zu 20 normale Fotos. Das öffentliche Profil zeigt die Galerie als erkundbare Gesamtansicht; der Bildausschnitt soll beim Zuschneiden so erkennbar sein, wie er später angezeigt wird.
 
 ### Eigenes Profilfoto
 
 Das optionale persönliche Profilfoto gehört in die Account-/Einstellungen und nicht in die Portfolio-Galerie. Es wird als rundes Bild für Account-Menü und gegebenenfalls Chat verwendet. JPG/JPEG, PNG und WebP, maximal 2 MB; der Nutzer soll den Ausschnitt im Kreis ausrichten und das Foto wieder löschen können.
 
-### Implementierungsabweichung bei Highlights
+### Abgrenzung zu älteren Highlight-Angaben
 
-Die Produktentscheidung lautet **3 bis 5 Highlights** bei höchstens 20 Galerie-Fotos. Die SQL-Migration am Baseline-Commit verlangt mindestens 3 Highlights, lässt technisch aber bis zu 10 zu. Außerdem enthält die Dashboard-JavaScriptdatei am Baseline-Commit keine erkennbare Oberfläche zum Setzen des Feldes `is_highlight`. Damit ist die Highlight-Auswahl nicht als vollständig implementiert oder getestet bestätigt.
-
-Das ist ein dokumentierter Abgleichspunkt für einen ausdrücklich beauftragten technischen Fix. Bis dahin darf die Produktregel nicht mit der Datenbankgrenze gleichgesetzt werden.
+Frühere Produktnotizen und ein älteres Datenbankschema enthalten Highlight-Markierungen. Diese gehören nicht mehr zum Produktumfang. Es gibt ausschließlich eine Galerie mit bis zu 20 gleichwertigen Fotos; keines wird als Highlight ausgewählt oder hervorgehoben. Die alte technische Markierung ist kein sichtbares Produktmerkmal und darf nicht in UI, Matching oder Profilregeln übernommen werden.
 
 ## 6. Öffentliche Profilansicht
 
@@ -190,7 +188,7 @@ Eine spätere FAQ-Automation soll allenfalls Entwürfe vorbereiten, die eine ver
 | Rollenwahl und Profilassistent | Im Code und in Datenbankmigrationen vorhanden; Speichern/Abschluss mit Testkonten offen |
 | Hochzeitspaarfelder und Fotoanforderung | Im Code/Migrationen vorhanden; End-to-End-Prüfung offen |
 | Fotografenfelder und Galerielimits | Im Code/Migrationen vorhanden; End-to-End-Prüfung offen |
-| Highlight-Auswahl | Produktentscheidung 3–5; Code/SQL am Baseline-Commit widersprechen einander |
+| Fotografen-Galerie | Bis zu 20 gleichwertige Fotos; keine Highlights |
 | Account-Profilfoto | Code und Datenbankmigration vorhanden; Upload mit unterschiedlichen Dateien noch zu verifizieren |
 | Like-Aktionen | Datenbankmigration vorhanden; vollständiger Match-Ablauf offen |
 | Matching, Chat, Payments und Admin | Geplant oder nicht umgesetzt |
