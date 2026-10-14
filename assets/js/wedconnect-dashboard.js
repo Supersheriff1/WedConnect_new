@@ -92,7 +92,7 @@
   }
 
   function renderAccountPhoto() {
-    return '<section class="account-photo-field" aria-labelledby="account-photo-title"><div class="account-photo-preview" id="account-photo-preview" aria-hidden="true"></div><div class="account-photo-copy"><strong id="account-photo-title">Dein Profilfoto</strong><p>Optional · JPG, PNG oder WebP · maximal 2 MB</p><label class="button button-secondary account-photo-pick" for="account-photo-input">Foto auswählen</label><input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp"><button id="account-photo-remove" class="account-photo-remove" type="button" hidden>Foto entfernen</button></div></section>';
+    return '<section class="account-photo-field" aria-labelledby="account-photo-title"><div class="account-photo-preview" id="account-photo-preview" aria-hidden="true"></div><div class="account-photo-copy"><strong id="account-photo-title">Dein Profilfoto</strong><p>Optional · JPG, PNG oder WebP · maximal 2 MB</p><label class="button button-secondary account-photo-pick" for="account-photo-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/><path d="M19 4v4m-2-2h4"/></svg><span>Foto auswählen</span></label><input id="account-photo-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp"><button id="account-photo-remove" class="account-photo-remove" type="button" hidden>Foto entfernen</button></div></section>';
   }
 
   async function renderAccountAvatar() {
@@ -419,9 +419,13 @@
         const file = avatarInput.files && avatarInput.files[0];
         if (!file) return;
         errorLine.textContent = "";
-        try { await uploadAccountPhoto(file); }
-        catch (error) { errorLine.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht gespeichert werden."; }
-        finally { avatarInput.value = ""; }
+        try {
+          if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Bitte lade ein JPG-, PNG- oder WebP-Foto hoch.");
+          if (file.size > 2 * 1024 * 1024) throw new Error("Das Profilfoto darf höchstens 2 MB groß sein.");
+          openCropEditor(file, async (croppedPhoto) => uploadAccountPhoto(croppedPhoto), { avatar: true });
+        } catch (error) {
+          errorLine.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht vorbereitet werden.";
+        } finally { avatarInput.value = ""; }
       });
       if (removeAvatar) removeAvatar.addEventListener("click", async () => {
         removeAvatar.disabled = true;
@@ -484,14 +488,22 @@
   const cropRotate = document.querySelector("#crop-rotate");
   let cropDrag = null;
 
-  function openCropEditor(blob, onApply) {
+  function openCropEditor(blob, onApply, options = {}) {
+    const isAvatarCrop = Boolean(options.avatar);
     const sourceUrl = URL.createObjectURL(blob);
     const image = new Image();
     image.onload = () => {
-      cropState = { image, sourceUrl, onApply, rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
-      cropCanvas.width = 960;
-      cropCanvas.height = 1200;
+      cropState = { image, sourceUrl, onApply, rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, isAvatarCrop };
+      cropCanvas.width = isAvatarCrop ? 1000 : 960;
+      cropCanvas.height = isAvatarCrop ? 1000 : 1200;
+      cropCanvas.style.aspectRatio = isAvatarCrop ? "1 / 1" : "4 / 5";
+      cropZoom.min = isAvatarCrop ? "1" : "0.5";
       cropZoom.value = "1";
+      cropDialog.classList.toggle("avatar-crop", isAvatarCrop);
+      document.querySelector("#crop-title").textContent = isAvatarCrop ? "Profilfoto ausrichten" : "Foto zuschneiden und ausrichten";
+      cropDialog.querySelector(".crop-intro").textContent = isAvatarCrop
+        ? "Verschiebe und zoome das Foto, bis dein Gesicht im Kreis gut sitzt."
+        : "Verschiebe und drehe das Foto, bis der sichtbare Hochformat-Ausschnitt passt.";
       drawCrop(cropCanvas, cropState);
       cropDialog.showModal();
     };
