@@ -774,6 +774,7 @@
       if (activeFullscreenGallery !== gallery) return;
       if (!originalUrl) return;
       image.dataset.fullscreenUrl = originalUrl;
+      image.addEventListener("load", () => syncFullscreenGalleryIndicators(gallery), { once: true });
       image.addEventListener("error", () => {
         if (activeFullscreenGallery === gallery && image.dataset.displayUrl) image.src = image.dataset.displayUrl;
       }, { once: true });
@@ -821,6 +822,37 @@
   const canPromptToRotate = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
   const portraitViewport = window.matchMedia ? window.matchMedia("(orientation: portrait)") : { matches: true };
 
+  function syncFullscreenGalleryIndicators(gallery = activeFullscreenGallery) {
+    if (!gallery) return;
+    const indicatorGroup = gallery.querySelector(".profile-preview-indicators");
+    const track = gallery.querySelector(".profile-preview-track");
+    if (!indicatorGroup || !track) return;
+    const landscapeMobile = window.matchMedia && window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+    if (!landscapeMobile) {
+      indicatorGroup.style.removeProperty("--gallery-indicator-left");
+      indicatorGroup.style.removeProperty("--gallery-indicator-width");
+      indicatorGroup.style.removeProperty("--gallery-indicator-top");
+      return;
+    }
+    const index = Math.max(0, Math.min(track.children.length - 1, Math.round(track.scrollLeft / (track.clientWidth || 1))));
+    const image = track.children[index] && track.children[index].querySelector("img");
+    if (!image || !image.naturalWidth || !image.naturalHeight) return;
+    const imageRect = image.getBoundingClientRect();
+    const galleryRect = gallery.getBoundingClientRect();
+    const ratio = image.naturalWidth / image.naturalHeight;
+    let visibleWidth = imageRect.width;
+    let visibleHeight = visibleWidth / ratio;
+    if (visibleHeight > imageRect.height) {
+      visibleHeight = imageRect.height;
+      visibleWidth = visibleHeight * ratio;
+    }
+    const visibleLeft = imageRect.left + (imageRect.width - visibleWidth) / 2;
+    const visibleTop = imageRect.top + (imageRect.height - visibleHeight) / 2;
+    indicatorGroup.style.setProperty("--gallery-indicator-left", Math.max(6, visibleLeft - galleryRect.left + 8) + "px");
+    indicatorGroup.style.setProperty("--gallery-indicator-width", Math.max(0, visibleWidth - 16) + "px");
+    indicatorGroup.style.setProperty("--gallery-indicator-top", Math.max(6, visibleTop - galleryRect.top + 8) + "px");
+  }
+
   function syncOrientationGuard() {
     const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
     const photoIsExpanded = Boolean(
@@ -829,6 +861,7 @@
       (photoViewer && photoViewer.open)
     );
     const mustReturnToPortrait = narrowLandscape.matches && !photoIsExpanded;
+    syncFullscreenGalleryIndicators();
     const galleryIsFullscreen = Boolean(document.querySelector(".profile-preview-gallery.is-fullscreen"));
     if (fullscreenRotateHint) fullscreenRotateHint.hidden = !(galleryIsFullscreen && canPromptToRotate && portraitViewport.matches);
     document.body.classList.toggle("is-portrait-required", mustReturnToPortrait);
