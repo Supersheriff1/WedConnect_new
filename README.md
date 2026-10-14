@@ -12,7 +12,8 @@ WedConnect connects wedding couples and wedding photographers for potential TFP 
 - [Project Bible v1.3](docs/PROJECT-BIBLE-v1.3.md) — current product decisions and implementation status.
 - [Project Bible v1.2](docs/PROJECT-BIBLE-v1.2.md) — previous version, retained for history.
 - [Project Bible v1.1](docs/PROJECT-BIBLE-v1.1.md) — previous version.
-- [Design Bible](docs/DESIGN-BIBLE.md) — current visual system.
+- [Design Bible](docs/DESIGN-BIBLE.md) — visual system for the public website.
+- [App Design Bible v1.0](docs/APP-DESIGN-BIBLE-v1.0.md) — visual and interaction reference for the logged-in app.
 - [Supabase setup](supabase/README.md) — authentication and database setup.
 
 ## Current repository state
