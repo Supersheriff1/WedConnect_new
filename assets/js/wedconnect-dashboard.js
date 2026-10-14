@@ -720,8 +720,40 @@
   const photoViewer = document.querySelector("#photo-viewer");
   const photoViewerImage = document.querySelector("#photo-viewer-image");
   const photoViewerClose = document.querySelector("#photo-viewer-close");
+  const fullscreenGalleryDialog = document.querySelector("#fullscreen-gallery-dialog");
+  let activeFullscreenGallery = null;
+  let fullscreenGalleryPlaceholder = null;
   const orientationGuard = document.querySelector("#orientation-guard");
   const narrowLandscape = window.matchMedia("(orientation: landscape) and (max-height: 600px) and (pointer: coarse)");
+
+  function openGalleryFullscreen(gallery) {
+    if (!fullscreenGalleryDialog || !gallery || fullscreenGalleryDialog.open) return;
+    fullscreenGalleryPlaceholder = document.createComment("WedConnect gallery location");
+    gallery.parentNode.insertBefore(fullscreenGalleryPlaceholder, gallery);
+    activeFullscreenGallery = gallery;
+    gallery.classList.add("is-fullscreen");
+    fullscreenGalleryDialog.append(gallery);
+    document.body.classList.add("is-gallery-fullscreen");
+    fullscreenGalleryDialog.showModal();
+    syncProfileFullscreenButtons();
+    syncOrientationGuard();
+  }
+
+  function closeGalleryFullscreen() {
+    if (!activeFullscreenGallery) return;
+    const gallery = activeFullscreenGallery;
+    gallery.classList.remove("is-fullscreen");
+    if (fullscreenGalleryPlaceholder && fullscreenGalleryPlaceholder.parentNode) {
+      fullscreenGalleryPlaceholder.parentNode.insertBefore(gallery, fullscreenGalleryPlaceholder);
+      fullscreenGalleryPlaceholder.remove();
+    }
+    activeFullscreenGallery = null;
+    fullscreenGalleryPlaceholder = null;
+    document.body.classList.remove("is-gallery-fullscreen");
+    if (fullscreenGalleryDialog && fullscreenGalleryDialog.open) fullscreenGalleryDialog.close();
+    syncProfileFullscreenButtons();
+    syncOrientationGuard();
+  }
 
   function syncOrientationGuard() {
     const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
@@ -762,13 +794,14 @@
   }
 
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    const openGallery = document.querySelector(".profile-preview-gallery.is-fullscreen");
-    if (!openGallery) return;
-    openGallery.classList.remove("is-fullscreen");
-    document.body.classList.remove("is-gallery-fullscreen");
-    syncProfileFullscreenButtons();
-    syncOrientationGuard();
+    if (event.key === "Escape" && activeFullscreenGallery) {
+      event.preventDefault();
+      closeGalleryFullscreen();
+    }
+  });
+
+  if (fullscreenGalleryDialog) fullscreenGalleryDialog.addEventListener("click", (event) => {
+    if (event.target === fullscreenGalleryDialog) closeGalleryFullscreen();
   });
 
   document.addEventListener("fullscreenchange", () => {
@@ -1603,14 +1636,8 @@
       fullscreenButton.title = "Galerie im Vollbild anzeigen";
       fullscreenButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
       fullscreenButton.addEventListener("click", () => {
-        const entering = !gallery.classList.contains("is-fullscreen");
-        if (entering) {
-          document.querySelectorAll(".profile-preview-gallery.is-fullscreen").forEach((openGallery) => openGallery.classList.remove("is-fullscreen"));
-        }
-        gallery.classList.toggle("is-fullscreen", entering);
-        document.body.classList.toggle("is-gallery-fullscreen", entering);
-        syncProfileFullscreenButtons();
-        syncOrientationGuard();
+        if (gallery.classList.contains("is-fullscreen")) closeGalleryFullscreen();
+        else openGalleryFullscreen(gallery);
       });
       gallery.append(fullscreenButton);
     }
