@@ -2118,12 +2118,7 @@
         await uploadSelectedPhotos();
         wizard.step = 4;
       } else if (wizard.step === 4) {
-        const { error: roleError } = await supabase.rpc("assign_initial_role", { p_role: wizard.role });
-        if (roleError) {
-          const roleCode = roleError.code ? " (" + roleError.code + ")" : "";
-          throw new Error("Rolle konnte vor dem Profilabschluss nicht bestätigt werden" + roleCode + ": " + (roleError.message || "Bitte versuche es erneut."));
-        }
-        const { error } = await supabase.rpc("complete_profile");
+        const { error } = await supabase.rpc("complete_profile_for_role", { p_role: wizard.role });
         if (error) {
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
