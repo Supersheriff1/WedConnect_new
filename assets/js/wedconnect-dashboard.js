@@ -1971,6 +1971,8 @@
   }
 
   async function setupRole(role, user, complete, greeting, profile, photos) {
+    wizard.isEditing = false;
+    wizard.autoSaveEnabled = false;
     onboarding.classList.remove("profile-edit-overlay");
     dashboard.classList.remove("is-editing-profile");
     currentRole = role === "couple" || role === "photographer" ? role : "";
@@ -2237,14 +2239,14 @@
 
   document.querySelector("#desktop-nav").addEventListener("click", async (event) => {
     if (event.target.closest("[data-profile-setup]")) {
-      if (!wizard.isEditing) beginWizard(currentRole, 1);
+      if (!wizard.isEditing || onboarding.classList.contains("hidden")) beginWizard(currentRole, 1);
       return;
     }
     if (wizard.isEditing && event.target.closest(".nav-link")) await closeProfileEditor();
   });
   document.querySelector("#mobile-nav").addEventListener("click", async (event) => {
     if (event.target.closest("[data-profile-setup]")) {
-      if (!wizard.isEditing) beginWizard(currentRole, 1);
+      if (!wizard.isEditing || onboarding.classList.contains("hidden")) beginWizard(currentRole, 1);
       return;
     }
     if (wizard.isEditing && event.target.closest(".nav-link")) await closeProfileEditor();
