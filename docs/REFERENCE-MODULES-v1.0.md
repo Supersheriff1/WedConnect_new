@@ -118,13 +118,23 @@ Die Galerie unterstützt laut Code bis zu 20 Fotos, mindestens 3 sind für den A
 
 **Noch zu prüfen:** Bildreihenfolge und Bildanzahl, Ladefehler und Signed-URL-Erneuerung, Bildrundungen ohne durchscheinende Unterlage, mittige Galerie auf Mobilgeräten, Vollbild in Hoch-/Querformat, Like-Zustand mit realen Daten und Sichtbarkeit des eigenen Profils für andere angemeldete Konten.
 
-## Visuelle Erfassung: Zugriff und offene Belege
+## Live-Prüfung und offene Belege
 
-Am 14. Oktober 2026 wurde versucht, die Production-Oberfläche über die bekannte Vercel-URL aufzurufen. Der Browser wurde zur Vercel-Anmeldung umgeleitet; der Vercel-Zugriffsdienst verweigerte den Lesezugriff auf das Deployment (403, `read_protection_bypass`). Daher wurden in dieser Aufnahme keine Screenshots der Live-Website erstellt.
+**Live geprüft:** 14. Oktober 2026, Desktopbrowser, 1348 × 920 px.  
+**Erreichbare Domain:** [wedconnectnew.vercel.app](https://wedconnectnew.vercel.app/)  
+**Geprüfte Ansichten:** öffentliche Startseite, „Für Fotografen“, rollenneutraler Registrierungsdialog sowie unauthentifizierter Dashboard-Einstieg.
 
-Die Vercel-Schutzregeln wurden nicht geändert und es wurde kein öffentlicher Bypass erzeugt. Frühere, im Gespräch geteilte Screenshots werden nicht ungeprüft in das öffentliche Repository übernommen: Für sie sind Commit, Deployment, Viewport und teils der aktuelle Endzustand nicht eindeutig belegt; außerdem enthalten sie echte Profilbilder.
+Die Vercel-Verbindung ist aktiv: Der authentifizierte Vercel-Endpunkt lieferte das Konto `supersheriff1` und das Projekt `wedconnect_new`. Vercel weist `ssoProtection.enabled = true` mit `all_except_custom_domains` aus. Die bestätigte Domain `wedconnectnew.vercel.app` ist erreichbar. Der alternative, deployment-spezifische Alias blieb durch Vercel geschützt (403 bei `read_protection_bypass`). Schutzregeln wurden nicht geändert und kein Bypass-Link wurde erstellt.
 
-Für Live-Screenshots braucht es eine autorisierte Vercel-Verbindung mit Zugriff auf genau dieses Projekt und Team. Bis dahin sind Code- und Produktregeln erfasst; aktuelle visuelle Prüfung und E2E-Abnahme bleiben offen.
+Der Screenshot mit „OAuth-Callback-Daten fehlen“ zeigt die ChatGPT-Seite für Plugins/Skills. Das ist nicht die Fehlermeldung der WedConnect-Seite. Trotz dieses Hinweises konnten wir die Vercel-Verbindung danach erfolgreich abfragen.
+
+**Direkt beobachtet:**
+- Die Fotografen-Seite lädt und entspricht in ihrer sichtbaren Struktur dem eingefrorenen Quellcode.
+- Der Registrierungsdialog bietet E-Mail/Passwort und Google. Die angezeigten Texte fragen keine Rolle ab.
+- Der direkte Dashboard-Aufruf zeigt kurz „Dein Bereich wird vorbereitet …“ und leitet ohne bestehende Sitzung zu `index.html?auth=signin` weiter.
+- Die Startseite enthält weiterhin den Text, Registrierung und Matching seien noch nicht produktiv verfügbar. Das ist ein Widerspruch zum aktuellen Login-/Profil-Assistenten und wird hier nur dokumentiert; es erfolgt keine Textänderung.
+
+Diese Prüfung hat keine persönlichen Kontodaten eingegeben oder verändert. Eine eingeloggte Dashboard- oder Profilansicht wurde mangels angemeldeter Testsitzung nicht geprüft. Screenshots früherer Gespräche werden nicht ungeprüft ins öffentliche Repository übernommen, da sie echte Profilbilder zeigen und Commit/Deployment nicht sicher zugeordnet sind. Die hier betrachteten Liveansichten wurden visuell geprüft, aber nicht als Screenshotdateien gespeichert.
 
 ## Screenshot- und Testmatrix (offen)
 
@@ -132,9 +142,9 @@ Die fünf Referenzmodule werden nach Möglichkeit mit realen Testkonten und neut
 
 | Modul | Beleg, der noch fehlt |
 |---|---|
-| Für Fotografen | Desktop und mobil; FAQ geöffnet/geschlossen; rollenneutraler Auth-Dialog |
-| Anmeldung | E-Mail, Google, Rückkehr, Fehler, Wiederherstellung; Start- und Ziel-URL |
-| Dashboard | Profil unvollständig/vollständig; Desktop, Tablet, mobile Navigation; leere/Fehlerzustände |
+| Für Fotografen | Desktop 1348 × 920 px visuell geprüft; Dialog geöffnet. Mobilansicht, FAQ geöffnet/geschlossen und Screenshot-Artefakt offen |
+| Anmeldung | Rollenneutraler Dialog live geprüft. E-Mail, Google, Rückkehr, Fehler und Wiederherstellung mit echtem Testkonto offen |
+| Dashboard | Unauthentifizierter Einstieg und Login-Weiterleitung live geprüft. Profilzustände, Navigation und mobile Ansicht mit Sitzung offen |
 | Profilverwaltung | Rolle, alle 4 Schritte pro Rolle, Zurück, Speichern/Fortsetzen, Galerie-/Avatar-Dialoge |
 | Öffentliches Profil | mehrere Fotos, Likes, Metadaten, mobile Ansicht und Vollbild hochkant/quer |
 
