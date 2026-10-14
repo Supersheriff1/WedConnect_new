@@ -1458,22 +1458,19 @@
     const content = document.createElement("div");
     content.className = "profile-preview-content";
     content.append(identity);
-    if (role === "photographer" && detailsData.keyFacts && detailsData.keyFacts.some((fact) => fact[2])) {
+    if (role === "photographer") {
       const keyFacts = document.createElement("div");
       keyFacts.className = "profile-preview-key-facts";
-      detailsData.keyFacts.filter(([, , value]) => value).forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
-      content.append(keyFacts);
-    }
-    if (role === "photographer") {
+      (detailsData.keyFacts || []).filter(([, , value]) => value).forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
       const links = document.createElement("div");
-      links.className = "profile-preview-links profile-preview-identity-links";
+      links.className = "profile-preview-identity-links";
       [["Instagram", profile.instagram_url, normalizeInstagram], ["Website", profile.website_url, normalizeWebsite]].forEach(([label, value, normalize]) => {
         if (!value) return;
         try {
           const url = normalize(value);
           if (!url) return;
           const link = document.createElement("a");
-          link.className = "profile-preview-link profile-preview-icon-link";
+          link.className = "profile-preview-icon-link";
           link.href = url;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
@@ -1485,7 +1482,8 @@
           links.append(link);
         } catch (_) {}
       });
-      if (links.children.length) content.append(links);
+      if (links.children.length) keyFacts.append(links);
+      if (keyFacts.children.length) content.append(keyFacts);
     }
 
     const about = document.createElement("section");
@@ -1494,14 +1492,7 @@
     aboutHeader.className = "profile-preview-about-header";
     const aboutTitle = document.createElement("h4");
     aboutTitle.textContent = role === "couple" ? "Über euch" : "Über mich";
-    const infoButton = document.createElement("button");
-    infoButton.className = "profile-preview-info-button";
-    infoButton.type = "button";
-    infoButton.setAttribute("aria-expanded", "false");
-    infoButton.setAttribute("aria-label", "Weitere Profilinformationen anzeigen");
-    infoButton.title = "Weitere Profilinformationen";
-    infoButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>';
-    aboutHeader.append(aboutTitle, infoButton);
+    aboutHeader.append(aboutTitle);
     about.append(aboutHeader);
 
     const introText = String(profile.public_intro || "").trim();
@@ -1514,34 +1505,12 @@
 
     const additional = document.createElement("div");
     additional.className = "profile-preview-additional";
-    additional.hidden = true;
     if (metadata.children.length) additional.append(metadata);
     detailsData.sections.forEach(([title, value]) => addPreviewSection(additional, title, value));
-    let detailsExpanded = false;
-    const mobileDetails = window.matchMedia("(max-width: 720px)");
-    const syncDetailsForViewport = () => {
-      const mobile = mobileDetails.matches;
-      infoButton.hidden = !mobile;
-      if (!mobile) {
-        additional.hidden = false;
-        about.classList.add("is-expanded");
-        return;
-      }
-      additional.hidden = !detailsExpanded;
-      about.classList.toggle("is-expanded", detailsExpanded);
-    };
-    infoButton.addEventListener("click", () => {
-      detailsExpanded = !detailsExpanded;
-      infoButton.setAttribute("aria-expanded", detailsExpanded ? "true" : "false");
-      infoButton.setAttribute("aria-label", detailsExpanded ? "Weitere Profilinformationen ausblenden" : "Weitere Profilinformationen anzeigen");
-      infoButton.title = detailsExpanded ? "Profilinformationen ausblenden" : "Weitere Profilinformationen";
-      about.classList.toggle("is-expanded", detailsExpanded);
-      additional.hidden = !detailsExpanded;
-    });
-    if (profileDetailsResizeHandler) window.removeEventListener("resize", profileDetailsResizeHandler);
-    profileDetailsResizeHandler = syncDetailsForViewport;
-    window.addEventListener("resize", profileDetailsResizeHandler, { passive: true });
-    syncDetailsForViewport();
+    if (profileDetailsResizeHandler) {
+      window.removeEventListener("resize", profileDetailsResizeHandler);
+      profileDetailsResizeHandler = null;
+    }
     content.append(about, additional);
     card.append(gallery, content);
     container.append(card);
