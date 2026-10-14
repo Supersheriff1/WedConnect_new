@@ -161,6 +161,17 @@
     .profile-status-pill .step-dot{width:6px;height:6px}
     .profile-preview-card{width:100%;max-width:760px;margin-inline:auto;overflow:hidden;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:0 20px 50px #09090b22}
     .profile-preview-gallery{position:relative;width:min(100%,620px);min-width:0;margin-inline:auto;padding:0}
+    .profile-preview-overlay{position:absolute;right:0;bottom:0;left:0;z-index:3;display:flex;flex-direction:column;align-items:center;padding:100px 22px 18px;background:linear-gradient(180deg,transparent 0%,rgb(18 17 20 / 10%) 35%,rgb(18 17 20 / 86%) 100%);pointer-events:none}
+    .profile-preview-identity{width:100%;padding:0 2px 13px;text-align:left}
+    .profile-preview-identity h3{margin:0;color:#fff;font-size:clamp(25px,3vw,36px);line-height:1.15;letter-spacing:-.045em;text-shadow:0 2px 12px #0008}
+    .profile-preview-role{display:block;margin-bottom:4px;color:#f2d99c;font:600 9px var(--mono);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 8px #000}
+    .profile-preview-actions{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;pointer-events:auto}
+    .profile-preview-action{width:54px;height:54px;display:grid;place-items:center;border:1px solid rgb(255 255 255 / 36%);border-radius:50%;background:rgb(37 36 43 / 86%);color:#fff;box-shadow:0 7px 22px #0005;opacity:.92}
+    .profile-preview-action--like{width:62px;height:62px;border-color:rgb(213 182 122 / 72%);background:var(--gold);color:#25212a}
+    .profile-preview-action:disabled{cursor:default}
+    .profile-preview-action svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .profile-preview-action--like svg{width:26px;height:26px;fill:currentColor;stroke-width:1.2}
+
     .profile-preview-identity{padding:22px clamp(20px,3vw,34px) 8px}
     .profile-preview-role{display:block;margin-bottom:4px;color:var(--gold);font:500 9px var(--mono);letter-spacing:.12em;text-transform:uppercase}
     .profile-preview-identity h3{margin:0;color:var(--ink);font-size:clamp(25px,3vw,36px);line-height:1.15;letter-spacing:-.045em}
@@ -181,7 +192,7 @@
     .profile-preview-photo:hover{border-color:rgb(213 182 122 / 55%);box-shadow:0 18px 40px #09090b50}
     .profile-preview-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,#302f38 8%,#3c3943 18%,#302f38 33%);background-size:200% 100%;animation:gallery-shimmer 1.5s linear infinite}
     .profile-preview-photo.is-loaded::before,.profile-preview-photo.is-failed::before{display:none}
-    .profile-preview-photo img{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden;border-radius:inherit;clip-path:inset(0 round 15px);object-fit:contain;opacity:0;transition:opacity .35s ease}
+    .profile-preview-photo img{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden;border-radius:inherit;clip-path:inset(0 round 15px);object-fit:cover;opacity:0;transition:opacity .35s ease}
     .profile-preview-photo.is-loaded img{opacity:1}
     .profile-preview-photo.is-loaded{animation:gallery-reveal .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:min(calc(var(--image-order,0) * 35ms),210ms)}
     .profile-preview-gallery-controls{position:absolute;top:50%;left:50%;z-index:2;width:min(100%,560px);display:flex;justify-content:space-between;padding:0 8px;transform:translate(-50%,-50%);pointer-events:none}
@@ -192,7 +203,7 @@
     .profile-preview-indicators{position:absolute;top:14px;left:16px;right:74px;z-index:3;display:flex;gap:5px;width:auto;padding:5px 7px;border-radius:999px;background:rgb(20 19 23 / 34%);backdrop-filter:blur(8px)}
     .profile-preview-indicator{height:3px;min-width:12px;flex:1;padding:0;border:0;border-radius:8px;background:rgb(255 255 255 / 38%);cursor:pointer;transition:background .2s ease}
     .profile-preview-indicator.is-active{background:#fff}
-    .profile-preview-count{position:absolute;top:13px;right:13px;z-index:3;padding:4px 8px;border:1px solid rgb(255 255 255 / 18%);border-radius:999px;background:rgb(20 19 23 / 40%);color:#fff;font:500 10px var(--mono);letter-spacing:.02em;backdrop-filter:blur(8px);text-shadow:0 1px 4px #0008}
+    
     .profile-preview-gallery-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     .profile-preview-empty{margin:0;padding:12px 0;color:var(--muted);font-size:13px}
     @keyframes gallery-shimmer{to{background-position-x:-200%}}
@@ -219,7 +230,7 @@
     .profile-preview-intro{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;margin:0;padding:0 clamp(20px,3vw,34px) 16px;color:var(--body);font-size:14px;line-height:1.7}
     .profile-preview-intro.is-expanded{-webkit-line-clamp:unset}
     .profile-preview-intro-toggle{margin:0 0 16px clamp(20px,3vw,34px);padding:0;border:0;background:none;color:var(--gold);font:600 12px var(--sans);cursor:pointer}
-    @media(max-width:720px){.profile-preview-track{height:clamp(300px,72vh,720px);height:clamp(300px,72svh,720px);min-height:0;gap:12px;padding:0}.profile-preview-gallery{width:min(100%,620px);padding-right:0;padding-left:0}.profile-preview-gallery-controls{display:none}.profile-preview-indicators{top:14px;left:14px;right:70px;width:auto}}
+    @media(max-width:720px){.profile-preview-track{height:clamp(300px,72vh,720px);height:clamp(300px,72svh,720px);min-height:0;gap:12px;padding:0}.profile-preview-gallery{width:min(100%,620px);padding-right:0;padding-left:0}.profile-preview-gallery-controls{display:none}.profile-preview-indicators{top:14px;left:14px;right:54px;width:auto}}
     @media(prefers-reduced-motion:reduce){.profile-preview-photo::before{animation:none}.profile-preview-photo.is-loaded{animation:none}.profile-preview-photo img{transition:none}.profile-preview-track{scroll-behavior:auto}}
 @media(max-width:720px){
 html,body{width:100%;max-width:100%;overflow-x:hidden}
@@ -321,7 +332,6 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
               <span class="profile-status-pill"><span class="step-dot"></span><span id="profile-status">Profil vollständig</span></span>
               <h2 id="profile-preview-heading">So sehen andere dein Profil</h2>
             </div>
-            <button class="button button-secondary" type="button" id="profile-action">Profil bearbeiten</button>
           </div>
           <div id="profile-preview" aria-live="polite"><p class="profile-preview-empty">Profilvorschau wird geladen …</p></div>
         </section>
