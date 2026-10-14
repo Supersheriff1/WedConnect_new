@@ -1305,13 +1305,11 @@
     const previous=gallery.querySelector(".profile-preview-arrow--previous");
     const next=gallery.querySelector(".profile-preview-arrow--next");
     const status=gallery.querySelector(".profile-preview-gallery-status");
-    const countBadge=gallery.querySelector(".profile-preview-count");
     const setActive=index=>{
       const n=Math.max(0,Math.min(photoCount-1,index));
       indicators.forEach((button,i)=>{button.classList.toggle("is-active",i===n);button.setAttribute("aria-current",i===n?"true":"false")});
       if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;
       if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:"";
-      if(countBadge)countBadge.textContent=photoCount?(n+1)+" / "+photoCount:"";
     };
     const centerPhoto=(figure,smooth)=>{
       if(!figure)return;
@@ -1399,9 +1397,8 @@
       indicator.setAttribute("aria-label", "Foto " + (index + 1) + " anzeigen"); indicatorGroup.append(indicator);
     }
     const status = document.createElement("span"); status.className = "profile-preview-gallery-status"; status.setAttribute("aria-live", "polite");
-    const countBadge = document.createElement("span"); countBadge.className = "profile-preview-count"; countBadge.setAttribute("aria-hidden", "true");
     controls.append(previous, next);
-    gallery.append(controls, indicatorGroup, countBadge, status, track);
+    gallery.append(track, controls, indicatorGroup, status, overlay);
 
     const identity = document.createElement("header");
     identity.className = "profile-preview-identity";
@@ -1414,6 +1411,27 @@
       : profile.first_name || "Dein Profil";
     identity.append(roleLabel, name);
 
+    const overlay = document.createElement("div");
+    overlay.className = "profile-preview-overlay";
+    const actions = document.createElement("div");
+    actions.className = "profile-preview-actions";
+    const passButton = document.createElement("button");
+    passButton.type = "button";
+    passButton.className = "profile-preview-action profile-preview-action--pass";
+    passButton.disabled = true;
+    passButton.setAttribute("aria-label", "Profil überspringen");
+    passButton.title = "Wird in Entdecken verfügbar sein";
+    passButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+    const likeButton = document.createElement("button");
+    likeButton.type = "button";
+    likeButton.className = "profile-preview-action profile-preview-action--like";
+    likeButton.disabled = true;
+    likeButton.setAttribute("aria-label", "Profil liken");
+    likeButton.title = "Wird in Entdecken verfügbar sein";
+    likeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>';
+    actions.append(passButton, likeButton);
+    overlay.append(identity, actions);
+
     const detailsData = profileDetailRows(role, profile);
     const metadata = document.createElement("div");
     metadata.className = "profile-preview-metadata";
@@ -1421,7 +1439,6 @@
 
     const content = document.createElement("div");
     content.className = "profile-preview-content";
-    content.append(identity);
     if (metadata.children.length) content.append(metadata);
     if (profile.public_intro && String(profile.public_intro).trim()) {
       addPreviewSection(content, role === "couple" ? "Über euch" : "Über mich", String(profile.public_intro).trim(), "profile-preview-about");
@@ -1464,7 +1481,6 @@
     document.querySelector("#role-eyebrow").textContent = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Dein WedConnect-Konto";
     document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting + "!" : "Willkommen!";
     document.querySelector("#profile-status").textContent = complete ? "Profil vollständig" : "Profil noch offen";
-    document.querySelector("#profile-action").textContent = "Profil bearbeiten";
     document.querySelector("#desktop-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
       navItem("Profil", "profile", false, !currentRole) +
@@ -1618,7 +1634,6 @@
   function openWorkspaceDialog(dialog) {
     if (dialog && !dialog.open) dialog.showModal();
   }
-  document.querySelector("#profile-action").addEventListener("click", () => beginWizard(currentRole, currentRole ? 1 : 0));
   if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   if (settingsTrigger) settingsTrigger.addEventListener("click", () => openWorkspaceDialog(settingsDialog));
