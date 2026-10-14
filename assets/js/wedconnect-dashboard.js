@@ -243,8 +243,8 @@
       multiSelectField("coverage_options", "Gewünschte Begleitung", COVERAGE_OPTIONS, "Wählt alle Abschnitte aus, die fotografisch begleitet werden sollen.") +
       multiSelectField("styles", "Bildstil", STYLE_OPTIONS, "Wählt alle Bildstile, die euch gefallen.") +
       '<div class="setup-two-col">' +
-      field("schedule", "Ablauf", "textarea", "Zum Beispiel: Trauung um 14 Uhr, Paarfotos um 15 Uhr, Feier ab 17 Uhr.", true, ' maxlength="4000" placeholder="Die wichtigsten Programmpunkte und ungefähren Uhrzeiten"') +
-      field("image_wishes", "Bildwünsche", "textarea", "Besondere Menschen, Momente oder Motive.", true, ' maxlength="2000" placeholder="Was soll dem Fotografen besonders wichtig sein?"') +
+      field("schedule", "Ablauf (optional)", "textarea", "Wenn der Ablauf noch nicht feststeht, ergänzt ihr ihn später.", false, ' maxlength="4000" placeholder="Zum Beispiel: Trauung um 14 Uhr, Paarfotos um 15 Uhr, Feier ab 17 Uhr"') +
+      field("image_wishes", "Bildwünsche (optional)", "textarea", "", false, ' maxlength="2000" placeholder="Besondere Menschen, Momente oder Motive"') +
       "</div>" +
       choiceField("photographer_usage_preference", "Fotos durch den Fotografen nutzbar?", [
         ["open", "Grundsätzlich offen"],
