@@ -43,15 +43,20 @@
     .photo-panel h3{margin:0 0 6px;color:var(--ink);font-size:16px}.photo-panel p{margin:0 0 14px;color:var(--muted);font-size:13px}
     .photo-panel input[type=file]{width:100%;min-height:48px;color:var(--body);font-size:13px}
     .photo-count{margin-top:8px!important;color:var(--gold)!important}
-    .photo-upload-hint{margin:7px 0 0!important;color:var(--muted)!important;font-size:11px!important;line-height:1.4}
+    .photo-upload-hint{margin:7px 0 0!important;color:var(--muted)!important;font-size:12px!important;line-height:1.45}
     .photo-selection-feedback{margin:6px 0 0!important;color:var(--ink)!important;font-size:12px!important;line-height:1.45}
+    .photo-instructions{font-size:15px!important;line-height:1.55}
+    .couple-individual-photo-panels{margin-top:14px}
+    .couple-photo-grid{margin-top:14px}
+    .couple-photo-grid .portfolio-photo-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+
     .photo-selection-feedback:empty{display:none}
     .photo-methods{display:grid;gap:12px;margin-bottom:18px}.photo-method{display:flex;align-items:flex-start;gap:10px;color:var(--body);font-size:14px}
     .photo-method input{accent-color:var(--gold);margin-top:4px}
     .setup-summary{display:grid;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
     .setup-summary div{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,1.3fr);gap:12px;padding:12px 15px;border-bottom:1px solid var(--border);font-size:13px}
     .setup-summary div:last-child{border-bottom:0}.setup-summary strong{color:var(--muted)}.setup-summary span{color:var(--ink);overflow-wrap:anywhere}
-    @media(max-width:560px){.setup-two-col,.role-options{grid-template-columns:1fr}.setup-content{padding-right:18px;padding-left:18px}.wizard-actions .button{flex:1;min-width:0}.setup-summary div{grid-template-columns:1fr;gap:3px}}
+    @media(max-width:560px){.setup-two-col,.role-options{grid-template-columns:1fr}.photo-instructions{font-size:16px!important}.setup-content{padding-right:18px;padding-left:18px}.wizard-actions .button{flex:1;min-width:0}.setup-summary div{grid-template-columns:1fr;gap:3px}}
 
 
     .photo-preview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 18px}
@@ -492,7 +497,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-couple-photo-upload-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-couple-photo-edit-v2"></script>
 </body>
 </html>
 
