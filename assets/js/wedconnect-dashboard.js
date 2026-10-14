@@ -1470,7 +1470,7 @@
           const url = normalize(value);
           if (!url) return;
           const link = document.createElement("a");
-          link.className = "profile-preview-icon-link";
+          link.className = "profile-preview-chip profile-preview-social-chip";
           link.href = url;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
