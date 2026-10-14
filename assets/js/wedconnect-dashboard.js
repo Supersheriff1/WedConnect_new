@@ -1305,11 +1305,13 @@
     const previous=gallery.querySelector(".profile-preview-arrow--previous");
     const next=gallery.querySelector(".profile-preview-arrow--next");
     const status=gallery.querySelector(".profile-preview-gallery-status");
+    const countBadge=gallery.querySelector(".profile-preview-count");
     const setActive=index=>{
       const n=Math.max(0,Math.min(photoCount-1,index));
       indicators.forEach((button,i)=>{button.classList.toggle("is-active",i===n);button.setAttribute("aria-current",i===n?"true":"false")});
       if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;
       if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:"";
+      if(countBadge)countBadge.textContent=photoCount?(n+1)+" / "+photoCount:"";
     };
     const centerPhoto=(figure,smooth)=>{
       if(!figure)return;
@@ -1397,8 +1399,9 @@
       indicator.setAttribute("aria-label", "Foto " + (index + 1) + " anzeigen"); indicatorGroup.append(indicator);
     }
     const status = document.createElement("span"); status.className = "profile-preview-gallery-status"; status.setAttribute("aria-live", "polite");
+    const countBadge = document.createElement("span"); countBadge.className = "profile-preview-count"; countBadge.setAttribute("aria-hidden", "true");
     controls.append(previous, next);
-    gallery.append(controls, indicatorGroup, status, track);
+    gallery.append(controls, indicatorGroup, countBadge, status, track);
 
     const identity = document.createElement("header");
     identity.className = "profile-preview-identity";
