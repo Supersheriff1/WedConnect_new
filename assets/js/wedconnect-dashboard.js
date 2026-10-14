@@ -748,6 +748,12 @@
     fullscreenGalleryDialog.append(gallery);
     document.body.classList.add("is-gallery-fullscreen");
     fullscreenGalleryDialog.showModal();
+    if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches && document.documentElement.requestFullscreen) {
+      try {
+        const fullscreenRequest = document.documentElement.requestFullscreen({ navigationUI: "hide" });
+        if (fullscreenRequest && typeof fullscreenRequest.catch === "function") fullscreenRequest.catch(() => {});
+      } catch (_) {}
+    }
     syncProfileFullscreenButtons();
     syncOrientationGuard();
 
@@ -797,6 +803,12 @@
     activeFullscreenGallery = null;
     fullscreenGalleryPlaceholder = null;
     document.body.classList.remove("is-gallery-fullscreen");
+    if (document.fullscreenElement && document.exitFullscreen) {
+      try {
+        const exitRequest = document.exitFullscreen();
+        if (exitRequest && typeof exitRequest.catch === "function") exitRequest.catch(() => {});
+      } catch (_) {}
+    }
     if (fullscreenGalleryDialog && fullscreenGalleryDialog.open) fullscreenGalleryDialog.close();
     const track = gallery.querySelector(".profile-preview-track");
     if (track) requestAnimationFrame(() => { track.scrollLeft = selectedIndex * track.clientWidth; });
