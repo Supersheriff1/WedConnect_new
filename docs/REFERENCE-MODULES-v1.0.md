@@ -118,6 +118,14 @@ Die Galerie unterstützt laut Code bis zu 20 Fotos, mindestens 3 sind für den A
 
 **Noch zu prüfen:** Bildreihenfolge und Bildanzahl, Ladefehler und Signed-URL-Erneuerung, Bildrundungen ohne durchscheinende Unterlage, mittige Galerie auf Mobilgeräten, Vollbild in Hoch-/Querformat, Like-Zustand mit realen Daten und Sichtbarkeit des eigenen Profils für andere angemeldete Konten.
 
+## Visuelle Erfassung: Zugriff und offene Belege
+
+Am 14. Oktober 2026 wurde versucht, die Production-Oberfläche über die bekannte Vercel-URL aufzurufen. Der Browser wurde zur Vercel-Anmeldung umgeleitet; der Vercel-Zugriffsdienst verweigerte den Lesezugriff auf das Deployment (403, `read_protection_bypass`). Daher wurden in dieser Aufnahme keine Screenshots der Live-Website erstellt.
+
+Die Vercel-Schutzregeln wurden nicht geändert und es wurde kein öffentlicher Bypass erzeugt. Frühere, im Gespräch geteilte Screenshots werden nicht ungeprüft in das öffentliche Repository übernommen: Für sie sind Commit, Deployment, Viewport und teils der aktuelle Endzustand nicht eindeutig belegt; außerdem enthalten sie echte Profilbilder.
+
+Für Live-Screenshots braucht es eine autorisierte Vercel-Verbindung mit Zugriff auf genau dieses Projekt und Team. Bis dahin sind Code- und Produktregeln erfasst; aktuelle visuelle Prüfung und E2E-Abnahme bleiben offen.
+
 ## Screenshot- und Testmatrix (offen)
 
 Die fünf Referenzmodule werden nach Möglichkeit mit realen Testkonten und neutralisierten Beispieldaten aufgenommen. Keine Kundendaten oder privaten Profilfotos in Dokumentations-Screenshots verwenden.
