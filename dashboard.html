@@ -337,8 +337,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     #fullscreen-gallery-dialog .profile-preview-photo{position:relative!important;box-sizing:border-box!important;display:block!important;flex:0 0 100vw!important;width:100vw!important;height:100dvh!important;min-width:100vw!important;max-width:100vw!important;min-height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#0c0c0f!important;overflow:hidden!important}
     #fullscreen-gallery-dialog .profile-preview-photo img{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;object-fit:contain!important;object-position:center center!important}
     #fullscreen-gallery-dialog .profile-preview-overlay{display:none!important}
-    #fullscreen-gallery-dialog .profile-preview-indicators{top:calc(16px + env(safe-area-inset-top))!important;left:16px!important;right:58px!important;z-index:10!important}
-    @media (orientation:landscape) and (pointer:coarse){#fullscreen-gallery-dialog .profile-preview-indicators{top:var(--gallery-indicator-top,calc(10px + env(safe-area-inset-top)))!important;left:var(--gallery-indicator-left,16px)!important;right:auto!important;width:var(--gallery-indicator-width,auto)!important;max-width:calc(100vw - 24px)!important;min-width:0!important;gap:4px!important;padding:3px 5px!important}.profile-preview-indicator{height:2px!important;min-width:4px!important}}
+    #fullscreen-gallery-dialog .profile-preview-indicators{top:var(--gallery-indicator-top,calc(10px + env(safe-area-inset-top)))!important;left:var(--gallery-indicator-left,16px)!important;right:auto!important;width:var(--gallery-indicator-width,calc(100% - 32px))!important;max-width:calc(100vw - 24px)!important;min-width:0!important;z-index:10!important}
+    @media (orientation:landscape) and (pointer:coarse){#fullscreen-gallery-dialog .profile-preview-indicators{gap:4px!important;padding:3px 5px!important}.profile-preview-indicator{height:2px!important;min-width:4px!important}}
     #fullscreen-gallery-dialog .profile-preview-gallery-controls{position:fixed!important;top:50%!important;left:50%!important;width:100vw!important;max-width:none!important;padding:0 14px!important;transform:translate(-50%,-50%)!important;z-index:9!important}
     #fullscreen-gallery-dialog .profile-preview-fullscreen{position:fixed!important;top:auto!important;right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;z-index:11!important;width:28px!important;height:28px!important}
     #fullscreen-gallery-dialog .profile-preview-fullscreen svg{width:14px!important;height:14px!important}
@@ -445,7 +445,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-mobile-native-fullscreen-restored-v70"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261014-centered-fullscreen-indicators-v71"></script>
 </body>
 </html>
 
