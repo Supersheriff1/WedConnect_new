@@ -172,18 +172,13 @@
     .profile-preview-action--like svg{width:26px;height:26px;fill:currentColor;stroke-width:1.2}
 
     .profile-preview-content{padding:0 clamp(20px,3vw,34px) 26px}
-    .profile-preview-key-facts{display:flex;flex-wrap:wrap;gap:8px;margin:-2px 0 12px}
+    .profile-preview-key-facts{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:-2px 0 12px}
     .profile-preview-key-facts .profile-preview-chip{gap:6px;padding:6px 9px;background:rgb(213 182 122 / 9%);font-size:11px;font-weight:600}
     .profile-preview-key-facts .profile-preview-chip svg{width:12px;height:12px}
     .profile-preview-about{padding:10px 0 14px;border-top:1px solid var(--border)}
     .profile-preview-about-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
     .profile-preview-about-header h4{margin:0;color:var(--muted);font:500 9px var(--mono);letter-spacing:.09em;text-transform:uppercase}
-    .profile-preview-info-button{width:34px;height:34px;flex:none;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--raised);color:var(--gold);cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease}
-    .profile-preview-info-button:hover,.profile-preview-info-button[aria-expanded="true"]{border-color:var(--gold);background:var(--hover);transform:translateY(-1px)}
-    .profile-preview-info-button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-    .profile-preview-intro-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:8;overflow:hidden;margin:0;color:var(--body);font-size:14px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
-    .profile-preview-about.is-expanded .profile-preview-intro-copy{-webkit-line-clamp:unset;overflow:visible}
-    .profile-preview-additional[hidden]{display:none!important}
+    .profile-preview-intro-copy{display:block;margin:0;color:var(--body);font-size:14px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
     .profile-preview-metadata{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 20px}
     .profile-preview-chip{min-width:0;max-width:100%;display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid rgb(213 182 122 / 25%);border-radius:999px;background:rgb(213 182 122 / 6%);color:var(--body);font-size:12px;line-height:1.35}
     .profile-preview-chip svg{width:15px;height:15px;flex:none;fill:none;stroke:var(--gold);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -194,9 +189,10 @@
     .profile-preview-links{display:flex;flex-wrap:wrap;gap:10px;padding-top:16px}
     .profile-preview-link{display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:999px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none}
     .profile-preview-link:hover{border-color:var(--gold);background:var(--hover);color:var(--ink)}
-    .profile-preview-identity-links .profile-preview-icon-link{width:34px;height:34px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted)}
+    .profile-preview-identity-links{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
+    .profile-preview-identity-links .profile-preview-icon-link{width:27px;height:27px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted)}
     .profile-preview-identity-links .profile-preview-icon-link:hover{background:rgb(213 182 122 / 10%);color:var(--gold)}
-    .profile-preview-icon-link svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .profile-preview-icon-link svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .profile-preview-icon-link .icon-dot{fill:currentColor;stroke:none}
     .profile-preview-track{box-sizing:border-box;position:relative;isolation:isolate;width:100%;max-width:100%;min-width:0;height:auto;aspect-ratio:4/5;min-height:0;display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;border-radius:14px;background:var(--canvas);padding:0;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:none;touch-action:pan-x pan-y}
     .profile-preview-track::-webkit-scrollbar{display:none}
