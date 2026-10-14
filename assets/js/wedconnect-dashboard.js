@@ -1265,103 +1265,34 @@
     ];
   }
 
-  function layoutProfileGallery(gallery) {
-    const style = window.getComputedStyle(gallery);
-    const rowHeight = parseFloat(style.gridAutoRows) || 8;
-    const rowGap = parseFloat(style.rowGap) || 10;
-    gallery.querySelectorAll(".profile-preview-photo").forEach((figure) => {
-      const image = figure.querySelector("img");
-      const width = figure.getBoundingClientRect().width;
-      if (!width) return;
-      const ratio = image && image.naturalWidth
-        ? image.naturalHeight / image.naturalWidth
-        : 1.25;
-      const imageHeight = width * ratio;
-      const span = Math.max(1, Math.ceil((imageHeight + rowGap) / (rowHeight + rowGap)));
-      figure.style.gridRowEnd = "span " + span;
-    });
+  function fitProfileGalleryPhoto(figure, track) {
+    const image=figure.querySelector("img"), aw=Math.max(180,track.clientWidth-36), ah=Math.max(280,track.clientHeight-24);
+    const aspect=image&&image.naturalWidth&&image.naturalHeight?image.naturalWidth/image.naturalHeight:.8;
+    const width=Math.min(aw,ah*aspect); figure.style.width=Math.round(width)+"px"; figure.style.height=Math.round(width/aspect)+"px";
   }
-
-  let profileGalleryResizeObserver = null;
-
-  function observeProfileGallery(gallery) {
-    if (profileGalleryResizeObserver) profileGalleryResizeObserver.disconnect();
-    layoutProfileGallery(gallery);
-    if ("ResizeObserver" in window) {
-      profileGalleryResizeObserver = new ResizeObserver(() => layoutProfileGallery(gallery));
-      profileGalleryResizeObserver.observe(gallery);
-    }
+  let profileGalleryResizeObserver=null, profileGalleryImageObserver=null;
+  function setupProfileGallery(gallery,photoCount){
+    const track=gallery.querySelector(".profile-preview-track"); if(!track)return;
+    if(profileGalleryResizeObserver)profileGalleryResizeObserver.disconnect();if(profileGalleryImageObserver)profileGalleryImageObserver.disconnect();
+    const figures=Array.from(track.querySelectorAll(".profile-preview-photo")), indicators=gallery.querySelectorAll(".profile-preview-indicator");
+    const previous=gallery.querySelector(".profile-preview-arrow--previous"),next=gallery.querySelector(".profile-preview-arrow--next"),status=gallery.querySelector(".profile-preview-gallery-status");
+    const setActive=index=>{const n=Math.max(0,Math.min(photoCount-1,index));indicators.forEach((b,i)=>{b.classList.toggle("is-active",i===n);b.setAttribute("aria-current",i===n?"true":"false")});if(previous)previous.disabled=n<=0;if(next)next.disabled=n>=photoCount-1;if(status)status.textContent=photoCount?(n+1)+" von "+photoCount:""};
+    const currentIndex=()=>{const center=track.scrollLeft+track.clientWidth/2;let nearest=0,distance=Infinity;figures.forEach((f,i)=>{const d=Math.abs(center-(f.offsetLeft+f.offsetWidth/2));if(d<distance){nearest=i;distance=d}});return nearest};
+    const goTo=index=>{const n=Math.max(0,Math.min(figures.length-1,index)),f=figures[n];if(f)track.scrollTo({left:f.offsetLeft-(track.clientWidth-f.offsetWidth)/2,behavior:"smooth"});setActive(n)};
+    if(previous)previous.addEventListener("click",()=>goTo(currentIndex()-1));if(next)next.addEventListener("click",()=>goTo(currentIndex()+1));
+    indicators.forEach(b=>b.addEventListener("click",()=>goTo(Number(b.dataset.index))));
+    track.addEventListener("scroll",()=>window.requestAnimationFrame(()=>setActive(currentIndex())),{passive:true});
+    gallery.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){e.preventDefault();goTo(currentIndex()-1)}if(e.key==="ArrowRight"){e.preventDefault();goTo(currentIndex()+1)}});
+    setActive(0);const fit=()=>figures.forEach(f=>fitProfileGalleryPhoto(f,track));fit();if("ResizeObserver"in window){profileGalleryResizeObserver=new ResizeObserver(fit);profileGalleryResizeObserver.observe(track)}
   }
-
-  function loadProfileGalleryImages(gallery) {
-    const images = Array.from(gallery.querySelectorAll("img[data-photo-path]"));
-    if (!images.length) return;
-    const queue = [];
-    let activeLoads = 0;
-    const maxConcurrentLoads = 2;
-
-    function finish(image, failed) {
-      if (image.dataset.photoState === "done") return;
-      image.dataset.photoState = "done";
-      const figure = image.closest(".profile-preview-photo");
-      if (figure) {
-        figure.classList.toggle("is-failed", Boolean(failed));
-        if (!failed) figure.classList.add("is-loaded");
-      }
-      layoutProfileGallery(gallery);
-      activeLoads = Math.max(0, activeLoads - 1);
-      pump();
-    }
-
-    function pump() {
-      while (activeLoads < maxConcurrentLoads && queue.length) {
-        const image = queue.shift();
-        if (image.dataset.photoState) continue;
-        image.dataset.photoState = "loading";
-        activeLoads += 1;
-        let settled = false;
-        const settle = (failed) => {
-          if (settled) return;
-          settled = true;
-          finish(image, failed);
-        };
-        image.addEventListener("load", () => settle(false), { once: true });
-        image.addEventListener("error", () => settle(true), { once: true });
-        supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath, 3600)
-          .then(({ data, error }) => {
-            if (error || !data || !data.signedUrl) {
-              settle(true);
-              return;
-            }
-            image.src = data.signedUrl;
-          })
-          .catch(() => settle(true));
-      }
-    }
-
-    function enqueue(imagesToLoad) {
-      const unseen = imagesToLoad.filter((image) =>
-        !image.dataset.photoState && !queue.includes(image)
-      );
-      unseen.sort((a, b) => images.indexOf(a) - images.indexOf(b));
-      queue.push(...unseen);
-      pump();
-    }
-
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .map((entry) => entry.target);
-        visible.forEach((image) => observer.unobserve(image));
-        enqueue(visible);
-      }, { rootMargin: "480px 0px", threshold: 0.01 });
-      images.forEach((image) => observer.observe(image));
-    } else {
-      enqueue(images);
-    }
+  function loadProfileGalleryImages(gallery){
+    const track=gallery.querySelector(".profile-preview-track"),images=Array.from(gallery.querySelectorAll("img[data-photo-path]"));if(!images.length||!track)return;
+    const queue=[];let active=0;const max=2;
+    function finish(image,failed){if(image.dataset.photoState==="done")return;image.dataset.photoState="done";const figure=image.closest(".profile-preview-photo");if(figure){figure.classList.toggle("is-failed",!!failed);if(!failed){figure.classList.add("is-loaded");fitProfileGalleryPhoto(figure,track)}}active=Math.max(0,active-1);pump()}
+    function pump(){while(active<max&&queue.length){const image=queue.shift();if(image.dataset.photoState)continue;image.dataset.photoState="loading";active++;let settled=false;const settle=f=>{if(!settled){settled=true;finish(image,f)}};image.addEventListener("load",()=>settle(false),{once:true});image.addEventListener("error",()=>settle(true),{once:true});supabase.storage.from(photoBucket).createSignedUrl(image.dataset.photoPath,3600).then(({data,error})=>{if(error||!data||!data.signedUrl){settle(true);return}image.src=data.signedUrl}).catch(()=>settle(true))}}
+    const enqueue=list=>{const unseen=list.filter(i=>!i.dataset.photoState&&!queue.includes(i));unseen.sort((a,b)=>images.indexOf(a)-images.indexOf(b));queue.push(...unseen);pump()};
+    if("IntersectionObserver"in window){profileGalleryImageObserver=new IntersectionObserver(entries=>{const nearby=entries.filter(e=>e.isIntersecting).map(e=>e.target);nearby.forEach(i=>profileGalleryImageObserver.unobserve(i));enqueue(nearby)},{root:track,rootMargin:"0px 520px",threshold:.01});images.forEach(i=>profileGalleryImageObserver.observe(i))}else enqueue(images)
   }
-
   async function renderOwnProfilePreview(role, profile, photos) {
     const container = document.querySelector("#profile-preview");
     if (!container) return;
@@ -1393,7 +1324,15 @@
     card.append(galleryTitle);
     const gallery = document.createElement("div");
     gallery.className = "profile-preview-gallery";
+    gallery.tabIndex = 0;
+    gallery.setAttribute("aria-label", role === "couple" ? "Fotos des Hochzeitspaars" : "Portfoliofotos");
     const visiblePhotos = (photos || []).filter((photo) => role !== "photographer" || photo.photo_type === "portfolio");
+    const track = document.createElement("div");
+    track.className = "profile-preview-track";
+    const controls = document.createElement("div"); controls.className = "profile-preview-gallery-controls";
+    const previous = document.createElement("button"); previous.type = "button"; previous.className = "profile-preview-arrow profile-preview-arrow--previous"; previous.setAttribute("aria-label", "Vorheriges Foto"); previous.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+    const next = document.createElement("button"); next.type = "button"; next.className = "profile-preview-arrow profile-preview-arrow--next"; next.setAttribute("aria-label", "Nächstes Foto"); next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+    const indicatorGroup = document.createElement("div"); indicatorGroup.className = "profile-preview-indicators"; indicatorGroup.setAttribute("role","group"); indicatorGroup.setAttribute("aria-label","Foto auswählen");
     let renderedCount = 0;
     visiblePhotos.forEach((photo, index) => {
       const highlight = role === "photographer" && photoIsHighlight(photo);
@@ -1411,7 +1350,6 @@
       image.loading = "lazy";
       image.decoding = "async";
       image.alt = role === "couple" ? "Foto des Hochzeitspaars " + (index + 1) : "Portfoliofoto " + (index + 1);
-      image.addEventListener("load", () => layoutProfileGallery(gallery), { once: true });
       figure.append(image);
       if (highlight) {
         const badge = document.createElement("span");
@@ -1421,19 +1359,23 @@
         badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.36l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"/></svg>';
         figure.append(badge);
       }
-      gallery.append(figure);
+      track.append(figure);
       renderedCount += 1;
     });
-    if (!gallery.children.length) {
+    if (!renderedCount) {
       const empty = document.createElement("p");
       empty.className = "profile-preview-empty";
       empty.textContent = "Noch keine Profilfotos vorhanden.";
-      gallery.append(empty);
+      track.append(empty);
     }
-    card.append(gallery);
-    container.append(card);
-    observeProfileGallery(gallery);
-    loadProfileGalleryImages(gallery);
+    for (let index = 0; index < renderedCount; index += 1) {
+      const indicator = document.createElement("button");
+      indicator.type = "button"; indicator.className = "profile-preview-indicator"; indicator.dataset.index = String(index);
+      indicator.setAttribute("aria-label", "Foto " + (index + 1) + " anzeigen"); indicatorGroup.append(indicator);
+    }
+    const status = document.createElement("span"); status.className = "profile-preview-gallery-status"; status.setAttribute("aria-live", "polite");
+    controls.append(previous, next); gallery.append(controls, indicatorGroup, status, track);
+    card.append(gallery); container.append(card); setupProfileGallery(gallery, renderedCount); loadProfileGalleryImages(gallery);
 
     const details = document.createElement("div");
     details.className = "profile-preview-details";
