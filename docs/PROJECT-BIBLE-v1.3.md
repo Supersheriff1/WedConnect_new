@@ -113,7 +113,7 @@ Das optionale persönliche Profilfoto gehört in die Account-/Einstellungen und 
 
 ### Abgrenzung zu älteren Highlight-Angaben
 
-Frühere Produktnotizen und ein älteres Datenbankschema enthalten Highlight-Markierungen. Diese gehören nicht mehr zum Produktumfang. Es gibt ausschließlich eine Galerie mit bis zu 20 gleichwertigen Fotos; keines wird als Highlight ausgewählt oder hervorgehoben. Die alte technische Markierung ist kein sichtbares Produktmerkmal und darf nicht in UI, Matching oder Profilregeln übernommen werden.
+Frühere Produktnotizen und ein älteres Datenbankschema enthalten Highlight-Markierungen. Diese gehören nicht mehr zum Produktumfang. Es gibt ausschließlich eine Galerie mit bis zu 20 gleichwertigen Fotos; keines wird als Highlight ausgewählt oder hervorgehoben. Im Dashboard-JavaScript der Baseline gibt es keine Auswahl- oder Anzeigelogik für Highlights. Das HTML enthält noch nicht verwendete Highlight-CSS-Selektoren, und die Migration bewahrt ein altes Datenbankfeld. Diese technischen Reste sind keine Produktfunktion und dürfen nicht in UI, Matching oder Profilregeln übernommen werden.
 
 ## 6. Öffentliche Profilansicht
 
