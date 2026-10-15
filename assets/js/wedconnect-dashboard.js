@@ -2260,12 +2260,13 @@
 
     const detailsData = profileDetailRows(role, profile);
     const metadata = document.createElement("div");
-    metadata.className = "profile-preview-metadata";
+    metadata.className = role === "couple" ? "profile-preview-key-facts" : "profile-preview-metadata";
     detailsData.chips.forEach(([icon, label, value]) => addPreviewChip(metadata, icon, label, value));
 
     const content = document.createElement("div");
     content.className = "profile-preview-content";
     content.append(identity);
+    if (role === "couple" && metadata.children.length) content.append(metadata);
     if (role === "photographer") {
       const keyFacts = document.createElement("div");
       keyFacts.className = "profile-preview-key-facts";
@@ -2313,7 +2314,7 @@
 
     const additional = document.createElement("div");
     additional.className = "profile-preview-additional";
-    if (metadata.children.length) additional.append(metadata);
+    if (role === "photographer" && metadata.children.length) additional.append(metadata);
     detailsData.sections.forEach(([title, value]) => addPreviewSection(additional, title, value));
     if (profileDetailsResizeHandler) {
       window.removeEventListener("resize", profileDetailsResizeHandler);
