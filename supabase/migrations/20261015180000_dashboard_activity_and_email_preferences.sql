@@ -82,3 +82,77 @@ create policy "Users manage their email preferences"
   on public.user_email_preferences for all to authenticated
   using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
+
+-- Enforce the agreed 2 MB ceiling for every newly uploaded profile photo at storage level.
+update storage.buckets
+set file_size_limit = 2097152
+where id = 'wedconnect-profile-photos';
+
+-- Content for the overview is published by the WedConnect operator.
+create table if not exists public.app_announcements (
+  id uuid primary key default gen_random_uuid(),
+  target_role text null check (target_role is null or target_role in ('couple', 'photographer')),
+  title text not null check (char_length(trim(title)) between 1 and 120),
+  body text not null check (char_length(trim(body)) between 1 and 1200),
+  destination_url text null,
+  is_published boolean not null default false,
+  published_at timestamptz not null default now(),
+  expires_at timestamptz null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists app_announcements_active_idx
+  on public.app_announcements (published_at desc)
+  where is_published = true;
+
+alter table public.app_announcements enable row level security;
+revoke all on table public.app_announcements from anon, authenticated;
+grant select on table public.app_announcements to authenticated;
+
+drop policy if exists "Users read published app announcements for their role" on public.app_announcements;
+create policy "Users read published app announcements for their role"
+  on public.app_announcements for select to authenticated
+  using (
+    is_published
+    and published_at <= now()
+    and (expires_at is null or expires_at > now())
+    and (target_role is null or exists (
+      select 1 from public.profiles p
+      where p.id = (select auth.uid()) and p.role = app_announcements.target_role
+    ))
+  );
+
+create table if not exists public.partner_offers (
+  id uuid primary key default gen_random_uuid(),
+  target_role text null check (target_role is null or target_role in ('couple', 'photographer')),
+  partner_name text not null check (char_length(trim(partner_name)) between 1 and 120),
+  title text not null check (char_length(trim(title)) between 1 and 160),
+  description text not null check (char_length(trim(description)) between 1 and 1200),
+  terms text null check (terms is null or char_length(terms) <= 1000),
+  destination_url text null,
+  is_published boolean not null default false,
+  starts_at timestamptz not null default now(),
+  expires_at timestamptz null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists partner_offers_active_idx
+  on public.partner_offers (starts_at desc)
+  where is_published = true;
+
+alter table public.partner_offers enable row level security;
+revoke all on table public.partner_offers from anon, authenticated;
+grant select on table public.partner_offers to authenticated;
+
+drop policy if exists "Users read published partner offers for their role" on public.partner_offers;
+create policy "Users read published partner offers for their role"
+  on public.partner_offers for select to authenticated
+  using (
+    is_published
+    and starts_at <= now()
+    and (expires_at is null or expires_at > now())
+    and (target_role is null or exists (
+      select 1 from public.profiles p
+      where p.id = (select auth.uid()) and p.role = partner_offers.target_role
+    ))
+  );
