@@ -1909,7 +1909,7 @@
       return {
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
-          ["pin", "Ort", location],
+          ["pin", "Hochzeitsort", location],
           ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
         ],
         sections: [
