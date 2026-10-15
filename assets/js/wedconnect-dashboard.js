@@ -30,6 +30,7 @@
   let currentGreeting = "";
   let activeConversationPeer = "";
   let activityCache = { incoming: [], matches: [], messages: [], summaries: new Map() };
+  let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
@@ -2571,6 +2572,239 @@
     }
   }
 
+  async function loadDiscoverFeed() {
+    const container = document.querySelector("#discover-content");
+    if (!container || discoverState.loading) return;
+    if (discoverState.loaded) {
+      if (!discoverState.active) await advanceDiscoverFeed();
+      return;
+    }
+    discoverState.loading = true;
+    container.replaceChildren();
+    const loading = document.createElement("p");
+    loading.className = "overview-empty-state";
+    loading.textContent = "Passende Profile werden geladen …";
+    container.append(loading);
+    try {
+      const oppositeRole = currentRole === "couple" ? "photographer" : "couple";
+      const [profilesResult, outgoingResult, incomingResult, skipsResult] = await Promise.all([
+        supabase.from("profiles").select("id,role").eq("profile_status", "complete").eq("role", oppositeRole),
+        supabase.from("profile_likes").select("liked_id").eq("liker_id", currentUser.id),
+        supabase.from("profile_likes").select("liker_id").eq("liked_id", currentUser.id),
+        supabase.from("profile_skips").select("skipped_id").eq("skipper_id", currentUser.id)
+      ]);
+      if (profilesResult.error || outgoingResult.error || incomingResult.error || skipsResult.error) {
+        throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob die Profil-Likes- und Entdecken-Migrationen in Supabase ausgeführt wurden.");
+      }
+      const excluded = new Set([currentUser.id]);
+      (outgoingResult.data || []).forEach((item) => excluded.add(item.liked_id));
+      (incomingResult.data || []).forEach((item) => excluded.add(item.liker_id));
+      (skipsResult.data || []).forEach((item) => excluded.add(item.skipped_id));
+      discoverState.ids = (profilesResult.data || []).map((item) => item.id).filter((id) => !excluded.has(id));
+      for (let i = discoverState.ids.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [discoverState.ids[i], discoverState.ids[j]] = [discoverState.ids[j], discoverState.ids[i]];
+      }
+      discoverState.index = 0;
+      discoverState.loaded = true;
+      await advanceDiscoverFeed();
+    } catch (error) {
+      container.replaceChildren();
+      const message = document.createElement("p");
+      message.className = "overview-empty-state";
+      message.textContent = error && error.message ? error.message : "Entdecken konnte gerade nicht geladen werden.";
+      container.append(message);
+      discoverState.loaded = false;
+    } finally {
+      discoverState.loading = false;
+    }
+  }
+
+  async function loadDiscoverProfile(userId) {
+    const headerResult = await supabase.from("profiles").select("id,role").eq("id", userId).maybeSingle();
+    if (headerResult.error || !headerResult.data || headerResult.data.profile_status === "incomplete") throw new Error("Profil nicht verfügbar");
+    const role = headerResult.data.role;
+    if (role !== (currentRole === "couple" ? "photographer" : "couple")) throw new Error("Profilrolle passt nicht");
+    const table = role === "couple" ? "couple_profiles" : "photographer_profiles";
+    const [profileResult, photosResult] = await Promise.all([
+      supabase.from(table).select("*").eq("id", userId).maybeSingle(),
+      supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order", { ascending: true }).limit(30)
+    ]);
+    if (profileResult.error || !profileResult.data) throw new Error("Profil konnte nicht geöffnet werden");
+    const photos = (photosResult.data || []).filter((photo) => role === "photographer"
+      ? photo.photo_type === "portfolio"
+      : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
+    return { id: userId, role, profile: profileResult.data, photos };
+  }
+
+  async function advanceDiscoverFeed() {
+    const container = document.querySelector("#discover-content");
+    if (!container) return;
+    discoverState.active = null;
+    container.replaceChildren();
+    while (discoverState.index < discoverState.ids.length) {
+      const id = discoverState.ids[discoverState.index++];
+      try {
+        const candidate = await loadDiscoverProfile(id);
+        discoverState.active = candidate;
+        discoverState.photoIndex = 0;
+        renderDiscoverCard(candidate);
+        return;
+      } catch (_) {}
+    }
+    const empty = document.createElement("p");
+    empty.className = "overview-empty-state";
+    empty.textContent = "Im Moment gibt es keine weiteren passenden Profile. Schau später wieder vorbei.";
+    container.append(empty);
+  }
+
+  async function setDiscoverPhoto(candidate, index, image, label) {
+    if (!candidate.photos.length) return;
+    discoverState.photoIndex = (index + candidate.photos.length) % candidate.photos.length;
+    const photo = candidate.photos[discoverState.photoIndex];
+    const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600);
+    if (!error && data && data.signedUrl) image.src = data.signedUrl;
+    image.alt = candidate.role === "couple" ? "Foto von " + [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ") : "Portfoliofoto von " + (candidate.profile.first_name || "Fotograf");
+    label.textContent = (discoverState.photoIndex + 1) + " / " + candidate.photos.length;
+    const oldName = image.parentElement.querySelector(".couple-photo-name-overlay");
+    if (oldName) oldName.remove();
+    if (candidate.role === "couple") {
+      const nameOverlay = createCouplePhotoNameOverlay(photo.photo_type, candidate.profile);
+      if (nameOverlay) image.parentElement.append(nameOverlay);
+    }
+  }
+
+  function renderDiscoverCard(candidate) {
+    const container = document.querySelector("#discover-content");
+    container.replaceChildren();
+    const card = document.createElement("article");
+    card.className = "discover-profile-card";
+    const photoFrame = document.createElement("div");
+    photoFrame.className = "discover-photo-frame";
+    const image = document.createElement("img");
+    image.alt = "";
+    image.loading = "eager";
+    image.decoding = "async";
+    const coupleName = [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ");
+    const displayName = candidate.role === "couple" ? coupleName || "Hochzeitspaar" : candidate.profile.first_name || "Fotograf";
+    if (candidate.photos.length) {
+      const firstPhoto = candidate.photos[0];
+      supabase.storage.from(photoBucket).createSignedUrl(firstPhoto.display_path || firstPhoto.object_path, 600).then(({ data, error }) => {
+        if (!error && data && data.signedUrl && image.isConnected) image.src = data.signedUrl;
+      });
+      if (candidate.role === "couple") {
+        const nameOverlay = createCouplePhotoNameOverlay(firstPhoto.photo_type, candidate.profile);
+        if (nameOverlay) photoFrame.append(nameOverlay);
+      }
+    } else {
+      image.className = "discover-photo-placeholder";
+    }
+    photoFrame.prepend(image);
+    const photoCount = document.createElement("span");
+    photoCount.className = "discover-photo-count";
+    photoCount.textContent = candidate.photos.length ? "1 / " + candidate.photos.length : "Kein Profilfoto";
+    if (candidate.photos.length > 1) {
+      const previous = document.createElement("button");
+      previous.type = "button";
+      previous.className = "discover-photo-arrow discover-photo-arrow--previous";
+      previous.setAttribute("aria-label", "Vorheriges Foto");
+      previous.textContent = "‹";
+      previous.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex - 1, image, photoCount));
+      const next = document.createElement("button");
+      next.type = "button";
+      next.className = "discover-photo-arrow discover-photo-arrow--next";
+      next.setAttribute("aria-label", "Nächstes Foto");
+      next.textContent = "›";
+      next.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex + 1, image, photoCount));
+      photoFrame.append(previous, next);
+    }
+    photoFrame.append(photoCount);
+    card.append(photoFrame);
+
+    const content = document.createElement("div");
+    content.className = "discover-profile-content";
+    const heading = document.createElement("h2");
+    heading.className = "discover-profile-name";
+    heading.textContent = displayName;
+    const details = profileDetailRows(candidate.role, candidate.profile);
+    const subtitle = document.createElement("p");
+    subtitle.className = "discover-profile-subtitle";
+    const subtitleFacts = candidate.role === "couple"
+      ? [candidate.profile.guest_count ? candidate.profile.guest_count + " Gäste" : "", ceremonyTypeLabel(candidate.profile.ceremony_type)]
+      : [profileLabels(candidate.profile.regions, REGION_OPTIONS) || candidate.profile.region, candidate.profile.experience_years != null ? candidate.profile.experience_years + (Number(candidate.profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : ""];
+    subtitle.textContent = subtitleFacts.filter(Boolean).join(" · ") || (candidate.role === "couple" ? "Hochzeitspaar" : "Hochzeitsfotograf");
+    content.append(heading, subtitle);
+    const keyFacts = document.createElement("div");
+    keyFacts.className = "discover-profile-facts profile-preview-key-facts";
+    const visibleFacts = candidate.role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])];
+    visibleFacts.forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
+    if (keyFacts.children.length) content.append(keyFacts);
+    const intro = String(candidate.profile.public_intro || "").trim();
+    if (intro) {
+      const about = document.createElement("p");
+      about.className = "discover-profile-intro";
+      about.textContent = intro;
+      content.append(about);
+    }
+    const sections = (details.sections || []).filter(([, value]) => String(value || "").trim());
+    if (sections.length) {
+      const detailList = document.createElement("dl");
+      detailList.className = "discover-profile-sections";
+      sections.forEach(([label, value]) => {
+        const row = document.createElement("div");
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value;
+        row.append(term, description);
+        detailList.append(row);
+      });
+      content.append(detailList);
+    }
+    const actions = document.createElement("div");
+    actions.className = "discover-actions";
+    const skip = document.createElement("button");
+    skip.type = "button";
+    skip.className = "button button-secondary";
+    skip.dataset.discoverAction = "skip";
+    skip.textContent = "Überspringen";
+    const like = document.createElement("button");
+    like.type = "button";
+    like.className = "button button-primary";
+    like.dataset.discoverAction = "like";
+    like.textContent = "Interesse zeigen";
+    actions.append(skip, like);
+    content.append(actions);
+    card.append(content);
+    container.append(card);
+  }
+
+  async function handleDiscoverAction(actionButton) {
+    const candidate = discoverState.active;
+    if (!candidate || actionButton.disabled) return;
+    const buttons = document.querySelectorAll("[data-discover-action]");
+    buttons.forEach((button) => { button.disabled = true; });
+    if (actionButton.dataset.discoverAction === "like") {
+      const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: candidate.id });
+      if (error && !/duplicate|unique/i.test(error.message || "")) {
+        showNotice("Dein Interesse konnte nicht gespeichert werden. Bitte versuche es erneut.");
+        buttons.forEach((button) => { button.disabled = false; });
+        return;
+      }
+      const { data: reciprocal, error: reciprocalError } = await supabase.from("profile_likes").select("liker_id").eq("liker_id", candidate.id).eq("liked_id", currentUser.id).maybeSingle();
+      showNotice(!reciprocalError && reciprocal ? "Es ist ein Match! Ihr könnt euch jetzt schreiben." : "Interesse gesendet.");
+    } else {
+      const { error } = await supabase.from("profile_skips").insert({ skipper_id: currentUser.id, skipped_id: candidate.id });
+      if (error && !/duplicate|unique/i.test(error.message || "")) {
+        showNotice("Das Profil konnte gerade nicht übersprungen werden. Bitte versuche es erneut.");
+        buttons.forEach((button) => { button.disabled = false; });
+        return;
+      }
+    }
+    await advanceDiscoverFeed();
+    await refreshActivityViews();
+  }
+
   function setDashboardView(view) {
     document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
       section.hidden = section.dataset.dashboardView !== view;
@@ -2580,7 +2814,8 @@
       home: "Willkommen" + (currentGreeting ? ", " + currentGreeting : "") + "!",
       profile: currentRole === "couple" ? "Euer Profil" : "Dein Profil",
       matches: "Matches",
-      messages: "Nachrichten"
+      messages: "Nachrichten",
+      discover: currentRole === "couple" ? "Fotografen entdecken" : "Hochzeiten entdecken"
     };
     document.querySelector("#page-title").textContent = titles[view] || "Willkommen!";
   }
@@ -2672,6 +2907,8 @@
     const photographer = currentRole === "photographer";
     currentGreeting = greeting || "";
     const roleName = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Profil einrichten";
+    const discoverIntro = document.querySelector("#discover-intro");
+    if (discoverIntro) discoverIntro.textContent = couple ? "Entdecke Hochzeitsfotografen, die zu euch passen könnten." : "Entdecke Hochzeitspaare, deren Geschichten zu deiner Arbeit passen könnten.";
     document.querySelector("#side-role").textContent = roleName;
     await renderAccountAvatar();
     document.querySelector("#account-email").textContent = user.email || "E-Mail nicht verfügbar";
@@ -2682,13 +2919,13 @@
     document.querySelector("#desktop-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
       navItem("Profil", "profile", false, !currentRole) +
-      navItem(couple ? "Fotografen entdecken" : "Hochzeiten entdecken", "discover", false, true) +
+      navItem(couple ? "Fotografen entdecken" : "Hochzeiten entdecken", "discover", false, false) +
       navItem("Matches", "matches", false, false) +
       navItem("Nachrichten", "messages", false, false);
     document.querySelector("#mobile-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
       navItem("Profil", "profile", false, !currentRole) +
-      navItem("Entdecken", "discover", false, true) +
+      navItem("Entdecken", "discover", false, false) +
       navItem("Matches", "matches", false, false) +
       navItem("Nachrichten", "messages", false, false);
     await renderOwnProfilePreview(currentRole, profile || {}, photos || []);
@@ -2947,6 +3184,11 @@
     beginWizard(currentRole, 0);
   });
   document.addEventListener("click", async (event) => {
+    const discoverAction = event.target.closest("[data-discover-action]");
+    if (discoverAction) {
+      await handleDiscoverAction(discoverAction);
+      return;
+    }
     const likeBack = event.target.closest("[data-like-back]");
     if (likeBack) {
       likeBack.disabled = true;
@@ -3002,10 +3244,11 @@
     const button = event.target.closest("[data-nav-item]");
     if (!button || button.disabled) return;
     const view = button.dataset.navItem;
-    if (!["home", "profile", "matches", "messages"].includes(view)) return;
+    if (!["home", "profile", "matches", "messages", "discover"].includes(view)) return;
     if (wizard.isEditing) await closeProfileEditor();
     setDashboardView(view);
     if (view === "home" || view === "matches" || view === "messages") await refreshActivityViews();
+    if (view === "discover") await loadDiscoverFeed();
   }
   document.querySelector("#desktop-nav").addEventListener("click", handleDashboardNavigation);
   document.querySelector("#mobile-nav").addEventListener("click", handleDashboardNavigation);

@@ -1,8 +1,8 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 1.4  
+**Version:** 1.5  
 **Stand der Prüfung:** 15. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Feature-Branch `feature/couple-wedding-timeline-20261015`, Basis `main` bei `0cf33004efaacfdf8715c0bd45293d919a3e4b66`  
+**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Feature-Branch `feature/couple-wedding-timeline-20261015`, aktualisiert um Entdecken/Überspringen, Basis `main` bei `0cf33004efaacfdf8715c0bd45293d919a3e4b66`  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
 **Prüfart:** Quellcode und SQL geprüft; keine Live-Prüfung von Vercel oder dem aktiven Supabase-Migrationsstatus
 
@@ -25,7 +25,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Matches und Nachrichten | Likes lassen sich auf der Übersicht beantworten; gegenseitige Likes werden als Matches angezeigt. Neue Matches können direkt angeschrieben werden; bestehende Nachrichten erscheinen in der Nachrichtenansicht. End-to-End-Live-Test steht aus. |
 | E-Mail-Einstellungen | Ereignisbezogene Präferenzen für Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote werden in Supabase gespeichert. Ein Versanddienst, der diese Einstellungen auswertet, ist nicht angeschlossen. |
 | Bearbeitung | Profilentwürfe werden in der Bearbeitung automatisch gespeichert. Navigation und Konto-/Einstellungsdialoge sind im Dashboard vorhanden. |
-| Entdecken | Bleibt bis zur Umsetzung des Browse-/Discover-Flows gesperrt. |
+| Entdecken | Lädt vollständige Profile der jeweils anderen Rolle. Gesendete Likes werden in `profile_likes` gespeichert; ein gegenseitiges Like erzeugt ein Match. „Überspringen“ wird privat in `profile_skips` gespeichert und blendet das Profil künftig aus. Der Live-End-to-End-Test steht noch aus. |
 | Supabase-Live-Status | Nicht geprüft. Eine Migration im Repository beweist nicht, dass sie auf dem verbundenen Supabase-Projekt ausgeführt wurde. |
 
 ## Ablauf und Profile
@@ -52,7 +52,7 @@ Die Migrationsdateien umfassen Profilanlage, rollenabhängige Felder, schrittwei
 
 Die ältere Migration `20261013200000_portfolio_highlight_star.sql` bleibt aus Datenbank-Historiegründen vorhanden. Die aktuelle Oberfläche und das aktuelle Dashboard-JS verwenden keine Highlight-Markierung; die Produktentscheidung sind bis zu 20 normale Galeriefotos. Eine Bereinigung alter Schemafelder wäre eine gesondert zu prüfende Migration und ist nicht Teil dieses Statusupdates.
 
-Die neue Aktivitätsmigration setzt die Grenze des privaten Buckets `wedconnect-profile-photos` auf 2 MB pro gespeicherter Datei. Fotografen- und Paaroberfläche begrenzen Uploads ebenfalls auf 2 MB. Für ein bestehendes Supabase-Projekt den tatsächlich ausgeführten Migrationsverlauf prüfen; Dateien nicht blind erneut ausführen.
+Die Discover-Migration `20261015200000_profile_skips_for_discover.sql` ergänzt private, kontobezogene Überspringen-Einträge. Sie muss vor dem Discover-Live-Test in Supabase ausgeführt sein. Die neue Aktivitätsmigration setzt die Grenze des privaten Buckets `wedconnect-profile-photos` auf 2 MB pro gespeicherter Datei. Fotografen- und Paaroberfläche begrenzen Uploads ebenfalls auf 2 MB. Für ein bestehendes Supabase-Projekt den tatsächlich ausgeführten Migrationsverlauf prüfen; Dateien nicht blind erneut ausführen.
 
 ## Verifikation und Grenzen
 

@@ -1,6 +1,6 @@
 # WedConnect · Project Bible
 
-**Version:** 2.4  
+**Version:** 2.5  
 **Stand:** 15. Oktober 2026  
 **Status:** maßgebliche Produkt- und Projektentscheidungen
 
@@ -29,6 +29,13 @@ WedConnect verbindet Hochzeitspaare mit Fotografen für mögliche TFP-Zusammenar
 4. Anschließend wird das passende Profil erstellt. Entdecken, Likes/Interesse, Matches und Nachrichten dürfen erst nach vollständigem Profil freigeschaltet werden.
 
 Die Rolle gehört zum WedConnect-Profil, nicht zum Anmeldeformular. Ein Rollenwechsel darf nicht stillschweigend Informationen des jeweils anderen Rollenprofils vernichten. Der gewünschte Umgang mit gleichzeitig vorhandenen Profilen ist vor einer Änderung an Datenmodell oder Oberfläche gesondert festzulegen.
+
+## Entdecken, Interesse und Matches
+
+- Nach vollständigem Profil können Nutzer:innen vollständige Profile der jeweils anderen Rolle entdecken.
+- „Interesse zeigen“ speichert ein Like. Ein Match entsteht erst bei gegenseitigem Interesse.
+- „Überspringen“ blendet ein Profil künftig nur für das eigene Konto aus. Die Entscheidung ist privat und benachrichtigt die andere Person nicht.
+- Bereits gelikte, gegenseitig gelikte oder übersprungene Profile erscheinen nicht erneut im Discover-Feed. Eingegangene Likes werden in der Übersicht beantwortet.
 
 ## Profile
 

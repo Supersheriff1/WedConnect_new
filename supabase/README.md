@@ -28,6 +28,7 @@ For a new project, execute the SQL files in the order below using the Supabase S
 20. `supabase/migrations/20261014150000_allow_couple_profile_drafts.sql`
 21. `supabase/migrations/20261015160000_couple_ceremony_and_timeline.sql`
 22. `supabase/migrations/20261015180000_dashboard_activity_and_email_preferences.sql`
+23. `supabase/migrations/20261015200000_profile_skips_for_discover.sql`
 
 The couple profile stores a structured ceremony type and guided timeline. Photographer galleries remain ordinary photos without a highlight selection. Couple profiles show wedding date, town and photo-use preference as key facts. Couple uploads require each partner to be represented: either one joint photo (stored as `photo_type = 'couple'`) or at least one individual photo for each partner. A joint photo may also be combined with individual photos. Each new image is limited to 2 MB. The activity migration also adds messages, role-targeted overview announcements/offers, email preferences, and a 2 MB bucket limit. Do not infer that these migrations are live; check the current Supabase migration history.
 
@@ -40,3 +41,5 @@ The private `wedconnect-profile-photos` bucket accepts JPEG, PNG and WebP. The n
 Configure allowed redirect URLs in Supabase Auth for production and local preview. Google sign-in requires Google provider credentials and the Supabase callback URL in Google Cloud. E-mail and Google use the same role-neutral entry; role selection belongs to profile creation after authentication.
 
 The frontend reads the Supabase URL and publishable key from `assets/js/supabase-config.js`. Never place a service-role key in browser code.
+
+The Discover feed shows complete profiles of the opposite role. Likes are saved in `profile_likes` and can create a match when mutual. “Überspringen” is private to the acting account and saved in `profile_skips`; it never notifies the other profile or creates a match.

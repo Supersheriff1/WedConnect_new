@@ -1,6 +1,6 @@
 # WedConnect · App Design Bible
 
-**Version:** 0.3  
+**Version:** 0.4  
 **Stand:** 15. Oktober 2026  
 **Status:** App-Baseline aus freigegebenen Entscheidungen und Codeprüfung  
 **Geltungsbereich:** Dashboard, Profil-Onboarding, Profilverwaltung und eingeloggte Ansichten
@@ -67,6 +67,13 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Die Bereiche bleiben verborgen, solange es keine passenden Einträge gibt. App-Neuigkeiten und Partnerangebote sind rollenbezogen, Partnerangebote deutlich gekennzeichnet und erscheinen nur, wenn sie veröffentlicht und aktuell sind.
 - Unter „Einstellungen“ können E-Mails für neue Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote getrennt gesteuert werden. Hinweise in der App bleiben unabhängig davon sichtbar. Sicherheits- und wichtige Konto-E-Mails sind davon ausgenommen.
 - Voreinstellung: transaktionale Match-Ereignisse aktiviert; App-Neuigkeiten und Partnerangebote deaktiviert. Der E-Mail-Versand muss diese gespeicherten Einstellungen berücksichtigen.
+
+## Entdecken und Profilaktionen
+
+- Entdecken zeigt jeweils ein vollständiges Profil der anderen Rolle mit Fotos, Eckdaten und Vorstellung.
+- Die Aktion „Interesse zeigen“ speichert ein Like; gegenseitige Likes ergeben ein Match.
+- „Überspringen“ ist eine private, dauerhaft gespeicherte Entscheidung des eigenen Kontos. Sie wird der anderen Person nicht angezeigt und erzeugt kein Match.
+- Profile, die das eigene Konto bereits gelikt oder übersprungen hat, erscheinen nicht erneut im Feed. Neue eingegangene Likes werden in der Übersicht beantwortet.
 
 ## Eingaben und Onboarding
 
