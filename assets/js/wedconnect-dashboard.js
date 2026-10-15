@@ -2826,13 +2826,14 @@
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) {
             const couple = wizard.data.couple || {};
-            if (!currentPhotoCount("partner_one")) {
-              throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_one_first_name || "die erste Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
+            const hasJointPhoto = currentPhotoCount("couple") > 0;
+            if (!hasJointPhoto && !currentPhotoCount("partner_one")) {
+              throw new Error("Lade ein gemeinsames Foto oder ein eigenes Foto für " + (couple.partner_one_first_name || "die erste Person") + " hoch.");
             }
-            if (!currentPhotoCount("partner_two")) {
-              throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_two_first_name || "die zweite Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
+            if (!hasJointPhoto && !currentPhotoCount("partner_two")) {
+              throw new Error("Lade ein gemeinsames Foto oder ein eigenes Foto für " + (couple.partner_two_first_name || "die zweite Person") + " hoch.");
             }
-            throw new Error("Lade für euch beide je mindestens ein eigenes Foto hoch. Ein gemeinsames Foto ist zusätzlich möglich.");
+            throw new Error("Lade ein gemeinsames Foto oder je ein Foto für beide Personen hoch.");
           }
           if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, Trauungsart, Begleitung und Fotos.");
           if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
