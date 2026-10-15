@@ -410,9 +410,9 @@
     updateLinkCheck("website_url");
   }
 
-  function photoPicker(name, label) {
+  function photoPicker(name, label, multiple = true) {
     const id = "photo-picker-" + name;
-    return '<div class="photo-picker"><input class="photo-picker-input" id="' + id + '" type="file" name="' + name + '" accept="image/jpeg,image/png,image/webp" multiple>' +
+    return '<div class="photo-picker"><input class="photo-picker-input" id="' + id + '" type="file" name="' + name + '" accept="image/jpeg,image/png,image/webp"' + (multiple ? " multiple" : "") + '>' +
       '<label class="button button-secondary photo-picker-button" for="' + id + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg><span>' + label + '</span></label></div>';
   }
 
@@ -430,14 +430,64 @@
     return file.type === type ? file : new File([file], file.name, { type, lastModified: file.lastModified });
   }
 
-  function couplePhotoFeedback(inputName, files) {
+  function couplePhotoFeedback(inputName, message) {
     const feedbackId = inputName === "joint-photos" ? "#joint-photo-feedback"
       : inputName === "partner-one-photos" ? "#partner-one-photo-feedback" : "#partner-two-photo-feedback";
     const feedback = document.querySelector(feedbackId);
-    if (!feedback) return;
-    feedback.textContent = files.length
-      ? files.length + (files.length === 1 ? " Foto ausgewählt. Tippe auf „Weiter“, um es hochzuladen." : " Fotos ausgewählt. Tippe auf „Weiter“, um sie hochzuladen.")
-      : "";
+    if (feedback) feedback.textContent = message || "";
+  }
+
+  function coupleInputName(photoType) {
+    return photoType === "couple" ? "joint-photos"
+      : photoType === "partner_one" ? "partner-one-photos" : "partner-two-photos";
+  }
+
+  async function uploadCouplePhotoItem(item) {
+    if (item.uploading) return;
+    const inputName = coupleInputName(item.photoType);
+    item.uploading = true;
+    item.status = "Foto wird hochgeladen …";
+    renderPendingCouplePhotos();
+    nextButton.disabled = true;
+    try {
+      const file = normalizePhotoFile(item.file);
+      if (file.size > maxPhotoBytes) throw new Error("Das Originalfoto ist größer als 10 MB.");
+      const displayFile = item.displayFile || await createContainedPhoto(file);
+      const savedPhoto = await uploadFile(file, item.photoType, wizard.photos.length, displayFile);
+      wizard.photos = (wizard.photos || []).concat(savedPhoto);
+      if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      wizard.pendingCouplePhotos = (wizard.pendingCouplePhotos || []).filter((candidate) => candidate !== item);
+      renderPendingCouplePhotos();
+      const countId = inputName === "joint-photos" ? "#joint-photo-count"
+        : inputName === "partner-one-photos" ? "#partner-one-photo-count" : "#partner-two-photo-count";
+      const count = document.querySelector(countId);
+      if (count) count.textContent = "Bereits hochgeladen: " + currentPhotoCount(item.photoType);
+      couplePhotoFeedback(inputName, "Foto erfolgreich hochgeladen.");
+      loadExistingCouplePhotos();
+    } catch (error) {
+      item.uploading = false;
+      item.status = error && error.message ? error.message : "Das Foto konnte nicht hochgeladen werden.";
+      renderPendingCouplePhotos();
+      couplePhotoFeedback(inputName, item.status);
+      throw error;
+    } finally {
+      nextButton.disabled = false;
+    }
+  }
+
+  function startCouplePhotoCrop(item) {
+    if (item.uploading) return;
+    item.status = "Wähle den Ausschnitt. Nach „Zuschnitt übernehmen“ wird sofort hochgeladen.";
+    renderPendingCouplePhotos();
+    openCropEditor(item.file, async (blob) => {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      item.displayFile = new File([blob], item.name + "-display.jpg", { type: "image/jpeg" });
+      item.previewUrl = URL.createObjectURL(blob);
+      item.status = "Foto wird hochgeladen …";
+      renderPendingCouplePhotos();
+      await uploadCouplePhotoItem(item);
+    });
   }
 
   function attachCouplePhotoControls() {
@@ -466,13 +516,16 @@
               name: normalized.name,
               originalPreviewUrl: URL.createObjectURL(normalized),
               previewUrl: "",
-              displayFile: null
+              displayFile: null,
+              uploading: false,
+              status: ""
             });
           });
           wizard.pendingCouplePhotos = (wizard.pendingCouplePhotos || []).concat(additions);
           input.value = "";
           renderPendingCouplePhotos();
-          couplePhotoFeedback(inputName, additions);
+          couplePhotoFeedback(inputName, "Bitte wähle den Fotoausschnitt aus.");
+          startCouplePhotoCrop(additions[0]);
         } catch (error) {
           additions.forEach((item) => URL.revokeObjectURL(item.originalPreviewUrl));
           errorLine.textContent = error && error.message ? error.message : "Das Foto kann nicht verwendet werden.";
@@ -504,20 +557,17 @@
       const cropButton = document.createElement("button");
       cropButton.className = "button button-secondary photo-crop-button";
       cropButton.type = "button";
-      cropButton.setAttribute("aria-label", "Foto zuschneiden und ausrichten");
-      cropButton.title = "Foto zuschneiden und ausrichten";
+      cropButton.setAttribute("aria-label", "Foto zuschneiden und hochladen");
+      cropButton.title = "Foto zuschneiden und hochladen";
+      cropButton.disabled = Boolean(item.uploading);
       cropButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg>';
-      cropButton.addEventListener("click", () => openCropEditor(item.file, async (blob) => {
-        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-        item.displayFile = new File([blob], item.name.replace(/\.[^.]+$/, "") + "-display.jpg", { type: "image/jpeg" });
-        item.previewUrl = URL.createObjectURL(blob);
-        renderPendingCouplePhotos();
-      }));
+      cropButton.addEventListener("click", () => startCouplePhotoCrop(item));
       const removeButton = document.createElement("button");
       removeButton.className = "button button-secondary photo-delete-button";
       removeButton.type = "button";
       removeButton.setAttribute("aria-label", "Ausgewähltes Foto entfernen");
       removeButton.title = "Ausgewähltes Foto entfernen";
+      removeButton.disabled = Boolean(item.uploading);
       removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l-1-14M9 7V4h6v3"/></svg>';
       removeButton.addEventListener("click", () => {
         if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
@@ -525,8 +575,12 @@
         wizard.pendingCouplePhotos.splice(index, 1);
         renderPendingCouplePhotos();
       });
+      const status = document.createElement("p");
+      status.className = "photo-selection-feedback";
+      status.setAttribute("aria-live", "polite");
+      status.textContent = item.status || "Nach dem Zuschnitt wird das Foto sofort hochgeladen.";
       actions.append(cropButton, removeButton);
-      card.append(image, caption, actions);
+      card.append(image, caption, status, actions);
       container.append(card);
     });
     syncMobileGallerySelection(container);
@@ -540,13 +594,13 @@
       const coupleProfile = wizard.data.couple || {};
       const firstName = escapeHtml(coupleProfile.partner_one_first_name || "Erste Person");
       const secondName = escapeHtml(coupleProfile.partner_two_first_name || "Zweite Person");
-      return '<p class="photo-upload-detail photo-instructions">Du kannst den Ausschnitt bei jedem Foto zuschneiden und ausrichten.</p>' +
-        '<div class="photo-panel"><h3>Gemeinsames Foto</h3><p>Beide Personen sind auf dem Foto zu sehen.</p>' +
-        photoPicker("joint-photos", "Gemeinsames Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="joint-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
-        '<div class="setup-two-col couple-individual-photo-panels"><div class="photo-panel"><h3>' + firstName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        photoPicker("partner-one-photos", "Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-one-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
-        '<div class="photo-panel"><h3>' + secondName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        photoPicker("partner-two-photos", "Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-two-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+      return '<p class="photo-upload-detail photo-instructions">Jede Person muss mindestens ein eigenes Foto hochladen. Nach der Auswahl kannst du den Ausschnitt festlegen; mit „Zuschnitt übernehmen“ wird das Foto sofort hochgeladen. Ein gemeinsames Foto ist optional und ersetzt keines der beiden eigenen Fotos.</p>' +
+        '<div class="setup-two-col couple-individual-photo-panels"><div class="photo-panel"><h3>' + firstName + '</h3><p>Eigenes Foto dieser Person · Pflicht</p>' +
+        photoPicker("partner-one-photos", "Eigenes Foto hinzufügen", false) + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-one-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
+        '<div class="photo-panel"><h3>' + secondName + '</h3><p>Eigenes Foto dieser Person · Pflicht</p>' +
+        photoPicker("partner-two-photos", "Eigenes Foto hinzufügen", false) + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-two-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+        '<div class="photo-panel couple-joint-photo-panel"><h3>Gemeinsames Foto · optional</h3><p>Das gemeinsame Foto kann zusätzlich hochgeladen werden. Für jedes von euch ist trotzdem ein eigenes Foto erforderlich.</p>' +
+        photoPicker("joint-photos", "Gemeinsames Foto hinzufügen", false) + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="joint-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
         '<div id="couple-pending-photos" class="portfolio-photo-grid couple-photo-grid" aria-label="Ausgewählte Fotos"></div>' +
         '<div id="couple-existing-photos" class="portfolio-photo-grid couple-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
@@ -625,7 +679,7 @@
         : step === 2
           ? (wizard.role === "couple" ? "Wählt eure Trauungsart, Begleitungsabschnitte und ungefähr geplante Uhrzeiten aus." : "Wähle aus, was dir für dein Portfolio noch fehlt und du gerne fotografieren möchtest, zum Beispiel ein Getting Ready, die Trauung oder eine Ganztagesreportage. Instagram und Website kannst du optional ergänzen.")
           : step === 3
-            ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
+            ? (wizard.role === "couple" ? "Lade für jede Person mindestens ein eigenes Foto hoch. Ein gemeinsames Foto ist optional." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
     const profileEditExit = document.querySelector("#profile-edit-exit");
     if (profileEditExit) profileEditExit.hidden = !wizard.isEditing;
@@ -1737,28 +1791,27 @@
       }
       throw new Error('„' + file.name + '“ wurde hochgeladen, aber nicht im Profil gespeichert: ' + (rowError.message || "Datenbankfehler."));
     }
+    return { photo_type: photoType, object_path: objectPath, display_path: displayPath, sort_order: sortOrder };
   }
 
   async function uploadSelectedPhotos(allowPartial = false) {
     if (wizard.role === "couple") {
-      const pending = wizard.pendingCouplePhotos || [];
-      const hasSavedPhoto = ["couple", "partner_one", "partner_two"].some((type) => currentPhotoCount(type) > 0);
-      if (!allowPartial && !hasSavedPhoto && !pending.length) {
-        throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
-      }
-      let nextSortOrder = wizard.photos.length;
-      for (const item of [...pending]) {
-        const file = normalizePhotoFile(item.file);
+      for (const item of [...(wizard.pendingCouplePhotos || [])]) {
         try {
-          if (file.size > maxPhotoBytes) throw new Error("Das Originalfoto ist größer als 10 MB.");
-          const displayFile = item.displayFile || await createContainedPhoto(file);
-          await uploadFile(file, item.photoType, nextSortOrder++, displayFile);
-          if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
-          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-          wizard.pendingCouplePhotos = wizard.pendingCouplePhotos.filter((candidate) => candidate !== item);
-          renderPendingCouplePhotos();
+          if (!item.displayFile) item.displayFile = await createContainedPhoto(item.file);
+          await uploadCouplePhotoItem(item);
         } catch (error) {
-          throw new Error('„' + file.name + '“: ' + (error && error.message ? error.message : "Das Foto konnte nicht verarbeitet werden."));
+          const fileName = item.file && item.file.name ? item.file.name : "Foto";
+          throw new Error('„' + fileName + '“: ' + (error && error.message ? error.message : "Das Foto konnte nicht verarbeitet werden."));
+        }
+      }
+      if (!allowPartial) {
+        const couple = wizard.data.couple || {};
+        if (!currentPhotoCount("partner_one")) {
+          throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_one_first_name || "die erste Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
+        }
+        if (!currentPhotoCount("partner_two")) {
+          throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_two_first_name || "die zweite Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
         }
       }
     } else {
@@ -2400,15 +2453,15 @@
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) {
             const couple = wizard.data.couple || {};
-            const hasJoint = currentPhotoCount("couple") > 0;
-            const hasOne = currentPhotoCount("partner_one") > 0;
-            const hasTwo = currentPhotoCount("partner_two") > 0;
-            if (hasJoint) throw new Error("Euer gemeinsames Foto fehlt noch. Ergänze es im Fotoschritt.");
-            if (hasOne && !hasTwo) throw new Error("Es fehlt noch ein Foto für " + (couple.partner_two_first_name || "die zweite Person") + ". Gehe zurück zum Fotoschritt.");
-            if (!hasOne && hasTwo) throw new Error("Es fehlt noch ein Foto für " + (couple.partner_one_first_name || "die erste Person") + ". Gehe zurück zum Fotoschritt.");
-            throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
+            if (!currentPhotoCount("partner_one")) {
+              throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_one_first_name || "die erste Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
+            }
+            if (!currentPhotoCount("partner_two")) {
+              throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_two_first_name || "die zweite Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
+            }
+            throw new Error("Lade für euch beide je mindestens ein eigenes Foto hoch. Ein gemeinsames Foto ist zusätzlich möglich.");
           }
-          if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, das Bundesland, den Begleitungsumfang und den Bildstil.");
+          if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, Trauungsart, Begleitung und Fotos.");
           if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           const code = error.code ? " (" + error.code + ")" : "";
