@@ -39,7 +39,7 @@ set search_path = ''
 as $$
 declare
   current_user_id uuid := auth.uid();
-  current_role text;
+  v_current_role text;
   has_couple_profile boolean;
   has_photographer_profile boolean;
   photo_count integer;
@@ -48,8 +48,8 @@ begin
     raise exception using message = 'not_authenticated';
   end if;
 
-  select role into current_role from public.profiles where id = current_user_id for update;
-  if current_role is null then
+  select role into v_current_role from public.profiles where id = current_user_id for update;
+  if v_current_role is null then
     select exists (
       select 1 from public.couple_profiles where id = current_user_id
     ), exists (
@@ -61,15 +61,15 @@ begin
       raise exception using message = 'role_required';
     end if;
 
-    current_role := case when has_couple_profile then 'couple' else 'photographer' end;
+    v_current_role := case when has_couple_profile then 'couple' else 'photographer' end;
     insert into public.profiles (id, role)
-    values (current_user_id, current_role)
+    values (current_user_id, v_current_role)
     on conflict (id) do update
       set role = excluded.role
       where public.profiles.profile_status is distinct from 'complete';
   end if;
 
-  if current_role = 'couple' then
+  if v_current_role = 'couple' then
     if not exists (
       select 1
       from public.couple_profiles
@@ -101,7 +101,7 @@ begin
     ) < 1 then
       raise exception using message = 'photos_for_both_partners_required';
     end if;
-  elsif current_role = 'photographer' then
+  elsif v_current_role = 'photographer' then
     if not exists (
       select 1
       from public.photographer_profiles
