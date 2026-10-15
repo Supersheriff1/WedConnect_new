@@ -1995,7 +1995,7 @@
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
           ["pin", "Hochzeitsort", location],
-          ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
+          ["camera", "Nutzung durch den Fotografen", preference]
         ],
         sections: [
           ...weddingLocations,
