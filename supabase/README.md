@@ -26,8 +26,9 @@ For a new project, execute the SQL files in the order below using the Supabase S
 18. `supabase/migrations/20261014120000_profile_avatars.sql`
 19. `supabase/migrations/20261014130000_structured_couple_profile_fields.sql`
 20. `supabase/migrations/20261014150000_allow_couple_profile_drafts.sql`
+21. `supabase/migrations/20261015160000_couple_ceremony_and_timeline.sql`
 
-The code and schema include older photographer-highlight fields. The accepted product direction is a gallery of up to 20 ordinary photos without highlights. Do not infer that this product decision has already been applied to Supabase; check the current implementation and decide on a separately reviewed migration before changing deployed data.
+The couple profile stores a structured ceremony type and guided timeline. The code and schema include older photographer-highlight fields. The accepted product direction is a gallery of up to 20 ordinary photos without highlights. Do not infer that this product decision has already been applied to Supabase; check the current implementation and decide on a separately reviewed migration before changing deployed data.
 
 ## Storage
 
