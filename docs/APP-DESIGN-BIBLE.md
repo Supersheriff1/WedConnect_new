@@ -63,7 +63,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Hochzeits- und Fotografenformulare speichern Zwischenschritte; Profiländerungen sollen automatisch gespeichert werden.
 - Zurück-Navigation zwischen den Einrichtungsschritten bleibt vorhanden.
 - Fotografen: Einsatzgebiete sind strukturierte Mehrfachauswahl (Bundesländer oder Ganz Österreich), Erfahrung in Jahren und/oder Zahl der Hochzeiten, Stil als Auswahl inklusive Boho, Umfang als Auswahl, Vergütung Unentgeltlich oder Fixbetrag. Website und Instagram sind optional. Verfügbarkeit und separate Zusatzvergütung für Nutzungsrechte werden nicht abgefragt.
-- Hochzeitspaar: Vornamen beider Personen, Datum, Bundesland, Ort/Location, Gästezahl, Art der Trauung (standesamtlich, kirchlich oder frei), gewünschter Begleitungsumfang und geführter Tagesablauf mit auswählbaren Programmpunkten, ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche entfallen. Die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen bleibt Teil des Profils. Foto beider Personen bleibt erforderlich.
+- Hochzeitspaar: Vornamen beider Personen, Datum, Bundesland, Ort der Hochzeit, separate optionale Locations für Trauung und Feier sowie Gästezahl, Art der Trauung (standesamtlich, kirchlich oder frei), gewünschter Begleitungsumfang und geführter Tagesablauf mit auswählbaren Programmpunkten, ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche entfallen. Die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen bleibt Teil des Profils. Foto beider Personen bleibt erforderlich.
 - Profilabschluss ist erforderlich, bevor Entdecken oder Matching-Funktionen benutzbar sind.
 
 ## Interaktionsqualität und Barrierefreiheit
