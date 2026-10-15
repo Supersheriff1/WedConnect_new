@@ -19,8 +19,6 @@ alter table public.couple_profiles
 
 -- These fields are replaced by guided inputs. Keep old data readable, but allow new drafts to omit them.
 alter table public.couple_profiles
-  alter column visual_style drop not null,
-  alter column image_wishes drop not null,
   alter column location drop not null;
 
 -- Preserve existing town/location data when moving it into the clearer field.
@@ -78,7 +76,7 @@ begin
       where user_id = current_user_id and photo_type = 'partner_two'
     ) then
       raise exception using message = 'photos_for_both_partners_required';
-    end if;;
+    end if;
   elsif current_role = 'photographer' then
     if not exists (
       select 1
