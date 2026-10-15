@@ -58,7 +58,7 @@ Die neue Aktivitätsmigration setzt die Grenze des privaten Buckets `wedconnect-
 
 - Der aktuelle Umsetzungsstand wurde auf `feature/couple-wedding-timeline-20261015` gegen die GitHub-Dateien geprüft; JavaScript-Syntax wurde lokal geparst. Der Branch enthält Profil-, Aktivitäts- und Einstellungsänderungen, ist aber nicht mit `main` zusammengeführt.
 - Der zuletzt vom Nutzer bestätigte Login-Ablauf bleibt als Nutzerbeobachtung dokumentiert; in dieser Runde erfolgte kein erneuter Google- oder E-Mail-Test.
-- Vercel-Deployment, Produktionsverhalten und aktive Supabase-Migrationen wurden nicht live verifiziert. Für Aktivitätsansicht, 2-MB-Grenze und Einstellungen sind die neuen Hochzeitsprofil- und Aktivitätsmigrationen erforderlich.
+- Der PR meldet den automatischen Vercel-Preview-Build als „Ready“ und der Vercel-Statuscheck ist erfolgreich. Der geschützte Preview-Inhalt ließ sich über die verbundene Vercel-Verbindung nicht abrufen; ein UI-End-to-End-Test fand daher nicht statt. Produktionsverhalten und aktive Supabase-Migrationen bleiben ungeprüft; für Aktivitätsansicht, 2-MB-Grenze und Einstellungen sind die neuen Hochzeitsprofil- und Aktivitätsmigrationen erforderlich.
 - Ein Verwaltungsbildschirm zum Erstellen/Planen von Neuigkeiten und Partnerangeboten existiert nicht; veröffentlichte Inhalte können erst nach einer separaten Admin-Funktion gepflegt werden.
 - Die öffentliche Fotografen-Seite wurde nicht verändert. Die Änderung betrifft Dashboard, JavaScript, zwei SQL-Migrationen und Dokumentation.
 
