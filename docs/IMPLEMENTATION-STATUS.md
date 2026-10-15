@@ -1,6 +1,6 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 1.3  
+**Version:** 1.4  
 **Stand der Prüfung:** 15. Oktober 2026  
 **Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Feature-Branch `feature/couple-wedding-timeline-20261015`, Basis `main` bei `0cf33004efaacfdf8715c0bd45293d919a3e4b66`  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
@@ -34,7 +34,7 @@ Die Anmeldung ist für alle gleich und rollenfrei. Nach erfolgreicher Authentifi
 
 Der Hochzeitsprofil-Code enthält auf dem Feature-Branch eine Pflichtauswahl zur Trauungsart (standesamtlich, kirchlich oder frei), österreichisches Bundesland, Ort der Hochzeit und separate optionale Locations für Trauung und Feier, strukturierten Begleitungsumfang und einen geführten Tagesablauf mit bis zu sieben Programmpunkten, jeweils mit ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche werden im Paarformular nicht mehr angezeigt. Die Bildnutzungspräferenz bleibt bestehen. Die SQL-Migration ergänzt `ceremony_type`, `schedule_items`, `wedding_town` und getrennte Felder für Trauungs- und Feierlocation. Vorhandene Ortsangaben werden nach `wedding_town` übernommen; alte Textspalten bleiben zur Kompatibilität erhalten. Für Fotos ist je mindestens ein eigenes Foto pro Person erforderlich; ein gemeinsames Foto ist optional. Nach Auswahl und Zuschnittsbestätigung startet der Upload sofort.
 
-Das Fotografenprofil enthält strukturierte Einsatzgebiete und Stile, Erfahrungsangaben, Begleitungsumfang, persönliche Vorstellung, optionale Instagram-/Website-Angaben sowie die Vergütungsauswahl „Unentgeltlich“ oder „Fixbetrag“. Bei Fixbetrag ist ein Betrag erforderlich. Die Galerie erlaubt bis zu 20 Fotos mit 2-MB-Grenze je Foto; die SQL-Storage-Konfiguration erlaubt größere Objekte, deshalb ist die Client-Grenze gesondert zu beachten.
+Das Fotografenprofil enthält strukturierte Einsatzgebiete und Stile, Erfahrungsangaben, Begleitungsumfang, persönliche Vorstellung, optionale Instagram-/Website-Angaben sowie die Vergütungsauswahl „Unentgeltlich“ oder „Fixbetrag“. Bei Fixbetrag ist ein Betrag erforderlich. Die Galerie erlaubt bis zu 20 Fotos mit 2-MB-Grenze je Foto. Die Aktivitätsmigration setzt den privaten Foto-Bucket ebenfalls auf maximal 2 MB pro Datei; der Status dieser Migration im Live-Supabase ist nicht geprüft.
 
 Nach Profilabschluss führt das Dashboard zur Übersicht; die vollständige eigene Profilansicht liegt unter „Profil“. Eingehende Likes können beantwortet und Matches direkt angeschrieben werden. Konto-Profilfoto und Kontoeinstellungen liegen in Dialogen. Änderungen im Profilbearbeitungsmodus werden automatisch gespeichert. Nicht angemeldete Besucher werden vom Dashboard zur Anmeldung geleitet.
 
