@@ -40,6 +40,8 @@ as $$
 declare
   current_user_id uuid := auth.uid();
   current_role text;
+  has_couple_profile boolean;
+  has_photographer_profile boolean;
   photo_count integer;
 begin
   if current_user_id is null then
@@ -47,6 +49,26 @@ begin
   end if;
 
   select role into current_role from public.profiles where id = current_user_id for update;
+  if current_role is null then
+    select exists (
+      select 1 from public.couple_profiles where id = current_user_id
+    ), exists (
+      select 1 from public.photographer_profiles where id = current_user_id
+    )
+    into has_couple_profile, has_photographer_profile;
+
+    if has_couple_profile = has_photographer_profile then
+      raise exception using message = 'role_required';
+    end if;
+
+    current_role := case when has_couple_profile then 'couple' else 'photographer' end;
+    insert into public.profiles (id, role)
+    values (current_user_id, current_role)
+    on conflict (id) do update
+      set role = excluded.role
+      where public.profiles.profile_status is distinct from 'complete';
+  end if;
+
   if current_role = 'couple' then
     if not exists (
       select 1
