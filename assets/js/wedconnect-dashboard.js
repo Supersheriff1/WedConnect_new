@@ -224,7 +224,7 @@
       field("partner_two_first_name", "Vorname der zweiten Person", "text", "", true, ' maxlength="80"') +
       field("wedding_date", "Hochzeitsdatum", "date", "", true, "") +
       choiceField("region_code", "Bundesland", COUPLE_REGION_OPTIONS, "Für die Zuordnung zu Fotografen.") +
-      field("location", "Ort der Hochzeit", "text", "Zum Beispiel Wien oder Baden bei Wien.", true, ' autocomplete="address-level2" maxlength="160"') +
+      field("wedding_town", "Ort der Hochzeit", "text", "Zum Beispiel Wien oder Baden bei Wien.", true, ' autocomplete="address-level2" maxlength="160"') +
       field("ceremony_location", "Location der Trauung", "text", "Name der Kirche, des Standesamts oder des Trauungsorts.", false, ' maxlength="160"') +
       field("reception_location", "Location der Feier", "text", "Name der Feierlocation, falls sie an einem anderen Ort stattfindet.", false, ' maxlength="160"') +
       field("guest_count", "Ungefähre Gästezahl", "number", "", true, ' min="1" max="5000" step="1" inputmode="numeric"') +
@@ -242,7 +242,7 @@
 
   function renderCoupleDetails() {
     return field("public_intro", "Eure Vorstellung", "textarea", "Optional · erscheint in eurem Profil.", false, ' maxlength="1200"') +
-      choiceField("ceremony_type", "Art der Trauung", CEREMONY_OPTIONS, "Wählt die passende Option aus. Wenn eure Planung noch offen ist, könnt ihr „Noch nicht festgelegt“ wählen.") +
+      choiceField("ceremony_type", "Art der Trauung", CEREMONY_OPTIONS, "Bitte wählt standesamtlich, kirchlich oder frei.") +
       multiSelectField("coverage_options", "Gewünschte Begleitung", COVERAGE_OPTIONS, "Wählt alle Abschnitte aus, die fotografisch begleitet werden sollen.") +
       renderWeddingTimeline() +
       choiceField("photographer_usage_preference", "Fotos durch den Fotografen nutzbar?", [
@@ -568,7 +568,7 @@
           ["Vorstellung", data.public_intro],
           ["Hochzeitsdatum", data.wedding_date],
           ["Bundesland", coupleRegionLabel(data.region_code)],
-          ["Ort der Hochzeit", data.location],
+          ["Ort der Hochzeit", data.wedding_town],
           ["Location der Trauung", data.ceremony_location],
           ["Location der Feier", data.reception_location],
           ["Gäste", data.guest_count],
@@ -1901,7 +1901,7 @@
           ? "Nur nach Absprache"
           : profile.photographer_usage_preference === "no" ? "Nein" : "";
       const region = coupleRegionLabel(profile.region_code);
-      const location = [profile.location, region].filter(Boolean).join(", ");
+      const location = [profile.wedding_town, region].filter(Boolean).join(", ");
       const weddingLocations = [
         ["Location der Trauung", profile.ceremony_location],
         ["Location der Feier", profile.reception_location]
