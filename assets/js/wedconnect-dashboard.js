@@ -267,7 +267,6 @@
     ["civil", "Standesamtliche Trauung"],
     ["religious", "Kirchliche Trauung"],
     ["free", "Freie Trauung"],
-    ["undecided", "Noch nicht festgelegt"]
   ];
   const SCHEDULE_EVENTS = [
     ["getting_ready", "Getting Ready", "Vorbereitung am Hochzeitstag"],
