@@ -47,7 +47,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 
 ### Hochzeitspaarfotos
 
-- Ein gemeinsames Foto genügt; alternativ kann für jede Person ein eigenes Foto hochgeladen werden.
+- Jede Person muss mindestens ein eigenes Foto hochladen. Ein gemeinsames Foto ist optional und ersetzt keines der Personenfotos. Nach Auswahl und Zuschnittsbestätigung wird das Foto sofort hochgeladen.
 - Jedes Bild lässt sich vor der Speicherung zuschneiden und ausrichten. Das Ergebnis und der sichtbare Ausschnitt müssen der späteren Darstellung entsprechen.
 - Für Einzel- und gemeinsame Fotos werden verständliche Upload-Fehler angezeigt.
 
