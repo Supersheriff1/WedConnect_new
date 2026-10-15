@@ -13,7 +13,7 @@
   const errorLine = document.querySelector("#setup-error");
   const progressBar = document.querySelector(".setup-progress");
   const progressFill = document.querySelector("#setup-progress-fill");
-  const maxPhotoBytes = 10 * 1024 * 1024;
+  const maxPhotoBytes = 2 * 1024 * 1024;
   const maxPortfolioPhotoBytes = 2 * 1024 * 1024;
   const maxPortfolioPhotos = 20;
   const loadingStartedAt = performance.now();
@@ -27,6 +27,10 @@
   let supabase;
   let currentUser = null;
   let currentRole = "";
+  let currentGreeting = "";
+  let activeConversationPeer = "";
+  let activityCache = { incoming: [], matches: [], messages: [], summaries: new Map() };
+  let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
@@ -224,7 +228,9 @@
       field("partner_two_first_name", "Vorname der zweiten Person", "text", "", true, ' maxlength="80"') +
       field("wedding_date", "Hochzeitsdatum", "date", "", true, "") +
       choiceField("region_code", "Bundesland", COUPLE_REGION_OPTIONS, "Für die Zuordnung zu Fotografen.") +
-      field("location", "Ort oder Location", "text", "Zum Beispiel Wien oder Schloss Belvedere", true, ' autocomplete="address-level2" maxlength="160"') +
+      field("wedding_town", "Ort der Hochzeit", "text", "Zum Beispiel Wien oder Baden bei Wien.", true, ' autocomplete="address-level2" maxlength="160"') +
+      field("ceremony_location", "Location der Trauung", "text", "Name der Kirche, des Standesamts oder des Trauungsorts.", false, ' maxlength="160"') +
+      field("reception_location", "Location der Feier", "text", "Name der Feierlocation, falls sie an einem anderen Ort stattfindet.", false, ' maxlength="160"') +
       field("guest_count", "Ungefähre Gästezahl", "number", "", true, ' min="1" max="5000" step="1" inputmode="numeric"') +
       "</div>";
   }
@@ -240,12 +246,9 @@
 
   function renderCoupleDetails() {
     return field("public_intro", "Eure Vorstellung", "textarea", "Optional · erscheint in eurem Profil.", false, ' maxlength="1200"') +
+      choiceField("ceremony_type", "Art der Trauung", CEREMONY_OPTIONS, "Bitte wählt standesamtlich, kirchlich oder frei.") +
       multiSelectField("coverage_options", "Gewünschte Begleitung", COVERAGE_OPTIONS, "Wählt alle Abschnitte aus, die fotografisch begleitet werden sollen.") +
-      multiSelectField("styles", "Bildstil", STYLE_OPTIONS, "Wählt alle Bildstile, die euch gefallen.") +
-      '<div class="setup-two-col">' +
-      field("schedule", "Ablauf (optional)", "textarea", "Wenn der Ablauf noch nicht feststeht, ergänzt ihr ihn später.", false, ' maxlength="4000" placeholder="Zum Beispiel: Trauung um 14 Uhr, Paarfotos um 15 Uhr, Feier ab 17 Uhr"') +
-      field("image_wishes", "Bildwünsche (optional)", "textarea", "", false, ' maxlength="2000" placeholder="Besondere Menschen, Momente oder Motive"') +
-      "</div>" +
+      renderWeddingTimeline() +
       choiceField("photographer_usage_preference", "Fotos durch den Fotografen nutzbar?", [
         ["open", "Grundsätzlich offen"],
         ["case_by_case", "Nur nach Absprache"],
@@ -266,6 +269,20 @@
     ["W", "Wien"]
   ];
   const COUPLE_REGION_OPTIONS = REGION_OPTIONS.filter((option) => option[0] !== "AT");
+  const CEREMONY_OPTIONS = [
+    ["civil", "Standesamtliche Trauung"],
+    ["religious", "Kirchliche Trauung"],
+    ["free", "Freie Trauung"],
+  ];
+  const SCHEDULE_EVENTS = [
+    ["getting_ready", "Getting Ready", "Vorbereitung am Hochzeitstag"],
+    ["ceremony", "Trauung", "Ungefähre Uhrzeit der Trauung"],
+    ["couple_photos", "Paarfotos", "Zum Beispiel vor oder nach der Trauung"],
+    ["reception", "Agape und Empfang", ""],
+    ["dinner_speeches", "Essen und Reden", ""],
+    ["party", "Feier und Party", ""],
+    ["other", "Weiterer Programmpunkt", "Zum Beispiel Sektempfang oder Hochzeitstanz"]
+  ];
   const STYLE_OPTIONS = [
     ["documentary", "Reportage"],
     ["natural", "Natürlich & authentisch"],
@@ -292,6 +309,41 @@
     ["half_day", "Halbtagesreportage"],
     ["full_day", "Ganztagesreportage"]
   ];
+
+  function scheduleItemsForForm() {
+    const value = valueOf("schedule_items");
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (_) {}
+    }
+    const legacy = String(valueOf("schedule") || "").trim();
+    return legacy ? [{ event: "other", label: "Bisheriger Ablauf", time: "", note: legacy }] : [];
+  }
+
+  function renderWeddingTimeline() {
+    const existing = scheduleItemsForForm();
+    const byEvent = new Map(existing.map((item) => [item.event, item]));
+    return '<fieldset class="setup-group wedding-timeline"><legend>Euer Ablauf</legend>' +
+      '<p class="setup-hint">Wählt die Programmpunkte aus, die bei euch geplant sind. Uhrzeiten sind ungefähr und können später ergänzt werden.</p>' +
+      '<div class="schedule-event-list">' + SCHEDULE_EVENTS.map((option) => {
+        const item = byEvent.get(option[0]) || {};
+        const checked = byEvent.has(option[0]);
+        const label = option[0] === "other" && item.label ? item.label : option[1];
+        const extraTitle = option[0] === "other"
+          ? '<div class="setup-field"><label for="schedule-other-label">Programmpunkt</label><input id="schedule-other-label" name="schedule_other_label" data-profile-field type="text" maxlength="120" placeholder="Zum Beispiel Hochzeitstanz" value="' + escapeHtml(item.label && item.label !== option[1] && item.label !== "Bisheriger Ablauf" ? item.label : "") + '"></div>'
+          : "";
+        const hint = option[2] ? '<span class="schedule-event-hint">' + option[2] + '</span>' : "";
+        return '<div class="schedule-event-card">' +
+          '<label class="schedule-event-choice"><input type="checkbox" name="schedule_event" value="' + option[0] + '" data-profile-field data-schedule-event' + (checked ? " checked" : "") + '><span><strong>' + option[1] + '</strong>' + hint + '</span></label>' +
+          '<div class="schedule-event-fields" data-schedule-fields' + (checked ? "" : " hidden") + '>' + extraTitle +
+          '<div class="setup-field"><label for="schedule-' + option[0] + '-time">Ungefähre Uhrzeit</label><input id="schedule-' + option[0] + '-time" name="schedule_' + option[0] + '_time" data-profile-field type="time" value="' + escapeHtml(item.time || "") + '"></div>' +
+          '<div class="setup-field"><label for="schedule-' + option[0] + '-note">Optionale Notiz</label><input id="schedule-' + option[0] + '-note" name="schedule_' + option[0] + '_note" data-profile-field type="text" maxlength="240" value="' + escapeHtml(item.note || "") + '" placeholder="Weitere kurze Angaben"></div>' +
+          '</div></div>';
+      }).join("") + '</div></fieldset>';
+  }
 
   function selectedValues(name) {
     const value = valueOf(name);
@@ -362,9 +414,9 @@
     updateLinkCheck("website_url");
   }
 
-  function photoPicker(name, label) {
+  function photoPicker(name, label, multiple = true) {
     const id = "photo-picker-" + name;
-    return '<div class="photo-picker"><input class="photo-picker-input" id="' + id + '" type="file" name="' + name + '" accept="image/jpeg,image/png,image/webp" multiple>' +
+    return '<div class="photo-picker"><input class="photo-picker-input" id="' + id + '" type="file" name="' + name + '" accept="image/jpeg,image/png,image/webp"' + (multiple ? " multiple" : "") + '>' +
       '<label class="button button-secondary photo-picker-button" for="' + id + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg><span>' + label + '</span></label></div>';
   }
 
@@ -382,14 +434,64 @@
     return file.type === type ? file : new File([file], file.name, { type, lastModified: file.lastModified });
   }
 
-  function couplePhotoFeedback(inputName, files) {
+  function couplePhotoFeedback(inputName, message) {
     const feedbackId = inputName === "joint-photos" ? "#joint-photo-feedback"
       : inputName === "partner-one-photos" ? "#partner-one-photo-feedback" : "#partner-two-photo-feedback";
     const feedback = document.querySelector(feedbackId);
-    if (!feedback) return;
-    feedback.textContent = files.length
-      ? files.length + (files.length === 1 ? " Foto ausgewählt. Tippe auf „Weiter“, um es hochzuladen." : " Fotos ausgewählt. Tippe auf „Weiter“, um sie hochzuladen.")
-      : "";
+    if (feedback) feedback.textContent = message || "";
+  }
+
+  function coupleInputName(photoType) {
+    return photoType === "couple" ? "joint-photos"
+      : photoType === "partner_one" ? "partner-one-photos" : "partner-two-photos";
+  }
+
+  async function uploadCouplePhotoItem(item) {
+    if (item.uploading) return;
+    const inputName = coupleInputName(item.photoType);
+    item.uploading = true;
+    item.status = "Foto wird hochgeladen …";
+    renderPendingCouplePhotos();
+    nextButton.disabled = true;
+    try {
+      const file = normalizePhotoFile(item.file);
+      if (file.size > maxPhotoBytes) throw new Error("Das Originalfoto ist größer als 2 MB.");
+      const displayFile = item.displayFile || await createContainedPhoto(file);
+      const savedPhoto = await uploadFile(file, item.photoType, wizard.photos.length, displayFile);
+      wizard.photos = (wizard.photos || []).concat(savedPhoto);
+      if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      wizard.pendingCouplePhotos = (wizard.pendingCouplePhotos || []).filter((candidate) => candidate !== item);
+      renderPendingCouplePhotos();
+      const countId = inputName === "joint-photos" ? "#joint-photo-count"
+        : inputName === "partner-one-photos" ? "#partner-one-photo-count" : "#partner-two-photo-count";
+      const count = document.querySelector(countId);
+      if (count) count.textContent = "Bereits hochgeladen: " + currentPhotoCount(item.photoType);
+      couplePhotoFeedback(inputName, "Foto erfolgreich hochgeladen.");
+      loadExistingCouplePhotos();
+    } catch (error) {
+      item.uploading = false;
+      item.status = error && error.message ? error.message : "Das Foto konnte nicht hochgeladen werden.";
+      renderPendingCouplePhotos();
+      couplePhotoFeedback(inputName, item.status);
+      throw error;
+    } finally {
+      nextButton.disabled = false;
+    }
+  }
+
+  function startCouplePhotoCrop(item) {
+    if (item.uploading) return;
+    item.status = "Wähle den Ausschnitt. Nach „Zuschnitt übernehmen“ wird sofort hochgeladen.";
+    renderPendingCouplePhotos();
+    openCropEditor(item.file, async (blob) => {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      item.displayFile = new File([blob], item.name + "-display.jpg", { type: "image/jpeg" });
+      item.previewUrl = URL.createObjectURL(blob);
+      item.status = "Foto wird hochgeladen …";
+      renderPendingCouplePhotos();
+      await uploadCouplePhotoItem(item);
+    });
   }
 
   function attachCouplePhotoControls() {
@@ -410,7 +512,7 @@
           files.forEach((file) => {
             const normalized = normalizePhotoFile(file);
             if (normalized.size > maxPhotoBytes) {
-              throw new Error('„' + file.name + '“ ist größer als 10 MB. Bitte wähle ein kleineres Foto.');
+              throw new Error('„' + file.name + '“ ist größer als 2 MB. Bitte wähle ein kleineres Foto.');
             }
             additions.push({
               file: normalized,
@@ -418,19 +520,41 @@
               name: normalized.name,
               originalPreviewUrl: URL.createObjectURL(normalized),
               previewUrl: "",
-              displayFile: null
+              displayFile: null,
+              uploading: false,
+              status: ""
             });
           });
           wizard.pendingCouplePhotos = (wizard.pendingCouplePhotos || []).concat(additions);
           input.value = "";
           renderPendingCouplePhotos();
-          couplePhotoFeedback(inputName, additions);
+          couplePhotoFeedback(inputName, "Bitte wähle den Fotoausschnitt aus.");
+          startCouplePhotoCrop(additions[0]);
         } catch (error) {
           additions.forEach((item) => URL.revokeObjectURL(item.originalPreviewUrl));
           errorLine.textContent = error && error.message ? error.message : "Das Foto kann nicht verwendet werden.";
         }
       });
     });
+  }
+
+  function couplePhotoName(photoType, profile) {
+    if (!profile) return "";
+    if (photoType === "couple") {
+      return [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ");
+    }
+    if (photoType === "partner_one") return profile.partner_one_first_name || "";
+    if (photoType === "partner_two") return profile.partner_two_first_name || "";
+    return "";
+  }
+
+  function createCouplePhotoNameOverlay(photoType, profile) {
+    const name = couplePhotoName(photoType, profile);
+    if (!name) return null;
+    const overlay = document.createElement("span");
+    overlay.className = "couple-photo-name-overlay";
+    overlay.textContent = name;
+    return overlay;
   }
 
   function renderPendingCouplePhotos() {
@@ -445,9 +569,14 @@
     (wizard.pendingCouplePhotos || []).forEach((item, index) => {
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
+      const frame = document.createElement("div");
+      frame.className = "couple-photo-preview-frame";
       const image = document.createElement("img");
       image.src = item.previewUrl || item.originalPreviewUrl;
       image.alt = labels[item.photoType] + " · Vorschau";
+      frame.append(image);
+      const nameOverlay = createCouplePhotoNameOverlay(item.photoType, wizard.data.couple || {});
+      if (nameOverlay) frame.append(nameOverlay);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = labels[item.photoType];
@@ -456,20 +585,17 @@
       const cropButton = document.createElement("button");
       cropButton.className = "button button-secondary photo-crop-button";
       cropButton.type = "button";
-      cropButton.setAttribute("aria-label", "Foto zuschneiden und ausrichten");
-      cropButton.title = "Foto zuschneiden und ausrichten";
+      cropButton.setAttribute("aria-label", "Foto zuschneiden und hochladen");
+      cropButton.title = "Foto zuschneiden und hochladen";
+      cropButton.disabled = Boolean(item.uploading);
       cropButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg>';
-      cropButton.addEventListener("click", () => openCropEditor(item.file, async (blob) => {
-        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-        item.displayFile = new File([blob], item.name.replace(/\.[^.]+$/, "") + "-display.jpg", { type: "image/jpeg" });
-        item.previewUrl = URL.createObjectURL(blob);
-        renderPendingCouplePhotos();
-      }));
+      cropButton.addEventListener("click", () => startCouplePhotoCrop(item));
       const removeButton = document.createElement("button");
       removeButton.className = "button button-secondary photo-delete-button";
       removeButton.type = "button";
       removeButton.setAttribute("aria-label", "Ausgewähltes Foto entfernen");
       removeButton.title = "Ausgewähltes Foto entfernen";
+      removeButton.disabled = Boolean(item.uploading);
       removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 14h11l-1-14M9 7V4h6v3"/></svg>';
       removeButton.addEventListener("click", () => {
         if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
@@ -477,8 +603,12 @@
         wizard.pendingCouplePhotos.splice(index, 1);
         renderPendingCouplePhotos();
       });
+      const status = document.createElement("p");
+      status.className = "photo-selection-feedback";
+      status.setAttribute("aria-live", "polite");
+      status.textContent = item.status || "Nach dem Zuschnitt wird das Foto sofort hochgeladen.";
       actions.append(cropButton, removeButton);
-      card.append(image, caption, actions);
+      card.append(frame, caption, status, actions);
       container.append(card);
     });
     syncMobileGallerySelection(container);
@@ -492,13 +622,13 @@
       const coupleProfile = wizard.data.couple || {};
       const firstName = escapeHtml(coupleProfile.partner_one_first_name || "Erste Person");
       const secondName = escapeHtml(coupleProfile.partner_two_first_name || "Zweite Person");
-      return '<p class="photo-upload-detail photo-instructions">Du kannst den Ausschnitt bei jedem Foto zuschneiden und ausrichten.</p>' +
-        '<div class="photo-panel"><h3>Gemeinsames Foto</h3><p>Beide Personen sind auf dem Foto zu sehen.</p>' +
-        photoPicker("joint-photos", "Gemeinsames Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="joint-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
-        '<div class="setup-two-col couple-individual-photo-panels"><div class="photo-panel"><h3>' + firstName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        photoPicker("partner-one-photos", "Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-one-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
-        '<div class="photo-panel"><h3>' + secondName + '</h3><p>Ein Foto, auf dem diese Person zu sehen ist.</p>' +
-        photoPicker("partner-two-photos", "Foto hinzufügen") + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 10 MB pro Foto.</p><p id="partner-two-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+      return '<p class="photo-upload-detail photo-instructions">Jede Person muss mindestens ein eigenes Foto hochladen. Nach der Auswahl kannst du den Ausschnitt festlegen; mit „Zuschnitt übernehmen“ wird das Foto sofort hochgeladen. Ein gemeinsames Foto ist optional und ersetzt keines der beiden eigenen Fotos.</p>' +
+        '<div class="setup-two-col couple-individual-photo-panels"><div class="photo-panel"><h3>' + firstName + '</h3><p>Eigenes Foto dieser Person · Pflicht</p>' +
+        photoPicker("partner-one-photos", "Eigenes Foto hinzufügen", false) + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 2 MB pro Foto.</p><p id="partner-one-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-one-photo-count" class="photo-count">Bereits hochgeladen: ' + oneCount + "</p></div>" +
+        '<div class="photo-panel"><h3>' + secondName + '</h3><p>Eigenes Foto dieser Person · Pflicht</p>' +
+        photoPicker("partner-two-photos", "Eigenes Foto hinzufügen", false) + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 2 MB pro Foto.</p><p id="partner-two-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="partner-two-photo-count" class="photo-count">Bereits hochgeladen: ' + twoCount + "</p></div></div>" +
+        '<div class="photo-panel couple-joint-photo-panel"><h3>Gemeinsames Foto · optional</h3><p>Das gemeinsame Foto kann zusätzlich hochgeladen werden. Für jedes von euch ist trotzdem ein eigenes Foto erforderlich.</p>' +
+        photoPicker("joint-photos", "Gemeinsames Foto hinzufügen", false) + '<p class="photo-upload-hint">JPG, PNG oder WebP · maximal 2 MB pro Foto.</p><p id="joint-photo-feedback" class="photo-selection-feedback" aria-live="polite"></p><p id="joint-photo-count" class="photo-count">Bereits hochgeladen: ' + jointCount + "</p></div>" +
         '<div id="couple-pending-photos" class="portfolio-photo-grid couple-photo-grid" aria-label="Ausgewählte Fotos"></div>' +
         '<div id="couple-existing-photos" class="portfolio-photo-grid couple-photo-grid" aria-label="Bereits hochgeladene Fotos"></div>';
     }
@@ -516,14 +646,17 @@
     const data = wizard.data[wizard.role === "couple" ? "couple" : "photographer"];
     const entries = wizard.role === "couple"
       ? [
-          ["Vornamen", data.partner_one_first_name + " und " + data.partner_two_first_name],
+          ["Vornamen", data.partner_one_first_name + " & " + data.partner_two_first_name],
           ["Vorstellung", data.public_intro],
           ["Hochzeitsdatum", data.wedding_date],
           ["Bundesland", coupleRegionLabel(data.region_code)],
-          ["Ort oder Location", data.location], ["Gäste", data.guest_count],
+          ["Ort der Hochzeit", data.wedding_town],
+          ["Location der Trauung", data.ceremony_location],
+          ["Location der Feier", data.reception_location],
+          ["Gäste", data.guest_count],
+          ["Art der Trauung", ceremonyTypeLabel(data.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(data.coverage_options, COVERAGE_OPTIONS) || data.coverage_scope],
-          ["Bildstil", profileLabels(data.styles, STYLE_OPTIONS) || data.visual_style],
-          ["Ablauf", data.schedule], ["Bildwünsche", data.image_wishes],
+          ["Ablauf", formatScheduleItems(data.schedule_items) || data.schedule],
           ["Nutzung durch Fotograf", data.photographer_usage_preference === "open" ? "Grundsätzlich offen" : data.photographer_usage_preference === "case_by_case" ? "Nur nach Absprache" : "Nein"],
           ["Fotos", currentPhotoCount("couple") ? "Gemeinsames Foto hochgeladen" : Math.min(2, Number(currentPhotoCount("partner_one") > 0) + Number(currentPhotoCount("partner_two") > 0)) + " von 2 Einzelfotos hochgeladen"]
         ]
@@ -572,9 +705,9 @@
       : step === 1
         ? (wizard.role === "couple" ? "Wie dürfen wir euch ansprechen und wann heiratet ihr?" : "Wie dürfen wir dich ansprechen?")
         : step === 2
-          ? (wizard.role === "couple" ? "Erzähl kurz von eurer Feier und euren Bildwünschen." : "Wähle aus, was dir für dein Portfolio noch fehlt und du gerne fotografieren möchtest, zum Beispiel ein Getting Ready, die Trauung oder eine Ganztagesreportage. Instagram und Website kannst du optional ergänzen.")
+          ? (wizard.role === "couple" ? "Wählt eure Trauungsart, Begleitungsabschnitte und ungefähr geplante Uhrzeiten aus." : "Wähle aus, was dir für dein Portfolio noch fehlt und du gerne fotografieren möchtest, zum Beispiel ein Getting Ready, die Trauung oder eine Ganztagesreportage. Instagram und Website kannst du optional ergänzen.")
           : step === 3
-            ? (wizard.role === "couple" ? "Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
+            ? (wizard.role === "couple" ? "Lade für jede Person mindestens ein eigenes Foto hoch. Ein gemeinsames Foto ist optional." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
     const profileEditExit = document.querySelector("#profile-edit-exit");
     if (profileEditExit) profileEditExit.hidden = !wizard.isEditing;
@@ -1177,9 +1310,14 @@
       const label = labels[photo.photo_type] || "Foto";
       const card = document.createElement("article");
       card.className = "portfolio-photo-card";
+      const frame = document.createElement("div");
+      frame.className = "couple-photo-preview-frame";
       const image = document.createElement("img");
       image.src = displayUrl;
       image.alt = label + " " + (index + 1);
+      frame.append(image);
+      const nameOverlay = createCouplePhotoNameOverlay(photo.photo_type, wizard.data.couple || {});
+      if (nameOverlay) frame.append(nameOverlay);
       activateMobileGalleryPhoto(container, card, image, image.alt);
       const caption = document.createElement("p");
       caption.textContent = label;
@@ -1245,7 +1383,7 @@
         }
       });
       actions.append(editButton, deleteButton);
-      card.append(image, caption, actions);
+      card.append(frame, caption, actions);
       container.append(card);
     }
     syncMobileGallerySelection(container);
@@ -1393,6 +1531,21 @@
         values[element.name] = element.value.trim();
       }
     });
+    if (wizard.role === "couple" && fields.querySelector('[name="schedule_event"]')) {
+      const selected = values.schedule_event || [];
+      values.schedule_items = selected.map((event) => ({
+        event,
+        label: event === "other" ? (values.schedule_other_label || "") : "",
+        time: values["schedule_" + event + "_time"] || "",
+        note: values["schedule_" + event + "_note"] || ""
+      }));
+      delete values.schedule_event;
+      delete values.schedule_other_label;
+      SCHEDULE_EVENTS.forEach(([event]) => {
+        delete values["schedule_" + event + "_time"];
+        delete values["schedule_" + event + "_note"];
+      });
+    }
     return values;
   }
 
@@ -1437,18 +1590,28 @@
     const data = Object.assign({}, wizard.data[key], values);
     if (wizard.role === "couple") {
       const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
-      const styles = Array.isArray(data.styles) ? data.styles : [];
       const regionCode = data.region_code || "";
+      const ceremonyType = data.ceremony_type || "";
+      const scheduleItems = Array.isArray(data.schedule_items) ? data.schedule_items : [];
       if (!allowIncomplete && wizard.step === 1 && !COUPLE_REGION_OPTIONS.some((option) => option[0] === regionCode)) {
         throw new Error("Wähle das Bundesland eurer Hochzeit aus.");
       }
+      if (!allowIncomplete && wizard.step === 2 && !CEREMONY_OPTIONS.some((option) => option[0] === ceremonyType)) {
+        throw new Error("Wähle die Art der Trauung aus.");
+      }
       if (!allowIncomplete && wizard.step === 2 && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
-      if (!allowIncomplete && wizard.step === 2 && !styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+      if (!allowIncomplete && wizard.step === 2 && scheduleItems.some((item) => item.event === "other" && !String(item.label || "").trim())) {
+        throw new Error("Gib den Namen für den weiteren Programmpunkt ein.");
+      }
       data.region_code = regionCode;
+      data.ceremony_type = ceremonyType;
       data.coverage_options = coverage;
-      data.styles = styles;
       data.coverage_scope = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
-      data.visual_style = styles.map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
+      data.schedule_items = scheduleItems;
+      data.schedule = formatScheduleItems(scheduleItems);
+      data.styles = [];
+      data.visual_style = "";
+      data.image_wishes = "";
     }
     if (wizard.role === "photographer") {
       const regions = Array.isArray(data.regions) ? data.regions : [];
@@ -1622,7 +1785,7 @@
     file = normalizePhotoFile(file);
     const sizeLimit = photoType === "portfolio" ? maxPortfolioPhotoBytes : maxPhotoBytes;
     if (file.size > sizeLimit) {
-      throw new Error('„' + file.name + '“ ist größer als ' + (photoType === "portfolio" ? "2" : "10") + " MB.");
+      throw new Error('„' + file.name + '“ ist größer als ' + "2" + " MB.");
     }
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
     const objectPath = currentUser.id + "/" + crypto.randomUUID() + "." + extension;
@@ -1661,28 +1824,27 @@
       }
       throw new Error('„' + file.name + '“ wurde hochgeladen, aber nicht im Profil gespeichert: ' + (rowError.message || "Datenbankfehler."));
     }
+    return { photo_type: photoType, object_path: objectPath, display_path: displayPath, sort_order: sortOrder };
   }
 
   async function uploadSelectedPhotos(allowPartial = false) {
     if (wizard.role === "couple") {
-      const pending = wizard.pendingCouplePhotos || [];
-      const hasSavedPhoto = ["couple", "partner_one", "partner_two"].some((type) => currentPhotoCount(type) > 0);
-      if (!allowPartial && !hasSavedPhoto && !pending.length) {
-        throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
-      }
-      let nextSortOrder = wizard.photos.length;
-      for (const item of [...pending]) {
-        const file = normalizePhotoFile(item.file);
+      for (const item of [...(wizard.pendingCouplePhotos || [])]) {
         try {
-          if (file.size > maxPhotoBytes) throw new Error("Das Originalfoto ist größer als 10 MB.");
-          const displayFile = item.displayFile || await createContainedPhoto(file);
-          await uploadFile(file, item.photoType, nextSortOrder++, displayFile);
-          if (item.originalPreviewUrl) URL.revokeObjectURL(item.originalPreviewUrl);
-          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-          wizard.pendingCouplePhotos = wizard.pendingCouplePhotos.filter((candidate) => candidate !== item);
-          renderPendingCouplePhotos();
+          if (!item.displayFile) item.displayFile = await createContainedPhoto(item.file);
+          await uploadCouplePhotoItem(item);
         } catch (error) {
-          throw new Error('„' + file.name + '“: ' + (error && error.message ? error.message : "Das Foto konnte nicht verarbeitet werden."));
+          const fileName = item.file && item.file.name ? item.file.name : "Foto";
+          throw new Error('„' + fileName + '“: ' + (error && error.message ? error.message : "Das Foto konnte nicht verarbeitet werden."));
+        }
+      }
+      if (!allowPartial) {
+        const couple = wizard.data.couple || {};
+        if (!currentPhotoCount("partner_one")) {
+          throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_one_first_name || "die erste Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
+        }
+        if (!currentPhotoCount("partner_two")) {
+          throw new Error("Lade mindestens ein eigenes Foto für " + (couple.partner_two_first_name || "die zweite Person") + " hoch. Ein gemeinsames Foto reicht dafür nicht.");
         }
       }
     } else {
@@ -1735,7 +1897,7 @@
 
   function profileGreeting(role, profile) {
     if (role === "couple" && profile) {
-      return [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ");
+      return [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ");
     }
     return profile && profile.first_name ? profile.first_name : "";
   }
@@ -1753,6 +1915,23 @@
 
   function profileLabels(values, options) {
     return profileArray(values).map((value) => (options.find((option) => option[0] === value) || [value, value])[1]).join(", ");
+  }
+
+  function ceremonyTypeLabel(value) {
+    return (CEREMONY_OPTIONS.find((option) => option[0] === value) || ["", ""])[1] || "";
+  }
+
+  function formatScheduleItems(value) {
+    let items = value;
+    if (!Array.isArray(items) && typeof items === "string" && items.trim()) {
+      try { items = JSON.parse(items); } catch (_) { return items; }
+    }
+    if (!Array.isArray(items)) return "";
+    return items.map((item) => {
+      const option = SCHEDULE_EVENTS.find(([event]) => event === item.event);
+      const label = item.event === "other" ? item.label : option ? option[1] : item.label || item.event;
+      return [label, item.time, item.note].filter(Boolean).join(" · ");
+    }).filter(Boolean).join("; ");
   }
 
   function coupleRegionLabel(value) {
@@ -1808,18 +1987,22 @@
           ? "Nur nach Absprache"
           : profile.photographer_usage_preference === "no" ? "Nein" : "";
       const region = coupleRegionLabel(profile.region_code);
-      const location = [profile.location, region].filter(Boolean).join(", ");
+      const location = [profile.wedding_town, region].filter(Boolean).join(", ");
+      const weddingLocations = [
+        ["Location der Trauung", profile.ceremony_location],
+        ["Location der Feier", profile.reception_location]
+      ].filter(([, value]) => String(value || "").trim());
       return {
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
-          ["pin", "Ort", location],
-          ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
+          ["pin", "Hochzeitsort", location],
+          ["camera", "Nutzung durch den Fotografen", preference]
         ],
         sections: [
+          ...weddingLocations,
+          ["Art der Trauung", ceremonyTypeLabel(profile.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope],
-          ["Ablauf", profile.schedule],
-          ["Bildstil", profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style],
-          ["Bildwünsche", profile.image_wishes],
+          ["Ablauf", formatScheduleItems(profile.schedule_items) || profile.schedule],
           ["Nutzung durch den Fotografen", preference]
         ]
       };
@@ -2012,6 +2195,10 @@
       image.decoding = "async";
       image.alt = role === "couple" ? "Foto des Hochzeitspaars " + (index + 1) : "Portfoliofoto " + (index + 1);
       figure.append(image);
+      if (role === "couple") {
+        const nameOverlay = createCouplePhotoNameOverlay(photo.photo_type, profile);
+        if (nameOverlay) figure.append(nameOverlay);
+      }
       track.append(figure);
       renderedCount += 1;
     });
@@ -2032,7 +2219,7 @@
     identity.className = "profile-preview-identity";
     const name = document.createElement("h3");
     name.textContent = role === "couple"
-      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ")
+      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ")
       : profile.first_name || "Dein Profil";
     identity.append(name);
 
@@ -2074,12 +2261,13 @@
 
     const detailsData = profileDetailRows(role, profile);
     const metadata = document.createElement("div");
-    metadata.className = "profile-preview-metadata";
+    metadata.className = role === "couple" ? "profile-preview-key-facts" : "profile-preview-metadata";
     detailsData.chips.forEach(([icon, label, value]) => addPreviewChip(metadata, icon, label, value));
 
     const content = document.createElement("div");
     content.className = "profile-preview-content";
     content.append(identity);
+    if (role === "couple" && metadata.children.length) content.append(metadata);
     if (role === "photographer") {
       const keyFacts = document.createElement("div");
       keyFacts.className = "profile-preview-key-facts";
@@ -2127,7 +2315,7 @@
 
     const additional = document.createElement("div");
     additional.className = "profile-preview-additional";
-    if (metadata.children.length) additional.append(metadata);
+    if (role === "photographer" && metadata.children.length) additional.append(metadata);
     detailsData.sections.forEach(([title, value]) => addPreviewSection(additional, title, value));
     if (profileDetailsResizeHandler) {
       window.removeEventListener("resize", profileDetailsResizeHandler);
@@ -2140,6 +2328,575 @@
     loadProfileGalleryImages(gallery);
   }
 
+  async function loadPublicProfileSummary(userId) {
+    const { data: header, error: headerError } = await supabase.from("profiles").select("id,role").eq("id", userId).maybeSingle();
+    if (headerError || !header) return null;
+    const table = header.role === "couple" ? "couple_profiles" : "photographer_profiles";
+    const { data: profile, error: profileError } = await supabase.from(table).select("*").eq("id", userId).maybeSingle();
+    if (profileError || !profile) return null;
+    const summary = { id: userId, role: header.role, name: "", detail: "", photoUrl: "" };
+    if (header.role === "couple") {
+      summary.name = [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar";
+      summary.detail = [profileDate(profile.wedding_date), profile.wedding_town, coupleRegionLabel(profile.region_code)].filter(Boolean).join(" · ");
+    } else {
+      summary.name = profile.first_name || "Fotograf";
+      summary.detail = [profile.region, profile.experience_years != null ? profile.experience_years + (Number(profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : ""].filter(Boolean).join(" · ");
+    }
+    const { data: photos } = await supabase.from("profile_photos")
+      .select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order").limit(30);
+    const candidates = (photos || []).filter((photo) => header.role === "photographer"
+      ? photo.photo_type === "portfolio"
+      : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
+    const photo = header.role === "couple"
+      ? candidates.find((item) => item.photo_type === "couple") || candidates.find((item) => item.photo_type === "partner_one") || candidates[0]
+      : candidates[0];
+    if (photo) {
+      const { data } = await supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600);
+      if (data && data.signedUrl) summary.photoUrl = data.signedUrl;
+    }
+    return summary;
+  }
+
+  async function loadDashboardContent() {
+    const today = new Date().toISOString();
+    const [newsResult, offersResult] = await Promise.all([
+      supabase.from("app_announcements").select("id,title,body,destination_url,target_role,published_at,expires_at")
+        .eq("is_published", true).lte("published_at", today).or("target_role.is.null,target_role.eq." + currentRole).order("published_at", { ascending: false }),
+      supabase.from("partner_offers").select("id,partner_name,title,description,terms,destination_url,target_role,starts_at,expires_at")
+        .eq("is_published", true).lte("starts_at", today).or("target_role.is.null,target_role.eq." + currentRole).order("starts_at", { ascending: false })
+    ]);
+    const active = (rows, startKey) => (rows || []).filter((item) =>
+      !item.expires_at || new Date(item.expires_at).getTime() > Date.now()
+    );
+    return {
+      news: newsResult.error ? [] : active(newsResult.data, "published_at"),
+      offers: offersResult.error ? [] : active(offersResult.data, "starts_at")
+    };
+  }
+
+  function createContentCard(item, kind) {
+    const card = document.createElement("article");
+    card.className = "activity-card content-card";
+    const copy = document.createElement("div");
+    copy.className = "activity-card-copy";
+    const label = document.createElement("span");
+    label.className = "content-card-label";
+    label.textContent = kind === "offer" ? "Partnerangebot" : "WedConnect-Neuigkeit";
+    const title = document.createElement("strong");
+    title.textContent = item.title || (kind === "offer" ? "Angebot" : "Neuigkeit");
+    const detail = document.createElement("p");
+    detail.textContent = kind === "offer"
+      ? [item.partner_name, item.description, item.terms ? "Bedingungen: " + item.terms : ""].filter(Boolean).join(" · ")
+      : item.body || "";
+    copy.append(label, title, detail);
+    card.append(copy);
+    const rawUrl = item.destination_url || "";
+    if (rawUrl) {
+      try {
+        const url = new URL(rawUrl, window.location.href);
+        if (["http:", "https:"].includes(url.protocol)) {
+          const link = document.createElement("a");
+          link.className = "button button-secondary";
+          link.href = url.toString();
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = kind === "offer" ? "Zum Angebot" : "Mehr erfahren";
+          card.append(link);
+        }
+      } catch (_) {}
+    }
+    return card;
+  }
+
+  function createActivityCard(summary, kind) {
+    const card = document.createElement("article");
+    card.className = "activity-card";
+    const avatar = document.createElement("div");
+    avatar.className = "activity-avatar";
+    if (summary.photoUrl) {
+      const image = document.createElement("img");
+      image.src = summary.photoUrl;
+      image.alt = "";
+      avatar.append(image);
+    } else {
+      avatar.textContent = summary.name.trim().slice(0, 1).toUpperCase() || "W";
+      avatar.setAttribute("aria-hidden", "true");
+    }
+    const copy = document.createElement("div");
+    copy.className = "activity-card-copy";
+    const name = document.createElement("strong");
+    name.textContent = summary.name;
+    const detail = document.createElement("p");
+    detail.textContent = summary.detail || (summary.role === "couple" ? "Hochzeitspaar" : "Fotograf");
+    copy.append(name, detail);
+    const actions = document.createElement("div");
+    actions.className = "activity-card-actions";
+    if (kind === "like") {
+      const likeBack = document.createElement("button");
+      likeBack.type = "button";
+      likeBack.className = "button button-primary";
+      likeBack.dataset.likeBack = summary.id;
+      likeBack.textContent = "Zurückliken";
+      const pass = document.createElement("button");
+      pass.type = "button";
+      pass.className = "button button-secondary";
+      pass.dataset.dismissLike = summary.id;
+      pass.textContent = "Nein danke";
+      actions.append(likeBack, pass);
+    } else {
+      const message = document.createElement("button");
+      message.type = "button";
+      message.className = "button button-primary";
+      message.dataset.openConversation = summary.id;
+      message.textContent = activityCache.messagedPeers && activityCache.messagedPeers.has(summary.id) ? "Gespräch öffnen" : "Nachricht schreiben";
+      actions.append(message);
+    }
+    card.append(avatar, copy, actions);
+    return card;
+  }
+
+  async function loadActivityData() {
+    const userId = currentUser && currentUser.id;
+    if (!userId) return;
+    const [inboundResult, outboundResult] = await Promise.all([
+      supabase.from("profile_likes").select("liker_id,created_at").eq("liked_id", userId).order("created_at", { ascending: false }),
+      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false })
+    ]);
+    if (inboundResult.error || outboundResult.error) throw new Error("Likes konnten nicht geladen werden. Prüfe die Profil-Likes-Migration in Supabase.");
+    const inbound = inboundResult.data || [];
+    const outgoingIds = new Set((outboundResult.data || []).map((item) => item.liked_id));
+    const matches = inbound.filter((item) => outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
+    const incoming = inbound.filter((item) => !outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
+    let messages = [];
+    if (matches.length) {
+      const result = await supabase.from("profile_messages")
+        .select("sender_id,recipient_id,body,created_at")
+        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
+        .order("created_at", { ascending: true });
+      if (result.error) throw new Error("Nachrichten konnten nicht geladen werden. Führe die WedConnect-Nachrichtenmigration aus.");
+      messages = result.data || [];
+    } else {
+      const result = await supabase.from("profile_messages")
+        .select("sender_id,recipient_id,body,created_at")
+        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
+        .order("created_at", { ascending: true });
+      if (!result.error) messages = result.data || [];
+    }
+    const messagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
+    const newMatches = matches.filter((peerId) => !messagedPeers.has(peerId));
+    const ids = Array.from(new Set([...incoming, ...matches]));
+    const summaries = await Promise.all(ids.map((id) => loadPublicProfileSummary(id)));
+    const content = await loadDashboardContent();
+    activityCache = {
+      incoming: incoming.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
+      matches: matches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
+      newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
+      messages,
+      messagedPeers,
+      news: content.news,
+      offers: content.offers,
+      summaries: new Map(summaries.filter(Boolean).map((summary) => [summary.id, summary]))
+    };
+  }
+
+  function renderOverviewActivity() {
+    const incomingSection = document.querySelector("#incoming-likes-section");
+    const matchesSection = document.querySelector("#new-matches-section");
+    const incomingList = document.querySelector("#incoming-likes-list");
+    const matchesList = document.querySelector("#new-matches-list");
+    incomingList.replaceChildren();
+    matchesList.replaceChildren();
+    activityCache.incoming.forEach((summary) => incomingList.append(createActivityCard(summary, "like")));
+    activityCache.newMatches.forEach((summary) => matchesList.append(createActivityCard(summary, "match")));
+    incomingSection.hidden = !activityCache.incoming.length;
+    matchesSection.hidden = !activityCache.newMatches.length;
+    document.querySelector("#incoming-likes-count").textContent = String(activityCache.incoming.length);
+    document.querySelector("#new-matches-count").textContent = String(activityCache.newMatches.length);
+    document.querySelector("#overview-empty-state").hidden = Boolean(activityCache.incoming.length || activityCache.newMatches.length || activityCache.news.length || activityCache.offers.length);
+    const newsSection = document.querySelector("#overview-news-section");
+    const newsList = document.querySelector("#overview-news-list");
+    newsList.replaceChildren();
+    (activityCache.news || []).forEach((item) => newsList.append(createContentCard(item, "news")));
+    newsSection.hidden = !activityCache.news.length;
+    const offersSection = document.querySelector("#overview-offers-section");
+    const offersList = document.querySelector("#overview-offers-list");
+    offersList.replaceChildren();
+    (activityCache.offers || []).forEach((item) => offersList.append(createContentCard(item, "offer")));
+    offersSection.hidden = !activityCache.offers.length;
+  }
+
+  function renderMatchList() {
+    const container = document.querySelector("#matches-list");
+    container.replaceChildren();
+    activityCache.matches.forEach((summary) => container.append(createActivityCard(summary, activityCache.messagedPeers.has(summary.id) ? "match" : "match")));
+    document.querySelector("#matches-empty-state").hidden = activityCache.matches.length > 0;
+  }
+
+  function renderMessagesList() {
+    const container = document.querySelector("#messages-list");
+    container.replaceChildren();
+    const peers = Array.from(activityCache.messagedPeers || []);
+    peers.forEach((peerId) => {
+      const summary = activityCache.summaries.get(peerId) || { id: peerId, name: "WedConnect-Mitglied", detail: "", photoUrl: "" };
+      const card = document.createElement("article");
+      card.className = "activity-card";
+      const copy = document.createElement("div");
+      copy.className = "activity-card-copy";
+      const name = document.createElement("strong");
+      name.textContent = summary.name;
+      const peerMessages = activityCache.messages.filter((item) => item.sender_id === peerId || item.recipient_id === peerId);
+      const latest = peerMessages[peerMessages.length - 1];
+      const detail = document.createElement("p");
+      detail.textContent = latest ? latest.body : "Gespräch öffnen";
+      copy.append(name, detail);
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "button button-secondary";
+      open.dataset.openConversation = peerId;
+      open.textContent = "Gespräch öffnen";
+      card.append(copy, open);
+      container.append(card);
+    });
+    document.querySelector("#messages-empty-state").hidden = peers.length > 0;
+  }
+
+  async function refreshActivityViews() {
+    try {
+      await loadActivityData();
+      renderOverviewActivity();
+      renderMatchList();
+      renderMessagesList();
+    } catch (error) {
+      showNotice(error && error.message ? error.message : "Aktivitäten konnten nicht geladen werden.");
+      document.querySelector("#overview-empty-state").hidden = false;
+    }
+  }
+
+  async function loadDiscoverFeed() {
+    const container = document.querySelector("#discover-content");
+    if (!container || discoverState.loading) return;
+    if (discoverState.loaded) {
+      if (!discoverState.active) await advanceDiscoverFeed();
+      return;
+    }
+    discoverState.loading = true;
+    container.replaceChildren();
+    const loading = document.createElement("p");
+    loading.className = "overview-empty-state";
+    loading.textContent = "Passende Profile werden geladen …";
+    container.append(loading);
+    try {
+      const oppositeRole = currentRole === "couple" ? "photographer" : "couple";
+      const [profilesResult, outgoingResult, incomingResult, skipsResult] = await Promise.all([
+        supabase.from("profiles").select("id,role").eq("profile_status", "complete").eq("role", oppositeRole),
+        supabase.from("profile_likes").select("liked_id").eq("liker_id", currentUser.id),
+        supabase.from("profile_likes").select("liker_id").eq("liked_id", currentUser.id),
+        supabase.from("profile_skips").select("skipped_id").eq("skipper_id", currentUser.id)
+      ]);
+      if (profilesResult.error || outgoingResult.error || incomingResult.error || skipsResult.error) {
+        throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob die Profil-Likes- und Entdecken-Migrationen in Supabase ausgeführt wurden.");
+      }
+      const excluded = new Set([currentUser.id]);
+      (outgoingResult.data || []).forEach((item) => excluded.add(item.liked_id));
+      (incomingResult.data || []).forEach((item) => excluded.add(item.liker_id));
+      (skipsResult.data || []).forEach((item) => excluded.add(item.skipped_id));
+      discoverState.ids = (profilesResult.data || []).map((item) => item.id).filter((id) => !excluded.has(id));
+      for (let i = discoverState.ids.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [discoverState.ids[i], discoverState.ids[j]] = [discoverState.ids[j], discoverState.ids[i]];
+      }
+      discoverState.index = 0;
+      discoverState.loaded = true;
+      await advanceDiscoverFeed();
+    } catch (error) {
+      container.replaceChildren();
+      const message = document.createElement("p");
+      message.className = "overview-empty-state";
+      message.textContent = error && error.message ? error.message : "Entdecken konnte gerade nicht geladen werden.";
+      container.append(message);
+      discoverState.loaded = false;
+    } finally {
+      discoverState.loading = false;
+    }
+  }
+
+  async function loadDiscoverProfile(userId) {
+    const headerResult = await supabase.from("profiles").select("id,role").eq("id", userId).maybeSingle();
+    if (headerResult.error || !headerResult.data || headerResult.data.profile_status === "incomplete") throw new Error("Profil nicht verfügbar");
+    const role = headerResult.data.role;
+    if (role !== (currentRole === "couple" ? "photographer" : "couple")) throw new Error("Profilrolle passt nicht");
+    const table = role === "couple" ? "couple_profiles" : "photographer_profiles";
+    const [profileResult, photosResult] = await Promise.all([
+      supabase.from(table).select("*").eq("id", userId).maybeSingle(),
+      supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order", { ascending: true }).limit(30)
+    ]);
+    if (profileResult.error || !profileResult.data) throw new Error("Profil konnte nicht geöffnet werden");
+    const photos = (photosResult.data || []).filter((photo) => role === "photographer"
+      ? photo.photo_type === "portfolio"
+      : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
+    return { id: userId, role, profile: profileResult.data, photos };
+  }
+
+  async function advanceDiscoverFeed() {
+    const container = document.querySelector("#discover-content");
+    if (!container) return;
+    discoverState.active = null;
+    container.replaceChildren();
+    while (discoverState.index < discoverState.ids.length) {
+      const id = discoverState.ids[discoverState.index++];
+      try {
+        const candidate = await loadDiscoverProfile(id);
+        discoverState.active = candidate;
+        discoverState.photoIndex = 0;
+        renderDiscoverCard(candidate);
+        return;
+      } catch (_) {}
+    }
+    const empty = document.createElement("p");
+    empty.className = "overview-empty-state";
+    empty.textContent = "Im Moment gibt es keine weiteren passenden Profile. Schau später wieder vorbei.";
+    container.append(empty);
+  }
+
+  async function setDiscoverPhoto(candidate, index, image, label) {
+    if (!candidate.photos.length) return;
+    discoverState.photoIndex = (index + candidate.photos.length) % candidate.photos.length;
+    const photo = candidate.photos[discoverState.photoIndex];
+    const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600);
+    if (!error && data && data.signedUrl) image.src = data.signedUrl;
+    image.alt = candidate.role === "couple" ? "Foto von " + [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ") : "Portfoliofoto von " + (candidate.profile.first_name || "Fotograf");
+    label.textContent = (discoverState.photoIndex + 1) + " / " + candidate.photos.length;
+    const oldName = image.parentElement.querySelector(".couple-photo-name-overlay");
+    if (oldName) oldName.remove();
+    if (candidate.role === "couple") {
+      const nameOverlay = createCouplePhotoNameOverlay(photo.photo_type, candidate.profile);
+      if (nameOverlay) image.parentElement.append(nameOverlay);
+    }
+  }
+
+  function renderDiscoverCard(candidate) {
+    const container = document.querySelector("#discover-content");
+    container.replaceChildren();
+    const card = document.createElement("article");
+    card.className = "discover-profile-card";
+    const photoFrame = document.createElement("div");
+    photoFrame.className = "discover-photo-frame";
+    const image = document.createElement("img");
+    image.alt = "";
+    image.loading = "eager";
+    image.decoding = "async";
+    const coupleName = [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ");
+    const displayName = candidate.role === "couple" ? coupleName || "Hochzeitspaar" : candidate.profile.first_name || "Fotograf";
+    if (candidate.photos.length) {
+      const firstPhoto = candidate.photos[0];
+      supabase.storage.from(photoBucket).createSignedUrl(firstPhoto.display_path || firstPhoto.object_path, 600).then(({ data, error }) => {
+        if (!error && data && data.signedUrl && image.isConnected) image.src = data.signedUrl;
+      });
+      if (candidate.role === "couple") {
+        const nameOverlay = createCouplePhotoNameOverlay(firstPhoto.photo_type, candidate.profile);
+        if (nameOverlay) photoFrame.append(nameOverlay);
+      }
+    } else {
+      image.className = "discover-photo-placeholder";
+    }
+    photoFrame.prepend(image);
+    const photoCount = document.createElement("span");
+    photoCount.className = "discover-photo-count";
+    photoCount.textContent = candidate.photos.length ? "1 / " + candidate.photos.length : "Kein Profilfoto";
+    if (candidate.photos.length > 1) {
+      const previous = document.createElement("button");
+      previous.type = "button";
+      previous.className = "discover-photo-arrow discover-photo-arrow--previous";
+      previous.setAttribute("aria-label", "Vorheriges Foto");
+      previous.textContent = "‹";
+      previous.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex - 1, image, photoCount));
+      const next = document.createElement("button");
+      next.type = "button";
+      next.className = "discover-photo-arrow discover-photo-arrow--next";
+      next.setAttribute("aria-label", "Nächstes Foto");
+      next.textContent = "›";
+      next.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex + 1, image, photoCount));
+      photoFrame.append(previous, next);
+    }
+    photoFrame.append(photoCount);
+    card.append(photoFrame);
+
+    const content = document.createElement("div");
+    content.className = "discover-profile-content";
+    const heading = document.createElement("h2");
+    heading.className = "discover-profile-name";
+    heading.textContent = displayName;
+    const details = profileDetailRows(candidate.role, candidate.profile);
+    const subtitle = document.createElement("p");
+    subtitle.className = "discover-profile-subtitle";
+    const subtitleFacts = candidate.role === "couple"
+      ? [candidate.profile.guest_count ? candidate.profile.guest_count + " Gäste" : "", ceremonyTypeLabel(candidate.profile.ceremony_type)]
+      : [profileLabels(candidate.profile.regions, REGION_OPTIONS) || candidate.profile.region, candidate.profile.experience_years != null ? candidate.profile.experience_years + (Number(candidate.profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : ""];
+    subtitle.textContent = subtitleFacts.filter(Boolean).join(" · ") || (candidate.role === "couple" ? "Hochzeitspaar" : "Hochzeitsfotograf");
+    content.append(heading, subtitle);
+    const keyFacts = document.createElement("div");
+    keyFacts.className = "discover-profile-facts profile-preview-key-facts";
+    const visibleFacts = candidate.role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])];
+    visibleFacts.forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
+    if (keyFacts.children.length) content.append(keyFacts);
+    const intro = String(candidate.profile.public_intro || "").trim();
+    if (intro) {
+      const about = document.createElement("p");
+      about.className = "discover-profile-intro";
+      about.textContent = intro;
+      content.append(about);
+    }
+    const sections = (details.sections || []).filter(([, value]) => String(value || "").trim());
+    if (sections.length) {
+      const detailList = document.createElement("dl");
+      detailList.className = "discover-profile-sections";
+      sections.forEach(([label, value]) => {
+        const row = document.createElement("div");
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value;
+        row.append(term, description);
+        detailList.append(row);
+      });
+      content.append(detailList);
+    }
+    const actions = document.createElement("div");
+    actions.className = "discover-actions";
+    const skip = document.createElement("button");
+    skip.type = "button";
+    skip.className = "button button-secondary";
+    skip.dataset.discoverAction = "skip";
+    skip.textContent = "Überspringen";
+    const like = document.createElement("button");
+    like.type = "button";
+    like.className = "button button-primary";
+    like.dataset.discoverAction = "like";
+    like.textContent = "Interesse zeigen";
+    actions.append(skip, like);
+    content.append(actions);
+    card.append(content);
+    container.append(card);
+  }
+
+  async function handleDiscoverAction(actionButton) {
+    const candidate = discoverState.active;
+    if (!candidate || actionButton.disabled) return;
+    const buttons = document.querySelectorAll("[data-discover-action]");
+    buttons.forEach((button) => { button.disabled = true; });
+    if (actionButton.dataset.discoverAction === "like") {
+      const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: candidate.id });
+      if (error && !/duplicate|unique/i.test(error.message || "")) {
+        showNotice("Dein Interesse konnte nicht gespeichert werden. Bitte versuche es erneut.");
+        buttons.forEach((button) => { button.disabled = false; });
+        return;
+      }
+      const { data: reciprocal, error: reciprocalError } = await supabase.from("profile_likes").select("liker_id").eq("liker_id", candidate.id).eq("liked_id", currentUser.id).maybeSingle();
+      showNotice(!reciprocalError && reciprocal ? "Es ist ein Match! Ihr könnt euch jetzt schreiben." : "Interesse gesendet.");
+    } else {
+      const { error } = await supabase.from("profile_skips").insert({ skipper_id: currentUser.id, skipped_id: candidate.id });
+      if (error && !/duplicate|unique/i.test(error.message || "")) {
+        showNotice("Das Profil konnte gerade nicht übersprungen werden. Bitte versuche es erneut.");
+        buttons.forEach((button) => { button.disabled = false; });
+        return;
+      }
+    }
+    await advanceDiscoverFeed();
+    await refreshActivityViews();
+  }
+
+  function setDashboardView(view) {
+    document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
+      section.hidden = section.dataset.dashboardView !== view;
+    });
+    setActiveNavigation(view);
+    const titles = {
+      home: "Willkommen" + (currentGreeting ? ", " + currentGreeting : "") + "!",
+      profile: currentRole === "couple" ? "Euer Profil" : "Dein Profil",
+      matches: "Matches",
+      messages: "Nachrichten",
+      discover: currentRole === "couple" ? "Fotografen entdecken" : "Hochzeiten entdecken"
+    };
+    document.querySelector("#page-title").textContent = titles[view] || "Willkommen!";
+  }
+
+  async function openConversation(peerId) {
+    activeConversationPeer = peerId;
+    const summary = activityCache.summaries.get(peerId) || await loadPublicProfileSummary(peerId);
+    document.querySelector("#conversation-title").textContent = summary ? summary.name : "Nachricht";
+    await renderConversationThread();
+    document.querySelector("#conversation-status").textContent = "";
+    openWorkspaceDialog(document.querySelector("#conversation-dialog"));
+  }
+
+  async function renderConversationThread() {
+    const container = document.querySelector("#conversation-thread");
+    if (!container) return;
+    container.replaceChildren();
+    const userId = currentUser.id;
+    const messages = activityCache.messages.filter((item) =>
+      (item.sender_id === userId && item.recipient_id === activeConversationPeer)
+      || (item.sender_id === activeConversationPeer && item.recipient_id === userId));
+    if (!messages.length) {
+      const empty = document.createElement("p");
+      empty.className = "conversation-empty";
+      empty.textContent = "Ihr habt noch keine Nachricht ausgetauscht. Schreib den ersten Satz.";
+      container.append(empty);
+      return;
+    }
+    messages.forEach((item) => {
+      const bubble = document.createElement("div");
+      bubble.className = "conversation-message" + (item.sender_id === userId ? " is-own" : "");
+      const body = document.createElement("span");
+      body.textContent = item.body;
+      const time = document.createElement("time");
+      time.dateTime = item.created_at;
+      time.textContent = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(item.created_at));
+      bubble.append(body, time);
+      container.append(bubble);
+    });
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function persistEmailPreferences() {
+    const form = document.querySelector("#email-preferences-form");
+    const status = document.querySelector("#email-preferences-status");
+    if (!form || !currentUser) return;
+    const preferences = Object.fromEntries(Array.from(form.querySelectorAll('input[type="checkbox"]')).map((input) => [input.name, input.checked]));
+    status.textContent = "Wird gespeichert …";
+    const { error } = await supabase.from("user_email_preferences").upsert({
+      user_id: currentUser.id,
+      incoming_likes: preferences.incoming_likes,
+      new_matches: preferences.new_matches,
+      new_messages: preferences.new_messages,
+      app_news: preferences.app_news,
+      partner_offers: preferences.partner_offers,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+    status.textContent = error ? "Speichern nicht möglich. Prüfe die Benachrichtigungs-Migration." : "Gespeichert.";
+    status.dataset.state = error ? "error" : "success";
+  }
+
+  async function loadEmailPreferences() {
+    const form = document.querySelector("#email-preferences-form");
+    const status = document.querySelector("#email-preferences-status");
+    if (!form || !currentUser) return;
+    const { data, error } = await supabase.from("user_email_preferences")
+      .select("incoming_likes,new_matches,new_messages,app_news,partner_offers").eq("user_id", currentUser.id).maybeSingle();
+    if (!error && data) {
+      Object.entries(data).forEach(([name, checked]) => {
+        const input = form.querySelector('[name="' + name + '"]');
+        if (input) input.checked = Boolean(checked);
+      });
+      status.textContent = "Gespeichert.";
+    } else if (error) {
+      status.textContent = "Einstellungen konnten nicht geladen werden. Prüfe die Benachrichtigungs-Migration.";
+      status.dataset.state = "error";
+    } else {
+      status.textContent = "Noch nicht gespeichert. Deine Auswahl wird beim Ändern gespeichert.";
+    }
+  }
+
   async function setupRole(role, user, complete, greeting, profile, photos) {
     wizard.isEditing = false;
     wizard.autoSaveEnabled = false;
@@ -2148,7 +2905,10 @@
     currentRole = role === "couple" || role === "photographer" ? role : "";
     const couple = currentRole === "couple";
     const photographer = currentRole === "photographer";
+    currentGreeting = greeting || "";
     const roleName = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Profil einrichten";
+    const discoverIntro = document.querySelector("#discover-intro");
+    if (discoverIntro) discoverIntro.textContent = couple ? "Entdecke Hochzeitsfotografen, die zu euch passen könnten." : "Entdecke Hochzeitspaare, deren Geschichten zu deiner Arbeit passen könnten.";
     document.querySelector("#side-role").textContent = roleName;
     await renderAccountAvatar();
     document.querySelector("#account-email").textContent = user.email || "E-Mail nicht verfügbar";
@@ -2159,19 +2919,21 @@
     document.querySelector("#desktop-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
       navItem("Profil", "profile", false, !currentRole) +
-      navItem(couple ? "Fotografen entdecken" : "Hochzeiten entdecken", "discover", false, true) +
-      navItem("Matches", "matches", false, true) +
-      navItem("Nachrichten", "messages", false, true);
+      navItem(couple ? "Fotografen entdecken" : "Hochzeiten entdecken", "discover", false, false) +
+      navItem("Matches", "matches", false, false) +
+      navItem("Nachrichten", "messages", false, false);
     document.querySelector("#mobile-nav").innerHTML =
       navItem("Übersicht", "home", true, false) +
       navItem("Profil", "profile", false, !currentRole) +
-      navItem("Entdecken", "discover", false, true) +
-      navItem("Matches", "matches", false, true) +
-      navItem("Nachrichten", "messages", false, true);
+      navItem("Entdecken", "discover", false, false) +
+      navItem("Matches", "matches", false, false) +
+      navItem("Nachrichten", "messages", false, false);
     await renderOwnProfilePreview(currentRole, profile || {}, photos || []);
     loading.classList.add("hidden");
     onboarding.classList.add("hidden");
     dashboard.classList.remove("hidden");
+    setDashboardView("home");
+    await Promise.all([refreshActivityViews(), loadEmailPreferences()]);
   }
 
   const icons = {
@@ -2183,8 +2945,7 @@
   };
 
   function navItem(label, icon, active, disabled) {
-    const state = active ? 'aria-current="page"' : disabled
-      ? 'disabled aria-disabled="true"' : icon === "profile" ? 'data-profile-setup' : "";
+    const state = active ? 'aria-current="page"' : disabled ? 'disabled aria-disabled="true"' : "";
     return '<button class="nav-link' + (active ? " active" : "") + '" type="button" data-nav-item="' + icon + '" ' + state + ">" +
       icons[icon] + "<span>" + label + "</span>" +
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : "") + "</button>";
@@ -2212,6 +2973,11 @@
   fields.addEventListener("change", (event) => {
     const target = event.target;
     scheduleDraftAutoSave();
+    if (target.matches('input[type="checkbox"][data-schedule-event]')) {
+      const row = target.closest(".schedule-event-card");
+      const details = row && row.querySelector("[data-schedule-fields]");
+      if (details) details.hidden = !target.checked;
+    }
     if (target.matches('select[name="compensation_type"]')) {
       const amountWrap = fields.querySelector("#compensation-amount-wrap");
       const amountInput = fields.querySelector('input[name="compensation_amount_eur"]');
@@ -2273,7 +3039,7 @@
         const values = collectFields();
         if (wizard.role === "couple" && wizard.step === 2) {
           if (!values.coverage_options || !values.coverage_options.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
-          if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+          if (!CEREMONY_OPTIONS.some((option) => option[0] === values.ceremony_type)) throw new Error("Wähle die Art der Trauung aus.");
         }
         if (wizard.role === "photographer" && wizard.step === 1) {
           if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
@@ -2298,15 +3064,16 @@
           const message = error.message || "";
           if (message.includes("photos_for_both_partners_required")) {
             const couple = wizard.data.couple || {};
-            const hasJoint = currentPhotoCount("couple") > 0;
-            const hasOne = currentPhotoCount("partner_one") > 0;
-            const hasTwo = currentPhotoCount("partner_two") > 0;
-            if (hasJoint) throw new Error("Euer gemeinsames Foto fehlt noch. Ergänze es im Fotoschritt.");
-            if (hasOne && !hasTwo) throw new Error("Es fehlt noch ein Foto für " + (couple.partner_two_first_name || "die zweite Person") + ". Gehe zurück zum Fotoschritt.");
-            if (!hasOne && hasTwo) throw new Error("Es fehlt noch ein Foto für " + (couple.partner_one_first_name || "die erste Person") + ". Gehe zurück zum Fotoschritt.");
-            throw new Error("Lade ein gemeinsames Foto oder je ein Foto von euch beiden hoch.");
+            const hasJointPhoto = currentPhotoCount("couple") > 0;
+            if (!hasJointPhoto && !currentPhotoCount("partner_one")) {
+              throw new Error("Lade ein gemeinsames Foto oder ein eigenes Foto für " + (couple.partner_one_first_name || "die erste Person") + " hoch.");
+            }
+            if (!hasJointPhoto && !currentPhotoCount("partner_two")) {
+              throw new Error("Lade ein gemeinsames Foto oder ein eigenes Foto für " + (couple.partner_two_first_name || "die zweite Person") + " hoch.");
+            }
+            throw new Error("Lade ein gemeinsames Foto oder je ein Foto für beide Personen hoch.");
           }
-          if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, das Bundesland, den Begleitungsumfang und den Bildstil.");
+          if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, Trauungsart, Begleitung und Fotos.");
           if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           const code = error.code ? " (" + error.code + ")" : "";
@@ -2398,11 +3165,16 @@
     catch (error) { if (accountPhotoStatus) accountPhotoStatus.textContent = error && error.message ? error.message : "Das Profilfoto konnte nicht entfernt werden."; }
     finally { accountPhotoRemove.disabled = false; }
   });
-  if (settingsTrigger) settingsTrigger.addEventListener("click", () => openWorkspaceDialog(settingsDialog));
+  if (settingsTrigger) settingsTrigger.addEventListener("click", () => {
+    openWorkspaceDialog(settingsDialog);
+    loadEmailPreferences();
+  });
   document.querySelector("#account-settings-open").addEventListener("click", () => {
     if (accountDialog.open) accountDialog.close();
     openWorkspaceDialog(settingsDialog);
+    loadEmailPreferences();
   });
+  document.querySelector("#email-preferences-form").addEventListener("change", persistEmailPreferences);
   document.querySelector("#account-profile-edit").addEventListener("click", () => {
     if (accountDialog.open) accountDialog.close();
     beginWizard(currentRole, currentRole ? 1 : 0);
@@ -2411,25 +3183,75 @@
     if (accountDialog.open) accountDialog.close();
     beginWizard(currentRole, 0);
   });
+  document.addEventListener("click", async (event) => {
+    const discoverAction = event.target.closest("[data-discover-action]");
+    if (discoverAction) {
+      await handleDiscoverAction(discoverAction);
+      return;
+    }
+    const likeBack = event.target.closest("[data-like-back]");
+    if (likeBack) {
+      likeBack.disabled = true;
+      const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: likeBack.dataset.likeBack });
+      if (error && !/duplicate|unique/i.test(error.message || "")) showNotice("Dein Like konnte nicht gespeichert werden.");
+      await refreshActivityViews();
+      return;
+    }
+    const dismiss = event.target.closest("[data-dismiss-like]");
+    if (dismiss) {
+      dismiss.disabled = true;
+      const { error } = await supabase.from("profile_likes").delete()
+        .eq("liker_id", dismiss.dataset.dismissLike).eq("liked_id", currentUser.id);
+      if (error) showNotice("Das Like konnte nicht ausgeblendet werden. Prüfe die Profil-Likes-Migration.");
+      await refreshActivityViews();
+      return;
+    }
+    const openMessage = event.target.closest("[data-open-conversation]");
+    if (openMessage) await openConversation(openMessage.dataset.openConversation);
+  });
+
+  document.querySelector("#conversation-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const input = document.querySelector("#conversation-input");
+    const status = document.querySelector("#conversation-status");
+    const body = String(input.value || "").trim();
+    if (!body || !activeConversationPeer) return;
+    status.textContent = "Wird gesendet …";
+    const send = document.querySelector("#conversation-form button[type=submit]");
+    send.disabled = true;
+    const { error } = await supabase.from("profile_messages").insert({
+      sender_id: currentUser.id,
+      recipient_id: activeConversationPeer,
+      body
+    });
+    send.disabled = false;
+    if (error) {
+      status.textContent = "Nachricht konnte nicht gesendet werden. Prüfe, ob das Match noch besteht.";
+      return;
+    }
+    input.value = "";
+    status.textContent = "Nachricht gesendet.";
+    await refreshActivityViews();
+    await renderConversationThread();
+  });
+
   document.querySelectorAll("[data-dialog-close]").forEach((button) => button.addEventListener("click", () => {
     const dialog = button.closest("dialog");
     if (dialog && dialog.open) dialog.close();
   }));
 
-  document.querySelector("#desktop-nav").addEventListener("click", async (event) => {
-    if (event.target.closest("[data-profile-setup]")) {
-      if (!wizard.isEditing || onboarding.classList.contains("hidden")) beginWizard(currentRole, 1);
-      return;
-    }
-    if (wizard.isEditing && event.target.closest(".nav-link")) await closeProfileEditor();
-  });
-  document.querySelector("#mobile-nav").addEventListener("click", async (event) => {
-    if (event.target.closest("[data-profile-setup]")) {
-      if (!wizard.isEditing || onboarding.classList.contains("hidden")) beginWizard(currentRole, 1);
-      return;
-    }
-    if (wizard.isEditing && event.target.closest(".nav-link")) await closeProfileEditor();
-  });
+  async function handleDashboardNavigation(event) {
+    const button = event.target.closest("[data-nav-item]");
+    if (!button || button.disabled) return;
+    const view = button.dataset.navItem;
+    if (!["home", "profile", "matches", "messages", "discover"].includes(view)) return;
+    if (wizard.isEditing) await closeProfileEditor();
+    setDashboardView(view);
+    if (view === "home" || view === "matches" || view === "messages") await refreshActivityViews();
+    if (view === "discover") await loadDiscoverFeed();
+  }
+  document.querySelector("#desktop-nav").addEventListener("click", handleDashboardNavigation);
+  document.querySelector("#mobile-nav").addEventListener("click", handleDashboardNavigation);
 
   document.querySelectorAll("[data-signout]").forEach((button) => button.addEventListener("click", async () => {
     if (wizard.isEditing) {

@@ -1,7 +1,7 @@
 # WedConnect · Project Bible
 
-**Version:** 2.3  
-**Stand:** 14. Oktober 2026  
+**Version:** 2.5  
+**Stand:** 15. Oktober 2026  
 **Status:** maßgebliche Produkt- und Projektentscheidungen
 
 ## Zweck und Vorrang
@@ -30,13 +30,20 @@ WedConnect verbindet Hochzeitspaare mit Fotografen für mögliche TFP-Zusammenar
 
 Die Rolle gehört zum WedConnect-Profil, nicht zum Anmeldeformular. Ein Rollenwechsel darf nicht stillschweigend Informationen des jeweils anderen Rollenprofils vernichten. Der gewünschte Umgang mit gleichzeitig vorhandenen Profilen ist vor einer Änderung an Datenmodell oder Oberfläche gesondert festzulegen.
 
+## Entdecken, Interesse und Matches
+
+- Nach vollständigem Profil können Nutzer:innen vollständige Profile der jeweils anderen Rolle entdecken.
+- „Interesse zeigen“ speichert ein Like. Ein Match entsteht erst bei gegenseitigem Interesse.
+- „Überspringen“ blendet ein Profil künftig nur für das eigene Konto aus. Die Entscheidung ist privat und benachrichtigt die andere Person nicht.
+- Bereits gelikte, gegenseitig gelikte oder übersprungene Profile erscheinen nicht erneut im Discover-Feed. Eingegangene Likes werden in der Übersicht beantwortet.
+
 ## Profile
 
 ### Hochzeitspaar
 
-Erfasst werden die Vornamen beider heiratenden Personen, Hochzeitsdatum, Bundesland, Ort/Location, ungefähre Gästezahl, Ablauf, gewünschter Begleitungsumfang, Stil und Bildwünsche sowie die Haltung zur Veröffentlichung der entstandenen Bilder durch den Fotografen.
+Erfasst werden die Vornamen beider heiratenden Personen, Hochzeitsdatum, Bundesland, Ort der Hochzeit, optionale Location der Trauung, optionale Location der Feier und ungefähre Gästezahl, Art der Trauung (standesamtlich, kirchlich oder frei), gewünschter Begleitungsumfang, ein geführter Tagesablauf mit auswählbaren Programmpunkten, ungefähren Uhrzeiten und optionalen Hinweisen sowie die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen. Ein Bildstil und separate Bildwünsche werden im Paarprofil nicht abgefragt.
 
-Beide Personen müssen im Profil erkennbar sein: zulässig ist ein gemeinsames Foto oder je ein eigenes Foto pro Person. Fotos können beim Hochladen zugeschnitten und ausgerichtet werden; Original und angezeigte Fassung werden getrennt behandelt.
+Beide Personen müssen jeweils mindestens ein eigenes Foto hochladen. Ein gemeinsames Foto kann zusätzlich hochgeladen werden, ersetzt aber keines der beiden Personenfotos. Nach Auswahl wird der Zuschnitt bestätigt und das Foto direkt hochgeladen. Original und angezeigte Fassung werden getrennt behandelt.
 
 ### Fotograf
 
@@ -60,6 +67,12 @@ Alle beteiligten Personen werden im Produkt mit Vornamen angesprochen. Profile e
 - Nach einem Match können die Beteiligten offene Fragen zu Ablauf, Umfang, Vergütung, Lieferung und Bildrechten klären.
 
 Matching, Like-Status, Chat und Benachrichtigungen gelten erst dann als umgesetzt, wenn der aktuelle Implementierungsstand sowohl die Oberfläche als auch die Datenflüsse bestätigt.
+
+## Übersicht und E-Mail-Benachrichtigungen
+
+Die Übersicht ist der Startbildschirm nach dem Login. Sie zeigt offene eingegangene Likes, gegenseitige Matches ohne erste Nachricht und, sofern vorhanden, rollenbezogene App-Neuigkeiten sowie klar gekennzeichnete Partnerangebote. Inhalte ohne aktuelle Einträge werden nicht angezeigt. Der Menüpunkt „Profil“ bleibt die vollständige eigene Profilansicht; „Matches“ enthält gegenseitige Likes.
+
+Nutzer:innen steuern in den Einstellungen pro Ereignis, ob WedConnect E-Mails zu Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangeboten schicken darf. In-App-Hinweise bleiben davon unberührt. Wichtige Sicherheits- und Konto-E-Mails können weiterhin versendet werden.
 
 ## Konto und Hilfe
 
