@@ -4,7 +4,8 @@ alter table public.couple_profiles
   add column if not exists ceremony_type text not null default '',
   add column if not exists schedule_items jsonb not null default '[]'::jsonb,
   add column if not exists ceremony_location text not null default '',
-  add column if not exists reception_location text not null default '';
+  add column if not exists reception_location text not null default '',
+  add column if not exists wedding_town text not null default '';
 
 alter table public.couple_profiles
   drop constraint if exists couple_profiles_ceremony_type_allowed,
@@ -19,14 +20,10 @@ alter table public.couple_profiles
 -- These fields are replaced by guided inputs. Keep old data readable, but allow new drafts to omit them.
 alter table public.couple_profiles
   alter column visual_style drop not null,
-  alter column image_wishes drop not null;
+  alter column image_wishes drop not null,
+  alter column location drop not null;
 
--- Ceremony type is required to complete a couple profile; drafts may remain blank.
-alter table public.couple_profiles
-  drop constraint if exists couple_profiles_ceremony_type_allowed,
-  add constraint couple_profiles_ceremony_type_allowed check (
-    ceremony_type = '' or ceremony_type in ('civil', 'religious', 'free')
-  );
+-- Legacy location is now optional; the wedding town is stored separately.
 
 create or replace function public.complete_profile()
 returns void
@@ -52,8 +49,10 @@ begin
         and length(trim(coalesce(partner_one_first_name, ''))) between 1 and 80
         and length(trim(coalesce(partner_two_first_name, ''))) between 1 and 80
         and wedding_date is not null
-        and length(trim(coalesce(location, ''))) between 2 and 160
+        and length(trim(coalesce(wedding_town, ''))) between 2 and 160
+        and length(trim(coalesce(location, ''))) <= 160
         and length(trim(coalesce(ceremony_location, ''))) <= 160
+        and length(trim(coalesce(wedding_town, ''))) <= 160
         and length(trim(coalesce(reception_location, ''))) <= 160
         and guest_count between 1 and 5000
         and region_code in ('BGL','KTN','NOE','OOE','SBG','STMK','TIR','VBG','W')
