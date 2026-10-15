@@ -1,10 +1,10 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 1.1  
-**Stand der Prüfung:** 14. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Branch `main`, HEAD `20a268f2f6d2e155001a8c13b6fbbb370fe568e9`  
-**Geprüfte Dateien:** `dashboard.html` (Blob `36c0a523a9bd76c38d2b117b30ef418e78889947`), `assets/js/wedconnect-dashboard.js` (Blob `2a11415c79a42d85ff039d5102079e42ed2ee1a2`)  
-**Prüfart:** GitHub-Quellcode und SQL-Migrationen; kein Login auf Vercel und keine Abfrage des aktiven Supabase-Migrationsstatus in dieser Runde
+**Version:** 1.2  
+**Stand der Prüfung:** 15. Oktober 2026  
+**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Feature-Branch `feature/couple-wedding-timeline-20261015`, Basis `main` bei `0cf33004efaacfdf8715c0bd45293d919a3e4b66`  
+**Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Paarprofil-Migration sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
+**Prüfart:** Quellcode und SQL geprüft; keine Live-Prüfung von Vercel oder dem aktiven Supabase-Migrationsstatus
 
 Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementierten Code von bestätigtem Live-Betrieb.
 
@@ -15,7 +15,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Öffentliche Seiten | `index.html`, `hochzeitspaare.html` und `fotografen.html` sind vorhanden. Die Fotografen-Seite bleibt eingefroren. |
 | Anmeldung | Supabase Auth für E-Mail/Passwort und Google ist eingebunden. Die Anmeldung fragt keine Rolle ab. Der Nutzer hat Anmeldung und Weiterleitung zuvor als funktionierend bestätigt. |
 | Einstieg nach Login | `dashboard.html` prüft die Auth-Sitzung. Unvollständige Konten beginnen dort mit der Profilanlage; die Rolle wird als erster Profilschritt gewählt. |
-| Hochzeitspaar-Profil | Strukturierte Angaben zu Bundesland, gewünschter Begleitung und Bildstilen liegen samt Migration vor. Der Abschluss verlangt ein gemeinsames Foto oder je ein Foto für beide Personen. |
+| Hochzeitspaar-Profil | Auf dem Feature-Branch: Trauungsart als Pflichtauswahl, strukturierte Begleitung und geführter Ablauf mit bis zu sieben Programmpunkten. Bildstil und Bildwünsche sind aus der Oberfläche entfernt; die Nutzungspräferenz bleibt. Die neue SQL-Migration liegt bei, ist aber nicht live verifiziert. |
 | Fotografen-Profil | Strukturierte Einsatzgebiete, Erfahrung, Stile, Begleitungsumfang, Galerie, Vergütung, Vorstellung und optionale Links sind im Code abgebildet. |
 | Galerie | Bis zu 20 normale Fotografenfotos, maximal 2 MB pro Foto. Kein Highlight-Stern und keine Highlight-Auswahl in der aktuellen Oberfläche. Fotos können angesehen, zugeschnitten, ersetzt und gelöscht werden. |
 | Profilfoto des Kontos | Upload, Zuschnitt/Ausrichtung und Entfernen über den Konto-Dialog sind implementiert. |
@@ -28,7 +28,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 
 Die Anmeldung ist für alle gleich und rollenfrei. Nach erfolgreicher Authentifizierung führt der Einstieg zu `dashboard.html`. Wenn noch keine Rolle gespeichert ist, startet die Profilanlage mit der Auswahl „Hochzeitspaar“ oder „Fotograf“. Die Rolle ist der erste Schritt des Profils, nicht der Anmeldung.
 
-Der Hochzeitsprofil-Code enthält strukturierte Felder für österreichisches Bundesland, Begleitungsumfang und Bildstile einschließlich Boho. Der Profilabschluss prüft Vornamen beider heiratenden Personen, Datum, Ort, Gästezahl, strukturierte Angaben, Beschreibung und Bildnutzungspräferenz. Für Fotos ist entweder ein gemeinsames Foto oder je ein Foto pro Person erforderlich. Gemeinsame und einzelne Fotos können zugeschnitten und ausgerichtet werden.
+Der Hochzeitsprofil-Code enthält auf dem Feature-Branch eine Pflichtauswahl zur Trauungsart, österreichisches Bundesland, strukturierten Begleitungsumfang und einen geführten Tagesablauf mit bis zu sieben Programmpunkten, jeweils mit ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche werden im Paarformular nicht mehr angezeigt. Die Bildnutzungspräferenz bleibt bestehen. Die SQL-Migration ergänzt `ceremony_type` und `schedule_items`; alte Textspalten bleiben zur Kompatibilität erhalten. Für Fotos ist entweder ein gemeinsames Foto oder je ein Foto pro Person erforderlich. Gemeinsame und einzelne Fotos können zugeschnitten und ausgerichtet werden.
 
 Das Fotografenprofil enthält strukturierte Einsatzgebiete und Stile, Erfahrungsangaben, Begleitungsumfang, persönliche Vorstellung, optionale Instagram-/Website-Angaben sowie die Vergütungsauswahl „Unentgeltlich“ oder „Fixbetrag“. Bei Fixbetrag ist ein Betrag erforderlich. Die Galerie erlaubt bis zu 20 Fotos mit 2-MB-Grenze je Foto; die SQL-Storage-Konfiguration erlaubt größere Objekte, deshalb ist die Client-Grenze gesondert zu beachten.
 
@@ -52,10 +52,10 @@ Der private Bucket `wedconnect-profile-photos` ist laut SQL auf JPEG, PNG und We
 
 ## Verifikation und Grenzen
 
-- Der Code wurde auf GitHub-`main` geprüft; die frühere lokale Arbeitskopie war veraltet und ist keine Referenz für diesen Stand.
+- Der aktuelle Umsetzungsstand wurde auf `feature/couple-wedding-timeline-20261015` gegen die GitHub-Dateien geprüft; JavaScript-Syntax wurde lokal geparst. Der Branch enthält die vorgeschlagene Profiländerung, ist aber nicht mit `main` zusammengeführt.
 - Der zuletzt vom Nutzer bestätigte Login-Ablauf bleibt als Nutzerbeobachtung dokumentiert; in dieser Runde erfolgte kein erneuter Google- oder E-Mail-Test.
-- Vercel-Deployment, Produktionsverhalten und aktive Supabase-Migrationen wurden in dieser Prüfung nicht live verifiziert.
-- Die öffentliche Fotografen-Seite wurde nicht verändert. Es wurden keine App-Dateien oder Datenbankdateien geändert.
+- Vercel-Deployment, Produktionsverhalten und aktive Supabase-Migrationen wurden nicht live verifiziert. Die neue Migration muss in Supabase ausgeführt werden, bevor die geänderten Felder dort gespeichert werden können.
+- Die öffentliche Fotografen-Seite wurde nicht verändert. Die neue Änderung betrifft `dashboard.html`, `assets/js/wedconnect-dashboard.js`, eine SQL-Migration und diese Dokumentation.
 
 ## Bei jeder künftigen Umsetzung aktualisieren
 
