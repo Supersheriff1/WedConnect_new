@@ -1784,7 +1784,7 @@
     file = normalizePhotoFile(file);
     const sizeLimit = photoType === "portfolio" ? maxPortfolioPhotoBytes : maxPhotoBytes;
     if (file.size > sizeLimit) {
-      throw new Error('„' + file.name + '“ ist größer als ' + (photoType === "portfolio" ? "2" : "10") + " MB.");
+      throw new Error('„' + file.name + '“ ist größer als ' + (photoType === "portfolio" ? "2" : "2") + " MB.");
     }
     const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
     const objectPath = currentUser.id + "/" + crypto.randomUUID() + "." + extension;
