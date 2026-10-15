@@ -34,7 +34,7 @@ Die Rolle gehört zum WedConnect-Profil, nicht zum Anmeldeformular. Ein Rollenwe
 
 ### Hochzeitspaar
 
-Erfasst werden die Vornamen beider heiratenden Personen, Hochzeitsdatum, Bundesland, Ort/Location, ungefähre Gästezahl, Art der Trauung (standesamtlich, kirchlich oder frei), gewünschter Begleitungsumfang, ein geführter Tagesablauf mit auswählbaren Programmpunkten, ungefähren Uhrzeiten und optionalen Hinweisen sowie die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen. Ein Bildstil und separate Bildwünsche werden im Paarprofil nicht abgefragt.
+Erfasst werden die Vornamen beider heiratenden Personen, Hochzeitsdatum, Bundesland, Ort der Hochzeit, optionale Location der Trauung, optionale Location der Feier und ungefähre Gästezahl, Art der Trauung (standesamtlich, kirchlich oder frei), gewünschter Begleitungsumfang, ein geführter Tagesablauf mit auswählbaren Programmpunkten, ungefähren Uhrzeiten und optionalen Hinweisen sowie die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen. Ein Bildstil und separate Bildwünsche werden im Paarprofil nicht abgefragt.
 
 Beide Personen müssen im Profil erkennbar sein: zulässig ist ein gemeinsames Foto oder je ein eigenes Foto pro Person. Fotos können beim Hochladen zugeschnitten und ausgerichtet werden; Original und angezeigte Fassung werden getrennt behandelt.
 
