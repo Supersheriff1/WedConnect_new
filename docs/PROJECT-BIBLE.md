@@ -36,7 +36,7 @@ Die Rolle gehört zum WedConnect-Profil, nicht zum Anmeldeformular. Ein Rollenwe
 
 Erfasst werden die Vornamen beider heiratenden Personen, Hochzeitsdatum, Bundesland, Ort der Hochzeit, optionale Location der Trauung, optionale Location der Feier und ungefähre Gästezahl, Art der Trauung (standesamtlich, kirchlich oder frei), gewünschter Begleitungsumfang, ein geführter Tagesablauf mit auswählbaren Programmpunkten, ungefähren Uhrzeiten und optionalen Hinweisen sowie die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen. Ein Bildstil und separate Bildwünsche werden im Paarprofil nicht abgefragt.
 
-Beide Personen müssen im Profil erkennbar sein: zulässig ist ein gemeinsames Foto oder je ein eigenes Foto pro Person. Fotos können beim Hochladen zugeschnitten und ausgerichtet werden; Original und angezeigte Fassung werden getrennt behandelt.
+Beide Personen müssen jeweils mindestens ein eigenes Foto hochladen. Ein gemeinsames Foto kann zusätzlich hochgeladen werden, ersetzt aber keines der beiden Personenfotos. Nach Auswahl wird der Zuschnitt bestätigt und das Foto direkt hochgeladen. Original und angezeigte Fassung werden getrennt behandelt.
 
 ### Fotograf
 
