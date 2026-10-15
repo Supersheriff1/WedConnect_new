@@ -72,10 +72,10 @@ begin
     end if;
     if (
       (select count(*) from public.profile_photos
-       where user_id = current_user_id and photo_type in ('partner_one', 'joint'))
+       where user_id = current_user_id and photo_type in ('partner_one', 'couple'))
     ) < 1 or (
       (select count(*) from public.profile_photos
-       where user_id = current_user_id and photo_type in ('partner_two', 'joint'))
+       where user_id = current_user_id and photo_type in ('partner_two', 'couple'))
     ) < 1 then
       raise exception using message = 'photos_for_both_partners_required';
     end if;
