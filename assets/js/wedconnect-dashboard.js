@@ -224,7 +224,9 @@
       field("partner_two_first_name", "Vorname der zweiten Person", "text", "", true, ' maxlength="80"') +
       field("wedding_date", "Hochzeitsdatum", "date", "", true, "") +
       choiceField("region_code", "Bundesland", COUPLE_REGION_OPTIONS, "Für die Zuordnung zu Fotografen.") +
-      field("location", "Ort oder Location", "text", "Zum Beispiel Wien oder Schloss Belvedere", true, ' autocomplete="address-level2" maxlength="160"') +
+      field("location", "Ort der Hochzeit", "text", "Zum Beispiel Wien oder Baden bei Wien.", true, ' autocomplete="address-level2" maxlength="160"') +
+      field("ceremony_location", "Location der Trauung", "text", "Name der Kirche, des Standesamts oder des Trauungsorts.", false, ' maxlength="160"') +
+      field("reception_location", "Location der Feier", "text", "Name der Feierlocation, falls sie an einem anderen Ort stattfindet.", false, ' maxlength="160"') +
       field("guest_count", "Ungefähre Gästezahl", "number", "", true, ' min="1" max="5000" step="1" inputmode="numeric"') +
       "</div>";
   }
