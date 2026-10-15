@@ -61,6 +61,12 @@ Alle beteiligten Personen werden im Produkt mit Vornamen angesprochen. Profile e
 
 Matching, Like-Status, Chat und Benachrichtigungen gelten erst dann als umgesetzt, wenn der aktuelle Implementierungsstand sowohl die Oberfläche als auch die Datenflüsse bestätigt.
 
+## Übersicht und E-Mail-Benachrichtigungen
+
+Die Übersicht ist der Startbildschirm nach dem Login. Sie zeigt offene eingegangene Likes, gegenseitige Matches ohne erste Nachricht und, sofern vorhanden, rollenbezogene App-Neuigkeiten sowie klar gekennzeichnete Partnerangebote. Inhalte ohne aktuelle Einträge werden nicht angezeigt. Der Menüpunkt „Profil“ bleibt die vollständige eigene Profilansicht; „Matches“ enthält gegenseitige Likes.
+
+Nutzer:innen steuern in den Einstellungen pro Ereignis, ob WedConnect E-Mails zu Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangeboten schicken darf. In-App-Hinweise bleiben davon unberührt. Wichtige Sicherheits- und Konto-E-Mails können weiterhin versendet werden.
+
 ## Konto und Hilfe
 
 Der Bereich **Konto und Einstellungen** ist der erweiterbare Ort für Kontodaten, Profilfoto, Rollenverwaltung, Hilfe und spätere Einstellungen. Die Hauptnavigation bleibt während der Profilbearbeitung erreichbar. Erklärungen im Dashboard sind kurz und selbsterklärend; ausführliche Hilfetexte gehören in einen eigenen Hilfe-Bereich.
