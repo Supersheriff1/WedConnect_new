@@ -23,6 +23,12 @@ alter table public.couple_profiles
   alter column image_wishes drop not null,
   alter column location drop not null;
 
+-- Preserve existing town/location data when moving it into the clearer field.
+update public.couple_profiles
+set wedding_town = location
+where length(trim(coalesce(wedding_town, ''))) = 0
+  and length(trim(coalesce(location, ''))) between 2 and 160;
+
 -- Legacy location is now optional; the wedding town is stored separately.
 
 create or replace function public.complete_profile()
