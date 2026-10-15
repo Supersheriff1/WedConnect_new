@@ -568,7 +568,10 @@
           ["Vorstellung", data.public_intro],
           ["Hochzeitsdatum", data.wedding_date],
           ["Bundesland", coupleRegionLabel(data.region_code)],
-          ["Ort oder Location", data.location], ["Gäste", data.guest_count],
+          ["Ort der Hochzeit", data.location],
+          ["Location der Trauung", data.ceremony_location],
+          ["Location der Feier", data.reception_location],
+          ["Gäste", data.guest_count],
           ["Art der Trauung", ceremonyTypeLabel(data.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(data.coverage_options, COVERAGE_OPTIONS) || data.coverage_scope],
           ["Ablauf", formatScheduleItems(data.schedule_items) || data.schedule],
@@ -1899,6 +1902,10 @@
           : profile.photographer_usage_preference === "no" ? "Nein" : "";
       const region = coupleRegionLabel(profile.region_code);
       const location = [profile.location, region].filter(Boolean).join(", ");
+      const weddingLocations = [
+        ["Location der Trauung", profile.ceremony_location],
+        ["Location der Feier", profile.reception_location]
+      ].filter(([, value]) => String(value || "").trim());
       return {
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
@@ -1906,6 +1913,7 @@
           ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
         ],
         sections: [
+          ...weddingLocations,
           ["Art der Trauung", ceremonyTypeLabel(profile.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope],
           ["Ablauf", formatScheduleItems(profile.schedule_items) || profile.schedule],
