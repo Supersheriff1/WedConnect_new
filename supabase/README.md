@@ -27,12 +27,13 @@ For a new project, execute the SQL files in the order below using the Supabase S
 19. `supabase/migrations/20261014130000_structured_couple_profile_fields.sql`
 20. `supabase/migrations/20261014150000_allow_couple_profile_drafts.sql`
 21. `supabase/migrations/20261015160000_couple_ceremony_and_timeline.sql`
+22. `supabase/migrations/20261015180000_dashboard_activity_and_email_preferences.sql`
 
-The couple profile stores a structured ceremony type and guided timeline. The code and schema include older photographer-highlight fields. The accepted product direction is a gallery of up to 20 ordinary photos without highlights. Do not infer that this product decision has already been applied to Supabase; check the current implementation and decide on a separately reviewed migration before changing deployed data.
+The couple profile stores a structured ceremony type and guided timeline. Photographer galleries remain ordinary photos without a highlight selection. Couple profiles show wedding date, town and photo-use preference as key facts. Couple uploads require one photo per partner, permit an optional joint photo and limit each new image to 2 MB. The activity migration also adds messages, role-targeted overview announcements/offers, email preferences, and a 2 MB bucket limit. Do not infer that these migrations are live; check the current Supabase migration history.
 
 ## Storage
 
-The private `wedconnect-profile-photos` bucket accepts JPEG, PNG and WebP and is configured for up to 10 MB per stored object. The photographer upload UI currently applies a 2 MB per-photo limit. Incomplete profiles and their photos are private according to the policies; completed profiles are readable by signed-in WedConnect users.
+The private `wedconnect-profile-photos` bucket accepts JPEG, PNG and WebP. The new migration sets the per-object limit to 2 MB; verify it has run before relying on server-side enforcement. Incomplete profiles and their photos are private according to the policies; completed profiles are readable by signed-in WedConnect users.
 
 ## Authentication
 
