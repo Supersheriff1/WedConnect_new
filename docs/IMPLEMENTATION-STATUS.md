@@ -10,7 +10,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 
 ## Kurzstatus
 
-| Bereich | Stand in `main` |
+| Bereich | Stand im Feature-Branch |
 |---|---|
 | Öffentliche Seiten | `index.html`, `hochzeitspaare.html` und `fotografen.html` sind vorhanden. Die Fotografen-Seite bleibt eingefroren. |
 | Anmeldung | Supabase Auth für E-Mail/Passwort und Google ist eingebunden. Die Anmeldung fragt keine Rolle ab. Der Nutzer hat Anmeldung und Weiterleitung zuvor als funktionierend bestätigt. |
