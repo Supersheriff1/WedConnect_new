@@ -240,12 +240,9 @@
 
   function renderCoupleDetails() {
     return field("public_intro", "Eure Vorstellung", "textarea", "Optional · erscheint in eurem Profil.", false, ' maxlength="1200"') +
+      choiceField("ceremony_type", "Art der Trauung", CEREMONY_OPTIONS, "Wählt die passende Option aus. Wenn eure Planung noch offen ist, könnt ihr „Noch nicht festgelegt“ wählen.") +
       multiSelectField("coverage_options", "Gewünschte Begleitung", COVERAGE_OPTIONS, "Wählt alle Abschnitte aus, die fotografisch begleitet werden sollen.") +
-      multiSelectField("styles", "Bildstil", STYLE_OPTIONS, "Wählt alle Bildstile, die euch gefallen.") +
-      '<div class="setup-two-col">' +
-      field("schedule", "Ablauf (optional)", "textarea", "Wenn der Ablauf noch nicht feststeht, ergänzt ihr ihn später.", false, ' maxlength="4000" placeholder="Zum Beispiel: Trauung um 14 Uhr, Paarfotos um 15 Uhr, Feier ab 17 Uhr"') +
-      field("image_wishes", "Bildwünsche (optional)", "textarea", "", false, ' maxlength="2000" placeholder="Besondere Menschen, Momente oder Motive"') +
-      "</div>" +
+      renderWeddingTimeline() +
       choiceField("photographer_usage_preference", "Fotos durch den Fotografen nutzbar?", [
         ["open", "Grundsätzlich offen"],
         ["case_by_case", "Nur nach Absprache"],
@@ -266,6 +263,21 @@
     ["W", "Wien"]
   ];
   const COUPLE_REGION_OPTIONS = REGION_OPTIONS.filter((option) => option[0] !== "AT");
+  const CEREMONY_OPTIONS = [
+    ["civil", "Standesamtliche Trauung"],
+    ["religious", "Kirchliche Trauung"],
+    ["free", "Freie Trauung"],
+    ["undecided", "Noch nicht festgelegt"]
+  ];
+  const SCHEDULE_EVENTS = [
+    ["getting_ready", "Getting Ready", "Vorbereitung am Hochzeitstag"],
+    ["ceremony", "Trauung", "Ungefähre Uhrzeit der Trauung"],
+    ["couple_photos", "Paarfotos", "Zum Beispiel vor oder nach der Trauung"],
+    ["reception", "Agape und Empfang", ""],
+    ["dinner_speeches", "Essen und Reden", ""],
+    ["party", "Feier und Party", ""],
+    ["other", "Weiterer Programmpunkt", "Zum Beispiel Sektempfang oder Hochzeitstanz"]
+  ];
   const STYLE_OPTIONS = [
     ["documentary", "Reportage"],
     ["natural", "Natürlich & authentisch"],
@@ -292,6 +304,41 @@
     ["half_day", "Halbtagesreportage"],
     ["full_day", "Ganztagesreportage"]
   ];
+
+  function scheduleItemsForForm() {
+    const value = valueOf("schedule_items");
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (_) {}
+    }
+    const legacy = String(valueOf("schedule") || "").trim();
+    return legacy ? [{ event: "other", label: "Bisheriger Ablauf", time: "", note: legacy }] : [];
+  }
+
+  function renderWeddingTimeline() {
+    const existing = scheduleItemsForForm();
+    const byEvent = new Map(existing.map((item) => [item.event, item]));
+    return '<fieldset class="setup-group wedding-timeline"><legend>Euer Ablauf</legend>' +
+      '<p class="setup-hint">Wählt die Programmpunkte aus, die bei euch geplant sind. Uhrzeiten sind ungefähr und können später ergänzt werden.</p>' +
+      '<div class="schedule-event-list">' + SCHEDULE_EVENTS.map((option) => {
+        const item = byEvent.get(option[0]) || {};
+        const checked = byEvent.has(option[0]);
+        const label = option[0] === "other" && item.label ? item.label : option[1];
+        const extraTitle = option[0] === "other"
+          ? '<div class="setup-field"><label for="schedule-other-label">Programmpunkt</label><input id="schedule-other-label" name="schedule_other_label" data-profile-field type="text" maxlength="120" placeholder="Zum Beispiel Hochzeitstanz" value="' + escapeHtml(item.label && item.label !== option[1] && item.label !== "Bisheriger Ablauf" ? item.label : "") + '"></div>'
+          : "";
+        const hint = option[2] ? '<span class="schedule-event-hint">' + option[2] + '</span>' : "";
+        return '<div class="schedule-event-card">' +
+          '<label class="schedule-event-choice"><input type="checkbox" name="schedule_event" value="' + option[0] + '" data-profile-field data-schedule-event' + (checked ? " checked" : "") + '><span><strong>' + option[1] + '</strong>' + hint + '</span></label>' +
+          '<div class="schedule-event-fields" data-schedule-fields' + (checked ? "" : " hidden") + '>' + extraTitle +
+          '<div class="setup-field"><label for="schedule-' + option[0] + '-time">Ungefähre Uhrzeit</label><input id="schedule-' + option[0] + '-time" name="schedule_' + option[0] + '_time" data-profile-field type="time" value="' + escapeHtml(item.time || "") + '"></div>' +
+          '<div class="setup-field"><label for="schedule-' + option[0] + '-note">Optionale Notiz</label><input id="schedule-' + option[0] + '-note" name="schedule_' + option[0] + '_note" data-profile-field type="text" maxlength="240" value="' + escapeHtml(item.note || "") + '" placeholder="Weitere kurze Angaben"></div>' +
+          '</div></div>';
+      }).join("") + '</div></fieldset>';
+  }
 
   function selectedValues(name) {
     const value = valueOf(name);
@@ -521,9 +568,9 @@
           ["Hochzeitsdatum", data.wedding_date],
           ["Bundesland", coupleRegionLabel(data.region_code)],
           ["Ort oder Location", data.location], ["Gäste", data.guest_count],
+          ["Art der Trauung", ceremonyTypeLabel(data.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(data.coverage_options, COVERAGE_OPTIONS) || data.coverage_scope],
-          ["Bildstil", profileLabels(data.styles, STYLE_OPTIONS) || data.visual_style],
-          ["Ablauf", data.schedule], ["Bildwünsche", data.image_wishes],
+          ["Ablauf", formatScheduleItems(data.schedule_items) || data.schedule],
           ["Nutzung durch Fotograf", data.photographer_usage_preference === "open" ? "Grundsätzlich offen" : data.photographer_usage_preference === "case_by_case" ? "Nur nach Absprache" : "Nein"],
           ["Fotos", currentPhotoCount("couple") ? "Gemeinsames Foto hochgeladen" : Math.min(2, Number(currentPhotoCount("partner_one") > 0) + Number(currentPhotoCount("partner_two") > 0)) + " von 2 Einzelfotos hochgeladen"]
         ]
@@ -1393,6 +1440,21 @@
         values[element.name] = element.value.trim();
       }
     });
+    if (wizard.role === "couple" && fields.querySelector('[name="schedule_event"]')) {
+      const selected = values.schedule_event || [];
+      values.schedule_items = selected.map((event) => ({
+        event,
+        label: event === "other" ? (values.schedule_other_label || "") : "",
+        time: values["schedule_" + event + "_time"] || "",
+        note: values["schedule_" + event + "_note"] || ""
+      }));
+      delete values.schedule_event;
+      delete values.schedule_other_label;
+      SCHEDULE_EVENTS.forEach(([event]) => {
+        delete values["schedule_" + event + "_time"];
+        delete values["schedule_" + event + "_note"];
+      });
+    }
     return values;
   }
 
@@ -1437,18 +1499,28 @@
     const data = Object.assign({}, wizard.data[key], values);
     if (wizard.role === "couple") {
       const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
-      const styles = Array.isArray(data.styles) ? data.styles : [];
       const regionCode = data.region_code || "";
+      const ceremonyType = data.ceremony_type || "";
+      const scheduleItems = Array.isArray(data.schedule_items) ? data.schedule_items : [];
       if (!allowIncomplete && wizard.step === 1 && !COUPLE_REGION_OPTIONS.some((option) => option[0] === regionCode)) {
         throw new Error("Wähle das Bundesland eurer Hochzeit aus.");
       }
+      if (!allowIncomplete && wizard.step === 2 && !CEREMONY_OPTIONS.some((option) => option[0] === ceremonyType)) {
+        throw new Error("Wähle die Art der Trauung aus.");
+      }
       if (!allowIncomplete && wizard.step === 2 && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
-      if (!allowIncomplete && wizard.step === 2 && !styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+      if (!allowIncomplete && wizard.step === 2 && scheduleItems.some((item) => item.event === "other" && !String(item.label || "").trim())) {
+        throw new Error("Gib den Namen für den weiteren Programmpunkt ein.");
+      }
       data.region_code = regionCode;
+      data.ceremony_type = ceremonyType;
       data.coverage_options = coverage;
-      data.styles = styles;
       data.coverage_scope = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
-      data.visual_style = styles.map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
+      data.schedule_items = scheduleItems;
+      data.schedule = formatScheduleItems(scheduleItems);
+      data.styles = [];
+      data.visual_style = "";
+      data.image_wishes = "";
     }
     if (wizard.role === "photographer") {
       const regions = Array.isArray(data.regions) ? data.regions : [];
@@ -1755,6 +1827,23 @@
     return profileArray(values).map((value) => (options.find((option) => option[0] === value) || [value, value])[1]).join(", ");
   }
 
+  function ceremonyTypeLabel(value) {
+    return (CEREMONY_OPTIONS.find((option) => option[0] === value) || ["", ""])[1] || "";
+  }
+
+  function formatScheduleItems(value) {
+    let items = value;
+    if (!Array.isArray(items) && typeof items === "string" && items.trim()) {
+      try { items = JSON.parse(items); } catch (_) { return items; }
+    }
+    if (!Array.isArray(items)) return "";
+    return items.map((item) => {
+      const option = SCHEDULE_EVENTS.find(([event]) => event === item.event);
+      const label = item.event === "other" ? item.label : option ? option[1] : item.label || item.event;
+      return [label, item.time, item.note].filter(Boolean).join(" · ");
+    }).filter(Boolean).join("; ");
+  }
+
   function coupleRegionLabel(value) {
     return (COUPLE_REGION_OPTIONS.find((option) => option[0] === value) || ["", ""])[1] || "";
   }
@@ -1816,10 +1905,9 @@
           ["users", "Gäste", profile.guest_count ? profile.guest_count + " Personen" : ""]
         ],
         sections: [
+          ["Art der Trauung", ceremonyTypeLabel(profile.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope],
-          ["Ablauf", profile.schedule],
-          ["Bildstil", profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style],
-          ["Bildwünsche", profile.image_wishes],
+          ["Ablauf", formatScheduleItems(profile.schedule_items) || profile.schedule],
           ["Nutzung durch den Fotografen", preference]
         ]
       };
@@ -2212,6 +2300,11 @@
   fields.addEventListener("change", (event) => {
     const target = event.target;
     scheduleDraftAutoSave();
+    if (target.matches('input[type="checkbox"][data-schedule-event]')) {
+      const row = target.closest(".schedule-event-card");
+      const details = row && row.querySelector("[data-schedule-fields]");
+      if (details) details.hidden = !target.checked;
+    }
     if (target.matches('select[name="compensation_type"]')) {
       const amountWrap = fields.querySelector("#compensation-amount-wrap");
       const amountInput = fields.querySelector('input[name="compensation_amount_eur"]');
@@ -2273,7 +2366,7 @@
         const values = collectFields();
         if (wizard.role === "couple" && wizard.step === 2) {
           if (!values.coverage_options || !values.coverage_options.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
-          if (!values.styles || !values.styles.length) throw new Error("Wähle mindestens einen Bildstil aus.");
+          if (!CEREMONY_OPTIONS.some((option) => option[0] === values.ceremony_type)) throw new Error("Wähle die Art der Trauung aus.");
         }
         if (wizard.role === "photographer" && wizard.step === 1) {
           if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
