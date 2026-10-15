@@ -1,7 +1,7 @@
 # WedConnect · App Design Bible
 
-**Version:** 0.1  
-**Stand:** 14. Oktober 2026  
+**Version:** 0.2  
+**Stand:** 15. Oktober 2026  
 **Status:** App-Baseline aus freigegebenen Entscheidungen und Codeprüfung  
 **Geltungsbereich:** Dashboard, Profil-Onboarding, Profilverwaltung und eingeloggte Ansichten
 
@@ -63,7 +63,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Hochzeits- und Fotografenformulare speichern Zwischenschritte; Profiländerungen sollen automatisch gespeichert werden.
 - Zurück-Navigation zwischen den Einrichtungsschritten bleibt vorhanden.
 - Fotografen: Einsatzgebiete sind strukturierte Mehrfachauswahl (Bundesländer oder Ganz Österreich), Erfahrung in Jahren und/oder Zahl der Hochzeiten, Stil als Auswahl inklusive Boho, Umfang als Auswahl, Vergütung Unentgeltlich oder Fixbetrag. Website und Instagram sind optional. Verfügbarkeit und separate Zusatzvergütung für Nutzungsrechte werden nicht abgefragt.
-- Hochzeitspaar: Vornamen beider Personen, Datum, Ort/Region, Gästezahl, Ablauf, gewünschter Begleitungsumfang, Stil, Bildwünsche und Foto beider Personen.
+- Hochzeitspaar: Vornamen beider Personen, Datum, Bundesland, Ort/Location, Gästezahl, Art der Trauung (standesamtlich, kirchlich, frei oder noch nicht festgelegt), gewünschter Begleitungsumfang und geführter Tagesablauf mit auswählbaren Programmpunkten, ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche entfallen. Die Haltung zur Nutzung der entstandenen Bilder durch den Fotografen bleibt Teil des Profils. Foto beider Personen bleibt erforderlich.
 - Profilabschluss ist erforderlich, bevor Entdecken oder Matching-Funktionen benutzbar sind.
 
 ## Interaktionsqualität und Barrierefreiheit
