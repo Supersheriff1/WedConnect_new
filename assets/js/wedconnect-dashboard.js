@@ -645,7 +645,7 @@
     const data = wizard.data[wizard.role === "couple" ? "couple" : "photographer"];
     const entries = wizard.role === "couple"
       ? [
-          ["Vornamen", data.partner_one_first_name + " und " + data.partner_two_first_name],
+          ["Vornamen", data.partner_one_first_name + " & " + data.partner_two_first_name],
           ["Vorstellung", data.public_intro],
           ["Hochzeitsdatum", data.wedding_date],
           ["Bundesland", coupleRegionLabel(data.region_code)],
@@ -1896,7 +1896,7 @@
 
   function profileGreeting(role, profile) {
     if (role === "couple" && profile) {
-      return [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ");
+      return [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ");
     }
     return profile && profile.first_name ? profile.first_name : "";
   }
@@ -2218,7 +2218,7 @@
     identity.className = "profile-preview-identity";
     const name = document.createElement("h3");
     name.textContent = role === "couple"
-      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ")
+      ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ")
       : profile.first_name || "Dein Profil";
     identity.append(name);
 
@@ -2335,7 +2335,7 @@
     if (profileError || !profile) return null;
     const summary = { id: userId, role: header.role, name: "", detail: "", photoUrl: "" };
     if (header.role === "couple") {
-      summary.name = [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" und ") || "Hochzeitspaar";
+      summary.name = [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar";
       summary.detail = [profileDate(profile.wedding_date), profile.wedding_town, coupleRegionLabel(profile.region_code)].filter(Boolean).join(" · ");
     } else {
       summary.name = profile.first_name || "Fotograf";
