@@ -7,7 +7,7 @@ alter table public.couple_profiles
 alter table public.couple_profiles
   drop constraint if exists couple_profiles_ceremony_type_allowed,
   add constraint couple_profiles_ceremony_type_allowed check (
-    ceremony_type = '' or ceremony_type in ('civil', 'religious', 'free', 'undecided')
+    ceremony_type = '' or ceremony_type in ('civil', 'religious', 'free')
   ),
   drop constraint if exists couple_profiles_schedule_items_array,
   add constraint couple_profiles_schedule_items_array check (
@@ -18,6 +18,13 @@ alter table public.couple_profiles
 alter table public.couple_profiles
   alter column visual_style drop not null,
   alter column image_wishes drop not null;
+
+-- Ceremony type is required to complete a couple profile; drafts may remain blank.
+alter table public.couple_profiles
+  drop constraint if exists couple_profiles_ceremony_type_allowed,
+  add constraint couple_profiles_ceremony_type_allowed check (
+    ceremony_type = '' or ceremony_type in ('civil', 'religious', 'free')
+  );
 
 create or replace function public.complete_profile()
 returns void
