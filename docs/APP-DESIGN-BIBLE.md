@@ -1,6 +1,6 @@
 # WedConnect · App Design Bible
 
-**Version:** 0.2  
+**Version:** 0.3  
 **Stand:** 15. Oktober 2026  
 **Status:** App-Baseline aus freigegebenen Entscheidungen und Codeprüfung  
 **Geltungsbereich:** Dashboard, Profil-Onboarding, Profilverwaltung und eingeloggte Ansichten
@@ -26,13 +26,13 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Mobil: Navigation am unteren Bildschirmrand; Inhalt bleibt innerhalb der Viewport-Breite.
 - Navigation bleibt verfügbar, wenn Profile betrachtet oder bearbeitet werden. Ein Wechsel zwischen Übersicht, Profil und anderen Bereichen ersetzt die Ansicht vollständig.
 - Nach der neutralen Anmeldung führt der Einstieg ins Dashboard. Ist noch kein Profil angelegt, beginnt dort zuerst die Rollenwahl und danach das rollenabhängige Onboarding. Das vollständige Dashboard wird erst nach Profilabschluss freigeschaltet.
-- Der erste Dashboard-Schritt bei fehlendem Profil ist die Profilerstellung. Nach Abschluss steht das eigene Profil mit der Galerie als zentrale Ansicht im Dashboard.
+- Der erste Dashboard-Schritt bei fehlendem Profil ist die Profilerstellung. Nach Abschluss startet die App in der Übersicht. Das eigene vollständige Profil liegt unter dem eigenen Menüpunkt „Profil“.
 
 ## Profile und Fotos
 
 ### Profilansicht
 
-- Der vollständige Profilinhalt wird in einer Ansicht gezeigt; es gibt keine separate Highlight-Vorschau gegenüber einer versteckten Detailansicht.
+- Der vollständige Profilinhalt wird in einer Ansicht gezeigt. Fotograf:innen erhalten keine Highlight-Auswahl. Beim Hochzeitspaar stehen Hochzeitsdatum, Ort und Bildnutzungspräferenz als drei Key-Fact-Chips im selben Stil wie die Fotografen-Highlights.
 - Fotografenname und relevante Kurzinfos sind geordnet beim Profilinhalt platziert. Vergütung und Erfahrung sind gut auffindbar.
 - Ein vorhandener Instagram- oder Website-Link wird als gleich großes, rechtsbündig eingeordnetes Symbol in der Informationszeile angezeigt.
 - Die Galerie bleibt responsiv, mittig und ohne abgeschnittene Ränder. Anzahl und aktuelle Bildposition liegen dezent innerhalb des Bildbereichs.
@@ -48,6 +48,8 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 ### Hochzeitspaarfotos
 
 - Jede Person muss mindestens ein eigenes Foto hochladen. Ein gemeinsames Foto ist optional und ersetzt keines der Personenfotos. Nach Auswahl und Zuschnittsbestätigung wird das Foto sofort hochgeladen.
+- Paarfotos sind auf 2 MB je Original begrenzt; die Storage-Grenze wird ebenfalls auf 2 MB gesetzt.
+- Namen erscheinen je nach Fotoart links unten als zugängliche, nicht in die Bilddatei eingebrannte Einblendung: bei Einzelbildern der jeweilige Vorname, bei gemeinsamen Fotos beide Vornamen.
 - Jedes Bild lässt sich vor der Speicherung zuschneiden und ausrichten. Das Ergebnis und der sichtbare Ausschnitt müssen der späteren Darstellung entsprechen.
 - Für Einzel- und gemeinsame Fotos werden verständliche Upload-Fehler angezeigt.
 
@@ -56,6 +58,15 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Ein separates Foto für das Konto wird über das Profilbild-Icon rechts oben verwaltet.
 - Hinzufügen und Ausrichten geschehen in einem gestalteten Dialog mit kreisförmiger Vorschau. Ein Klick auf das Foto öffnet den Ausrichtungsdialog. Löschen erfolgt über ein Papierkorb-Symbol und ein kurzes Bestätigungs-Popup.
 - Uploadfehler nennen den Grund. Vergrößern, Verkleinern, Drehen, Abbrechen und Übernehmen müssen sichtbar aktiv wirken.
+
+## Übersicht, Matches und Benachrichtigungen
+
+- Die Übersicht ist der Startbildschirm nach dem Login. Sie ergänzt die Hauptnavigation und dupliziert nicht Profil-, Match- oder Nachrichtenlisten.
+- Oben stehen eingegangene, noch unbeantwortete Likes mit den Aktionen „Zurückliken“ und „Nein danke“. Ein Zurücklike erzeugt bei Gegenseitigkeit ein Match.
+- Darunter erscheinen gegenseitige Matches, bei denen noch niemand eine Nachricht gesendet hat. Die erste Nachricht kann direkt begonnen werden.
+- Die Bereiche bleiben verborgen, solange es keine passenden Einträge gibt. App-Neuigkeiten und Partnerangebote sind rollenbezogen, Partnerangebote deutlich gekennzeichnet und erscheinen nur, wenn sie veröffentlicht und aktuell sind.
+- Unter „Einstellungen“ können E-Mails für neue Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote getrennt gesteuert werden. Hinweise in der App bleiben unabhängig davon sichtbar. Sicherheits- und wichtige Konto-E-Mails sind davon ausgenommen.
+- Voreinstellung: transaktionale Match-Ereignisse aktiviert; App-Neuigkeiten und Partnerangebote deaktiviert. Der E-Mail-Versand muss diese gespeicherten Einstellungen berücksichtigen.
 
 ## Eingaben und Onboarding
 
