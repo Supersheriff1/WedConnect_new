@@ -72,13 +72,13 @@ begin
     end if;
     if not exists (
       select 1 from public.profile_photos
-      where user_id = current_user_id and photo_type = 'couple'
-    ) and (
-      not exists (select 1 from public.profile_photos where user_id = current_user_id and photo_type = 'partner_one')
-      or not exists (select 1 from public.profile_photos where user_id = current_user_id and photo_type = 'partner_two')
+      where user_id = current_user_id and photo_type = 'partner_one'
+    ) or not exists (
+      select 1 from public.profile_photos
+      where user_id = current_user_id and photo_type = 'partner_two'
     ) then
       raise exception using message = 'photos_for_both_partners_required';
-    end if;
+    end if;;
   elsif current_role = 'photographer' then
     if not exists (
       select 1
