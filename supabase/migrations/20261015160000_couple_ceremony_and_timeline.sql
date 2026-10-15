@@ -53,7 +53,7 @@ begin
         and length(trim(coalesce(location, ''))) between 2 and 160
         and guest_count between 1 and 5000
         and region_code in ('BGL','KTN','NOE','OOE','SBG','STMK','TIR','VBG','W')
-        and ceremony_type in ('civil', 'religious', 'free', 'undecided')
+        and ceremony_type in ('civil', 'religious', 'free')
         and cardinality(coverage_options) >= 1
         and jsonb_typeof(schedule_items) = 'array'
         and length(trim(coalesce(coverage_scope, ''))) between 1 and 1200
