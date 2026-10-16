@@ -2516,6 +2516,7 @@
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       messages,
       messagedPeers,
+      reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
       summaries: new Map(summaries.filter(Boolean).map((summary) => [summary.id, summary]))
@@ -3191,7 +3192,10 @@
           .in("message_id", peerMessages.map((item) => item.id));
         if (reactionError) {
           if (!reactionMigrationNoticeShown) {
-            showNotice("Herzreaktionen sind noch nicht eingerichtet. Bitte führe die Nachrichtenreaktions-Migration in Supabase aus.");
+            const missingTable = /does not exist|schema cache|42P01|could not find the table/i.test(String(reactionError.message || ""));
+            showNotice(missingTable
+              ? "Herzreaktionen sind noch nicht eingerichtet. Bitte führe die Nachrichtenreaktions-Migration in Supabase aus."
+              : "Herzreaktionen konnten gerade nicht geladen werden.");
             reactionMigrationNoticeShown = true;
           }
           reactionFeatureAvailable = false;
