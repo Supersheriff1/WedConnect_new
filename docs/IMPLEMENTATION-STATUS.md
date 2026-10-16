@@ -250,7 +250,7 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Die Aktionsbuttons liegen auf dem Profilbild: Herz sendet ein Like, X speichert einen privaten, dauerhaften Skip, das Lesezeichen speichert ein Profil ohne Like.
 - Unter „Entdecken“ gibt es die eigene Merkliste mit Profilvorschau und der Möglichkeit, Einträge zu entfernen. Entfernte Profile werden wieder für Entdecken zugelassen, sofern sie weder gelikt noch übersprungen oder blockiert wurden.
-- Ein Zurück-Button zeigt das vorherige Profil im aktuellen Durchlauf. Bereits gespeicherte Aktionen bleiben bestehen und werden beim erneuten Anzeigen kenntlich gemacht; ein Weiter-Button führt zurück zum nächsten Profil.
+- Ein Zurück-Button zeigt das vorherige Profil im aktuellen Durchlauf. Dabei bleiben gespeicherte Aktionen kenntlich, und Like, Merken sowie Überspringen stehen erneut zur Auswahl. Ein Weiter-Button führt zurück zum nächsten Profil.
 - Die eigene Profilansicht enthält keine Like- oder Skip-Aktionsbuttons.
 - Voraussetzung: `supabase/migrations/20261016180000_profile_saved_profiles.sql` im aktiven Supabase-Projekt ausführen. Der Live-Migrationsstatus ist nicht bestätigt.
 - JavaScript-Syntax und HTML-Markup statisch geprüft; ein Supabase-/Browser-End-to-End-Test wurde nicht durchgeführt. Ohne neue Migration bleibt Entdecken nutzbar, die Merkliste wird bis zur Migration mit einem Hinweis deaktiviert.
