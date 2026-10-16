@@ -2419,27 +2419,46 @@
     const active = (rows, startKey) => (rows || []).filter((item) =>
       !item.expires_at || new Date(item.expires_at).getTime() > Date.now()
     );
+    const testAdvertisement = {
+      id: "test-ad-shira-rachel",
+      partner_name: "Shira Rachel Photography",
+      title: "Eure Geschichte. Für immer festgehalten.",
+      description: "Natürliche Hochzeitsfotografie mit Gefühl – vom ersten Moment bis zur Feier.",
+      destination_url: "https://shira-rachel.com/",
+      is_test_ad: true
+    };
+    const liveOffers = offersResult.error ? [] : active(offersResult.data, "starts_at");
     return {
       news: newsResult.error ? [] : active(newsResult.data, "published_at"),
-      offers: offersResult.error ? [] : active(offersResult.data, "starts_at")
+      offers: [testAdvertisement, ...liveOffers]
     };
   }
 
   function createContentCard(item, kind) {
     const card = document.createElement("article");
-    card.className = "activity-card content-card";
+    const isTestAd = Boolean(item.is_test_ad);
+    card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "");
     const copy = document.createElement("div");
     copy.className = "activity-card-copy";
     const label = document.createElement("span");
-    label.className = "content-card-label";
-    label.textContent = kind === "offer" ? "Partnerangebot" : "WedConnect-Neuigkeit";
+    label.className = isTestAd ? "test-ad-label" : "content-card-label";
+    label.textContent = isTestAd ? "TESTANZEIGE · SHIRA RACHEL PHOTOGRAPHY" : kind === "offer" ? "Partnerangebot" : "WedConnect-Neuigkeit";
     const title = document.createElement("strong");
     title.textContent = item.title || (kind === "offer" ? "Angebot" : "Neuigkeit");
     const detail = document.createElement("p");
-    detail.textContent = kind === "offer"
-      ? [item.partner_name, item.description, item.terms ? "Bedingungen: " + item.terms : ""].filter(Boolean).join(" · ")
-      : item.body || "";
+    detail.textContent = isTestAd
+      ? item.description || ""
+      : kind === "offer"
+        ? [item.partner_name, item.description, item.terms ? "Bedingungen: " + item.terms : ""].filter(Boolean).join(" · ")
+        : item.body || "";
     copy.append(label, title, detail);
+    if (isTestAd) {
+      const monogram = document.createElement("span");
+      monogram.className = "test-ad-monogram";
+      monogram.setAttribute("aria-hidden", "true");
+      monogram.textContent = "SR";
+      card.append(monogram);
+    }
     card.append(copy);
     const rawUrl = item.destination_url || "";
     if (rawUrl) {
@@ -2447,11 +2466,11 @@
         const url = new URL(rawUrl, window.location.href);
         if (["http:", "https:"].includes(url.protocol)) {
           const link = document.createElement("a");
-          link.className = "button button-secondary";
+          link.className = "button " + (isTestAd ? "button-primary" : "button-secondary");
           link.href = url.toString();
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = kind === "offer" ? "Zum Angebot" : "Mehr erfahren";
+          link.textContent = isTestAd ? "shira-rachel.com besuchen" : kind === "offer" ? "Zum Angebot" : "Mehr erfahren";
           card.append(link);
         }
       } catch (_) {}
