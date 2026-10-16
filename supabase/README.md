@@ -65,3 +65,16 @@ values ('00000000-0000-0000-0000-000000000000');
 ```
 
 Führe für die Chat-Funktion `supabase/migrations/20261016130000_support_contact_feedback.sql` aus. Die Migration und die Betreiberfreischaltung in Supabase müssen separat erfolgen; das Vorhandensein der Dateien im Repository bestätigt keine Live-Einrichtung.
+
+
+## Konto dauerhaft löschen
+
+Die Einstellungsseite enthält einen dauerhaft sichtbaren Löschbereich. Nutzer müssen im Bestätigungsdialog exakt `KONTO LÖSCHEN` eingeben. Der authentifizierte Aufruf geht an `supabase/functions/delete-account/index.ts`; die Funktion prüft die Nutzersitzung, entfernt Dateien aus dem privaten Bucket `wedconnect-profile-photos` und löscht anschließend den Auth-Nutzer. Die Profil- und Aktivitätsdaten hängen per `ON DELETE CASCADE` am Auth-/Profilkonto. Die Löschung entfernt auch persönliche Chatverläufe für beide Beteiligten.
+
+Vor der Verwendung muss die Funktion im richtigen Supabase-Projekt deployt werden:
+
+```sh
+supabase functions deploy delete-account
+```
+
+Die Supabase-Standard-Secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY` (oder `SUPABASE_PUBLISHABLE_KEY`) und `SUPABASE_SERVICE_ROLE_KEY` müssen für Functions verfügbar sein. Der Service-Role-Key bleibt ausschließlich im Supabase-Secret-Store und darf nie in Browsercode oder Vercel-Clientvariablen veröffentlicht werden. Bei einem Storage-Fehler wird die Auth-Löschung abgebrochen; ein erneuter Versuch kann nötig sein, falls bereits ein Teil der Dateien entfernt wurde. Das Deployment und die Ausführung in Produktion sind separat zu prüfen.
