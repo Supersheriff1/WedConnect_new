@@ -2554,8 +2554,17 @@
     likesContainer.replaceChildren();
     activityCache.matches.forEach((summary) => container.append(createActivityCard(summary, "match")));
     activityCache.incoming.forEach((summary) => likesContainer.append(createActivityCard(summary, "like")));
+    const isCouple = currentRole === "couple";
+    document.querySelector("#matches-intro").textContent = isCouple
+      ? "Ein Match entsteht, wenn ihr und ein Fotograf gegenseitig Interesse zeigen. Das ist noch keine Buchungszusage."
+      : "Ein Match entsteht, wenn du und ein Hochzeitspaar gegenseitig Interesse zeigen. Das ist noch keine Buchungszusage.";
+    document.querySelector("#matches-likes-intro").textContent = isCouple
+      ? "Diese Fotografen interessieren sich für eure Hochzeit. Schaut euch ihre Profile an und entscheidet, ob ihr zurückliken möchtet."
+      : "Diese Hochzeitspaare interessieren sich für dein Profil. Sieh dir ihre Profile an und entscheide, ob du zurückliken möchtest.";
     document.querySelector("#matches-count").textContent = String(activityCache.matches.length);
     document.querySelector("#matches-likes-count").textContent = String(activityCache.incoming.length);
+    document.querySelector("#matches-empty-state").textContent = isCouple ? "Ihr habt derzeit keine Matches." : "Du hast derzeit keine Matches.";
+    document.querySelector("#matches-likes-empty-state").textContent = isCouple ? "Ihr habt derzeit keine offenen Likes." : "Du hast derzeit keine offenen Likes.";
     document.querySelector("#matches-empty-state").hidden = activityCache.matches.length > 0;
     document.querySelector("#matches-likes-empty-state").hidden = activityCache.incoming.length > 0;
     setMatchesTab(activeMatchesTab);
