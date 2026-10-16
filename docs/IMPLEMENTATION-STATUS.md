@@ -172,3 +172,6 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Mobile Ansicht: Pfeiltasten auf Profilbildern ausgeblendet; stattdessen erscheinen oben segmentierte Fortschrittsbalken, die beim Wischen das aktuelle Foto anzeigen und direkt anwählbar sind.
 - Fotozähler unten rechts aktualisiert sich beim Wischen ebenfalls.
+
+
+- Korrektur: Die mobile Ausblendung der Discover-Pfeile steht nun nach den allgemeinen Pfeilregeln und kann durch diese nicht mehr überschrieben werden.
