@@ -63,7 +63,7 @@
   let blockFeatureNoticeShown = false;
   let pendingBlockPeerId = "";
   const profilePhotoUrlCache = new Map();
-  let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
+  let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0, mode: "discover", savedIds: new Set(), likedIds: new Set(), skippedIds: new Set(), savedFeatureAvailable: true, busy: false };
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
@@ -2284,7 +2284,7 @@
     overlay.append(actions);
     controls.append(previous, next);
     gallery.append(track, controls, indicatorGroup, status);
-    if (options.showActions !== false) gallery.append(overlay);
+    if (options.showActions === true) gallery.append(overlay);
     if (renderedCount) {
       const fullscreenButton = document.createElement("button");
       fullscreenButton.type = "button";
@@ -3552,7 +3552,10 @@
     const container = document.querySelector("#discover-content");
     if (!container || discoverState.loading) return;
     if (discoverState.loaded) {
-      if (!discoverState.active) await advanceDiscoverFeed();
+      discoverState.mode = "discover";
+      updateDiscoverModeButtons();
+      if (discoverState.active) renderDiscoverCard(discoverState.active);
+      else await advanceDiscoverFeed();
       return;
     }
     discoverState.loading = true;
@@ -3563,19 +3566,25 @@
     container.append(loading);
     try {
       const oppositeRole = currentRole === "couple" ? "photographer" : "couple";
-      const [profilesResult, outgoingResult, skipsResult, blocksResult] = await Promise.all([
+      const [profilesResult, outgoingResult, skipsResult, savedResult, blocksResult] = await Promise.all([
         supabase.from("profiles").select("id,role").eq("profile_status", "complete").eq("role", oppositeRole),
         supabase.from("profile_likes").select("liked_id").eq("liker_id", currentUser.id),
         supabase.from("profile_skips").select("skipped_id").eq("skipper_id", currentUser.id),
+        supabase.from("profile_saved_profiles").select("saved_profile_id").eq("user_id", currentUser.id),
         supabase.from("profile_blocks").select("blocker_id,blocked_id").or("blocker_id.eq." + currentUser.id + ",blocked_id.eq." + currentUser.id)
       ]);
       if (!blocksResult.error) activityCache.profileBlocks = blocksResult.data || [];
       if (profilesResult.error || outgoingResult.error || skipsResult.error || blocksResult.error) {
-        throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob die Profil-Likes- und Entdecken-Migrationen in Supabase ausgeführt wurden.");
+        throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob Profil-Likes, Überspringen und Blockieren in Supabase eingerichtet sind.");
       }
+      discoverState.savedFeatureAvailable = !savedResult.error;
+      discoverState.likedIds = new Set((outgoingResult.data || []).map((item) => item.liked_id));
+      discoverState.skippedIds = new Set((skipsResult.data || []).map((item) => item.skipped_id));
+      discoverState.savedIds = new Set((savedResult.data || []).map((item) => item.saved_profile_id));
       const excluded = new Set([currentUser.id]);
-      (outgoingResult.data || []).forEach((item) => excluded.add(item.liked_id));
-      (skipsResult.data || []).forEach((item) => excluded.add(item.skipped_id));
+      discoverState.likedIds.forEach((id) => excluded.add(id));
+      discoverState.skippedIds.forEach((id) => excluded.add(id));
+      discoverState.savedIds.forEach((id) => excluded.add(id));
       (blocksResult.data || []).forEach((item) => excluded.add(item.blocker_id === currentUser.id ? item.blocked_id : item.blocker_id));
       discoverState.ids = (profilesResult.data || []).map((item) => item.id).filter((id) => !excluded.has(id));
       for (let i = discoverState.ids.length - 1; i > 0; i -= 1) {
@@ -3591,6 +3600,7 @@
         if (savedIndex > 0) discoverState.ids.unshift(discoverState.ids.splice(savedIndex, 1)[0]);
       }
       discoverState.index = 0;
+      updateDiscoverModeButtons();
       discoverState.loaded = true;
       await advanceDiscoverFeed();
     } catch (error) {
@@ -3603,6 +3613,150 @@
     } finally {
       discoverState.loading = false;
     }
+  }
+
+  function updateDiscoverModeButtons() {
+    document.querySelectorAll("[data-discover-mode]").forEach((button) => {
+      const selected = button.dataset.discoverMode === discoverState.mode;
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+      button.classList.toggle("is-active", selected);
+    });
+    const count = document.querySelector("#discover-saved-count");
+    if (count) count.textContent = String(discoverState.savedIds.size);
+  }
+
+  async function showSavedProfiles() {
+    const container = document.querySelector("#discover-content");
+    if (!container) return;
+    discoverState.mode = "saved";
+    updateDiscoverModeButtons();
+    container.replaceChildren();
+    if (!discoverState.savedFeatureAvailable) {
+      const unavailable = document.createElement("p");
+      unavailable.className = "overview-empty-state";
+      unavailable.textContent = "Die Merkliste wird nach der Einrichtung der Supabase-Migration verfügbar.";
+      container.append(unavailable);
+      return;
+    }
+    const loading = document.createElement("p");
+    loading.className = "overview-empty-state";
+    loading.textContent = "Deine Merkliste wird geladen …";
+    container.append(loading);
+    const savedIds = [...discoverState.savedIds];
+    if (!savedIds.length) {
+      container.replaceChildren();
+      const empty = document.createElement("p");
+      empty.className = "overview-empty-state";
+      empty.textContent = "Hier erscheinen Profile, die du dir gemerkt hast.";
+      container.append(empty);
+      return;
+    }
+    try {
+      const result = await supabase.from("profiles").select("id,role").in("id", savedIds).eq("profile_status", "complete");
+      if (result.error) throw result.error;
+      const visibleProfiles = (result.data || []).filter((profile) => profile.role === (currentRole === "couple" ? "photographer" : "couple") &&
+        !(activityCache.profileBlocks || []).some((block) => block.blocker_id === profile.id || block.blocked_id === profile.id));
+      const candidates = await Promise.all(visibleProfiles.map((profile) => loadDiscoverProfile(profile.id).catch(() => null)));
+      container.replaceChildren();
+      candidates.filter(Boolean).forEach((candidate) => {
+        const item = document.createElement("article");
+        item.className = "saved-profile-item";
+        const thumbnail = document.createElement("div");
+        thumbnail.className = "saved-profile-thumbnail";
+        const photo = candidate.photos[0];
+        if (photo) {
+          supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600).then(({ data, error }) => {
+            if (!error && data?.signedUrl && thumbnail.isConnected) {
+              const image = document.createElement("img");
+              image.src = data.signedUrl;
+              image.alt = "";
+              thumbnail.replaceChildren(image);
+            }
+          });
+        }
+        const copy = document.createElement("div");
+        copy.className = "saved-profile-copy";
+        const title = document.createElement("h3");
+        title.textContent = candidate.role === "couple"
+          ? [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar"
+          : candidate.profile.first_name || "Fotograf";
+        const details = profileDetailRows(candidate.role, candidate.profile);
+        const description = document.createElement("p");
+        description.textContent = (details.keyFacts || details.chips || []).slice(0, 3).map((fact) => Array.isArray(fact) ? fact[fact.length - 1] : "").filter(Boolean).join(" · ") || "Gespeichertes Profil";
+        copy.append(title, description);
+        const actions = document.createElement("div");
+        actions.className = "saved-profile-actions";
+        const view = document.createElement("button");
+        view.type = "button";
+        view.className = "button button-secondary";
+        view.textContent = "Profil ansehen";
+        const preview = document.createElement("div");
+        preview.className = "saved-profile-preview";
+        preview.hidden = true;
+        view.addEventListener("click", async () => {
+          const opening = preview.hidden;
+          preview.hidden = !opening;
+          view.textContent = opening ? "Profil schließen" : "Profil ansehen";
+          if (opening && !preview.dataset.loaded) {
+            await renderOwnProfilePreview(candidate.role, candidate.profile, candidate.photos, preview, { publicView: true, showActions: false });
+            preview.dataset.loaded = "true";
+          }
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "button button-secondary";
+        remove.dataset.removeSavedProfile = candidate.id;
+        remove.textContent = "Aus Merkliste entfernen";
+        actions.append(view, remove);
+        item.append(thumbnail, copy, actions, preview);
+        container.append(item);
+      });
+      if (!container.children.length) {
+        const empty = document.createElement("p");
+        empty.className = "overview-empty-state";
+        empty.textContent = "Deine Merkliste ist derzeit leer.";
+        container.append(empty);
+      }
+    } catch (_) {
+      container.replaceChildren();
+      const error = document.createElement("p");
+      error.className = "overview-empty-state";
+      error.textContent = "Die Merkliste konnte nicht geladen werden. Bitte prüfe die Merkliste-Migration in Supabase.";
+      container.append(error);
+    }
+  }
+
+  async function setDiscoverMode(mode) {
+    if (mode === "saved") {
+      if (!discoverState.loaded) {
+        discoverState.mode = "discover";
+        await loadDiscoverFeed();
+      }
+      await showSavedProfiles();
+      return;
+    }
+    discoverState.mode = "discover";
+    updateDiscoverModeButtons();
+    if (!discoverState.loaded) await loadDiscoverFeed();
+    else if (discoverState.active) renderDiscoverCard(discoverState.active);
+    else await advanceDiscoverFeed();
+  }
+
+  async function removeSavedProfile(profileId, button) {
+    if (!profileId || button.disabled) return;
+    button.disabled = true;
+    const { error } = await supabase.from("profile_saved_profiles").delete().eq("user_id", currentUser.id).eq("saved_profile_id", profileId);
+    if (error) {
+      showNotice("Das Profil konnte nicht aus der Merkliste entfernt werden.");
+      button.disabled = false;
+      return;
+    }
+    discoverState.savedIds.delete(profileId);
+    if (!discoverState.likedIds.has(profileId) && !discoverState.skippedIds.has(profileId) && !discoverState.ids.includes(profileId)) {
+      discoverState.ids.splice(discoverState.index, 0, profileId);
+    }
+    updateDiscoverModeButtons();
+    await showSavedProfiles();
   }
 
   async function loadDiscoverProfile(userId) {
@@ -3702,7 +3856,7 @@
 
   async function advanceDiscoverFeed() {
     const container = document.querySelector("#discover-content");
-    if (!container) return;
+    if (!container || discoverState.mode !== "discover") return;
     discoverState.active = null;
     container.replaceChildren();
     while (discoverState.index < discoverState.ids.length) {
@@ -3721,6 +3875,32 @@
     empty.textContent = "Im Moment gibt es keine weiteren passenden Profile. Schau später wieder vorbei.";
     try { window.sessionStorage.removeItem("wedconnect-discover-active:" + currentUser.id); } catch (_) {}
     container.append(empty);
+    if (discoverState.index > 0) {
+      const back = document.createElement("button");
+      back.type = "button";
+      back.className = "button button-secondary discover-empty-back";
+      back.dataset.discoverAction = "back";
+      back.textContent = "Zum vorherigen Profil";
+      container.append(back);
+    }
+  }
+
+  async function goBackDiscoverFeed() {
+    if (discoverState.busy || discoverState.mode !== "discover") return;
+    if (discoverState.active) {
+      if (discoverState.index < 2) return;
+      discoverState.index -= 1;
+    } else if (discoverState.index < 1) return;
+    const previousId = discoverState.ids[discoverState.index - 1];
+    try {
+      const candidate = await loadDiscoverProfile(previousId);
+      discoverState.active = candidate;
+      discoverState.photoIndex = 0;
+      try { window.sessionStorage.setItem("wedconnect-discover-active:" + currentUser.id, candidate.id); } catch (_) {}
+      renderDiscoverCard(candidate);
+    } catch (_) {
+      showNotice("Das vorherige Profil konnte nicht geladen werden.");
+    }
   }
 
   async function setDiscoverPhoto(candidate, index, image, label) {
@@ -3858,47 +4038,113 @@
       });
       content.append(detailList);
     }
-    const actions = document.createElement("div");
-    actions.className = "discover-actions";
-    const skip = document.createElement("button");
-    skip.type = "button";
-    skip.className = "button button-secondary";
-    skip.dataset.discoverAction = "skip";
-    skip.textContent = "Überspringen";
-    const like = document.createElement("button");
-    like.type = "button";
-    like.className = "button button-primary";
-    like.dataset.discoverAction = "like";
-    like.textContent = "Interesse zeigen";
-    actions.append(skip, like);
-    content.append(actions);
     card.append(content);
+
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "discover-back-button";
+    back.dataset.discoverAction = "back";
+    back.disabled = discoverState.index < 2;
+    back.setAttribute("aria-label", "Zum vorherigen Profil");
+    back.title = "Vorheriges Profil";
+    back.textContent = "‹";
+    photoFrame.append(back);
+
+    const photoActions = document.createElement("div");
+    photoActions.className = "discover-photo-actions";
+    const alreadyLiked = discoverState.likedIds.has(candidate.id);
+    const alreadySkipped = discoverState.skippedIds.has(candidate.id);
+    const alreadySaved = discoverState.savedIds.has(candidate.id);
+    if (alreadyLiked || alreadySkipped || alreadySaved) {
+      const stateLabel = document.createElement("span");
+      stateLabel.className = "discover-action-state";
+      stateLabel.textContent = alreadyLiked ? "Like gesendet" : alreadySkipped ? "Dauerhaft ausgeblendet" : "Gemerkt";
+      const next = document.createElement("button");
+      next.type = "button";
+      next.className = "discover-photo-action discover-photo-action--next";
+      next.dataset.discoverAction = "next";
+      next.setAttribute("aria-label", "Weiter zum nächsten Profil");
+      next.title = "Weiter zum nächsten Profil";
+      next.textContent = "›";
+      photoActions.append(stateLabel, next);
+    } else {
+      const skip = document.createElement("button");
+      skip.type = "button";
+      skip.className = "discover-photo-action discover-photo-action--skip";
+      skip.dataset.discoverAction = "skip";
+      skip.setAttribute("aria-label", "Profil dauerhaft überspringen");
+      skip.title = "Profil dauerhaft überspringen";
+      skip.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+      const save = document.createElement("button");
+      save.type = "button";
+      save.className = "discover-photo-action discover-photo-action--save";
+      save.dataset.discoverAction = "save";
+      save.setAttribute("aria-label", "Profil merken");
+      save.title = "Profil merken";
+      save.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg>';
+      const like = document.createElement("button");
+      like.type = "button";
+      like.className = "discover-photo-action discover-photo-action--like";
+      like.dataset.discoverAction = "like";
+      like.setAttribute("aria-label", "Interesse zeigen");
+      like.title = "Interesse zeigen";
+      like.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>';
+      photoActions.append(skip, save, like);
+    }
+    photoFrame.append(photoActions);
     container.append(card);
   }
 
   async function handleDiscoverAction(actionButton) {
     const candidate = discoverState.active;
-    if (!candidate || actionButton.disabled) return;
+    if (actionButton.disabled) return;
+    if (actionButton.dataset.discoverAction === "back") { await goBackDiscoverFeed(); return; }
+    if (actionButton.dataset.discoverAction === "next") { await advanceDiscoverFeed(); return; }
+    if (!candidate || discoverState.busy) return;
+    discoverState.busy = true;
     const buttons = document.querySelectorAll("[data-discover-action]");
     buttons.forEach((button) => { button.disabled = true; });
-    if (actionButton.dataset.discoverAction === "like") {
+    const action = actionButton.dataset.discoverAction;
+    if (action === "like") {
       const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: candidate.id });
       if (error && !/duplicate|unique/i.test(error.message || "")) {
         showNotice("Dein Interesse konnte nicht gespeichert werden. Bitte versuche es erneut.");
         buttons.forEach((button) => { button.disabled = false; });
+        discoverState.busy = false;
         return;
       }
+      discoverState.likedIds.add(candidate.id);
       const { data: reciprocal, error: reciprocalError } = await supabase.from("profile_likes").select("liker_id").eq("liker_id", candidate.id).eq("liked_id", currentUser.id).maybeSingle();
       showNotice(!reciprocalError && reciprocal ? "Es ist ein Match! Ihr könnt euch jetzt schreiben." : "Interesse gesendet.");
-    } else {
+    } else if (action === "skip") {
       const { error } = await supabase.from("profile_skips").insert({ skipper_id: currentUser.id, skipped_id: candidate.id });
       if (error && !/duplicate|unique/i.test(error.message || "")) {
         showNotice("Das Profil konnte gerade nicht übersprungen werden. Bitte versuche es erneut.");
         buttons.forEach((button) => { button.disabled = false; });
+        discoverState.busy = false;
         return;
       }
+      discoverState.skippedIds.add(candidate.id);
+    } else if (action === "save") {
+      if (!discoverState.savedFeatureAvailable) {
+        showNotice("Die Merkliste ist noch nicht eingerichtet. Bitte führe zuerst die Merkliste-Migration in Supabase aus.");
+        buttons.forEach((button) => { button.disabled = false; });
+        discoverState.busy = false;
+        return;
+      }
+      const { error } = await supabase.from("profile_saved_profiles").insert({ user_id: currentUser.id, saved_profile_id: candidate.id });
+      if (error && !/duplicate|unique/i.test(error.message || "")) {
+        showNotice("Das Profil konnte nicht gemerkt werden. Bitte prüfe die Merkliste-Migration in Supabase.");
+        buttons.forEach((button) => { button.disabled = false; });
+        discoverState.busy = false;
+        return;
+      }
+      discoverState.savedIds.add(candidate.id);
+      updateDiscoverModeButtons();
+      showNotice("Profil in deiner Merkliste gespeichert.");
     }
     await advanceDiscoverFeed();
+    discoverState.busy = false;
     await refreshActivityViews();
   }
 
@@ -4907,6 +5153,16 @@
     const profileButton = cardAction ? null : event.target.closest("[data-open-profile]");
     if (profileButton) {
       openMatchedProfile(profileButton.dataset.openProfile);
+      return;
+    }
+    const discoverMode = event.target.closest("[data-discover-mode]");
+    if (discoverMode) {
+      await setDiscoverMode(discoverMode.dataset.discoverMode);
+      return;
+    }
+    const removeSaved = event.target.closest("[data-remove-saved-profile]");
+    if (removeSaved) {
+      await removeSavedProfile(removeSaved.dataset.removeSavedProfile, removeSaved);
       return;
     }
     const discoverAction = event.target.closest("[data-discover-action]");
