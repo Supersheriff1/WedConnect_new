@@ -2520,7 +2520,6 @@
     if (messageResult.error) throw new Error("Nachrichten konnten nicht geladen werden. Prüfe die WedConnect-Nachrichtenmigration in Supabase.");
     const messages = messageResult.data || [];
     const messagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
-    const visibleMessages = messages.filter((item) => !item.deleted_at);
     const newMatches = matches.filter((peerId) => !messagedPeers.has(peerId));
     const ids = Array.from(new Set([...incoming, ...matches]));
     const summaries = await Promise.all(ids.map((id) => loadPublicProfileSummary(id)));
@@ -2529,7 +2528,7 @@
       incoming: incoming.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       matches: matches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
-      messages: visibleMessages,
+      messages,
       messagedPeers,
       reactions: activityCache.reactions || [],
       news: content.news,
@@ -2640,7 +2639,7 @@
       const latest = peerMessages[peerMessages.length - 1];
       const detail = document.createElement("p");
       detail.className = "activity-message-preview";
-      detail.textContent = latest ? latest.body : "Keine sichtbaren Nachrichten";
+      detail.textContent = latest ? (latest.deleted_at ? "Nachricht wurde gelöscht" : latest.body) : "Keine sichtbaren Nachrichten";
       card.dataset.searchText = (summary.name + " " + detail.textContent).toLocaleLowerCase("de");
       card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
       copy.append(name, detail);
@@ -3147,6 +3146,14 @@
       return;
     }
     messages.forEach((item) => {
+      if (item.deleted_at) {
+        const deletionNote = document.createElement("div");
+        deletionNote.className = "conversation-message is-deleted";
+        deletionNote.setAttribute("aria-label", "Nachricht wurde gelöscht");
+        deletionNote.textContent = "Nachricht wurde gelöscht";
+        container.append(deletionNote);
+        return;
+      }
       const bubble = document.createElement("div");
       bubble.className = "conversation-message" + (item.sender_id === userId ? " is-own" : "");
       if (item.sender_id !== userId) {
@@ -3215,8 +3222,9 @@
       const allPeerMessages = forPeer(incoming);
       const peerMessages = allPeerMessages.filter((item) => !item.deleted_at);
       const previous = forPeer(activityCache.messages || []);
+      const previousVisibleMessages = previous.filter((item) => !item.deleted_at);
       const messagesKey = (items) => items.map((item) => [item.id, item.created_at, item.deleted_at || ""].join("|")).join(";");
-      const messagesChanged = messagesKey(previous) !== messagesKey(peerMessages);
+      const messagesChanged = messagesKey(previous) !== messagesKey(allPeerMessages);
       let peerReactions = null;
       if (peerMessages.length) {
         const { data: reactions, error: reactionError } = await supabase.from("profile_message_reactions")
@@ -3236,7 +3244,7 @@
           peerReactions = reactions || [];
         }
       }
-      const previousMessageIds = new Set(previous.map((item) => item.id));
+      const previousMessageIds = new Set(previousVisibleMessages.map((item) => item.id));
       const nextMessageIds = new Set(peerMessages.map((item) => item.id));
       const reactionKey = (items) => items.map((item) => [item.message_id, item.user_id, item.reaction].join("|")).sort().join(";");
       const oldPeerReactions = (activityCache.reactions || []).filter((item) => previousMessageIds.has(item.message_id));
@@ -3245,7 +3253,7 @@
       if (messagesChanged) {
         activityCache.messages = (activityCache.messages || [])
           .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
-          .concat(peerMessages)
+          .concat(allPeerMessages)
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       }
       if (activityCache.messagedPeers) {
@@ -3706,8 +3714,9 @@
       const status = document.querySelector("#delete-message-status");
       confirmMessageDelete.disabled = true;
       status.textContent = "Nachricht wird für beide gelöscht …";
+      const deletedAt = new Date().toISOString();
       const { data, error } = await supabase.from("profile_messages")
-        .update({ body: "[Diese Nachricht wurde gelöscht.]", deleted_at: new Date().toISOString() })
+        .update({ body: "[Diese Nachricht wurde gelöscht.]", deleted_at: deletedAt })
         .eq("id", messageId).eq("sender_id", currentUser.id).is("deleted_at", null)
         .select("id").maybeSingle();
       confirmMessageDelete.disabled = false;
@@ -3715,7 +3724,11 @@
         status.textContent = error ? "Die Nachricht konnte nicht gelöscht werden. Bitte prüfe die Nachrichten-Löschmigration in Supabase." : "Die Nachricht wurde bereits gelöscht oder ist nicht mehr verfügbar.";
         return;
       }
-      activityCache.messages = (activityCache.messages || []).filter((item) => item.id !== messageId);
+      const cachedMessage = (activityCache.messages || []).find((item) => item.id === messageId);
+      if (cachedMessage) {
+        cachedMessage.body = "[Diese Nachricht wurde gelöscht.]";
+        cachedMessage.deleted_at = deletedAt;
+      }
       activityCache.reactions = (activityCache.reactions || []).filter((item) => item.message_id !== messageId);
       pendingDeleteMessageId = "";
       document.querySelector("#delete-message-dialog").close();
