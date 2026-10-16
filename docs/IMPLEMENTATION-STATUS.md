@@ -210,3 +210,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Die Testanzeige verwendet ein Hochzeitsfoto von der Website shira-rachel.com. Das Motiv wird als linkes, abgerundetes Bildfeld mit `object-fit: cover` dargestellt; auf kleinen Bildschirmen wird es kompakter und der Website-Button rückt darunter.
 - Kein Datenbank- oder Storage-Upload erforderlich. Das Bild wird von der Website geladen.
+
+
+## Werbekennzeichnung in Angebotsdetails (16. Oktober 2026)
+
+- Auch die Detailseite eines Partnerangebots zeigt oben rechts die Kennzeichnung „Werbung“. Das gilt für die Shira-Testanzeige und alle Partnerangebote.
+- Die Kennzeichnung bleibt auf Mobilgeräten gut sichtbar und vom Inhalt getrennt.
