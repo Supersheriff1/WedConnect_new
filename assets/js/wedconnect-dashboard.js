@@ -3518,7 +3518,9 @@
     const status = document.querySelector("#conversation-status");
     const body = String(input.value || "").trim();
     if (!body || !activeConversationPeer) return;
-    status.textContent = "Wird gesendet …";
+    status.textContent = "";
+    const form = document.querySelector("#conversation-form");
+    form.setAttribute("aria-busy", "true");
     const send = document.querySelector("#conversation-form button[type=submit]");
     send.disabled = true;
     const { error } = await supabase.from("profile_messages").insert({
@@ -3527,6 +3529,7 @@
       body
     });
     send.disabled = false;
+    form.removeAttribute("aria-busy");
     if (error) {
       status.textContent = "Nachricht konnte nicht gesendet werden. Prüfe, ob das Match noch besteht.";
       return;
@@ -3534,7 +3537,7 @@
     input.value = "";
     input.style.height = "50px";
     input.style.overflowY = "hidden";
-    status.textContent = "Nachricht gesendet.";
+    status.textContent = "";
     await refreshActivityViews();
     await renderConversationThread();
   });
