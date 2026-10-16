@@ -1,8 +1,8 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 1.5  
-**Stand der Prüfung:** 15. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Feature-Branch `feature/couple-wedding-timeline-20261015`, aktualisiert um Entdecken/Überspringen, Basis `main` bei `0cf33004efaacfdf8715c0bd45293d919a3e4b66`  
+**Version:** 1.6  
+**Stand der Prüfung:** 16. Oktober 2026  
+**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Branch `main`, geprüft bei `4c8f09696e1700a8a8a97465bc456e77bb1285bc`  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
 **Prüfart:** Quellcode und SQL geprüft; keine Live-Prüfung von Vercel oder dem aktiven Supabase-Migrationsstatus
 
@@ -10,7 +10,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 
 ## Kurzstatus
 
-| Bereich | Stand im Feature-Branch |
+| Bereich | Stand in `main` |
 |---|---|
 | Öffentliche Seiten | `index.html`, `hochzeitspaare.html` und `fotografen.html` sind vorhanden. Die Fotografen-Seite bleibt eingefroren. |
 | Anmeldung | Supabase Auth für E-Mail/Passwort und Google ist eingebunden. Die Anmeldung fragt keine Rolle ab. Der Nutzer hat Anmeldung und Weiterleitung zuvor als funktionierend bestätigt. |
@@ -22,7 +22,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Übersicht | Startet nach Profilabschluss mit Begrüßung, offenen eingegangenen Likes und beidseitigen Matches ohne erste Nachricht. Abschnitte ohne Inhalte bleiben verborgen. App-Neuigkeiten und Partnerangebote werden rollenbezogen nur bei veröffentlichten Einträgen angezeigt. |
 | Eigene Profilansicht | Vollständiges eigenes Profil mit Galerie unter „Profil“. Hochzeitspaare sehen Key Facts für Datum, Ort und Bildnutzungspräferenz. |
 | Hochzeitspaarfotos | Je ein eigenes Foto pro Person erforderlich, gemeinsames Foto optional; 2-MB-Grenze, Vorname(n) links unten als nicht-destruktive Ansichtseinblendung. |
-| Matches und Nachrichten | Likes lassen sich auf der Übersicht beantworten; gegenseitige Likes werden als Matches angezeigt. Neue Matches können direkt angeschrieben werden; bestehende Nachrichten erscheinen in der Nachrichtenansicht. End-to-End-Live-Test steht aus. |
+| Matches und Nachrichten | Likes lassen sich auf der Übersicht beantworten; gegenseitige Likes werden als Matches angezeigt. Neue Matches können direkt angeschrieben werden; bestehende Nachrichten erscheinen in der Nachrichtenansicht. Profilaufruf per Foto oder Namen wird in dieser Änderung ergänzt. |
 | E-Mail-Einstellungen | Ereignisbezogene Präferenzen für Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote werden in Supabase gespeichert. Ein Versanddienst, der diese Einstellungen auswertet, ist nicht angeschlossen. |
 | Bearbeitung | Profilentwürfe werden in der Bearbeitung automatisch gespeichert. Navigation und Konto-/Einstellungsdialoge sind im Dashboard vorhanden. |
 | Entdecken | Lädt vollständige Profile der jeweils anderen Rolle. Gesendete Likes werden in `profile_likes` gespeichert; ein gegenseitiges Like erzeugt ein Match. „Überspringen“ wird privat in `profile_skips` gespeichert und blendet das Profil künftig aus. Der Live-End-to-End-Test steht noch aus. |

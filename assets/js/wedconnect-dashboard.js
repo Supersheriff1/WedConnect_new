@@ -2411,8 +2411,12 @@
   function createActivityCard(summary, kind) {
     const card = document.createElement("article");
     card.className = "activity-card";
-    const avatar = document.createElement("div");
-    avatar.className = "activity-avatar";
+    const avatar = document.createElement("button");
+    avatar.type = "button";
+    avatar.className = "activity-avatar activity-profile-open";
+    avatar.dataset.openProfile = summary.id;
+    avatar.setAttribute("aria-haspopup", "dialog");
+    avatar.setAttribute("aria-label", "Profil von " + summary.name + " öffnen");
     if (summary.photoUrl) {
       const image = document.createElement("img");
       image.src = summary.photoUrl;
@@ -2424,7 +2428,11 @@
     }
     const copy = document.createElement("div");
     copy.className = "activity-card-copy";
-    const name = document.createElement("strong");
+    const name = document.createElement("button");
+    name.type = "button";
+    name.className = "activity-name-button";
+    name.dataset.openProfile = summary.id;
+    name.setAttribute("aria-haspopup", "dialog");
     name.textContent = summary.name;
     const detail = document.createElement("p");
     detail.textContent = summary.detail || (summary.role === "couple" ? "Hochzeitspaar" : "Fotograf");
@@ -2635,6 +2643,172 @@
       ? photo.photo_type === "portfolio"
       : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
     return { id: userId, role, profile: profileResult.data, photos };
+  }
+
+  async function waitForProfileQuery(query, timeoutMs, label) {
+    let timer;
+    try {
+      return await Promise.race([
+        Promise.resolve(query),
+        new Promise((_, reject) => {
+          timer = window.setTimeout(() => reject(new Error(label + " Zeitüberschreitung")), timeoutMs);
+        })
+      ]);
+    } finally {
+      if (timer) window.clearTimeout(timer);
+    }
+  }
+
+  async function openMatchedProfile(userId) {
+    const dialog = document.querySelector("#matched-profile-dialog");
+    const container = document.querySelector("#matched-profile-content");
+    const dialogTitle = document.querySelector("#matched-profile-dialog-title");
+    if (!dialog || !container || !userId) return;
+    container.replaceChildren();
+    const loading = document.createElement("p");
+    loading.className = "overview-empty-state";
+    loading.textContent = "Profil wird geladen …";
+    container.append(loading);
+    dialogTitle.textContent = "Profil";
+    if (!dialog.open) dialog.show();
+    try {
+      const headerResult = await waitForProfileQuery(
+        supabase.from("profiles").select("id,role").eq("id", userId).maybeSingle(),
+        7000,
+        "Profil"
+      );
+      if (headerResult.error || !headerResult.data) throw new Error("Profil nicht verfügbar");
+      const role = headerResult.data.role;
+      if (role !== (currentRole === "couple" ? "photographer" : "couple")) throw new Error("Profilrolle passt nicht");
+      const table = role === "couple" ? "couple_profiles" : "photographer_profiles";
+      const profileResult = await waitForProfileQuery(
+        supabase.from(table).select("*").eq("id", userId).maybeSingle(),
+        7000,
+        "Profildaten"
+      );
+      if (profileResult.error || !profileResult.data) throw new Error("Profil konnte nicht geöffnet werden");
+      const profile = profileResult.data;
+      const title = role === "couple"
+        ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar"
+        : profile.first_name || "Fotograf";
+      dialogTitle.textContent = title;
+      const card = document.createElement("article");
+      card.className = "discover-profile-card";
+      const gallery = document.createElement("div");
+      gallery.className = "discover-photo-frame matched-profile-gallery";
+      const counter = document.createElement("span");
+      counter.className = "discover-photo-count";
+      container.replaceChildren(card);
+      card.append(gallery);
+      const photosResult = await waitForProfileQuery(
+        supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order", { ascending: true }).limit(30),
+        3500,
+        "Profilfotos"
+      ).catch(() => ({ data: [] }));
+      const photos = (photosResult.data || []).filter((photo) => role === "photographer"
+        ? photo.photo_type === "portfolio"
+        : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
+      if (photos.length) {
+        const track = document.createElement("div");
+        track.className = "matched-profile-track";
+        track.setAttribute("aria-label", "Profilfotos");
+        gallery.append(track);
+        photos.forEach((photo, index) => {
+          const slide = document.createElement("div");
+          slide.className = "matched-profile-slide";
+          const image = document.createElement("img");
+          image.alt = role === "couple" ? "Foto " + (index + 1) + " von " + title : "Portfoliofoto " + (index + 1) + " von " + title;
+          image.loading = index === 0 ? "eager" : "lazy";
+          image.decoding = "async";
+          slide.append(image);
+          if (role === "couple") {
+            const names = createCouplePhotoNameOverlay(photo.photo_type, profile);
+            if (names) slide.append(names);
+          }
+          track.append(slide);
+          supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600)
+            .then(({ data, error }) => { if (!error && data && image.isConnected) image.src = data.signedUrl; })
+            .catch(() => {});
+        });
+        const updateCounter = () => {
+          const index = Math.max(0, Math.min(photos.length - 1, Math.round(track.scrollLeft / Math.max(track.clientWidth, 1))));
+          counter.textContent = (index + 1) + " / " + photos.length;
+        };
+        track.addEventListener("scroll", updateCounter, { passive: true });
+        counter.textContent = "1 / " + photos.length;
+        gallery.append(counter);
+        if (photos.length > 1) {
+          const prev = document.createElement("button");
+          prev.type = "button";
+          prev.className = "discover-photo-arrow discover-photo-arrow--previous";
+          prev.setAttribute("aria-label", "Vorheriges Foto");
+          prev.textContent = "‹";
+          prev.addEventListener("click", () => track.scrollBy({ left: -track.clientWidth, behavior: "smooth" }));
+          const next = document.createElement("button");
+          next.type = "button";
+          next.className = "discover-photo-arrow discover-photo-arrow--next";
+          next.setAttribute("aria-label", "Nächstes Foto");
+          next.textContent = "›";
+          next.addEventListener("click", () => track.scrollBy({ left: track.clientWidth, behavior: "smooth" }));
+          gallery.append(prev, next);
+        }
+      } else {
+        gallery.classList.remove("matched-profile-gallery");
+        gallery.textContent = "Keine Profilfotos vorhanden";
+        gallery.setAttribute("role", "img");
+      }
+      const content = document.createElement("div");
+      content.className = "discover-profile-content";
+      const heading = document.createElement("h3");
+      heading.className = "discover-profile-name";
+      heading.textContent = title;
+      const subtitle = document.createElement("p");
+      subtitle.className = "discover-profile-subtitle";
+      const details = profileDetailRows(role, profile);
+      const subtitleValues = role === "couple"
+        ? [profile.guest_count ? profile.guest_count + " Gäste" : "", ceremonyTypeLabel(profile.ceremony_type)]
+        : [profileLabels(profile.regions, REGION_OPTIONS) || profile.region, profile.experience_years ? profile.experience_years + " Jahre Erfahrung" : ""];
+      subtitle.textContent = subtitleValues.filter(Boolean).join(" · ") || (role === "couple" ? "Hochzeitspaar" : "Hochzeitsfotograf");
+      content.append(heading, subtitle);
+      const facts = document.createElement("div");
+      facts.className = "discover-profile-facts profile-preview-key-facts";
+      (role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])]).forEach(([icon, label, value]) => addPreviewChip(facts, icon, label, value));
+      if (facts.children.length) content.append(facts);
+      if (String(profile.public_intro || "").trim()) {
+        const intro = document.createElement("p");
+        intro.className = "discover-profile-intro";
+        intro.textContent = profile.public_intro.trim();
+        content.append(intro);
+      }
+      const sections = (details.sections || []).filter(([, value]) => String(value || "").trim());
+      if (sections.length) {
+        const list = document.createElement("dl");
+        list.className = "discover-profile-sections";
+        sections.forEach(([label, value]) => {
+          const row = document.createElement("div");
+          const term = document.createElement("dt");
+          term.textContent = label;
+          const description = document.createElement("dd");
+          description.textContent = value;
+          row.append(term, description);
+          list.append(row);
+        });
+        content.append(list);
+      }
+      card.append(content);
+    } catch (_) {
+      if (!dialog.open) return;
+      container.replaceChildren();
+      const error = document.createElement("p");
+      error.className = "overview-empty-state";
+      error.textContent = "Profil konnte nicht geladen werden. Du kannst die App weiter benutzen oder es erneut versuchen.";
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "button button-secondary";
+      retry.textContent = "Erneut versuchen";
+      retry.addEventListener("click", () => openMatchedProfile(userId));
+      container.append(error, retry);
+    }
   }
 
   async function advanceDiscoverFeed() {
@@ -3202,6 +3376,11 @@
     beginWizard(currentRole, 0);
   });
   document.addEventListener("click", async (event) => {
+    const profileButton = event.target.closest("[data-open-profile]");
+    if (profileButton) {
+      openMatchedProfile(profileButton.dataset.openProfile);
+      return;
+    }
     const discoverAction = event.target.closest("[data-discover-action]");
     if (discoverAction) {
       await handleDiscoverAction(discoverAction);

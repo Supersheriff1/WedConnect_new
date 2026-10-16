@@ -60,6 +60,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Uploadfehler nennen den Grund. Vergrößern, Verkleinern, Drehen, Abbrechen und Übernehmen müssen sichtbar aktiv wirken.
 
 ## Übersicht, Matches und Benachrichtigungen
+- In der Match-Liste öffnen Klicks auf Profilfoto oder Namen das vollständige Profil in einem nicht-modalen Dialog. Der Dialog lässt die übrige App bedienbar; die Chat-Schaltfläche bleibt separat.
 
 - Die Übersicht ist der Startbildschirm nach dem Login. Sie ergänzt die Hauptnavigation und dupliziert nicht Profil-, Match- oder Nachrichtenlisten.
 - Oben stehen eingegangene, noch unbeantwortete Likes mit den Aktionen „Zurückliken“ und „Nein danke“. Ein Zurücklike erzeugt bei Gegenseitigkeit ein Match.
