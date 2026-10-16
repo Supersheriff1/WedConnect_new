@@ -3149,12 +3149,6 @@
         heart.setAttribute("aria-pressed", String(ownHeart));
         heart.textContent = messageReactions.length ? "♥" : "♡";
         reactionRow.append(heart);
-        if (messageReactions.length) {
-          const count = document.createElement("span");
-          count.className = "message-heart-count";
-          count.textContent = String(messageReactions.length);
-          reactionRow.append(count);
-        }
         bubble.append(reactionRow);
       }
       container.append(bubble);
