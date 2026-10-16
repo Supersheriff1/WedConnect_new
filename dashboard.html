@@ -436,6 +436,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .offer-detail-actions .button{min-width:190px}
     @media(max-width:600px){.offer-card-cta{font-size:11px}.offer-detail-card{padding:22px 19px}.offer-detail-brand{margin-bottom:24px}.offer-detail-actions{display:grid}.offer-detail-actions .button{width:100%}}
 
+      .page-title-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+    .page-title-row .page-title{min-width:0;flex:1}
+    .offer-detail-view{margin-top:18px}
+    .offer-detail-back{padding:6px 9px;color:var(--muted);font-size:11px;font-weight:600}
+
   </style>
 </head>
 <body>
@@ -605,7 +610,10 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       </header>
       <div class="content">
         <p class="eyebrow" id="role-eyebrow">WedConnect</p>
-        <h1 class="page-title" id="page-title">Willkommen!</h1>
+        <div id="page-title-row" class="page-title-row">
+          <h1 class="page-title" id="page-title">Willkommen!</h1>
+          <button id="offer-detail-back" class="matched-profile-back offer-detail-back hidden" type="button" aria-label="Zurück zur Übersicht">‹ Übersicht</button>
+        </div>
         <section id="home-view" class="dashboard-view overview-home" data-dashboard-view="home" aria-label="Übersicht">
           <p class="overview-lead">Hier findest du neue Interessen und Matches, bei denen noch keine Nachricht geschrieben wurde.</p>
           <section id="incoming-likes-section" class="activity-section" hidden aria-labelledby="incoming-likes-title">
@@ -626,7 +634,6 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
           </section>
         </section>
         <section id="offer-detail-view" class="dashboard-view offer-detail-view" data-dashboard-view="offer-detail" hidden aria-label="Angebotsdetails">
-          <div class="offer-detail-toolbar"><button id="offer-detail-back" class="button button-secondary" type="button">‹ Zurück zur Übersicht</button></div>
           <div id="offer-detail-content" aria-live="polite"></div>
         </section>
         <section id="profile-view" class="dashboard-view overview-profile" data-dashboard-view="profile" hidden aria-labelledby="profile-preview-heading">
