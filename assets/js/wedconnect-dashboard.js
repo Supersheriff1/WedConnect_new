@@ -3827,6 +3827,18 @@
     await refreshActivityViews();
   }
 
+  function syncOverviewScrollHint() {
+    const hint = document.querySelector("#overview-scroll-hint");
+    const home = document.querySelector("#home-view");
+    if (!hint || !home) return;
+    const root = document.documentElement;
+    const scrollTop = window.scrollY || root.scrollTop || 0;
+    const scrollHeight = Math.max(root.scrollHeight, document.body.scrollHeight);
+    const maxScroll = Math.max(0, scrollHeight - window.innerHeight);
+    const isOverview = !home.hidden;
+    const hasMoreBelow = maxScroll > 32 && scrollTop < 24 && maxScroll - scrollTop > 32;
+    hint.hidden = !(isOverview && hasMoreBelow);
+  }
   function setDashboardView(view) {
     document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
       section.hidden = section.dataset.dashboardView !== view;
@@ -3853,6 +3865,7 @@
     contextBack.textContent = returnFromPartnerList ? "‹ Konto" : returnFromPartnerDetail ? "‹ Partnerangebote" : "‹ Übersicht";
     contextBack.setAttribute("aria-label", returnFromPartnerList ? "Zurück zum Konto-Menü" : returnFromPartnerDetail ? "Zurück zu Partnerangeboten" : "Zurück zur Übersicht");
     document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail" || view === "partner-offers";
+    syncOverviewScrollHint();
   }
 
   async function openConversation(peerId) {
@@ -5067,6 +5080,15 @@
       if (event === "SIGNED_OUT") window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
     });
   }
+
+  window.addEventListener("scroll", syncOverviewScrollHint, { passive: true });
+  window.addEventListener("resize", syncOverviewScrollHint);
+  const homeForScrollHint = document.querySelector("#home-view");
+  if (homeForScrollHint && "ResizeObserver" in window) {
+    const overviewHintResizeObserver = new ResizeObserver(syncOverviewScrollHint);
+    overviewHintResizeObserver.observe(homeForScrollHint);
+  }
+  window.setTimeout(syncOverviewScrollHint, 0);
 
   start().catch(() => showError("Beim Laden deines WedConnect-Bereichs ist ein Fehler aufgetreten."));
 })();
