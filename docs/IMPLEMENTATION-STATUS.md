@@ -260,6 +260,7 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - „Profil vollständig“ steht in der eigenen Profilansicht rechts in derselben Zeile wie die Rollenkennzeichnung „Fotograf“ bzw. „Hochzeitspaar“.
 - Auf anderen Dashboard-Seiten wird der Statushinweis ausgeblendet. Die bisherige Platzierung unter der Profilüberschrift entfällt.
+- Die Status-Pille und ihre leere Kopfzeile werden auf Übersicht, Entdecken, Matches und Nachrichten zuverlässig ausgeblendet. Auf Seiten ohne Rollenhinweis rückt der Titelbereich nach oben.
 
 
 ## Profilaktionen und Match-Moment (16. Oktober 2026)

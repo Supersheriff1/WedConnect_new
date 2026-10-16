@@ -4325,8 +4325,15 @@
     const returnFromPartnerDetail = view === "offer-detail" && offerDetailReturnView === "partner-offers";
     contextBack.textContent = returnFromPartnerList ? "‹ Konto" : returnFromPartnerDetail ? "‹ Partnerangebote" : "‹ Übersicht";
     contextBack.setAttribute("aria-label", returnFromPartnerList ? "Zurück zum Konto-Menü" : returnFromPartnerDetail ? "Zurück zu Partnerangeboten" : "Zurück zur Übersicht");
-    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail" || view === "partner-offers";
-    document.querySelector("#profile-status-pill").hidden = view !== "profile";
+    const roleEyebrow = document.querySelector("#role-eyebrow");
+    const profileStatus = document.querySelector("#profile-status-pill");
+    roleEyebrow.hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail" || view === "partner-offers";
+    profileStatus.hidden = view !== "profile";
+    profileStatus.classList.toggle("hidden", profileStatus.hidden);
+    const roleRow = roleEyebrow.closest(".profile-role-row");
+    const hideRoleRow = roleEyebrow.hidden && profileStatus.hidden;
+    roleRow.hidden = hideRoleRow;
+    roleRow.classList.toggle("hidden", hideRoleRow);
     syncOverviewScrollHint();
   }
 
