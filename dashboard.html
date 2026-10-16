@@ -456,7 +456,30 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
   
     @media(max-width:850px){.discover-photo-arrow{display:none!important}}
-  </style>
+  
+    /* Einheitliche, dezente Foto-Fortschrittsbalken in allen Profilansichten */
+    #dashboard .profile-preview-gallery:not(.is-fullscreen) .profile-preview-indicators,
+    #dashboard .matched-profile-view-content .profile-preview-gallery:not(.is-fullscreen) .profile-preview-indicators,
+    #dashboard .discover-photo-indicators {
+      top:14px!important;left:14px!important;right:14px!important;width:auto!important;
+      gap:4px!important;padding:0!important;border-radius:0!important;
+      background:transparent!important;backdrop-filter:none!important;transform:none!important;
+    }
+    #dashboard .profile-preview-indicator,
+    #dashboard .discover-photo-indicator,
+    #fullscreen-gallery-dialog .profile-preview-indicator {
+      height:2px!important;min-width:4px!important;border-radius:999px!important;
+    }
+    #dashboard .profile-preview-indicator,
+    #dashboard .discover-photo-indicator {background:rgb(255 255 255 / 42%)}
+    #dashboard .profile-preview-indicator.is-active,
+    #dashboard .discover-photo-indicator[aria-current="true"] {background:#fff}
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-indicators,
+    #fullscreen-gallery-dialog .profile-preview-indicators {
+      gap:4px!important;padding:0!important;border-radius:0!important;
+      background:transparent!important;backdrop-filter:none!important;
+    }
+</style>
 </head>
 <body>
   <div id="orientation-guard" role="status" aria-live="polite" aria-hidden="true">
