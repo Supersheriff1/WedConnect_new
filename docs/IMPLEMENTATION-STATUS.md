@@ -108,3 +108,12 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Das Entfernen gilt nur für die eigene Übersicht. Der Verlauf der anderen Person bleibt erhalten. Neue Nachrichten nach dem Löschzeitpunkt lassen den Chat wieder erscheinen.
 - Match-Chats und WedConnect-Supportchats werden unterstützt.
 - Voraussetzung: Migration `supabase/migrations/20261016160000_hide_conversations_for_user.sql` muss in Supabase ausgeführt werden.
+
+
+## Chat blockieren (16. Oktober 2026)
+
+- Persönliche Chats haben im Kopf eine Drei-Punkte-Menüführung mit „Person blockieren“ und nach eigener Sperre „Blockierung aufheben“.
+- Ein Bestätigungsfenster erklärt, dass beide keine Nachrichten mehr senden können und der bisherige Verlauf sichtbar bleibt.
+- Blockierte Profile verschwinden bei beiden Seiten aus Entdecken, eingehenden Likes und Matches. Bestehende Chats bleiben sichtbar und sind mit „Blockiert“ markiert, damit Sperren aufgehoben werden können.
+- Die Chat-Eingabe ist bei einer Sperre deaktiviert; Supabase weist direkte Nachrichten und Likes zwischen blockierten Profilen zusätzlich serverseitig ab. Support-Chats sind nicht betroffen.
+- Voraussetzung: Migration `supabase/migrations/20261016170000_profile_blocks.sql` im Supabase SQL Editor ausführen. Live-Ausführung ist nicht verifiziert.
