@@ -235,3 +235,6 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Die erste Vereinheitlichung zog die Balken über fast die gesamte Bildbreite. Korrigiert: Die Anzeige ist jetzt kurz, zentriert und pro Foto auf 6 Pixel Breite begrenzt, angelehnt an die gewünschte Like-Profilansicht.
 - Die kompakte Darstellung gilt für eigene Profile, aufgerufene Like-/Match-Profile, Entdecken und die Galerie im Vollbild.
+
+
+- Galerie-Indikatoren gelten rollenunabhängig für Hochzeitsprofile und Fotografenprofile. Im Like-/Match-Profil sitzen die kurzen Balken leicht tiefer (20 px vom oberen Bildrand) als in den übrigen Ansichten.
