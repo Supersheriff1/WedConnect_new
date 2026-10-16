@@ -4655,8 +4655,18 @@
     const dismiss = event.target.closest("[data-dismiss-like]");
     if (dismiss) {
       dismiss.disabled = true;
+      const skippedId = dismiss.dataset.dismissLike;
+      const { error: skipError } = await supabase.from("profile_skips").insert({
+        skipper_id: currentUser.id,
+        skipped_id: skippedId
+      });
+      if (skipError && !/duplicate|unique/i.test(skipError.message || "")) {
+        showNotice("Das Profil konnte nicht dauerhaft übersprungen werden. Prüfe die Entdecken-Migration in Supabase.");
+        dismiss.disabled = false;
+        return;
+      }
       const { error } = await supabase.from("profile_likes").delete()
-        .eq("liker_id", dismiss.dataset.dismissLike).eq("liked_id", currentUser.id);
+        .eq("liker_id", skippedId).eq("liked_id", currentUser.id);
       if (error) showNotice("Das Like konnte nicht ausgeblendet werden. Prüfe die Profil-Likes-Migration.");
       await refreshActivityViews();
       return;
