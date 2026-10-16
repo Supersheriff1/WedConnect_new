@@ -1,9 +1,9 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 2.1  
+**Version:** 2.2  
 **Stand der Prüfung:** 16. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` sowie der Feature-Branch für Kontakt / Feedback und Nachrichtenlöschung  
-**Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
+**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` (`7807fba70dbcf413ef4605429136729a56525e09`)  
+**Geprüfte Dateien:** Dashboard, Dashboard-JavaScript, Support- und Nachrichtenmigrationen, Supabase Edge Function, Supabase-Setup sowie Projekt-, App-Design- und Ideen-Bibles  
 **Prüfart:** Quellcode und SQL geprüft; JavaScript-Syntax geprüft; kein Live-End-to-End-Test; aktiver Supabase-Migrationsstatus nicht geprüft
 
 Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementierten Code von bestätigtem Live-Betrieb.
@@ -15,7 +15,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Öffentliche Seiten | `index.html`, `hochzeitspaare.html` und `fotografen.html` sind vorhanden. Die Fotografen-Seite bleibt eingefroren. |
 | Anmeldung | Supabase Auth für E-Mail/Passwort und Google ist eingebunden. Die Anmeldung fragt keine Rolle ab. Der Nutzer hat Anmeldung und Weiterleitung zuvor als funktionierend bestätigt. |
 | Einstieg nach Login | `dashboard.html` prüft die Auth-Sitzung. Unvollständige Konten beginnen dort mit der Profilanlage; die Rolle wird als erster Profilschritt gewählt. |
-| Hochzeitspaar-Profil | Auf dem Feature-Branch: Trauungsart als Pflichtauswahl, Ort der Hochzeit plus getrennte optionale Locations für Trauung und Feier, strukturierte Begleitung und geführter Ablauf mit bis zu sieben Programmpunkten. Bildstil und Bildwünsche sind aus der Oberfläche entfernt; die Nutzungspräferenz bleibt. Die neue SQL-Migration liegt bei, ist aber nicht live verifiziert. |
+| Hochzeitspaar-Profil | In `main`: Trauungsart als Pflichtauswahl, Ort der Hochzeit plus getrennte optionale Locations für Trauung und Feier, strukturierte Begleitung und geführter Ablauf mit bis zu sieben Programmpunkten. Bildstil und Bildwünsche sind aus der Oberfläche entfernt; die Nutzungspräferenz bleibt. Die neue SQL-Migration liegt bei, ist aber nicht live verifiziert. |
 | Fotografen-Profil | Strukturierte Einsatzgebiete, Erfahrung, Stile, Begleitungsumfang, Galerie, Vergütung, Vorstellung und optionale Links sind im Code abgebildet. |
 | Galerie | Bis zu 20 normale Fotografenfotos, maximal 2 MB pro Foto. Kein Highlight-Stern und keine Highlight-Auswahl in der aktuellen Oberfläche. Fotos können angesehen, zugeschnitten, ersetzt und gelöscht werden. |
 | Profilfoto des Kontos | Upload, Zuschnitt/Ausrichtung und Entfernen über den Konto-Dialog sind implementiert. |
@@ -32,7 +32,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 
 Die Anmeldung ist für alle gleich und rollenfrei. Nach erfolgreicher Authentifizierung führt der Einstieg zu `dashboard.html`. Wenn noch keine Rolle gespeichert ist, startet die Profilanlage mit der Auswahl „Hochzeitspaar“ oder „Fotograf“. Die Rolle ist der erste Schritt des Profils, nicht der Anmeldung.
 
-Der Hochzeitsprofil-Code enthält auf dem Feature-Branch eine Pflichtauswahl zur Trauungsart (standesamtlich, kirchlich oder frei), österreichisches Bundesland, Ort der Hochzeit und separate optionale Locations für Trauung und Feier, strukturierten Begleitungsumfang und einen geführten Tagesablauf mit bis zu sieben Programmpunkten, jeweils mit ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche werden im Paarformular nicht mehr angezeigt. Die Bildnutzungspräferenz bleibt bestehen. Die SQL-Migration ergänzt `ceremony_type`, `schedule_items`, `wedding_town` und getrennte Felder für Trauungs- und Feierlocation. Vorhandene Ortsangaben werden nach `wedding_town` übernommen; alte Textspalten bleiben zur Kompatibilität erhalten. Für Fotos muss jede Person repräsentiert sein: entweder durch ein gemeinsames Foto oder durch je ein individuelles Foto. Ein gemeinsames Foto kann mit individuellen Fotos kombiniert werden. Nach Auswahl und Zuschnittsbestätigung startet der Upload sofort.
+Der Hochzeitsprofil-Code enthält in `main` eine Pflichtauswahl zur Trauungsart (standesamtlich, kirchlich oder frei), österreichisches Bundesland, Ort der Hochzeit und separate optionale Locations für Trauung und Feier, strukturierten Begleitungsumfang und einen geführten Tagesablauf mit bis zu sieben Programmpunkten, jeweils mit ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche werden im Paarformular nicht mehr angezeigt. Die Bildnutzungspräferenz bleibt bestehen. Die SQL-Migration ergänzt `ceremony_type`, `schedule_items`, `wedding_town` und getrennte Felder für Trauungs- und Feierlocation. Vorhandene Ortsangaben werden nach `wedding_town` übernommen; alte Textspalten bleiben zur Kompatibilität erhalten. Für Fotos muss jede Person repräsentiert sein: entweder durch ein gemeinsames Foto oder durch je ein individuelles Foto. Ein gemeinsames Foto kann mit individuellen Fotos kombiniert werden. Nach Auswahl und Zuschnittsbestätigung startet der Upload sofort.
 
 Das Fotografenprofil enthält strukturierte Einsatzgebiete und Stile, Erfahrungsangaben, Begleitungsumfang, persönliche Vorstellung, optionale Instagram-/Website-Angaben sowie die Vergütungsauswahl „Unentgeltlich“ oder „Fixbetrag“. Bei Fixbetrag ist ein Betrag erforderlich. Die Galerie erlaubt bis zu 20 Fotos mit 2-MB-Grenze je Foto. Die Aktivitätsmigration setzt den privaten Foto-Bucket ebenfalls auf maximal 2 MB pro Datei; der Status dieser Migration im Live-Supabase ist nicht geprüft.
 
@@ -60,7 +60,7 @@ Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am D
 
 ## Kontakt / Feedback
 
-Der Feature-Branch ergänzt im Kontodialog zwei Kontaktwege. Support-Chats werden als Unterhaltung in „Nachrichten“ angezeigt und dort im normalen Chatdialog fortgeführt. E-Mail-Verläufe bleiben im Kontobereich sichtbar; Antworten versendet die Supabase Edge Function `send-support-email` über Resend. Es werden keine Push-Nachrichten versendet. Ein Support-Eingang für Betreiberkonten ist über `support_operators` zugriffsgeschützt. Die Empfängeradresse `albert.fuerst.usa@gmail.com` ist ausdrücklich vorläufig und muss vor dem Livegang geändert werden. Für den E-Mail-Kanal sind Migration, Edge-Function-Deployment, Resend-API-Key, bestätigte Absenderadresse und finale Empfängeradresse erforderlich. Diese externen Einstellungen und ein erfolgreicher Versand sind nicht durch den Quellcode verifiziert.
+`main` enthält im Kontodialog zwei Kontaktwege. Support-Chats werden als Unterhaltung in „Nachrichten“ angezeigt und dort im normalen Chatdialog fortgeführt. E-Mail-Verläufe bleiben im Kontobereich sichtbar; Antworten versendet die Supabase Edge Function `send-support-email` über Resend. Es werden keine Push-Nachrichten versendet. Ein Support-Eingang für Betreiberkonten ist über `support_operators` zugriffsgeschützt. Die Empfängeradresse `albert.fuerst.usa@gmail.com` ist ausdrücklich vorläufig und muss vor dem Livegang geändert werden. Für den E-Mail-Kanal sind Migration, Edge-Function-Deployment, Resend-API-Key, bestätigte Absenderadresse und finale Empfängeradresse erforderlich. Diese externen Einstellungen und ein erfolgreicher Versand sind nicht durch den Quellcode verifiziert.
 
 Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis „Nachricht wurde gelöscht“ wird entsprechend rechts für eigene gesendete bzw. links für empfangene Nachrichten ausgerichtet.
 
