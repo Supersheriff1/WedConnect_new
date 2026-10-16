@@ -74,7 +74,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 ### Kontakt / Feedback
 
 - Der Kontobereich bietet Chat und E-Mail als getrennte Kontaktwege.
-- Chat-Verläufe erscheinen in „Nachrichten“ und lassen sich dort mit dem vorhandenen Chatlayout fortsetzen.
+- Pro Konto wird eine bestehende Support-Chat-Unterhaltung fortgeführt. Ein neuer Support-Chat wird nur beim ersten Kontakt angelegt. Chat-Verläufe erscheinen in „Nachrichten“ und lassen sich dort mit dem vorhandenen Chatlayout fortsetzen.
 - E-Mail-Verläufe bleiben im Kontodialog „Kontakt / Feedback“ sichtbar. Antworten werden dort geschrieben und per E-Mail versendet.
 - Der geschützte Support-Eingang steht ausschließlich eingetragenen WedConnect-Betreiberkonten zur Verfügung.
 - Push-Benachrichtigungen sind nicht Teil dieser Funktion.

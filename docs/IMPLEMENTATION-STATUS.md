@@ -60,7 +60,7 @@ Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am D
 
 ## Kontakt / Feedback
 
-`main` enthält im Kontodialog zwei Kontaktwege. Support-Chats werden als Unterhaltung in „Nachrichten“ angezeigt und dort im normalen Chatdialog fortgeführt. E-Mail-Verläufe bleiben im Kontobereich sichtbar; Antworten versendet die Supabase Edge Function `send-support-email` über Resend. Es werden keine Push-Nachrichten versendet. Ein Support-Eingang für Betreiberkonten ist über `support_operators` zugriffsgeschützt. Die Empfängeradresse `albert.fuerst.usa@gmail.com` ist ausdrücklich vorläufig und muss vor dem Livegang geändert werden. Für den E-Mail-Kanal sind Migration, Edge-Function-Deployment, Resend-API-Key, bestätigte Absenderadresse und finale Empfängeradresse erforderlich. Diese externen Einstellungen und ein erfolgreicher Versand sind nicht durch den Quellcode verifiziert.
+`main` enthält im Kontodialog zwei Kontaktwege. Pro Konto wird eine bestehende Support-Chat-Unterhaltung weiterverwendet; nur beim ersten Kontakt entsteht ein Thread. Support-Chats werden in „Nachrichten“ angezeigt und dort im normalen Chatdialog fortgeführt. E-Mail-Verläufe bleiben im Kontobereich sichtbar; Antworten versendet die Supabase Edge Function `send-support-email` über Resend. Es werden keine Push-Nachrichten versendet. Ein Support-Eingang für Betreiberkonten ist über `support_operators` zugriffsgeschützt. Die Empfängeradresse `albert.fuerst.usa@gmail.com` ist ausdrücklich vorläufig und muss vor dem Livegang geändert werden. Für den E-Mail-Kanal sind Migration, Edge-Function-Deployment, Resend-API-Key, bestätigte Absenderadresse und finale Empfängeradresse erforderlich. Diese externen Einstellungen und ein erfolgreicher Versand sind nicht durch den Quellcode verifiziert.
 
 Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis „Nachricht wurde gelöscht“ wird entsprechend rechts für eigene gesendete bzw. links für empfangene Nachrichten ausgerichtet.
 
@@ -85,7 +85,7 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 ## Änderungen dieses Feature-Branches
 
 - Konto-Dialog: Kontakt / Feedback mit Chat und E-Mail, E-Mail-Verlauf und zugriffsgeschütztem Betreiber-Eingang.
-- Nachrichten: Support-Chatkarten, Chatfortsetzung im bestehenden Nachrichtenfenster und Betreiberzugriff aus dem Support-Eingang.
+- Nachrichten: Support-Chatkarten, Chatfortsetzung im bestehenden Nachrichtenfenster und Betreiberzugriff aus dem Support-Eingang. Ein weiterer Chat-Kontakt desselben Kontos fügt die Nachricht zur bestehenden Unterhaltung hinzu; ein neuer Thread wird nur beim ersten Kontakt erzeugt.
 - Datenbank: neue Support-Threads, Nachrichten, Betreiber-Allowlist, RLS-Regeln und RPC zum atomaren Erstellen eines Threads.
 - E-Mail: serverseitige Supabase Edge Function für Resend; benötigte Secrets und Betreiberkonfiguration stehen in [supabase/README.md](../supabase/README.md).
 - Vorläufige Empfängeradresse: `albert.fuerst.usa@gmail.com`; vor Livegang ersetzen.
