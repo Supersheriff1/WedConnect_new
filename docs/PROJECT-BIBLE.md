@@ -81,8 +81,9 @@ Der Bereich **Konto und Einstellungen** ist der erweiterbare Ort für Kontodaten
 ### Kontakt und Feedback
 
 - Der Kontobereich bietet ausschließlich Chat mit dem WedConnect-Team. Push-Benachrichtigungen und Support-E-Mail-Versand sind nicht vorgesehen.
-- Beim Start werden Thema, Betreff und Nachricht gemeinsam als erste Chatnachricht übernommen.
-- Pro Konto wird eine Support-Unterhaltung fortgeführt. Weitere Nachrichten werden im normalen Nachrichtenbereich geschrieben.
+- Das Kontaktfenster bleibt bei jedem Einstieg sichtbar und fragt Art der Kontaktaufnahme, Betreff und Nachricht ab.
+- Die drei Angaben werden gemeinsam in eine Chatnachricht übernommen und an die bestehende Support-Unterhaltung angehängt; nur beim ersten Kontakt wird ein Thread angelegt.
+- Nach dem Absenden öffnet sich der Chat im normalen Nachrichtenbereich.
 - Betreiber:innen beantworten Supportanfragen über einen geschützten Support-Eingang.
 - Beim Löschen einer eigenen Chat-Nachricht für beide Seiten bleibt ein Löschhinweis an der ursprünglichen Position. Er steht rechts bei einer eigenen gesendeten Nachricht und links bei einer empfangenen Nachricht.
 

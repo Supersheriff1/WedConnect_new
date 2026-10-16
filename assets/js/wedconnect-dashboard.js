@@ -3730,6 +3730,11 @@
     const status = document.querySelector("#support-new-status");
     const submit = document.querySelector("#support-new-submit");
     if (!body || !subject || !supportFeatureAvailable) return;
+    const contactMessage = "Thema: " + topic + "\nBetreff: " + subject + "\n\n" + body;
+    if (contactMessage.length > 2000) {
+      status.textContent = "Bitte kürze die Nachricht, damit Thema und Betreff mitgesendet werden können.";
+      return;
+    }
     submit.disabled = true;
     status.textContent = "Wird gesendet …";
 
@@ -3749,7 +3754,7 @@
         thread_id: existingThread.id,
         sender_id: currentUser.id,
         sender_type: supportOperator ? "operator" : "user",
-        body
+        body: contactMessage
       });
       if (error) {
         submit.disabled = false;
@@ -3758,17 +3763,11 @@
       }
       threadId = existingThread.id;
     } else {
-      const openingMessage = "Thema: " + topic + "\nBetreff: " + subject + "\n\n" + body;
-      if (openingMessage.length > 2000) {
-        submit.disabled = false;
-        status.textContent = "Bitte kürze die Nachricht, damit Thema und Betreff mitgesendet werden können.";
-        return;
-      }
       const { data, error } = await supabase.rpc("create_support_thread", {
         p_channel: "chat",
         p_category: category,
         p_subject: subject,
-        p_body: openingMessage
+        p_body: contactMessage
       });
       if (error || !data || !data.length) {
         submit.disabled = false;
@@ -3962,16 +3961,7 @@
     if (contactOpen) {
       if (accountDialog && accountDialog.open) accountDialog.close();
       openWorkspaceDialog(contactDialog);
-      const loaded = await loadSupportData(true);
-      if (loaded && !supportOperator) {
-        const existingThread = (activityCache.supportThreads || [])
-          .filter((thread) => thread.channel === "chat" && thread.user_id === currentUser.id)
-          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
-        if (existingThread) {
-          contactDialog.close();
-          await openSupportConversation(existingThread.id);
-        }
-      }
+      await loadSupportData(true);
       return;
     }
     const confirmMessageDelete = event.target.closest("#delete-message-confirm");

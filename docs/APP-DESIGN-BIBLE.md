@@ -74,8 +74,9 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 ### Kontakt / Feedback
 
 - Der Kontobereich bietet ausschließlich Chat mit dem WedConnect-Team. Push-Benachrichtigungen und Support-E-Mail-Versand gibt es nicht.
-- Beim ersten Start erfasst das Formular Thema, Betreff und Nachricht und übernimmt alle drei in die erste Chatnachricht.
-- Pro Konto wird eine bestehende Support-Unterhaltung fortgeführt; nach dem Start öffnet der Kontoeinstieg direkt diesen Chat. Weitere Nachrichten werden im normalen Chatdialog unter „Nachrichten“ geschrieben.
+- Das Kontaktfenster bleibt bei jedem Einstieg sichtbar und fragt die Art der Kontaktaufnahme, Betreff und Nachricht ab.
+- Thema, Betreff und Nachricht werden zusammen in eine Chatnachricht übernommen. Sie wird an die bestehende Unterhaltung angehängt; nur beim ersten Kontakt wird ein Support-Chat angelegt.
+- Nach dem Absenden öffnet sich der Chat unter „Nachrichten“.
 - Der geschützte Support-Eingang steht ausschließlich eingetragenen WedConnect-Betreiberkonten zur Verfügung.
 - Gelöschte Chat-Nachrichten behalten ihren ursprünglichen Absender und stehen deshalb rechts für eigene bzw. links für empfangene Nachrichten.
 
