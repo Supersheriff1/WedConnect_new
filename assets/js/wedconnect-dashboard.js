@@ -2425,6 +2425,7 @@
       title: "Eure Geschichte. Für immer festgehalten.",
       description: "Natürliche Hochzeitsfotografie mit Gefühl – vom ersten Moment bis zur Feier.",
       destination_url: "https://shira-rachel.com/",
+      image_url: "https://shira-rachel.com/wp-content/uploads/2026/07/hochzeitspaar-wien-europa-editorial-hochzeitsfotografie.jpg",
       is_test_ad: true
     };
     const testNews = {
@@ -2533,11 +2534,14 @@
       card.append(dismiss);
     }
     if (isTestAd) {
-      const monogram = document.createElement("span");
-      monogram.className = "test-ad-monogram";
-      monogram.setAttribute("aria-hidden", "true");
-      monogram.textContent = "SR";
-      card.append(monogram);
+      const image = document.createElement("img");
+      image.className = "test-ad-image";
+      image.src = item.image_url;
+      image.alt = "Hochzeitspaar in einer natürlichen, emotionalen Hochzeitsaufnahme von Shira Rachel Photography";
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.addEventListener("error", () => image.remove(), { once: true });
+      card.append(image);
     }
     card.append(copy);
     if (isOffer) {
