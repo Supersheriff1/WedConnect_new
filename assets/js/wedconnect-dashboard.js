@@ -30,7 +30,6 @@
   let currentGreeting = "";
   let activeConversationPeer = "";
   let activeSupportThreadId = "";
-  let activeSupportEmailThreadId = "";
   let supportFeatureAvailable = false;
   let supportOperator = false;
   let supportNoticeShown = false;
@@ -2520,7 +2519,7 @@
     let messages = [];
     if (threads.length) {
       const messageResult = await supabase.from("support_messages")
-        .select("id,thread_id,sender_id,sender_type,body,created_at,email_sent_at")
+        .select("id,thread_id,sender_id,sender_type,body,created_at")
         .in("thread_id", threads.map((thread) => thread.id))
         .order("created_at", { ascending: true });
       if (messageResult.error) {
@@ -2536,86 +2535,8 @@
     supportFeatureAvailable = true;
     activityCache.supportThreads = threads;
     activityCache.supportMessages = messages;
-    renderSupportEmailThreads();
     renderSupportOperatorInbox();
     return true;
-  }
-
-  async function sendSupportEmail(messageId) {
-    const { data, error } = await supabase.functions.invoke("send-support-email", { body: { message_id: messageId } });
-    if (error || data && data.error) return { ok: false, message: data && data.error ? data.error : (error && error.message) || "Versand fehlgeschlagen." };
-    return { ok: true };
-  }
-
-  function renderSupportEmailThreads() {
-    const container = document.querySelector("#support-email-threads");
-    if (!container) return;
-    container.replaceChildren();
-    const threads = (activityCache.supportThreads || []).filter((thread) => thread.channel === "email");
-    if (!threads.length) {
-      const empty = document.createElement("p");
-      empty.className = "support-thread-empty";
-      empty.textContent = supportOperator ? "Noch keine E-Mail-Anfragen." : "Deine E-Mail-Verläufe erscheinen hier.";
-      container.append(empty);
-      return;
-    }
-    threads.forEach((thread) => {
-      const details = document.createElement("details");
-      details.className = "support-email-thread";
-      details.dataset.supportEmailThread = thread.id;
-      details.open = activeSupportEmailThreadId === thread.id;
-      const summary = document.createElement("summary");
-      const title = document.createElement("span");
-      title.className = "support-thread-title";
-      title.textContent = thread.subject || "Kontakt / Feedback";
-      const threadMessages = (activityCache.supportMessages || []).filter((message) => message.thread_id === thread.id);
-      const latest = threadMessages[threadMessages.length - 1];
-      const preview = document.createElement("span");
-      preview.className = "support-thread-preview";
-      preview.textContent = (supportOperator && thread.user_id !== currentUser.id ? "Anfrage · " : "") + (latest ? latest.body : "Noch keine Nachricht");
-      summary.append(title, preview);
-      const messageList = document.createElement("div");
-      messageList.className = "support-thread-messages";
-      threadMessages.forEach((message) => {
-        const bubble = document.createElement("div");
-        bubble.className = "support-thread-message" + (message.sender_id === currentUser.id ? " is-own" : "");
-        bubble.textContent = message.body;
-        const meta = document.createElement("small");
-        meta.textContent = (message.sender_id === currentUser.id ? "Du" : (supportOperator ? "Nutzer:in" : "WedConnect-Team"))
-          + " · " + new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(message.created_at));
-        bubble.append(meta);
-        messageList.append(bubble);
-        if (!message.email_sent_at && (message.sender_id === currentUser.id || supportOperator)) {
-          const retry = document.createElement("button");
-          retry.type = "button";
-          retry.className = "support-email-retry";
-          retry.dataset.retrySupportEmail = message.id;
-          retry.textContent = "E-Mail erneut senden";
-          messageList.append(retry);
-        }
-      });
-      details.append(summary, messageList);
-      const replyForm = document.createElement("form");
-      replyForm.className = "support-email-reply";
-      replyForm.dataset.supportEmailReply = thread.id;
-      const reply = document.createElement("textarea");
-      reply.name = "body";
-      reply.maxLength = 2000;
-      reply.required = true;
-      reply.placeholder = supportOperator ? "Antwort an die Person …" : "Antwort an WedConnect …";
-      reply.setAttribute("aria-label", reply.placeholder);
-      const send = document.createElement("button");
-      send.type = "submit";
-      send.className = "button button-primary";
-      send.textContent = supportOperator ? "Antwort senden" : "E-Mail senden";
-      const status = document.createElement("p");
-      status.className = "settings-save-status";
-      status.id = "support-email-status-" + thread.id;
-      status.setAttribute("role", "status");
-      replyForm.append(reply, send, status);
-      details.append(replyForm);
-      container.append(details);
-    });
   }
 
   function renderSupportOperatorInbox() {
@@ -2625,7 +2546,7 @@
     section.hidden = !supportOperator;
     container.replaceChildren();
     if (!supportOperator) return;
-    const threads = activityCache.supportThreads || [];
+    const threads = (activityCache.supportThreads || []).filter((thread) => thread.channel === "chat");
     if (!threads.length) {
       const empty = document.createElement("p");
       empty.className = "support-thread-empty";
@@ -2637,11 +2558,11 @@
       const row = document.createElement("div");
       row.className = "support-operator-row";
       const label = document.createElement("span");
-      label.textContent = (thread.channel === "chat" ? "Chat" : "E-Mail") + " · " + (thread.subject || "Kontakt / Feedback");
+      label.textContent = "Chat · " + (thread.subject || "Kontakt / Feedback");
       const action = document.createElement("button");
       action.type = "button";
       action.className = "button button-secondary support-operator-open";
-      action.textContent = thread.channel === "chat" ? "Chat öffnen" : "Verlauf öffnen";
+      action.textContent = "Chat öffnen";
       action.dataset.openSupportInboxThread = thread.id;
       row.append(label, action);
       container.append(row);
@@ -3799,51 +3720,55 @@
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const channel = String(formData.get("channel") || "chat");
     const category = String(formData.get("category") || "other");
     const subject = String(formData.get("subject") || "").trim();
     const body = String(formData.get("body") || "").trim();
+    const topicSelect = document.querySelector("#support-category");
+    const topic = topicSelect && topicSelect.selectedOptions[0]
+      ? topicSelect.selectedOptions[0].textContent.trim()
+      : category;
     const status = document.querySelector("#support-new-status");
     const submit = document.querySelector("#support-new-submit");
-    if (!body || !supportFeatureAvailable) return;
+    if (!body || !subject || !supportFeatureAvailable) return;
     submit.disabled = true;
     status.textContent = "Wird gesendet …";
 
+    const supportDataLoaded = await loadSupportData(false);
+    if (!supportDataLoaded) {
+      submit.disabled = false;
+      status.textContent = "Deine Support-Unterhaltungen konnten nicht geladen werden. Bitte versuche es erneut.";
+      return;
+    }
+    const existingThread = (activityCache.supportThreads || [])
+      .filter((thread) => thread.channel === "chat" && thread.user_id === currentUser.id)
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
+
     let threadId = "";
-    let messageId = "";
-    if (channel === "chat") {
-      const supportDataLoaded = await loadSupportData(false);
-      if (!supportDataLoaded) {
+    if (existingThread) {
+      const { error } = await supabase.from("support_messages").insert({
+        thread_id: existingThread.id,
+        sender_id: currentUser.id,
+        sender_type: supportOperator ? "operator" : "user",
+        body
+      });
+      if (error) {
         submit.disabled = false;
-        status.textContent = "Deine Support-Unterhaltungen konnten nicht geladen werden. Bitte versuche es erneut.";
+        status.textContent = "Deine Nachricht konnte nicht zur bestehenden Unterhaltung hinzugefügt werden. Bitte versuche es erneut.";
         return;
       }
-      const existingThread = (activityCache.supportThreads || [])
-        .filter((thread) => thread.channel === "chat" && thread.user_id === currentUser.id)
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
-      if (existingThread) {
-        const { data, error } = await supabase.from("support_messages").insert({
-          thread_id: existingThread.id,
-          sender_id: currentUser.id,
-          sender_type: supportOperator ? "operator" : "user",
-          body
-        }).select("id").single();
-        if (error || !data) {
-          submit.disabled = false;
-          status.textContent = "Deine Nachricht konnte nicht zur bestehenden Unterhaltung hinzugefügt werden. Bitte versuche es erneut.";
-          return;
-        }
-        threadId = existingThread.id;
-        messageId = data.id;
+      threadId = existingThread.id;
+    } else {
+      const openingMessage = "Thema: " + topic + "\nBetreff: " + subject + "\n\n" + body;
+      if (openingMessage.length > 2000) {
+        submit.disabled = false;
+        status.textContent = "Bitte kürze die Nachricht, damit Thema und Betreff mitgesendet werden können.";
+        return;
       }
-    }
-
-    if (!threadId) {
       const { data, error } = await supabase.rpc("create_support_thread", {
-        p_channel: channel,
+        p_channel: "chat",
         p_category: category,
-        p_subject: subject || (channel === "chat" ? "Support-Chat" : "Kontakt / Feedback"),
-        p_body: body
+        p_subject: subject,
+        p_body: openingMessage
       });
       if (error || !data || !data.length) {
         submit.disabled = false;
@@ -3851,61 +3776,15 @@
         return;
       }
       threadId = data[0].thread_id;
-      messageId = data[0].message_id;
     }
 
     form.reset();
-    await loadSupportData(false);
-    if (channel === "email") {
-      const delivery = await sendSupportEmail(messageId);
-      await loadSupportData(false);
-      submit.disabled = false;
-      status.textContent = delivery.ok
-        ? "Deine E-Mail wurde versendet. Der Verlauf bleibt hier gespeichert."
-        : "Deine Nachricht ist gespeichert, aber die E-Mail konnte noch nicht versendet werden. Du kannst sie im Verlauf erneut senden.";
-      activeSupportEmailThreadId = threadId;
-      renderSupportEmailThreads();
-      const threadDetails = document.querySelector('[data-support-email-thread="' + threadId + '"]');
-      if (threadDetails) { threadDetails.open = true; threadDetails.scrollIntoView({ behavior: "smooth", block: "center" }); }
-      return;
-    }
     submit.disabled = false;
     status.textContent = "";
     if (contactDialog && contactDialog.open) contactDialog.close();
+    await loadSupportData(false);
     await openSupportConversation(threadId);
     renderMessagesList();
-  });
-
-  document.addEventListener("submit", async (event) => {
-    const replyForm = event.target.closest("[data-support-email-reply]");
-    if (!replyForm) return;
-    event.preventDefault();
-    const threadId = replyForm.dataset.supportEmailReply;
-    const body = String(new FormData(replyForm).get("body") || "").trim();
-    const status = replyForm.querySelector(".settings-save-status");
-    const send = replyForm.querySelector('button[type="submit"]');
-    if (!body) return;
-    send.disabled = true;
-    status.textContent = "Wird gesendet …";
-    const { data, error } = await supabase.from("support_messages").insert({
-      thread_id: threadId,
-      sender_id: currentUser.id,
-      sender_type: supportOperator ? "operator" : "user",
-      body
-    }).select("id").single();
-    if (error || !data) {
-      send.disabled = false;
-      status.textContent = "Die Antwort konnte nicht gespeichert werden.";
-      return;
-    }
-    activeSupportEmailThreadId = threadId;
-    const delivery = await sendSupportEmail(data.id);
-    await loadSupportData(false);
-    renderMessagesList();
-    const nextStatus = document.querySelector("#support-email-status-" + threadId);
-    if (nextStatus) nextStatus.textContent = delivery.ok
-      ? "E-Mail wurde versendet."
-      : "Nachricht ist gespeichert, aber der E-Mail-Versand ist noch nicht eingerichtet. Du kannst sie erneut senden.";
   });
 
   const accountDialog = document.querySelector("#account-dialog");
@@ -4076,31 +3955,23 @@
     }
     const supportInboxButton = event.target.closest("[data-open-support-inbox-thread]");
     if (supportInboxButton) {
-      const threadId = supportInboxButton.dataset.openSupportInboxThread;
-      const thread = (activityCache.supportThreads || []).find((item) => item.id === threadId);
-      if (thread && thread.channel === "chat") await openSupportConversation(threadId);
-      else {
-        activeSupportEmailThreadId = threadId;
-        renderSupportEmailThreads();
-        const details = document.querySelector('[data-support-email-thread="' + threadId + '"]');
-        if (details) { details.open = true; details.scrollIntoView({ behavior: "smooth", block: "center" }); }
-      }
-      return;
-    }
-    const retrySupportEmail = event.target.closest("[data-retry-support-email]");
-    if (retrySupportEmail) {
-      retrySupportEmail.disabled = true;
-      const result = await sendSupportEmail(retrySupportEmail.dataset.retrySupportEmail);
-      await loadSupportData(false);
-      renderMessagesList();
-      if (!result.ok) showNotice("E-Mail konnte nicht versendet werden. Prüfe die E-Mail-Konfiguration.");
+      await openSupportConversation(supportInboxButton.dataset.openSupportInboxThread);
       return;
     }
     const contactOpen = event.target.closest("#account-contact-open");
     if (contactOpen) {
       if (accountDialog && accountDialog.open) accountDialog.close();
       openWorkspaceDialog(contactDialog);
-      await loadSupportData(true);
+      const loaded = await loadSupportData(true);
+      if (loaded && !supportOperator) {
+        const existingThread = (activityCache.supportThreads || [])
+          .filter((thread) => thread.channel === "chat" && thread.user_id === currentUser.id)
+          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
+        if (existingThread) {
+          contactDialog.close();
+          await openSupportConversation(existingThread.id);
+        }
+      }
       return;
     }
     const confirmMessageDelete = event.target.closest("#delete-message-confirm");
