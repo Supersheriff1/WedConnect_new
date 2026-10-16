@@ -2195,8 +2195,9 @@
     enqueueNearby();
   }
 
-  async function renderOwnProfilePreview(role, profile, photos) {
-    const container = document.querySelector("#profile-preview");
+  async function renderOwnProfilePreview(role, profile, photos, targetContainer, renderOptions) {
+    const container = targetContainer || document.querySelector("#profile-preview");
+    const options = renderOptions || {};
     if (!container) return;
     container.innerHTML = "";
     const card = document.createElement("article");
@@ -2276,7 +2277,8 @@
     actions.append(passButton, likeButton);
     overlay.append(actions);
     controls.append(previous, next);
-    gallery.append(track, controls, indicatorGroup, status, overlay);
+    gallery.append(track, controls, indicatorGroup, status);
+    if (options.showActions !== false) gallery.append(overlay);
     if (renderedCount) {
       const fullscreenButton = document.createElement("button");
       fullscreenButton.type = "button";
@@ -2298,7 +2300,7 @@
 
     const content = document.createElement("div");
     content.className = "profile-preview-content";
-    content.append(identity);
+    if (options.showIdentity !== false) content.append(identity);
     if (role === "couple" && metadata.children.length) content.append(metadata);
     if (role === "photographer") {
       const keyFacts = document.createElement("div");
@@ -3429,14 +3431,6 @@
         : profile.first_name || "Fotograf";
       profileTitle.textContent = title;
       document.querySelector("#page-title").textContent = title;
-      const card = document.createElement("article");
-      card.className = "discover-profile-card";
-      const gallery = document.createElement("div");
-      gallery.className = "discover-photo-frame matched-profile-gallery";
-      const counter = document.createElement("span");
-      counter.className = "discover-photo-count";
-      container.replaceChildren(card);
-      card.append(gallery);
       const photosResult = await waitForProfileQuery(
         supabase.from("profile_photos").select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order", { ascending: true }).limit(30),
         3500,
@@ -3445,91 +3439,10 @@
       const photos = (photosResult.data || []).filter((photo) => role === "photographer"
         ? photo.photo_type === "portfolio"
         : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
-      if (photos.length) {
-        const track = document.createElement("div");
-        track.className = "matched-profile-track";
-        track.setAttribute("aria-label", "Profilfotos");
-        gallery.append(track);
-        photos.forEach((photo, index) => {
-          const slide = document.createElement("div");
-          slide.className = "matched-profile-slide";
-          const image = document.createElement("img");
-          image.alt = role === "couple" ? "Foto " + (index + 1) + " von " + title : "Portfoliofoto " + (index + 1) + " von " + title;
-          image.loading = index === 0 ? "eager" : "lazy";
-          image.decoding = "async";
-          slide.append(image);
-          if (role === "couple") {
-            const names = createCouplePhotoNameOverlay(photo.photo_type, profile);
-            if (names) slide.append(names);
-          }
-          track.append(slide);
-          supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600)
-            .then(({ data, error }) => { if (!error && data && image.isConnected) image.src = data.signedUrl; })
-            .catch(() => {});
-        });
-        const updateCounter = () => {
-          const index = Math.max(0, Math.min(photos.length - 1, Math.round(track.scrollLeft / Math.max(track.clientWidth, 1))));
-          counter.textContent = (index + 1) + " / " + photos.length;
-        };
-        track.addEventListener("scroll", updateCounter, { passive: true });
-        counter.textContent = "1 / " + photos.length;
-        gallery.append(counter);
-        if (photos.length > 1) {
-          const prev = document.createElement("button");
-          prev.type = "button";
-          prev.className = "discover-photo-arrow discover-photo-arrow--previous";
-          prev.setAttribute("aria-label", "Vorheriges Foto");
-          prev.textContent = "‹";
-          prev.addEventListener("click", () => track.scrollBy({ left: -track.clientWidth, behavior: "smooth" }));
-          const next = document.createElement("button");
-          next.type = "button";
-          next.className = "discover-photo-arrow discover-photo-arrow--next";
-          next.setAttribute("aria-label", "Nächstes Foto");
-          next.textContent = "›";
-          next.addEventListener("click", () => track.scrollBy({ left: track.clientWidth, behavior: "smooth" }));
-          gallery.append(prev, next);
-        }
-      } else {
-        gallery.classList.remove("matched-profile-gallery");
-        gallery.textContent = "Keine Profilfotos vorhanden";
-        gallery.setAttribute("role", "img");
-      }
-      const content = document.createElement("div");
-      content.className = "discover-profile-content";
-      const subtitle = document.createElement("p");
-      subtitle.className = "discover-profile-subtitle";
-      const details = profileDetailRows(role, profile);
-      const subtitleValues = role === "couple"
-        ? [profile.guest_count ? profile.guest_count + " Gäste" : "", ceremonyTypeLabel(profile.ceremony_type)]
-        : [profileLabels(profile.regions, REGION_OPTIONS) || profile.region, profile.experience_years ? profile.experience_years + " Jahre Erfahrung" : ""];
-      subtitle.textContent = subtitleValues.filter(Boolean).join(" · ") || (role === "couple" ? "Hochzeitspaar" : "Hochzeitsfotograf");
-      content.append(subtitle);
-      const facts = document.createElement("div");
-      facts.className = "discover-profile-facts profile-preview-key-facts";
-      (role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])]).forEach(([icon, label, value]) => addPreviewChip(facts, icon, label, value));
-      if (facts.children.length) content.append(facts);
-      if (String(profile.public_intro || "").trim()) {
-        const intro = document.createElement("p");
-        intro.className = "discover-profile-intro";
-        intro.textContent = profile.public_intro.trim();
-        content.append(intro);
-      }
-      const sections = (details.sections || []).filter(([, value]) => String(value || "").trim());
-      if (sections.length) {
-        const list = document.createElement("dl");
-        list.className = "discover-profile-sections";
-        sections.forEach(([label, value]) => {
-          const row = document.createElement("div");
-          const term = document.createElement("dt");
-          term.textContent = label;
-          const description = document.createElement("dd");
-          description.textContent = value;
-          row.append(term, description);
-          list.append(row);
-        });
-        content.append(list);
-      }
-      card.append(content);
+      await renderOwnProfilePreview(role, profile, photos, container, {
+        showActions: false,
+        showIdentity: false
+      });
     } catch (_) {
       if (profileView.hidden) return;
       container.replaceChildren();
