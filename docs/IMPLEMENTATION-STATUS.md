@@ -198,3 +198,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 
 - Zusätzlich erscheinen zwei statische Testneuigkeiten („Mach dein Profil noch persönlicher“ und „Neue Begegnungen warten auf dich“) für alle Profilrollen. Sie tragen ebenfalls die Kennzeichnung „TESTNEUIGKEIT“ und können einzeln geschlossen werden.
+
+
+## Werbekennzeichnung für Angebote (16. Oktober 2026)
+
+- Alle Karten im Abschnitt „Angebote für dich“ zeigen rechts oben ein dezentes Label „Werbung“, auf Höhe der oberen Kartenkante. Das Label ist auch bei der Testanzeige sichtbar.
+- Neuigkeiten bleiben davon unberührt. Es ist keine Supabase-Migration erforderlich.

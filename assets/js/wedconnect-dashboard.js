@@ -2481,6 +2481,7 @@
     const isTestAd = Boolean(item.is_test_ad);
     const isTestNews = Boolean(item.is_test_news);
     const isOffer = kind === "offer";
+    const isAdvertising = isOffer;
     const canDismissNews = kind === "news";
     const offerReturnView = sourceView === "partner-offers" ? "partner-offers" : "home";
     card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "") + (isOffer ? " offer-card-clickable" : "");
@@ -2510,6 +2511,13 @@
         ? [item.partner_name, item.description, item.terms ? "Bedingungen: " + item.terms : ""].filter(Boolean).join(" · ")
         : item.body || "";
     copy.append(label, title, detail);
+    if (isAdvertising) {
+      const adLabel = document.createElement("span");
+      adLabel.className = "content-card-ad-label";
+      adLabel.textContent = "Werbung";
+      adLabel.setAttribute("aria-label", "Werbung");
+      card.append(adLabel);
+    }
     if (canDismissNews) {
       const dismiss = document.createElement("button");
       dismiss.type = "button";
