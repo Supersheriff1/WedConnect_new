@@ -2717,6 +2717,24 @@
       next.textContent = "›";
       next.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex + 1, image, photoCount));
       photoFrame.append(previous, next);
+      let touchStart = null;
+      photoFrame.addEventListener("touchstart", (event) => {
+        if (event.touches.length !== 1 || event.target.closest(".discover-photo-arrow")) return;
+        const touch = event.touches[0];
+        touchStart = { x: touch.clientX, y: touch.clientY };
+      }, { passive: true });
+      photoFrame.addEventListener("touchend", (event) => {
+        if (!touchStart || !event.changedTouches.length) return;
+        const start = touchStart;
+        touchStart = null;
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - start.x;
+        const deltaY = touch.clientY - start.y;
+        if (Math.abs(deltaX) < 48 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+        const direction = deltaX < 0 ? 1 : -1;
+        setDiscoverPhoto(candidate, discoverState.photoIndex + direction, image, photoCount);
+      }, { passive: true });
+      photoFrame.addEventListener("touchcancel", () => { touchStart = null; }, { passive: true });
     }
     photoFrame.append(photoCount);
     card.append(photoFrame);
