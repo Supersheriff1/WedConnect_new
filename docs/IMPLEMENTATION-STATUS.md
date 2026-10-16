@@ -273,4 +273,4 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 ## Entdecken: Zurück-Pfeil (16. Oktober 2026)
 
-- Die Zurück-Schaltfläche für das vorherige Profil verwendet ein geschwungenes Undo-Symbol anstelle des einfachen Winkelpfeils. Der helle, runde Button hebt sich auf den Profilfotos klar ab.
+- Die Zurück-Schaltfläche für das vorherige Profil verwendet ein geschwungenes Undo-Symbol in einem goldenen runden Button. Sie sitzt mit gleichem Abstand zum oberen und linken Rand; auf Mobilgeräten beginnen die Foto-Fortschrittsbalken rechts daneben.
