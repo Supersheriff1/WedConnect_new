@@ -2572,6 +2572,8 @@
 
   function renderMessagesList() {
     const container = document.querySelector("#messages-list");
+    const searchInput = document.querySelector("#messages-search");
+    const query = (searchInput.value || "").trim().toLocaleLowerCase("de");
     container.replaceChildren();
     const peers = Array.from(activityCache.messagedPeers || []);
     peers.forEach((peerId) => {
@@ -2601,12 +2603,19 @@
       const detail = document.createElement("p");
       detail.className = "activity-message-preview";
       detail.textContent = latest ? latest.body : "Noch keine Nachricht";
+      card.dataset.searchText = (summary.name + " " + detail.textContent).toLocaleLowerCase("de");
+      card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
       copy.append(name, detail);
       card.append(avatar, copy);
       container.append(card);
     });
-    document.querySelector("#messages-empty-state").hidden = peers.length > 0;
+    const hasConversations = peers.length > 0;
+    const hasVisibleConversations = Array.from(container.children).some((card) => !card.hidden);
+    document.querySelector("#messages-empty-state").hidden = hasConversations;
+    document.querySelector("#messages-no-results").hidden = !query || !hasConversations || hasVisibleConversations;
   }
+
+  document.querySelector("#messages-search").addEventListener("input", renderMessagesList);
 
   async function refreshActivityViews() {
     try {
