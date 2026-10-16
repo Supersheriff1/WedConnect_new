@@ -2667,6 +2667,38 @@
     renderMessagesList();
   }
 
+  function unreadConversationCount(peerId) {
+    const userId = currentUser && currentUser.id;
+    if (!userId || !peerId) return 0;
+    const read = (activityCache.conversationReads || []).find((receipt) =>
+      receipt.user_id === userId && receipt.peer_id === peerId
+    );
+    return (activityCache.messages || []).filter((item) =>
+      item.sender_id === peerId && item.recipient_id === userId && !item.deleted_at
+      && (!read || new Date(item.created_at) > new Date(read.last_read_at))
+    ).length;
+  }
+
+  function unreadSupportCount(threadId) {
+    const userId = currentUser && currentUser.id;
+    if (!userId || !threadId) return 0;
+    const read = (activityCache.supportReads || []).find((receipt) =>
+      receipt.user_id === userId && receipt.thread_id === threadId
+    );
+    return (activityCache.supportMessages || []).filter((item) =>
+      item.thread_id === threadId && item.sender_id !== userId
+      && (!read || new Date(item.created_at) > new Date(read.last_read_at))
+    ).length;
+  }
+
+  function latestMessageForPeer(peerId) {
+    const peerMessages = (activityCache.messages || []).filter((item) =>
+      (item.sender_id === peerId && item.recipient_id === currentUser.id)
+      || (item.sender_id === currentUser.id && item.recipient_id === peerId)
+    );
+    return peerMessages[peerMessages.length - 1] || null;
+  }
+
   function unreadMessageCount() {
     const userId = currentUser && currentUser.id;
     if (!userId) return 0;
@@ -2809,14 +2841,21 @@
     const searchInput = document.querySelector("#messages-search");
     const query = (searchInput.value || "").trim().toLocaleLowerCase("de");
     container.replaceChildren();
-    const peers = Array.from(activityCache.messagedPeers || []);
+    const peers = Array.from(activityCache.messagedPeers || []).sort((a, b) => {
+      const unreadDifference = unreadConversationCount(b) - unreadConversationCount(a);
+      if (unreadDifference) return unreadDifference;
+      const latestA = latestMessageForPeer(a);
+      const latestB = latestMessageForPeer(b);
+      return new Date(latestB ? latestB.created_at : 0) - new Date(latestA ? latestA.created_at : 0);
+    });
     peers.forEach((peerId) => {
       const summary = activityCache.summaries.get(peerId) || { id: peerId, name: "WedConnect-Mitglied", detail: "", photoUrl: "" };
+      const unreadCount = unreadConversationCount(peerId);
       const card = document.createElement("article");
-      card.className = "activity-card activity-message-card";
+      card.className = "activity-card activity-message-card" + (unreadCount ? " has-unread" : "");
       card.dataset.openConversation = peerId;
       card.tabIndex = 0;
-      card.setAttribute("aria-label", "Gespräch mit " + summary.name + " öffnen");
+      card.setAttribute("aria-label", "Gespräch mit " + summary.name + " öffnen" + (unreadCount ? ", " + unreadCount + " ungelesene Nachrichten" : ""));
       const avatar = document.createElement("div");
       avatar.className = "activity-avatar";
       avatar.setAttribute("aria-hidden", "true");
@@ -2839,7 +2878,17 @@
       detail.textContent = latest ? (latest.deleted_at ? "Nachricht wurde gelöscht" : latest.body) : "Keine sichtbaren Nachrichten";
       card.dataset.searchText = (summary.name + " " + detail.textContent).toLocaleLowerCase("de");
       card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
-      copy.append(name, detail);
+      const titleRow = document.createElement("div");
+      titleRow.className = "activity-message-title";
+      titleRow.append(name);
+      if (unreadCount) {
+        const unread = document.createElement("span");
+        unread.className = "conversation-unread-count";
+        unread.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+        unread.setAttribute("aria-label", unreadCount + " ungelesene Nachrichten");
+        titleRow.append(unread);
+      }
+      copy.append(titleRow, detail);
       if (latest && latest.sender_id === currentUser.id && !latest.deleted_at) {
         const peerRead = (activityCache.conversationReads || []).find((receipt) =>
           receipt.user_id === peerId && receipt.peer_id === currentUser.id
@@ -2854,13 +2903,20 @@
       card.append(avatar, copy);
       container.append(card);
     });
-    const supportChatThreads = (activityCache.supportThreads || []).filter((thread) => thread.channel === "chat");
+    const supportChatThreads = (activityCache.supportThreads || [])
+      .filter((thread) => thread.channel === "chat")
+      .sort((a, b) => {
+        const unreadDifference = unreadSupportCount(b.id) - unreadSupportCount(a.id);
+        if (unreadDifference) return unreadDifference;
+        return new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at);
+      });
     supportChatThreads.forEach((thread) => {
+      const unreadCount = unreadSupportCount(thread.id);
       const card = document.createElement("article");
-      card.className = "activity-card activity-message-card";
+      card.className = "activity-card activity-message-card" + (unreadCount ? " has-unread" : "");
       card.dataset.openSupportThread = thread.id;
       card.tabIndex = 0;
-      card.setAttribute("aria-label", "Support-Chat öffnen");
+      card.setAttribute("aria-label", "Support-Chat öffnen" + (unreadCount ? ", " + unreadCount + " ungelesene Nachrichten" : ""));
       const avatar = document.createElement("div");
       avatar.className = "activity-avatar";
       avatar.setAttribute("aria-hidden", "true");
@@ -2874,7 +2930,17 @@
       const detail = document.createElement("p");
       detail.className = "activity-message-preview";
       detail.textContent = latest ? ((latest.sender_id === currentUser.id ? "Du: " : "") + latest.body) : "Support-Chat öffnen";
-      copy.append(name, detail);
+      const titleRow = document.createElement("div");
+      titleRow.className = "activity-message-title";
+      titleRow.append(name);
+      if (unreadCount) {
+        const unread = document.createElement("span");
+        unread.className = "conversation-unread-count";
+        unread.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+        unread.setAttribute("aria-label", unreadCount + " ungelesene Nachrichten");
+        titleRow.append(unread);
+      }
+      copy.append(titleRow, detail);
       const latestIsOwn = latest && latest.sender_id === currentUser.id;
       if (latestIsOwn) {
         const peerRead = (activityCache.supportReads || []).find((receipt) =>
@@ -3636,7 +3702,10 @@
   });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") refreshOpenConversationMessages();
+    if (document.visibilityState === "visible") {
+      refreshOpenConversationMessages();
+      refreshUnreadMessageState();
+    }
   });
 
   async function persistEmailPreferences() {
