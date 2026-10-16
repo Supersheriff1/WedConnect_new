@@ -56,7 +56,7 @@ Die Discover-Migration `20261015200000_profile_skips_for_discover.sql` ergänzt 
 
 ## Nachrichtenlöschung im Chat
 
-Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am Desktop über das Nachrichtenmenü für beide Seiten gelöscht werden. Ein Bestätigungsdialog erklärt die Auswirkung. Beim Bestätigen wird der Nachrichtentext in der Datenbank durch einen Löschhinweis ersetzt und die App blendet den Eintrag für beide Beteiligten aus; vorhandene Herzreaktionen werden entfernt. Dafür muss `supabase/migrations/20261016110000_profile_message_delete_for_everyone.sql` im aktiven Supabase-Projekt ausgeführt werden. Die frühere Migration `20261016100000_profile_message_hidden.sql` bleibt aus Migrationshistorie bestehen, wird von der Oberfläche aber nicht mehr verwendet.
+Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am Desktop über das Nachrichtenmenü für beide Seiten gelöscht werden. Ein Bestätigungsdialog erklärt die Auswirkung. Beim Bestätigen wird der Nachrichtentext in der Datenbank durch einen Löschhinweis ersetzt und die App zeigt an der ursprünglichen Stelle für beide Beteiligten den neutralen Hinweis „Nachricht wurde gelöscht“; vorhandene Herzreaktionen werden entfernt. Dafür muss `supabase/migrations/20261016110000_profile_message_delete_for_everyone.sql` im aktiven Supabase-Projekt ausgeführt werden. Die frühere Migration `20261016100000_profile_message_hidden.sql` bleibt aus Migrationshistorie bestehen, wird von der Oberfläche aber nicht mehr verwendet.
 
 ## Verifikation und Grenzen
 
