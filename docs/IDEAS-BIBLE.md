@@ -37,7 +37,7 @@ Zu klären sind projektspezifische gegenüber Bibliotheks-Icons, Strichstärke u
 ### I-003 · Strukturierter Feedback-Einstieg in der App
 
 **Status:** Übernommen  
-Entscheidung: Im Kontobereich gibt es zwei Kanäle: Chat und E-Mail. Chats erscheinen in der Nachrichtenübersicht; E-Mail-Verläufe bleiben unter „Kontakt / Feedback“. Betreiber:innen bearbeiten beide Kanäle im geschützten Support-Eingang. Push-Benachrichtigungen sind ausgeschlossen. Die konkrete Umsetzung und notwendige Einrichtung stehen im [Implementierungsstand](IMPLEMENTATION-STATUS.md). Die vorläufige Empfängeradresse `albert.fuerst.usa@gmail.com` ist vor Livegang zu ersetzen.
+Entscheidung: Im Kontobereich gibt es ausschließlich Chat. Thema, Betreff und Nachricht werden beim Start als erste Chatnachricht übernommen. Weitere Nachrichten werden im bestehenden Support-Chat unter „Nachrichten“ geführt. Betreiber:innen bearbeiten Anfragen im geschützten Support-Eingang. E-Mail-Versand und Push-Benachrichtigungen sind ausgeschlossen. Die Umsetzung und Einrichtung stehen im [Implementierungsstand](IMPLEMENTATION-STATUS.md).
 
 ### I-004 · Ideen in umsetzbare Entscheidungen überführen
 
