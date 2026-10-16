@@ -53,6 +53,8 @@
   let suppressConversationClickUntil = 0;
   let unreadRefreshTimer = null;
   let unreadRefreshBusy = false;
+  let discoverRefreshTimer = null;
+  let discoverRefreshBusy = false;
   let incomingLikeBadgeRefreshBusy = false;
   let pendingDeleteMessageId = "";
   let messageLongPressTimer = null;
@@ -3586,12 +3588,60 @@
     }, 15000);
   }
 
+  async function refreshDiscoverProfiles() {
+    const discoverView = document.querySelector('[data-dashboard-view="discover"]');
+    if (!currentUser || !discoverState.loaded || discoverState.mode !== "discover" ||
+        !discoverView || discoverView.hidden || document.hidden || discoverRefreshBusy) return;
+    discoverRefreshBusy = true;
+    const knownIds = new Set(discoverState.ids);
+    if (discoverState.active) knownIds.add(discoverState.active.id);
+    const queuedLength = discoverState.ids.length;
+    try {
+      const oppositeRole = currentRole === "couple" ? "photographer" : "couple";
+      const { data, error } = await supabase.from("profiles").select("id")
+        .eq("profile_status", "complete").eq("role", oppositeRole);
+      if (error || !Array.isArray(data)) return;
+      if (discoverState.mode !== "discover" || discoverView.hidden) return;
+      const excluded = new Set([currentUser.id]);
+      discoverState.likedIds.forEach((id) => excluded.add(id));
+      discoverState.skippedIds.forEach((id) => excluded.add(id));
+      discoverState.savedIds.forEach((id) => excluded.add(id));
+      (activityCache.profileBlocks || []).forEach((block) => {
+        excluded.add(block.blocker_id === currentUser.id ? block.blocked_id : block.blocker_id);
+      });
+      const newIds = data.map((profile) => profile.id).filter((id) => id && !knownIds.has(id) && !excluded.has(id));
+      for (let i = newIds.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newIds[i], newIds[j]] = [newIds[j], newIds[i]];
+      }
+      if (!newIds.length) return;
+      discoverState.ids.push(...newIds);
+      if (!discoverState.active && discoverState.index >= queuedLength) await advanceDiscoverFeed();
+    } catch (_) {
+      // Keep the current Discover round usable if a background refresh fails.
+    } finally {
+      discoverRefreshBusy = false;
+    }
+  }
+
+  function startDiscoverProfileRefresh() {
+    if (discoverRefreshTimer) window.clearInterval(discoverRefreshTimer);
+    discoverRefreshTimer = window.setInterval(refreshDiscoverProfiles, 5000);
+  }
+
+  function stopDiscoverProfileRefresh() {
+    if (discoverRefreshTimer) window.clearInterval(discoverRefreshTimer);
+    discoverRefreshTimer = null;
+  }
+
   async function loadDiscoverFeed() {
     const container = document.querySelector("#discover-content");
     if (!container || discoverState.loading) return;
     if (discoverState.loaded) {
       discoverState.mode = "discover";
+      startDiscoverProfileRefresh();
       updateDiscoverModeButtons();
+      await refreshDiscoverProfiles();
       if (discoverState.active) renderDiscoverCard(discoverState.active);
       else await advanceDiscoverFeed();
       return;
@@ -3766,6 +3816,7 @@
 
   async function setDiscoverMode(mode) {
     if (mode === "saved") {
+      stopDiscoverProfileRefresh();
       if (!discoverState.loaded) {
         discoverState.mode = "discover";
         await loadDiscoverFeed();
@@ -3774,10 +3825,14 @@
       return;
     }
     discoverState.mode = "discover";
+    startDiscoverProfileRefresh();
     updateDiscoverModeButtons();
     if (!discoverState.loaded) await loadDiscoverFeed();
-    else if (discoverState.active) renderDiscoverCard(discoverState.active);
-    else await advanceDiscoverFeed();
+    else {
+      await refreshDiscoverProfiles();
+      if (discoverState.active) renderDiscoverCard(discoverState.active);
+      else await advanceDiscoverFeed();
+    }
   }
 
   async function removeSavedProfile(profileId, button) {
@@ -4334,6 +4389,8 @@
     const hideRoleRow = roleEyebrow.hidden && profileStatus.hidden;
     roleRow.hidden = hideRoleRow;
     roleRow.classList.toggle("hidden", hideRoleRow);
+    if (view === "discover") startDiscoverProfileRefresh();
+    else stopDiscoverProfileRefresh();
     syncOverviewScrollHint();
   }
 
@@ -5610,6 +5667,10 @@
       if (event === "SIGNED_OUT") window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
     });
   }
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshDiscoverProfiles();
+  });
 
   window.addEventListener("scroll", syncOverviewScrollHint, { passive: true });
   window.addEventListener("resize", syncOverviewScrollHint);

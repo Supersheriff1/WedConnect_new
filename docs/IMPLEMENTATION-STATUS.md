@@ -274,3 +274,10 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 ## Entdecken: Zurück-Pfeil (16. Oktober 2026)
 
 - Die Zurück-Schaltfläche für das vorherige Profil verwendet ein geschwungenes Undo-Symbol in einem goldenen runden Button. Sie sitzt mit gleichem Abstand zum oberen und linken Rand; auf Mobilgeräten beginnen die Foto-Fortschrittsbalken rechts daneben.
+
+
+## Entdecken: Neue Profile automatisch laden (16. Oktober 2026)
+
+- Beim ersten Öffnen wird die Profilrunde aus Supabase geladen. Bei späterem Öffnen erfolgt sofort eine Aktualisierung; solange „Entdecken“ sichtbar und ausgewählt ist, wird alle fünf Sekunden nach neuen vollständigen Profilen gesucht.
+- Neue Profile werden ans Ende der laufenden Runde angehängt. Das gerade angezeigte Profil und der Fortschritt der Runde bleiben erhalten. Aktualisierung pausiert außerhalb von „Entdecken“, in der Merkliste und solange der Browser-Tab im Hintergrund liegt; bei Rückkehr in den Tab wird sofort erneut geprüft.
+- Es ist keine Supabase-Migration erforderlich.
