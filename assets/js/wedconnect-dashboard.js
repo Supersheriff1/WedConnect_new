@@ -2427,9 +2427,15 @@
       destination_url: "https://shira-rachel.com/",
       is_test_ad: true
     };
+    const testNews = {
+      id: "test-news-wedconnect",
+      title: "Neuigkeiten bei WedConnect",
+      body: "Hier teilen wir künftig wichtige Updates und neue Funktionen. Diese Testneuigkeit dient dazu, die Darstellung auf der Übersicht für alle Profile zu prüfen.",
+      is_test_news: true
+    };
     const liveOffers = offersResult.error ? [] : active(offersResult.data, "starts_at");
     return {
-      news: newsResult.error ? [] : active(newsResult.data, "published_at"),
+      news: [testNews, ...(newsResult.error ? [] : active(newsResult.data, "published_at"))],
       offers: [testAdvertisement, ...liveOffers]
     };
   }
@@ -2437,6 +2443,7 @@
   function createContentCard(item, kind, sourceView) {
     const card = document.createElement("article");
     const isTestAd = Boolean(item.is_test_ad);
+    const isTestNews = Boolean(item.is_test_news);
     const isOffer = kind === "offer";
     const offerReturnView = sourceView === "partner-offers" ? "partner-offers" : "home";
     card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "") + (isOffer ? " offer-card-clickable" : "");
@@ -2456,7 +2463,7 @@
     copy.className = "activity-card-copy";
     const label = document.createElement("span");
     label.className = isTestAd ? "test-ad-label" : "content-card-label";
-    label.textContent = isTestAd ? "TESTANZEIGE · SHIRA RACHEL PHOTOGRAPHY" : kind === "offer" ? "Partnerangebot" : "WedConnect-Neuigkeit";
+    label.textContent = isTestAd ? "TESTANZEIGE · SHIRA RACHEL PHOTOGRAPHY" : isTestNews ? "TESTNEUIGKEIT" : kind === "offer" ? "Partnerangebot" : "WedConnect-Neuigkeit";
     const title = document.createElement("strong");
     title.textContent = item.title || (kind === "offer" ? "Angebot" : "Neuigkeit");
     const detail = document.createElement("p");

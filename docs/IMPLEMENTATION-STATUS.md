@@ -181,3 +181,10 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Ein dezenter Hinweis „Weiter unten“ erscheint unten rechts, solange die Übersicht am Seitenanfang steht und weitere Inhalte vorhanden sind. Er verschwindet beim Scrollen, am Seitenende sowie außerhalb der Übersicht.
 - Inhalte erhalten keinen einheitlichen Schließen-Button: offene Likes bleiben bis zur Reaktion sichtbar; neue Matches ohne Nachricht bis zum Chatstart. Nicht dringende App-Neuigkeiten können als gelesen markiert oder ausgeblendet werden. Anzeigen und Partnerangebote bleiben ohne Schließen-X sichtbar und werden über Laufzeit, Zielgruppe und Werbeeinstellungen gesteuert.
+
+
+## Testneuigkeit für alle Profile (16. Oktober 2026)
+
+- Eine statische Beispielneuigkeit „Neuigkeiten bei WedConnect“ erscheint im Neuigkeiten-Abschnitt für alle Profilrollen.
+- Sie ist deutlich als „TESTNEUIGKEIT“ gekennzeichnet und ergänzt veröffentlichte Datenbank-Neuigkeiten. Es ist keine Supabase-Migration erforderlich.
+- Testinhalt zur Prüfung der Darstellung; vor dem Livegang entfernen oder durch eine echte Ankündigung ersetzen.
