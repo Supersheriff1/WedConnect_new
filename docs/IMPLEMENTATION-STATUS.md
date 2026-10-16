@@ -99,3 +99,5 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Der Nachrichtenpunkt in der Navigation zeigt die Summe ungelesener Nachrichten aus Match-Unterhaltungen und Support-Chats. Der Zähler wird alle 15 Sekunden aktualisiert, solange das Dashboard sichtbar ist.
 - Das Öffnen eines Chats markiert die bis dahin geladenen eingehenden Nachrichten als gelesen; neue Nachrichten werden während eines geöffneten Chats ebenfalls als gelesen erfasst.
 - Voraussetzung: Migration `supabase/migrations/20261016150000_message_read_receipts.sql` muss in Supabase ausgeführt werden. Bis dahin bleibt die bestehende Nachrichtenfunktion nutzbar; Lesestatus und Zähler erscheinen erst nach der Migration.
+
+- Nachrichtenübersicht: Chats mit ungelesenen Nachrichten werden farblich hervorgehoben, erhalten einen Zähler und erscheinen vor gelesenen Chats. Beim Zurückkehren in den Tab wird der Status sofort aktualisiert; zusätzlich läuft die Hintergrundprüfung im geöffneten Dashboard weiter.
