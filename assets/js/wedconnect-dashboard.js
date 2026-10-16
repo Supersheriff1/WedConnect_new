@@ -2578,6 +2578,11 @@
     if (!offer || !container) return;
     const card = document.createElement("article");
     card.className = "offer-detail-card";
+    const adDisclosure = document.createElement("span");
+    adDisclosure.className = "offer-detail-ad-label";
+    adDisclosure.textContent = "Werbung";
+    adDisclosure.setAttribute("aria-label", "Werbung");
+    card.append(adDisclosure);
     const brand = document.createElement("div");
     brand.className = "offer-detail-brand";
     if (offer.is_test_ad) {
