@@ -3154,15 +3154,16 @@
       const forPeer = (items) => items.filter((item) =>
         (item.sender_id === userId && item.recipient_id === peerId)
         || (item.sender_id === peerId && item.recipient_id === userId));
+      const peerMessages = forPeer(incoming);
       const previous = forPeer(activityCache.messages || []);
       const latestKey = (items) => {
         const last = items[items.length - 1];
         return last ? items.length + "|" + last.created_at + "|" + last.sender_id + "|" + last.body : "0";
       };
-      if (latestKey(previous) === latestKey(forPeer(incoming))) return;
+      if (latestKey(previous) === latestKey(peerMessages)) return;
       activityCache.messages = (activityCache.messages || [])
         .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
-        .concat(incoming)
+        .concat(peerMessages)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       if (activityCache.messagedPeers) activityCache.messagedPeers.add(peerId);
       renderMessagesList();
