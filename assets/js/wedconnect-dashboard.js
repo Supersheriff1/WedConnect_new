@@ -2660,17 +2660,19 @@
   }
 
   async function openMatchedProfile(userId) {
-    const dialog = document.querySelector("#matched-profile-dialog");
+    const profileView = document.querySelector("#matched-profile-view");
     const container = document.querySelector("#matched-profile-content");
-    const dialogTitle = document.querySelector("#matched-profile-dialog-title");
-    if (!dialog || !container || !userId) return;
+    const profileTitle = document.querySelector("#matched-profile-title");
+    if (!profileView || !container || !profileTitle || !userId) return;
     container.replaceChildren();
     const loading = document.createElement("p");
     loading.className = "overview-empty-state";
     loading.textContent = "Profil wird geladen …";
     container.append(loading);
-    dialogTitle.textContent = "Profil";
-    if (!dialog.open) dialog.show();
+    setDashboardView("matched-profile");
+    setActiveNavigation("matches");
+    document.querySelector("#page-title").textContent = "Profil";
+    profileTitle.textContent = "Profil";
     try {
       const headerResult = await waitForProfileQuery(
         supabase.from("profiles").select("id,role").eq("id", userId).maybeSingle(),
@@ -2691,7 +2693,8 @@
       const title = role === "couple"
         ? [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar"
         : profile.first_name || "Fotograf";
-      dialogTitle.textContent = title;
+      profileTitle.textContent = title;
+      document.querySelector("#page-title").textContent = title;
       const card = document.createElement("article");
       card.className = "discover-profile-card";
       const gallery = document.createElement("div");
@@ -2797,7 +2800,7 @@
       }
       card.append(content);
     } catch (_) {
-      if (!dialog.open) return;
+      if (profileView.hidden) return;
       container.replaceChildren();
       const error = document.createElement("p");
       error.className = "overview-empty-state";
@@ -3001,11 +3004,12 @@
     document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
       section.hidden = section.dataset.dashboardView !== view;
     });
-    setActiveNavigation(view);
+    setActiveNavigation(view === "matched-profile" ? "matches" : view);
     const titles = {
       home: "Willkommen" + (currentGreeting ? ", " + currentGreeting : "") + "!",
       profile: currentRole === "couple" ? "Euer Profil" : "Dein Profil",
       matches: "Matches",
+      "matched-profile": "Profil",
       messages: "Nachrichten",
       discover: currentRole === "couple" ? "Fotografen entdecken" : "Hochzeiten entdecken"
     };
@@ -3376,6 +3380,11 @@
     beginWizard(currentRole, 0);
   });
   document.addEventListener("click", async (event) => {
+    const profileBack = event.target.closest("#matched-profile-back");
+    if (profileBack) {
+      setDashboardView("matches");
+      return;
+    }
     const profileButton = event.target.closest("[data-open-profile]");
     if (profileButton) {
       openMatchedProfile(profileButton.dataset.openProfile);
