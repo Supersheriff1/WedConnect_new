@@ -195,3 +195,6 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Jede Neuigkeit in der Startübersicht hat ein eigenes Schließen-X. Beim Schließen wird die Karte sofort entfernt; der folgende Inhalt rückt in der Liste automatisch nach oben.
 - Die ausgeblendete Neuigkeit bleibt nur für das jeweilige angemeldete Profil auf demselben Browser verborgen (localStorage). Es ist keine Supabase-Migration erforderlich. Auf einem anderen Gerät kann sie erneut erscheinen.
 - Anzeigen und Partnerangebote behalten ihr bisheriges Verhalten und sind nicht über dieses X schließbar.
+
+
+- Zusätzlich erscheinen zwei statische Testneuigkeiten („Mach dein Profil noch persönlicher“ und „Neue Begegnungen warten auf dich“) für alle Profilrollen. Sie tragen ebenfalls die Kennzeichnung „TESTNEUIGKEIT“ und können einzeln geschlossen werden.
