@@ -60,7 +60,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Uploadfehler nennen den Grund. Vergrößern, Verkleinern, Drehen, Abbrechen und Übernehmen müssen sichtbar aktiv wirken.
 
 ## Übersicht, Matches und Benachrichtigungen
-- In der Match-Liste öffnen Klicks auf Profilfoto oder Namen eine eigene Profilansicht innerhalb des Dashboards. Die Matches-Navigation bleibt aktiv; eine Zurück-Schaltfläche führt zur Matchliste. Das Profil ersetzt die Liste und liegt nicht darüber. Der Chat bleibt separat.
+- In der Match-Liste öffnet ein Klick auf die gesamte Karte die Profilansicht innerhalb des Dashboards. Die Matches-Navigation bleibt aktiv; Like-/Dislike- und Chat-Aktionen bleiben separat. Eine Zurück-Schaltfläche führt zur Matchliste.
 
 - Die Übersicht ist der Startbildschirm nach dem Login. Sie ergänzt die Hauptnavigation und dupliziert nicht Profil-, Match- oder Nachrichtenlisten.
 - Oben stehen eingegangene, noch unbeantwortete Likes mit den Aktionen „Zurückliken“ und „Nein danke“. Ein Zurücklike erzeugt bei Gegenseitigkeit ein Match.

@@ -2410,12 +2410,14 @@
 
   function createActivityCard(summary, kind) {
     const card = document.createElement("article");
-    card.className = "activity-card";
+    card.className = "activity-card activity-card-profile-clickable";
+    card.dataset.openProfile = summary.id;
+    card.tabIndex = 0;
+    card.setAttribute("aria-label", "Profil von " + summary.name + " öffnen");
     const avatar = document.createElement("button");
     avatar.type = "button";
     avatar.className = "activity-avatar activity-profile-open";
     avatar.dataset.openProfile = summary.id;
-    avatar.setAttribute("aria-haspopup", "dialog");
     avatar.setAttribute("aria-label", "Profil von " + summary.name + " öffnen");
     if (summary.photoUrl) {
       const image = document.createElement("img");
@@ -2432,7 +2434,6 @@
     name.type = "button";
     name.className = "activity-name-button";
     name.dataset.openProfile = summary.id;
-    name.setAttribute("aria-haspopup", "dialog");
     name.textContent = summary.name;
     const detail = document.createElement("p");
     detail.textContent = summary.detail || (summary.role === "couple" ? "Hochzeitspaar" : "Fotograf");
@@ -3379,13 +3380,20 @@
     if (accountDialog.open) accountDialog.close();
     beginWizard(currentRole, 0);
   });
+  document.addEventListener("keydown", (event) => {
+    const card = event.target.closest(".activity-card-profile-clickable");
+    if (!card || event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    openMatchedProfile(card.dataset.openProfile);
+  });
   document.addEventListener("click", async (event) => {
     const profileBack = event.target.closest("#matched-profile-back");
     if (profileBack) {
       setDashboardView("matches");
       return;
     }
-    const profileButton = event.target.closest("[data-open-profile]");
+    const cardAction = event.target.closest("[data-like-back], [data-dismiss-like], [data-open-conversation]");
+    const profileButton = cardAction ? null : event.target.closest("[data-open-profile]");
     if (profileButton) {
       openMatchedProfile(profileButton.dataset.openProfile);
       return;
