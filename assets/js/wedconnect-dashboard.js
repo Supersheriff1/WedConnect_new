@@ -3148,6 +3148,7 @@
       if (reactionFeatureAvailable) {
         const messageReactions = (activityCache.reactions || []).filter((reaction) => reaction.message_id === item.id && reaction.reaction === "heart");
         const ownHeart = messageReactions.some((reaction) => reaction.user_id === userId);
+        if (messageReactions.length || messageReactionPickerId === item.id) bubble.classList.add("has-reaction");
         if (messageReactions.length) {
           const sticker = document.createElement("span");
           sticker.className = "message-reaction-sticker";
