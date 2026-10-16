@@ -2435,9 +2435,31 @@
     };
     const liveOffers = offersResult.error ? [] : active(offersResult.data, "starts_at");
     return {
-      news: [testNews, ...(newsResult.error ? [] : active(newsResult.data, "published_at"))],
+      news: [testNews, ...(newsResult.error ? [] : active(newsResult.data, "published_at"))]
+        .filter((item) => !getDismissedNewsIds().has(String(item.id))),
       offers: [testAdvertisement, ...liveOffers]
     };
+  }
+
+  function getDismissedNewsIds() {
+    if (!currentUser || !currentUser.id) return new Set();
+    try {
+      const stored = JSON.parse(window.localStorage.getItem("wedconnect-dismissed-news:" + currentUser.id) || "[]");
+      return new Set(Array.isArray(stored) ? stored.map(String) : []);
+    } catch (_) {
+      return new Set();
+    }
+  }
+
+  function dismissDashboardNews(newsId) {
+    if (!currentUser || !currentUser.id) return;
+    const dismissed = getDismissedNewsIds();
+    dismissed.add(String(newsId));
+    try {
+      window.localStorage.setItem("wedconnect-dismissed-news:" + currentUser.id, JSON.stringify(Array.from(dismissed)));
+    } catch (_) {}
+    activityCache.news = (activityCache.news || []).filter((item) => String(item.id) !== String(newsId));
+    renderOverviewActivity();
   }
 
   function createContentCard(item, kind, sourceView) {
@@ -2445,6 +2467,7 @@
     const isTestAd = Boolean(item.is_test_ad);
     const isTestNews = Boolean(item.is_test_news);
     const isOffer = kind === "offer";
+    const canDismissNews = kind === "news";
     const offerReturnView = sourceView === "partner-offers" ? "partner-offers" : "home";
     card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "") + (isOffer ? " offer-card-clickable" : "");
     if (isOffer) {
@@ -2473,6 +2496,20 @@
         ? [item.partner_name, item.description, item.terms ? "Bedingungen: " + item.terms : ""].filter(Boolean).join(" · ")
         : item.body || "";
     copy.append(label, title, detail);
+    if (canDismissNews) {
+      const dismiss = document.createElement("button");
+      dismiss.type = "button";
+      dismiss.className = "content-card-dismiss";
+      dismiss.setAttribute("aria-label", "Neuigkeit ausblenden: " + (item.title || "Neuigkeit"));
+      dismiss.title = "Neuigkeit ausblenden";
+      dismiss.textContent = "×";
+      dismiss.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        dismissDashboardNews(item.id);
+      });
+      card.append(dismiss);
+    }
     if (isTestAd) {
       const monogram = document.createElement("span");
       monogram.className = "test-ad-monogram";

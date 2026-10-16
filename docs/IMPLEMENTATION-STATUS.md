@@ -188,3 +188,10 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Eine statische Beispielneuigkeit „Neuigkeiten bei WedConnect“ erscheint im Neuigkeiten-Abschnitt für alle Profilrollen.
 - Sie ist deutlich als „TESTNEUIGKEIT“ gekennzeichnet und ergänzt veröffentlichte Datenbank-Neuigkeiten. Es ist keine Supabase-Migration erforderlich.
 - Testinhalt zur Prüfung der Darstellung; vor dem Livegang entfernen oder durch eine echte Ankündigung ersetzen.
+
+
+## App-Neuigkeiten ausblenden (16. Oktober 2026)
+
+- Jede Neuigkeit in der Startübersicht hat ein eigenes Schließen-X. Beim Schließen wird die Karte sofort entfernt; der folgende Inhalt rückt in der Liste automatisch nach oben.
+- Die ausgeblendete Neuigkeit bleibt nur für das jeweilige angemeldete Profil auf demselben Browser verborgen (localStorage). Es ist keine Supabase-Migration erforderlich. Auf einem anderen Gerät kann sie erneut erscheinen.
+- Anzeigen und Partnerangebote behalten ihr bisheriges Verhalten und sind nicht über dieses X schließbar.
