@@ -90,3 +90,12 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - E-Mail-Support und Push-Benachrichtigungen sind nicht Bestandteil der Funktion.
 - Nachrichtenlöschung: Anzeige bleibt auf der ursprünglichen Absenderseite.
 - Die Support-Migration und Betreiberfreischaltung müssen im Supabase-Projekt erfolgen. Eine Live-DB-Migration wurde nicht getestet.
+
+
+## Nachrichten: Lesestatus und Ungelesen-Zähler (16. Oktober 2026)
+
+- Persönliche Unterhaltungen und Support-Chats speichern pro lesender Person den Zeitpunkt der zuletzt gelesenen Nachricht.
+- In der Nachrichtenübersicht wird die letzte eigene Nachricht als „Gesendet“ oder „Gelesen“ markiert.
+- Der Nachrichtenpunkt in der Navigation zeigt die Summe ungelesener Nachrichten aus Match-Unterhaltungen und Support-Chats. Der Zähler wird alle 15 Sekunden aktualisiert, solange das Dashboard sichtbar ist.
+- Das Öffnen eines Chats markiert die bis dahin geladenen eingehenden Nachrichten als gelesen; neue Nachrichten werden während eines geöffneten Chats ebenfalls als gelesen erfasst.
+- Voraussetzung: Migration `supabase/migrations/20261016150000_message_read_receipts.sql` muss in Supabase ausgeführt werden. Bis dahin bleibt die bestehende Nachrichtenfunktion nutzbar; Lesestatus und Zähler erscheinen erst nach der Migration.

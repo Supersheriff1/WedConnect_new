@@ -40,11 +40,16 @@
   let reactionMigrationNoticeShown = false;
   let messageDeletionFeatureAvailable = false;
   let messageDeletionNoticeShown = false;
+  let readReceiptFeatureAvailable = false;
+  let readReceiptNoticeShown = false;
+  let supportReadFeatureAvailable = false;
+  let unreadRefreshTimer = null;
+  let unreadRefreshBusy = false;
   let pendingDeleteMessageId = "";
   let messageLongPressTimer = null;
   let messageLongPressStart = null;
   let suppressOwnMessageClickUntil = 0;
-  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], summaries: new Map() };
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], conversationReads: [], supportReads: [], summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2532,9 +2537,11 @@
       }
       messages = messageResult.data || [];
     }
+    const supportReads = await loadSupportReads(threads.map((thread) => thread.id));
     supportFeatureAvailable = true;
     activityCache.supportThreads = threads;
     activityCache.supportMessages = messages;
+    activityCache.supportReads = supportReads;
     renderSupportOperatorInbox();
     return true;
   }
@@ -2588,6 +2595,105 @@
     return queryMessages("id,sender_id,recipient_id,body,created_at");
   }
 
+  async function loadConversationReads(userId) {
+    const result = await supabase.from("profile_conversation_reads")
+      .select("user_id,peer_id,last_read_at")
+      .or("user_id.eq." + userId + ",peer_id.eq." + userId);
+    if (result.error) {
+      readReceiptFeatureAvailable = false;
+      if (!readReceiptNoticeShown && /does not exist|schema cache|42P01|could not find the table/i.test(String(result.error.message || ""))) {
+        showNotice("Lesestatus und Ungelesen-Zähler sind noch nicht eingerichtet. Bitte führe die Nachrichten-Lesestatus-Migration in Supabase aus.");
+        readReceiptNoticeShown = true;
+      }
+      return [];
+    }
+    readReceiptFeatureAvailable = true;
+    return result.data || [];
+  }
+
+  async function markConversationRead(peerId) {
+    if (!readReceiptFeatureAvailable || !peerId || !currentUser) return;
+    const latestIncoming = (activityCache.messages || []).filter((item) =>
+      item.sender_id === peerId && item.recipient_id === currentUser.id
+    ).reduce((latest, item) => !latest || item.created_at > latest ? item.created_at : latest, "");
+    if (!latestIncoming) return;
+    const existing = (activityCache.conversationReads || []).find((item) =>
+      item.user_id === currentUser.id && item.peer_id === peerId
+    );
+    if (existing && existing.last_read_at >= latestIncoming) return;
+    const { error } = await supabase.from("profile_conversation_reads").upsert({
+      user_id: currentUser.id,
+      peer_id: peerId,
+      last_read_at: latestIncoming
+    }, { onConflict: "user_id,peer_id" });
+    if (error) return;
+    activityCache.conversationReads = (activityCache.conversationReads || [])
+      .filter((item) => !(item.user_id === currentUser.id && item.peer_id === peerId))
+      .concat({ user_id: currentUser.id, peer_id: peerId, last_read_at: latestIncoming });
+    renderMessagesList();
+  }
+
+  async function loadSupportReads(threadIds) {
+    if (!threadIds.length) {
+      supportReadFeatureAvailable = true;
+      return [];
+    }
+    const result = await supabase.from("support_thread_reads")
+      .select("thread_id,user_id,last_read_at")
+      .in("thread_id", threadIds);
+    supportReadFeatureAvailable = !result.error;
+    return result.error ? [] : (result.data || []);
+  }
+
+  async function markSupportThreadRead(threadId) {
+    if (!supportReadFeatureAvailable || !threadId || !currentUser) return;
+    const latestIncoming = (activityCache.supportMessages || []).filter((item) =>
+      item.thread_id === threadId && item.sender_id !== currentUser.id
+    ).reduce((latest, item) => !latest || item.created_at > latest ? item.created_at : latest, "");
+    if (!latestIncoming) return;
+    const existing = (activityCache.supportReads || []).find((item) =>
+      item.thread_id === threadId && item.user_id === currentUser.id
+    );
+    if (existing && existing.last_read_at >= latestIncoming) return;
+    const { error } = await supabase.from("support_thread_reads").upsert({
+      thread_id: threadId,
+      user_id: currentUser.id,
+      last_read_at: latestIncoming
+    }, { onConflict: "thread_id,user_id" });
+    if (error) return;
+    activityCache.supportReads = (activityCache.supportReads || [])
+      .filter((item) => !(item.thread_id === threadId && item.user_id === currentUser.id))
+      .concat({ thread_id: threadId, user_id: currentUser.id, last_read_at: latestIncoming });
+    renderMessagesList();
+  }
+
+  function unreadMessageCount() {
+    const userId = currentUser && currentUser.id;
+    if (!userId) return 0;
+    const reads = activityCache.conversationReads || [];
+    const unreadMatches = (activityCache.messages || []).filter((item) => {
+      if (item.recipient_id !== userId || item.deleted_at) return false;
+      const read = reads.find((receipt) => receipt.user_id === userId && receipt.peer_id === item.sender_id);
+      return !read || new Date(item.created_at) > new Date(read.last_read_at);
+    }).length;
+    const supportReads = activityCache.supportReads || [];
+    const unreadSupport = (activityCache.supportMessages || []).filter((item) => {
+      if (item.sender_id === userId) return false;
+      const read = supportReads.find((receipt) => receipt.user_id === userId && receipt.thread_id === item.thread_id);
+      return !read || new Date(item.created_at) > new Date(read.last_read_at);
+    }).length;
+    return unreadMatches + unreadSupport;
+  }
+
+  function updateUnreadMessageBadges() {
+    const count = unreadMessageCount();
+    document.querySelectorAll("[data-unread-badge]").forEach((badge) => {
+      badge.hidden = count === 0;
+      badge.textContent = count > 99 ? "99+" : String(count);
+      badge.setAttribute("aria-label", count + " ungelesene " + (count === 1 ? "Nachricht" : "Nachrichten"));
+    });
+  }
+
   async function loadActivityData() {
     const userId = currentUser && currentUser.id;
     if (!userId) return;
@@ -2603,6 +2709,7 @@
     const messageResult = await loadProfileMessages(userId);
     if (messageResult.error) throw new Error("Nachrichten konnten nicht geladen werden. Prüfe die WedConnect-Nachrichtenmigration in Supabase.");
     const messages = messageResult.data || [];
+    const conversationReads = await loadConversationReads(userId);
     const messagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
     const newMatches = matches.filter((peerId) => !messagedPeers.has(peerId));
     const ids = Array.from(new Set([...incoming, ...matches]));
@@ -2614,6 +2721,8 @@
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       messages,
       messagedPeers,
+      conversationReads,
+      supportReads: activityCache.supportReads || [],
       reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
@@ -2622,6 +2731,7 @@
       supportMessages: activityCache.supportMessages || []
     };
     await loadSupportData(false);
+    updateUnreadMessageBadges();
   }
 
   function renderOverviewActivity() {
@@ -2730,6 +2840,17 @@
       card.dataset.searchText = (summary.name + " " + detail.textContent).toLocaleLowerCase("de");
       card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
       copy.append(name, detail);
+      if (latest && latest.sender_id === currentUser.id && !latest.deleted_at) {
+        const peerRead = (activityCache.conversationReads || []).find((receipt) =>
+          receipt.user_id === peerId && receipt.peer_id === currentUser.id
+        );
+        const read = Boolean(peerRead && new Date(peerRead.last_read_at) >= new Date(latest.created_at));
+        const status = document.createElement("span");
+        status.className = "message-read-status" + (read ? " is-read" : "");
+        status.setAttribute("aria-label", read ? "Gelesen" : "Gesendet");
+        status.textContent = read ? "✓✓ Gelesen" : "✓ Gesendet";
+        copy.append(status);
+      }
       card.append(avatar, copy);
       container.append(card);
     });
@@ -2754,6 +2875,18 @@
       detail.className = "activity-message-preview";
       detail.textContent = latest ? ((latest.sender_id === currentUser.id ? "Du: " : "") + latest.body) : "Support-Chat öffnen";
       copy.append(name, detail);
+      const latestIsOwn = latest && latest.sender_id === currentUser.id;
+      if (latestIsOwn) {
+        const peerRead = (activityCache.supportReads || []).find((receipt) =>
+          receipt.thread_id === thread.id && receipt.user_id !== currentUser.id
+        );
+        const read = Boolean(peerRead && new Date(peerRead.last_read_at) >= new Date(latest.created_at));
+        const status = document.createElement("span");
+        status.className = "message-read-status" + (read ? " is-read" : "");
+        status.setAttribute("aria-label", read ? "Gelesen" : "Gesendet");
+        status.textContent = read ? "✓✓ Gelesen" : "✓ Gesendet";
+        copy.append(status);
+      }
       card.dataset.searchText = (name.textContent + " " + detail.textContent).toLocaleLowerCase("de");
       card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
       card.append(avatar, copy);
@@ -2763,6 +2896,7 @@
     const hasVisibleConversations = Array.from(container.children).some((card) => !card.hidden);
     document.querySelector("#messages-empty-state").hidden = hasConversations;
     document.querySelector("#messages-no-results").hidden = !query || !hasConversations || hasVisibleConversations;
+    updateUnreadMessageBadges();
   }
 
   document.querySelector("#messages-search").addEventListener("input", renderMessagesList);
@@ -2777,6 +2911,37 @@
       showNotice(error && error.message ? error.message : "Aktivitäten konnten nicht geladen werden.");
       document.querySelector("#overview-empty-state").hidden = false;
     }
+  }
+
+  async function refreshUnreadMessageState() {
+    if (!currentUser || unreadRefreshBusy || document.visibilityState !== "visible") return;
+    unreadRefreshBusy = true;
+    try {
+      const result = await loadProfileMessages(currentUser.id);
+      if (result.error) return;
+      activityCache.messages = result.data || [];
+      activityCache.messagedPeers = new Set(activityCache.messages.map((item) =>
+        item.sender_id === currentUser.id ? item.recipient_id : item.sender_id
+      ));
+      activityCache.conversationReads = await loadConversationReads(currentUser.id);
+      for (const peerId of activityCache.messagedPeers) {
+        if (!activityCache.summaries.has(peerId)) {
+          const summary = await loadPublicProfileSummary(peerId);
+          if (summary) activityCache.summaries.set(peerId, summary);
+        }
+      }
+      await loadSupportData(false);
+      if (activeConversationPeer) await markConversationRead(activeConversationPeer);
+      if (activeSupportThreadId) await markSupportThreadRead(activeSupportThreadId);
+      renderMessagesList();
+    } finally {
+      unreadRefreshBusy = false;
+    }
+  }
+
+  function startUnreadMessageRefresh() {
+    if (unreadRefreshTimer) window.clearInterval(unreadRefreshTimer);
+    unreadRefreshTimer = window.setInterval(refreshUnreadMessageState, 15000);
   }
 
   async function loadDiscoverFeed() {
@@ -3236,6 +3401,7 @@
     document.querySelector("#conversation-status").textContent = "";
     messageReactionPickerId = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
+    await markConversationRead(peerId);
     const thread = document.querySelector("#conversation-thread");
     requestAnimationFrame(() => { if (thread) thread.scrollTop = thread.scrollHeight; });
     await refreshOpenConversationMessages();
@@ -3257,6 +3423,7 @@
     await renderConversationThread(true);
     document.querySelector("#conversation-status").textContent = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
+    await markSupportThreadRead(threadId);
     const input = document.querySelector("#conversation-input");
     input.placeholder = "Nachricht an WedConnect schreiben …";
     input.setAttribute("aria-label", "Nachricht an WedConnect");
@@ -3379,6 +3546,7 @@
         if (!loaded || supportThreadId !== activeSupportThreadId) return;
         const after = (activityCache.supportMessages || []).filter((item) => item.thread_id === supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
         if (before !== after) {
+          await markSupportThreadRead(supportThreadId);
           renderMessagesList();
           await renderConversationThread();
         }
@@ -3427,6 +3595,7 @@
           .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
           .concat(allPeerMessages)
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        await markConversationRead(peerId);
       }
       if (activityCache.messagedPeers) {
         if (allPeerMessages.length) activityCache.messagedPeers.add(peerId);
@@ -3546,6 +3715,7 @@
     dashboard.classList.remove("hidden");
     setDashboardView("home");
     await Promise.all([refreshActivityViews(), loadEmailPreferences()]);
+    startUnreadMessageRefresh();
   }
 
   const icons = {
@@ -3558,8 +3728,9 @@
 
   function navItem(label, icon, active, disabled) {
     const state = active ? 'aria-current="page"' : disabled ? 'disabled aria-disabled="true"' : "";
+    const badge = icon === "messages" ? '<span class="nav-unread-badge" data-unread-badge hidden></span>' : "";
     return '<button class="nav-link' + (active ? " active" : "") + '" type="button" data-nav-item="' + icon + '" ' + state + ">" +
-      icons[icon] + "<span>" + label + "</span>" +
+      icons[icon] + "<span>" + label + "</span>" + badge +
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : "") + "</button>";
   }
 
