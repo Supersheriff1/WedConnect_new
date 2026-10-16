@@ -57,7 +57,10 @@
   let messageLongPressTimer = null;
   let messageLongPressStart = null;
   let suppressOwnMessageClickUntil = 0;
-  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], conversationReads: [], supportReads: [], conversationHidden: [], supportHidden: [], summaries: new Map() };
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], conversationReads: [], supportReads: [], conversationHidden: [], supportHidden: [], profileBlocks: [], summaries: new Map() };
+  let blockFeatureAvailable = false;
+  let blockFeatureNoticeShown = false;
+  let pendingBlockPeerId = "";
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2627,6 +2630,131 @@
     );
   }
 
+  function blockStateForPeer(peerId) {
+    const rows = activityCache.profileBlocks || [];
+    return {
+      blockedByMe: rows.some((item) => item.blocker_id === currentUser.id && item.blocked_id === peerId),
+      blockedMe: rows.some((item) => item.blocker_id === peerId && item.blocked_id === currentUser.id)
+    };
+  }
+
+  function isPeerBlocked(peerId) {
+    const state = blockStateForPeer(peerId);
+    return state.blockedByMe || state.blockedMe;
+  }
+
+  async function loadProfileBlocks(userId) {
+    const result = await supabase.from("profile_blocks")
+      .select("blocker_id,blocked_id,created_at")
+      .or("blocker_id.eq." + userId + ",blocked_id.eq." + userId);
+    if (result.error) {
+      blockFeatureAvailable = false;
+      if (!blockFeatureNoticeShown && /does not exist|schema cache|42P01|could not find the table/i.test(String(result.error.message || ""))) {
+        showNotice("Blockieren ist noch nicht eingerichtet. Bitte führe die Profil-Blockiermigration in Supabase aus.");
+        blockFeatureNoticeShown = true;
+      }
+      return activityCache.profileBlocks || [];
+    }
+    blockFeatureAvailable = true;
+    return result.data || [];
+  }
+
+  function setConversationMenuOpen(open) {
+    const menu = document.querySelector("#conversation-action-menu");
+    const button = document.querySelector("#conversation-menu-button");
+    if (menu) menu.hidden = !open;
+    if (button) button.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function updateConversationBlockUI(peerId) {
+    const menuButton = document.querySelector("#conversation-menu-button");
+    const menu = document.querySelector("#conversation-action-menu");
+    const actionButton = document.querySelector("#conversation-block-action");
+    const form = document.querySelector("#conversation-form");
+    const input = document.querySelector("#conversation-input");
+    const sendButton = form && form.querySelector('button[type="submit"]');
+    const status = document.querySelector("#conversation-block-status");
+    if (!menuButton || !form || !input || !sendButton || !status) return;
+    const isDirectChat = Boolean(peerId);
+    menuButton.hidden = !isDirectChat;
+    menu.hidden = !isDirectChat;
+    if (!isDirectChat) {
+      status.hidden = true;
+      form.classList.remove("is-blocked");
+      input.disabled = false;
+      input.placeholder = activeSupportThreadId ? "Nachricht an WedConnect schreiben …" : "Nachricht schreiben …";
+      sendButton.disabled = false;
+      return;
+    }
+    const state = blockStateForPeer(peerId);
+    const blocked = state.blockedByMe || state.blockedMe;
+    actionButton.textContent = state.blockedByMe ? "Blockierung aufheben" : state.blockedMe ? "Diese Person blockieren" : "Person blockieren";
+    status.hidden = !blocked;
+    status.textContent = state.blockedByMe
+      ? "Du hast diese Person blockiert. Ihr könnt euch keine Nachrichten schicken."
+      : state.blockedMe
+        ? "Diese Person hat den Chat blockiert. Du kannst keine Nachrichten senden."
+        : "";
+    form.classList.toggle("is-blocked", blocked);
+    input.disabled = blocked;
+    input.placeholder = blocked ? "Nachrichten sind nicht verfügbar" : "Nachricht schreiben …";
+    sendButton.disabled = blocked;
+    setConversationMenuOpen(false);
+  }
+
+  function openBlockProfileDialog() {
+    if (!activeConversationPeer || !blockFeatureAvailable) {
+      showNotice("Blockieren ist noch nicht eingerichtet. Bitte führe die Profil-Blockiermigration in Supabase aus.");
+      return;
+    }
+    const state = blockStateForPeer(activeConversationPeer);
+    const summary = activityCache.summaries.get(activeConversationPeer);
+    const name = summary && summary.name ? summary.name : "diese Person";
+    const dialog = document.querySelector("#block-profile-dialog");
+    const title = document.querySelector("#block-profile-title");
+    const copy = document.querySelector("#block-profile-copy");
+    const confirm = document.querySelector("#block-profile-confirm");
+    pendingBlockPeerId = activeConversationPeer;
+    const unblock = state.blockedByMe;
+    title.textContent = unblock ? "Blockierung aufheben?" : "Person blockieren?";
+    copy.textContent = unblock
+      ? "Du kannst " + name + " danach wieder Nachrichten schicken. Der bisherige Chat bleibt sichtbar."
+      : "Wenn du " + name + " blockierst, könnt ihr euch keine Nachrichten mehr schicken. Der bisherige Chat bleibt sichtbar.";
+    confirm.textContent = unblock ? "Blockierung aufheben" : "Blockieren";
+    document.querySelector("#block-profile-status").textContent = "";
+    openWorkspaceDialog(dialog);
+  }
+
+  async function applyProfileBlock() {
+    const peerId = pendingBlockPeerId;
+    const confirm = document.querySelector("#block-profile-confirm");
+    const status = document.querySelector("#block-profile-status");
+    if (!peerId || !blockFeatureAvailable) return;
+    confirm.disabled = true;
+    const state = blockStateForPeer(peerId);
+    status.textContent = state.blockedByMe ? "Blockierung wird aufgehoben …" : "Person wird blockiert …";
+    const result = await supabase.from("profile_blocks")
+      .delete().eq("blocker_id", currentUser.id).eq("blocked_id", peerId);
+    if (!state.blockedByMe) {
+      const { error: insertError } = await supabase.from("profile_blocks").insert({ blocker_id: currentUser.id, blocked_id: peerId });
+      if (insertError) result.error = insertError;
+    }
+    confirm.disabled = false;
+    if (result.error) {
+      status.textContent = "Die Änderung konnte nicht gespeichert werden. Bitte prüfe die Profil-Blockiermigration in Supabase.";
+      return;
+    }
+    activityCache.profileBlocks = await loadProfileBlocks(currentUser.id);
+    pendingBlockPeerId = "";
+    document.querySelector("#block-profile-dialog").close();
+    updateConversationBlockUI(activeConversationPeer);
+    renderMessagesList();
+    renderMatchList();
+    renderOverviewActivity();
+    updateUnreadMessageBadges();
+    showNotice(state.blockedByMe ? "Blockierung wurde aufgehoben." : "Person wurde blockiert.");
+  }
+
   async function loadConversationHides(userId) {
     const result = await supabase.from("profile_conversation_hidden")
       .select("user_id,peer_id,hidden_at").eq("user_id", userId);
@@ -2810,7 +2938,7 @@
     if (!userId) return 0;
     const reads = activityCache.conversationReads || [];
     const unreadMatches = (activityCache.messages || []).filter((item) => {
-      if (item.recipient_id !== userId || item.deleted_at || !isConversationMessageVisible(item, item.sender_id)) return false;
+      if (item.recipient_id !== userId || item.deleted_at || isPeerBlocked(item.sender_id) || !isConversationMessageVisible(item, item.sender_id)) return false;
       const read = reads.find((receipt) => receipt.user_id === userId && receipt.peer_id === item.sender_id);
       return !read || new Date(item.created_at) > new Date(read.last_read_at);
     }).length;
@@ -2835,11 +2963,16 @@
   async function loadActivityData() {
     const userId = currentUser && currentUser.id;
     if (!userId) return;
-    const [inboundResult, outboundResult] = await Promise.all([
+    const [inboundResult, outboundResult, blockResult] = await Promise.all([
       supabase.from("profile_likes").select("liker_id,created_at").eq("liked_id", userId).order("created_at", { ascending: false }),
-      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false })
+      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false }),
+      supabase.from("profile_blocks").select("blocker_id,blocked_id").or("blocker_id.eq." + userId + ",blocked_id.eq." + userId)
     ]);
     if (inboundResult.error || outboundResult.error) throw new Error("Likes konnten nicht geladen werden. Prüfe die Profil-Likes-Migration in Supabase.");
+    if (!blockResult.error) {
+      activityCache.profileBlocks = blockResult.data || [];
+      blockFeatureAvailable = true;
+    }
     const inbound = inboundResult.data || [];
     const outgoingIds = new Set((outboundResult.data || []).map((item) => item.liked_id));
     const matches = inbound.filter((item) => outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
@@ -2849,8 +2982,12 @@
     const messages = messageResult.data || [];
     const conversationReads = await loadConversationReads(userId);
     const conversationHidden = await loadConversationHides(userId);
+    const profileBlocks = activityCache.profileBlocks.length ? activityCache.profileBlocks : await loadProfileBlocks(userId);
+    const blockedIds = new Set(profileBlocks.map((item) => item.blocker_id === userId ? item.blocked_id : item.blocker_id));
+    const visibleIncoming = incoming.filter((id) => !blockedIds.has(id));
+    const visibleMatches = matches.filter((id) => !blockedIds.has(id));
     const allMessagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
-    const newMatches = matches.filter((peerId) => !allMessagedPeers.has(peerId));
+    const newMatches = visibleMatches.filter((peerId) => !allMessagedPeers.has(peerId));
     const messagedPeers = new Set(Array.from(allMessagedPeers).filter((peerId) =>
       messages.some((item) =>
         ((item.sender_id === userId && item.recipient_id === peerId)
@@ -2858,12 +2995,13 @@
         && isConversationMessageVisible(item, peerId, conversationHidden)
       )
     ));
-    const ids = Array.from(new Set([...incoming, ...matches]));
+    const ids = Array.from(new Set([...visibleIncoming, ...visibleMatches, ...Array.from(allMessagedPeers)]));
     const summaries = await Promise.all(ids.map((id) => loadPublicProfileSummary(id)));
     const content = await loadDashboardContent();
     activityCache = {
-      incoming: incoming.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
-      matches: matches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
+      incoming: visibleIncoming.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
+      matches: visibleMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
+      profileBlocks,
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       messages,
       messagedPeers,
@@ -2967,6 +3105,8 @@
     peers.forEach((peerId) => {
       const summary = activityCache.summaries.get(peerId) || { id: peerId, name: "WedConnect-Mitglied", detail: "", photoUrl: "" };
       const unreadCount = unreadConversationCount(peerId);
+      const blockState = blockStateForPeer(peerId);
+      const blocked = blockState.blockedByMe || blockState.blockedMe;
       const card = document.createElement("article");
       card.className = "activity-card activity-message-card" + (unreadCount ? " has-unread" : "");
       card.dataset.openConversation = peerId;
@@ -3015,6 +3155,7 @@
         remove.dataset.deleteConversationKind = "match";
         titleRow.append(remove);
       }
+      if (blocked) { const blockedLabel = document.createElement("span"); blockedLabel.className = "activity-message-blocked"; blockedLabel.textContent = "Blockiert"; titleRow.append(blockedLabel); }
       copy.append(titleRow, detail);
       if (latest && latest.sender_id === currentUser.id && !latest.deleted_at) {
         const peerRead = (activityCache.conversationReads || []).find((receipt) =>
@@ -3125,6 +3266,7 @@
       if (result.error) return;
       activityCache.messages = result.data || [];
       activityCache.conversationHidden = await loadConversationHides(currentUser.id);
+      activityCache.profileBlocks = await loadProfileBlocks(currentUser.id);
       const allPeers = new Set(activityCache.messages.map((item) =>
         item.sender_id === currentUser.id ? item.recipient_id : item.sender_id
       ));
@@ -3137,9 +3279,13 @@
         }
       }
       await loadSupportData(false);
-      if (activeConversationPeer) await markConversationRead(activeConversationPeer);
+      if (activeConversationPeer) {
+        updateConversationBlockUI(activeConversationPeer);
+        if (!isPeerBlocked(activeConversationPeer)) await markConversationRead(activeConversationPeer);
+      }
       if (activeSupportThreadId) await markSupportThreadRead(activeSupportThreadId);
       renderMessagesList();
+      updateUnreadMessageBadges();
     } finally {
       unreadRefreshBusy = false;
     }
@@ -3165,19 +3311,22 @@
     container.append(loading);
     try {
       const oppositeRole = currentRole === "couple" ? "photographer" : "couple";
-      const [profilesResult, outgoingResult, incomingResult, skipsResult] = await Promise.all([
+      const [profilesResult, outgoingResult, incomingResult, skipsResult, blocksResult] = await Promise.all([
         supabase.from("profiles").select("id,role").eq("profile_status", "complete").eq("role", oppositeRole),
         supabase.from("profile_likes").select("liked_id").eq("liker_id", currentUser.id),
         supabase.from("profile_likes").select("liker_id").eq("liked_id", currentUser.id),
-        supabase.from("profile_skips").select("skipped_id").eq("skipper_id", currentUser.id)
+        supabase.from("profile_skips").select("skipped_id").eq("skipper_id", currentUser.id),
+        supabase.from("profile_blocks").select("blocker_id,blocked_id").or("blocker_id.eq." + currentUser.id + ",blocked_id.eq." + currentUser.id)
       ]);
-      if (profilesResult.error || outgoingResult.error || incomingResult.error || skipsResult.error) {
+      if (!blocksResult.error) activityCache.profileBlocks = blocksResult.data || [];
+      if (profilesResult.error || outgoingResult.error || incomingResult.error || skipsResult.error || blocksResult.error) {
         throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob die Profil-Likes- und Entdecken-Migrationen in Supabase ausgeführt wurden.");
       }
       const excluded = new Set([currentUser.id]);
       (outgoingResult.data || []).forEach((item) => excluded.add(item.liked_id));
       (incomingResult.data || []).forEach((item) => excluded.add(item.liker_id));
       (skipsResult.data || []).forEach((item) => excluded.add(item.skipped_id));
+      (blocksResult.data || []).forEach((item) => excluded.add(item.blocker_id === currentUser.id ? item.blocked_id : item.blocker_id));
       discoverState.ids = (profilesResult.data || []).map((item) => item.id).filter((id) => !excluded.has(id));
       for (let i = discoverState.ids.length - 1; i > 0; i -= 1) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -3603,11 +3752,12 @@
     } else {
       avatar.textContent = partnerName.trim().slice(0, 1).toUpperCase() || "W";
     }
+    updateConversationBlockUI(peerId);
     await renderConversationThread();
     document.querySelector("#conversation-status").textContent = "";
     messageReactionPickerId = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
-    await markConversationRead(peerId);
+    if (!isPeerBlocked(peerId)) await markConversationRead(peerId);
     const thread = document.querySelector("#conversation-thread");
     requestAnimationFrame(() => { if (thread) thread.scrollTop = thread.scrollHeight; });
     await refreshOpenConversationMessages();
@@ -3620,6 +3770,8 @@
     if (!thread) return;
     activeConversationPeer = "";
     activeSupportThreadId = threadId;
+    updateConversationBlockUI("");
+    setConversationMenuOpen(false);
     const title = supportOperator ? ("Support · " + (thread.subject || "Anfrage")) : "WedConnect-Team";
     document.querySelector("#conversation-title").textContent = title;
     const avatar = document.querySelector("#conversation-avatar");
@@ -4365,6 +4517,7 @@
   document.addEventListener("pointercancel", cancelConversationLongPress);
 
   document.addEventListener("click", async (event) => {
+    if (!event.target.closest("#conversation-action-menu") && !event.target.closest("#conversation-menu-button")) setConversationMenuOpen(false);
     if (Date.now() < suppressConversationClickUntil && event.target.closest("#messages-list .activity-message-card")) {
       suppressConversationClickUntil = 0;
       event.preventDefault();
@@ -4373,6 +4526,24 @@
     if (Date.now() < suppressOwnMessageClickUntil && event.target.closest("#delete-message-dialog")) {
       suppressOwnMessageClickUntil = 0;
       event.preventDefault();
+      return;
+    }
+    const menuButton = event.target.closest("#conversation-menu-button");
+    if (menuButton) {
+      event.preventDefault();
+      setConversationMenuOpen(menuButton.getAttribute("aria-expanded") !== "true");
+      return;
+    }
+    const blockAction = event.target.closest("[data-conversation-block-action]");
+    if (blockAction) {
+      event.preventDefault();
+      setConversationMenuOpen(false);
+      openBlockProfileDialog();
+      return;
+    }
+    const confirmBlock = event.target.closest("#block-profile-confirm");
+    if (confirmBlock) {
+      await applyProfileBlock();
       return;
     }
     const deleteConversationButton = event.target.closest("[data-delete-conversation]");
@@ -4532,6 +4703,10 @@
     form.setAttribute("aria-busy", "true");
     const send = document.querySelector("#conversation-form button[type=submit]");
     send.disabled = true;
+    if (activeConversationPeer && isPeerBlocked(activeConversationPeer)) {
+      status.textContent = "Nachricht konnte nicht gesendet werden, weil dieser Chat blockiert ist.";
+      return;
+    }
     if (activeSupportThreadId) {
       const { error: supportError } = await supabase.from("support_messages").insert({
         thread_id: activeSupportThreadId,
@@ -4561,7 +4736,9 @@
     send.disabled = false;
     form.removeAttribute("aria-busy");
     if (error) {
-      status.textContent = "Nachricht konnte nicht gesendet werden. Prüfe, ob das Match noch besteht.";
+      status.textContent = String(error.message || "").includes("profile_blocked")
+        ? "Nachricht konnte nicht gesendet werden, weil dieser Chat blockiert ist."
+        : "Nachricht konnte nicht gesendet werden. Prüfe, ob das Match noch besteht.";
       return;
     }
     input.value = "";
