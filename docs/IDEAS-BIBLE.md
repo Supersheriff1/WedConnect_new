@@ -1,7 +1,7 @@
 # WedConnect · Ideen-Bible
 
 **Version:** 0.1  
-**Stand:** 14. Oktober 2026  
+**Stand:** 16. Oktober 2026  
 **Status:** aktiver Ideenpool · keine verbindlichen Produktanforderungen
 
 Diese Bible sammelt lose Gedanken, Fragen und mögliche Verbesserungen. Sie ist keine Quelle für den aktuellen Funktions- oder Designstand. Ideen werden nicht automatisch umgesetzt und verändern keine bestehenden Seiten, Abläufe, Texte oder Designs.
@@ -36,8 +36,8 @@ Zu klären sind projektspezifische gegenüber Bibliotheks-Icons, Strichstärke u
 
 ### I-003 · Strukturierter Feedback-Einstieg in der App
 
-**Status:** Ideenpool  
-Ein Feedback-Einstieg im Kontobereich könnte Fragen, Vorschläge und Fehlerberichte aufnehmen. Denkbar sind Bereich der App, kurze Beschreibung, Art der Rückmeldung und optional ein Bild. Datenschutz, Aufbewahrung und Supportprozess sind vor Umsetzung zu klären.
+**Status:** Übernommen  
+Entscheidung: Im Kontobereich gibt es zwei Kanäle: Chat und E-Mail. Chats erscheinen in der Nachrichtenübersicht; E-Mail-Verläufe bleiben unter „Kontakt / Feedback“. Betreiber:innen bearbeiten beide Kanäle im geschützten Support-Eingang. Push-Benachrichtigungen sind ausgeschlossen. Die konkrete Umsetzung und notwendige Einrichtung stehen im [Implementierungsstand](IMPLEMENTATION-STATUS.md). Die vorläufige Empfängeradresse `albert.fuerst.usa@gmail.com` ist vor Livegang zu ersetzen.
 
 ### I-004 · Ideen in umsetzbare Entscheidungen überführen
 
