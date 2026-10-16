@@ -67,6 +67,7 @@
   let activeMatchedProfileContext = "match";
   let pendingMatchPeerId = "";
   let pendingMatchFromDiscover = false;
+  const matchMomentsShown = new Set();
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
@@ -2201,13 +2202,13 @@
 
   function createProfileDecisionBar(profileId, context) {
     const bar = document.createElement("div");
-    bar.className = "profile-decision-bar";
+    bar.className = "profile-decision-bar" + (context === "saved" ? " is-two-actions" : "");
     bar.setAttribute("aria-label", "Profilaktionen");
     const saved = discoverState.savedIds.has(profileId);
     const liked = discoverState.likedIds.has(profileId);
     const actions = [
       { action: "skip", label: "Überspringen", style: "button button-secondary", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>' },
-      { action: saved ? "unsave" : "save", label: saved ? "Entmerken" : "Merken", style: "button button-secondary", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg>' },
+      ...(context === "saved" ? [] : [{ action: saved ? "unsave" : "save", label: saved ? "Entmerken" : "Merken", style: "button button-secondary", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg>' }]),
       { action: "like", label: liked ? "Interesse gezeigt" : "Interesse zeigen", style: "button button-primary profile-decision-action--like", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>' }
     ];
     actions.forEach((item) => {
@@ -4136,7 +4137,8 @@
 
   function openMatchDialog(peerId, fromDiscover) {
     const dialog = document.querySelector("#match-dialog");
-    if (!dialog || !peerId) return;
+    if (!dialog || !peerId || dialog.open || matchMomentsShown.has(peerId)) return;
+    matchMomentsShown.add(peerId);
     pendingMatchPeerId = peerId;
     pendingMatchFromDiscover = Boolean(fromDiscover);
     dialog.classList.remove("is-flashing");

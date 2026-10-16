@@ -523,6 +523,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     @media(max-width:650px){.discover-photo-actions{bottom:48px;gap:10px}.discover-photo-action{width:44px;height:44px}.discover-photo-action--like{width:54px;height:54px}.discover-back-button{top:39px;left:10px;width:36px;height:36px}.saved-profile-item{grid-template-columns:68px minmax(0,1fr);gap:10px;padding:10px}.saved-profile-thumbnail{width:68px;height:68px}.saved-profile-actions{grid-column:1/-1;justify-content:stretch}.saved-profile-actions .button{flex:1}.saved-profile-preview{grid-column:1/-1}}
   
     .profile-decision-bar{width:min(760px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 auto;padding:14px clamp(14px,3vw,24px) 22px}
+.profile-decision-bar.is-two-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:510px}
     .profile-decision-action{min-width:0;min-height:46px;gap:7px;padding:9px 10px;font-size:12px;white-space:nowrap}
     .profile-decision-action svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .profile-decision-action--like svg{fill:currentColor;stroke-width:1.2}
@@ -793,7 +794,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-profile-actions-match-flash-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-match-flash-guard-saved-actions-v1"></script>
 </body>
 </html>
 
