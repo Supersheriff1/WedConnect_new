@@ -3135,10 +3135,12 @@
     messages.forEach((item) => {
       const bubble = document.createElement("div");
       bubble.className = "conversation-message" + (item.sender_id === userId ? " is-own" : "");
-      bubble.dataset.messageBubble = item.id;
-      bubble.tabIndex = 0;
-      bubble.setAttribute("role", "group");
-      bubble.setAttribute("aria-label", "Nachricht. Tippen oder Enter drücken, um zu reagieren.");
+      if (item.sender_id !== userId) {
+        bubble.dataset.messageBubble = item.id;
+        bubble.tabIndex = 0;
+        bubble.setAttribute("role", "group");
+        bubble.setAttribute("aria-label", "Nachricht. Tippen oder Enter drücken, um zu reagieren.");
+      }
       const body = document.createElement("span");
       body.textContent = item.body;
       const time = document.createElement("time");
@@ -3156,7 +3158,7 @@
           sticker.textContent = "♥";
           bubble.append(sticker);
         }
-        if (messageReactionPickerId === item.id) {
+        if (item.sender_id !== userId && messageReactionPickerId === item.id) {
           const heart = document.createElement("button");
           heart.type = "button";
           heart.className = "message-heart-picker" + (ownHeart ? " is-active" : "");
