@@ -53,6 +53,7 @@
   let suppressConversationClickUntil = 0;
   let unreadRefreshTimer = null;
   let unreadRefreshBusy = false;
+  let incomingLikeBadgeRefreshBusy = false;
   let pendingDeleteMessageId = "";
   let messageLongPressTimer = null;
   let messageLongPressStart = null;
@@ -2984,6 +2985,36 @@
     });
   }
 
+  function updateMatchesBadge(count = (activityCache.incoming || []).length) {
+    document.querySelectorAll("[data-matches-badge]").forEach((badge) => {
+      badge.hidden = count === 0;
+      badge.textContent = count > 99 ? "99+" : String(count);
+      badge.setAttribute("aria-label", count + " offene " + (count === 1 ? "Like" : "Likes"));
+    });
+  }
+
+  async function refreshIncomingLikeBadge() {
+    if (!currentUser || incomingLikeBadgeRefreshBusy || document.visibilityState !== "visible") return;
+    incomingLikeBadgeRefreshBusy = true;
+    try {
+      const [inboundResult, outboundResult, blockResult] = await Promise.all([
+        supabase.from("profile_likes").select("liker_id").eq("liked_id", currentUser.id),
+        supabase.from("profile_likes").select("liked_id").eq("liker_id", currentUser.id),
+        supabase.from("profile_blocks").select("blocker_id,blocked_id").or("blocker_id.eq." + currentUser.id + ",blocked_id.eq." + currentUser.id)
+      ]);
+      if (inboundResult.error || outboundResult.error) return;
+      const outgoingIds = new Set((outboundResult.data || []).map((item) => item.liked_id));
+      const blocks = blockResult.error ? (activityCache.profileBlocks || []) : (blockResult.data || []);
+      const blockedIds = new Set(blocks.map((item) => item.blocker_id === currentUser.id ? item.blocked_id : item.blocker_id));
+      const incomingIds = new Set((inboundResult.data || [])
+        .map((item) => item.liker_id)
+        .filter((id) => !outgoingIds.has(id) && !blockedIds.has(id)));
+      updateMatchesBadge(incomingIds.size);
+    } finally {
+      incomingLikeBadgeRefreshBusy = false;
+    }
+  }
+
   async function loadActivityData() {
     const userId = currentUser && currentUser.id;
     if (!userId) return;
@@ -3042,6 +3073,7 @@
     };
     await loadSupportData(false);
     updateUnreadMessageBadges();
+    updateMatchesBadge();
   }
 
   function renderOverviewActivity() {
@@ -3317,7 +3349,10 @@
 
   function startUnreadMessageRefresh() {
     if (unreadRefreshTimer) window.clearInterval(unreadRefreshTimer);
-    unreadRefreshTimer = window.setInterval(refreshUnreadMessageState, 15000);
+    unreadRefreshTimer = window.setInterval(() => {
+      refreshUnreadMessageState();
+      refreshIncomingLikeBadge();
+    }, 15000);
   }
 
   async function loadDiscoverFeed() {
@@ -3335,26 +3370,32 @@
     container.append(loading);
     try {
       const oppositeRole = currentRole === "couple" ? "photographer" : "couple";
-      const [profilesResult, outgoingResult, incomingResult, skipsResult, blocksResult] = await Promise.all([
+      const [profilesResult, outgoingResult, skipsResult, blocksResult] = await Promise.all([
         supabase.from("profiles").select("id,role").eq("profile_status", "complete").eq("role", oppositeRole),
         supabase.from("profile_likes").select("liked_id").eq("liker_id", currentUser.id),
-        supabase.from("profile_likes").select("liker_id").eq("liked_id", currentUser.id),
         supabase.from("profile_skips").select("skipped_id").eq("skipper_id", currentUser.id),
         supabase.from("profile_blocks").select("blocker_id,blocked_id").or("blocker_id.eq." + currentUser.id + ",blocked_id.eq." + currentUser.id)
       ]);
       if (!blocksResult.error) activityCache.profileBlocks = blocksResult.data || [];
-      if (profilesResult.error || outgoingResult.error || incomingResult.error || skipsResult.error || blocksResult.error) {
+      if (profilesResult.error || outgoingResult.error || skipsResult.error || blocksResult.error) {
         throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob die Profil-Likes- und Entdecken-Migrationen in Supabase ausgeführt wurden.");
       }
       const excluded = new Set([currentUser.id]);
       (outgoingResult.data || []).forEach((item) => excluded.add(item.liked_id));
-      (incomingResult.data || []).forEach((item) => excluded.add(item.liker_id));
       (skipsResult.data || []).forEach((item) => excluded.add(item.skipped_id));
       (blocksResult.data || []).forEach((item) => excluded.add(item.blocker_id === currentUser.id ? item.blocked_id : item.blocker_id));
       discoverState.ids = (profilesResult.data || []).map((item) => item.id).filter((id) => !excluded.has(id));
       for (let i = discoverState.ids.length - 1; i > 0; i -= 1) {
         const j = Math.floor(Math.random() * (i + 1));
         [discoverState.ids[i], discoverState.ids[j]] = [discoverState.ids[j], discoverState.ids[i]];
+      }
+      const savedProfileId = (() => {
+        try { return window.sessionStorage.getItem("wedconnect-discover-active:" + currentUser.id) || ""; }
+        catch (_) { return ""; }
+      })();
+      if (savedProfileId) {
+        const savedIndex = discoverState.ids.indexOf(savedProfileId);
+        if (savedIndex > 0) discoverState.ids.unshift(discoverState.ids.splice(savedIndex, 1)[0]);
       }
       discoverState.index = 0;
       discoverState.loaded = true;
@@ -3477,6 +3518,7 @@
         const candidate = await loadDiscoverProfile(id);
         discoverState.active = candidate;
         discoverState.photoIndex = 0;
+        try { window.sessionStorage.setItem("wedconnect-discover-active:" + currentUser.id, candidate.id); } catch (_) {}
         renderDiscoverCard(candidate);
         return;
       } catch (_) {}
@@ -3484,6 +3526,7 @@
     const empty = document.createElement("p");
     empty.className = "overview-empty-state";
     empty.textContent = "Im Moment gibt es keine weiteren passenden Profile. Schau später wieder vorbei.";
+    try { window.sessionStorage.removeItem("wedconnect-discover-active:" + currentUser.id); } catch (_) {}
     container.append(empty);
   }
 
@@ -3929,6 +3972,7 @@
     if (document.visibilityState === "visible") {
       refreshOpenConversationMessages();
       refreshUnreadMessageState();
+      refreshIncomingLikeBadge();
     }
   });
 
@@ -4021,7 +4065,9 @@
 
   function navItem(label, icon, active, disabled) {
     const state = active ? 'aria-current="page"' : disabled ? 'disabled aria-disabled="true"' : "";
-    const badge = icon === "messages" ? '<span class="nav-unread-badge" data-unread-badge hidden></span>' : "";
+    const badge = icon === "messages"
+      ? '<span class="nav-unread-badge" data-unread-badge hidden></span>'
+      : icon === "matches" ? '<span class="nav-unread-badge" data-matches-badge hidden></span>' : "";
     return '<button class="nav-link' + (active ? " active" : "") + '" type="button" data-nav-item="' + icon + '" ' + state + ">" +
       icons[icon] + "<span>" + label + "</span>" + badge +
       (disabled ? '<span class="nav-soon">Nach Profil</span>' : "") + "</button>";
