@@ -43,13 +43,21 @@
   let readReceiptFeatureAvailable = false;
   let readReceiptNoticeShown = false;
   let supportReadFeatureAvailable = false;
+  let conversationHideFeatureAvailable = false;
+  let supportHideFeatureAvailable = false;
+  let conversationHideNoticeShown = false;
+  let supportHideNoticeShown = false;
+  let pendingDeleteConversation = null;
+  let conversationLongPressTimer = null;
+  let conversationLongPressStart = null;
+  let suppressConversationClickUntil = 0;
   let unreadRefreshTimer = null;
   let unreadRefreshBusy = false;
   let pendingDeleteMessageId = "";
   let messageLongPressTimer = null;
   let messageLongPressStart = null;
   let suppressOwnMessageClickUntil = 0;
-  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], conversationReads: [], supportReads: [], summaries: new Map() };
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], conversationReads: [], supportReads: [], conversationHidden: [], supportHidden: [], summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2538,10 +2546,12 @@
       messages = messageResult.data || [];
     }
     const supportReads = await loadSupportReads(threads.map((thread) => thread.id));
+    const supportHidden = await loadSupportHides(threads.map((thread) => thread.id));
     supportFeatureAvailable = true;
     activityCache.supportThreads = threads;
     activityCache.supportMessages = messages;
     activityCache.supportReads = supportReads;
+    activityCache.supportHidden = supportHidden;
     renderSupportOperatorInbox();
     return true;
   }
@@ -2595,6 +2605,106 @@
     return queryMessages("id,sender_id,recipient_id,body,created_at");
   }
 
+  function isConversationMessageVisible(message, peerId, hiddenRows = activityCache.conversationHidden || []) {
+    const hidden = hiddenRows.find((item) => item.user_id === currentUser.id && item.peer_id === peerId);
+    return !hidden || new Date(message.created_at) > new Date(hidden.hidden_at);
+  }
+
+  function visibleMessagesForPeer(peerId) {
+    return (activityCache.messages || []).filter((item) =>
+      ((item.sender_id === currentUser.id && item.recipient_id === peerId)
+        || (item.sender_id === peerId && item.recipient_id === currentUser.id))
+      && isConversationMessageVisible(item, peerId)
+    );
+  }
+
+  function visibleSupportMessagesForThread(threadId) {
+    const hidden = (activityCache.supportHidden || []).find((item) =>
+      item.user_id === currentUser.id && item.thread_id === threadId
+    );
+    return (activityCache.supportMessages || []).filter((item) =>
+      item.thread_id === threadId && (!hidden || new Date(item.created_at) > new Date(hidden.hidden_at))
+    );
+  }
+
+  async function loadConversationHides(userId) {
+    const result = await supabase.from("profile_conversation_hidden")
+      .select("user_id,peer_id,hidden_at").eq("user_id", userId);
+    if (result.error) {
+      conversationHideFeatureAvailable = false;
+      if (!conversationHideNoticeShown && /does not exist|schema cache|42P01|could not find the table/i.test(String(result.error.message || ""))) {
+        showNotice("Chat-Löschen ist noch nicht eingerichtet. Bitte führe die Unterhaltungen-ausblenden-Migration in Supabase aus.");
+        conversationHideNoticeShown = true;
+      }
+      return [];
+    }
+    conversationHideFeatureAvailable = true;
+    return result.data || [];
+  }
+
+  async function loadSupportHides(threadIds) {
+    if (!threadIds.length) {
+      supportHideFeatureAvailable = true;
+      return [];
+    }
+    const result = await supabase.from("support_thread_hidden")
+      .select("thread_id,user_id,hidden_at").in("thread_id", threadIds);
+    if (result.error) {
+      supportHideFeatureAvailable = false;
+      if (!supportHideNoticeShown && /does not exist|schema cache|42P01|could not find the table/i.test(String(result.error.message || ""))) {
+        showNotice("Chat-Löschen ist noch nicht eingerichtet. Bitte führe die Unterhaltungen-ausblenden-Migration in Supabase aus.");
+        supportHideNoticeShown = true;
+      }
+      return [];
+    }
+    supportHideFeatureAvailable = true;
+    return result.data || [];
+  }
+
+  function openDeleteConversationDialog(kind, id) {
+    const available = kind === "support" ? supportHideFeatureAvailable : conversationHideFeatureAvailable;
+    if (!available) {
+      showNotice("Chat-Löschen ist noch nicht eingerichtet. Bitte führe die Unterhaltungen-ausblenden-Migration in Supabase aus.");
+      return;
+    }
+    if (!id) return;
+    pendingDeleteConversation = { kind, id };
+    const isSupport = kind === "support";
+    document.querySelector("#delete-conversation-title").textContent = isSupport
+      ? "Supportchat aus deiner Übersicht löschen?"
+      : "Chat aus deiner Übersicht löschen?";
+    document.querySelector("#delete-conversation-copy").textContent =
+      "Der Chat wird nur aus deiner Nachrichtenübersicht entfernt. Die andere Person behält den Verlauf. Wenn eine neue Nachricht eintrifft, erscheint der Chat wieder.";
+    document.querySelector("#delete-conversation-status").textContent = "";
+    openWorkspaceDialog(document.querySelector("#delete-conversation-dialog"));
+  }
+
+  async function deleteConversationForCurrentUser() {
+    if (!pendingDeleteConversation || !currentUser) return;
+    const { kind, id } = pendingDeleteConversation;
+    const table = kind === "support" ? "support_thread_hidden" : "profile_conversation_hidden";
+    const payload = kind === "support"
+      ? { thread_id: id, user_id: currentUser.id, hidden_at: new Date().toISOString() }
+      : { peer_id: id, user_id: currentUser.id, hidden_at: new Date().toISOString() };
+    const conflict = kind === "support" ? "thread_id,user_id" : "user_id,peer_id";
+    const { error } = await supabase.from(table).upsert(payload, { onConflict: conflict });
+    if (error) {
+      document.querySelector("#delete-conversation-status").textContent =
+        "Der Chat konnte nicht gelöscht werden. Bitte führe zuerst die Unterhaltungen-ausblenden-Migration in Supabase aus.";
+      return;
+    }
+    if (kind === "support") {
+      activityCache.supportHidden = (activityCache.supportHidden || [])
+        .filter((item) => !(item.thread_id === id && item.user_id === currentUser.id)).concat(payload);
+    } else {
+      activityCache.conversationHidden = (activityCache.conversationHidden || [])
+        .filter((item) => !(item.peer_id === id && item.user_id === currentUser.id)).concat(payload);
+      if (!visibleMessagesForPeer(id).length) activityCache.messagedPeers.delete(id);
+    }
+    document.querySelector("#delete-conversation-dialog").close();
+    renderMessagesList();
+  }
+
   async function loadConversationReads(userId) {
     const result = await supabase.from("profile_conversation_reads")
       .select("user_id,peer_id,last_read_at")
@@ -2613,8 +2723,8 @@
 
   async function markConversationRead(peerId) {
     if (!readReceiptFeatureAvailable || !peerId || !currentUser) return;
-    const latestIncoming = (activityCache.messages || []).filter((item) =>
-      item.sender_id === peerId && item.recipient_id === currentUser.id
+    const latestIncoming = visibleMessagesForPeer(peerId).filter((item) =>
+      item.sender_id === peerId
     ).reduce((latest, item) => !latest || item.created_at > latest ? item.created_at : latest, "");
     if (!latestIncoming) return;
     const existing = (activityCache.conversationReads || []).find((item) =>
@@ -2647,8 +2757,8 @@
 
   async function markSupportThreadRead(threadId) {
     if (!supportReadFeatureAvailable || !threadId || !currentUser) return;
-    const latestIncoming = (activityCache.supportMessages || []).filter((item) =>
-      item.thread_id === threadId && item.sender_id !== currentUser.id
+    const latestIncoming = visibleSupportMessagesForThread(threadId).filter((item) =>
+      item.sender_id !== currentUser.id
     ).reduce((latest, item) => !latest || item.created_at > latest ? item.created_at : latest, "");
     if (!latestIncoming) return;
     const existing = (activityCache.supportReads || []).find((item) =>
@@ -2673,8 +2783,8 @@
     const read = (activityCache.conversationReads || []).find((receipt) =>
       receipt.user_id === userId && receipt.peer_id === peerId
     );
-    return (activityCache.messages || []).filter((item) =>
-      item.sender_id === peerId && item.recipient_id === userId && !item.deleted_at
+    return visibleMessagesForPeer(peerId).filter((item) =>
+      item.sender_id === peerId && !item.deleted_at
       && (!read || new Date(item.created_at) > new Date(read.last_read_at))
     ).length;
   }
@@ -2685,17 +2795,13 @@
     const read = (activityCache.supportReads || []).find((receipt) =>
       receipt.user_id === userId && receipt.thread_id === threadId
     );
-    return (activityCache.supportMessages || []).filter((item) =>
-      item.thread_id === threadId && item.sender_id !== userId
-      && (!read || new Date(item.created_at) > new Date(read.last_read_at))
+    return visibleSupportMessagesForThread(threadId).filter((item) =>
+      item.sender_id !== userId && (!read || new Date(item.created_at) > new Date(read.last_read_at))
     ).length;
   }
 
   function latestMessageForPeer(peerId) {
-    const peerMessages = (activityCache.messages || []).filter((item) =>
-      (item.sender_id === peerId && item.recipient_id === currentUser.id)
-      || (item.sender_id === currentUser.id && item.recipient_id === peerId)
-    );
+    const peerMessages = visibleMessagesForPeer(peerId);
     return peerMessages[peerMessages.length - 1] || null;
   }
 
@@ -2704,13 +2810,13 @@
     if (!userId) return 0;
     const reads = activityCache.conversationReads || [];
     const unreadMatches = (activityCache.messages || []).filter((item) => {
-      if (item.recipient_id !== userId || item.deleted_at) return false;
+      if (item.recipient_id !== userId || item.deleted_at || !isConversationMessageVisible(item, item.sender_id)) return false;
       const read = reads.find((receipt) => receipt.user_id === userId && receipt.peer_id === item.sender_id);
       return !read || new Date(item.created_at) > new Date(read.last_read_at);
     }).length;
     const supportReads = activityCache.supportReads || [];
     const unreadSupport = (activityCache.supportMessages || []).filter((item) => {
-      if (item.sender_id === userId) return false;
+      if (item.sender_id === userId || !visibleSupportMessagesForThread(item.thread_id).includes(item)) return false;
       const read = supportReads.find((receipt) => receipt.user_id === userId && receipt.thread_id === item.thread_id);
       return !read || new Date(item.created_at) > new Date(read.last_read_at);
     }).length;
@@ -2742,8 +2848,16 @@
     if (messageResult.error) throw new Error("Nachrichten konnten nicht geladen werden. Prüfe die WedConnect-Nachrichtenmigration in Supabase.");
     const messages = messageResult.data || [];
     const conversationReads = await loadConversationReads(userId);
-    const messagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
-    const newMatches = matches.filter((peerId) => !messagedPeers.has(peerId));
+    const conversationHidden = await loadConversationHides(userId);
+    const allMessagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
+    const newMatches = matches.filter((peerId) => !allMessagedPeers.has(peerId));
+    const messagedPeers = new Set(Array.from(allMessagedPeers).filter((peerId) =>
+      messages.some((item) =>
+        ((item.sender_id === userId && item.recipient_id === peerId)
+          || (item.sender_id === peerId && item.recipient_id === userId))
+        && isConversationMessageVisible(item, peerId, conversationHidden)
+      )
+    ));
     const ids = Array.from(new Set([...incoming, ...matches]));
     const summaries = await Promise.all(ids.map((id) => loadPublicProfileSummary(id)));
     const content = await loadDashboardContent();
@@ -2755,6 +2869,8 @@
       messagedPeers,
       conversationReads,
       supportReads: activityCache.supportReads || [],
+      conversationHidden,
+      supportHidden: activityCache.supportHidden || [],
       reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
@@ -2841,7 +2957,7 @@
     const searchInput = document.querySelector("#messages-search");
     const query = (searchInput.value || "").trim().toLocaleLowerCase("de");
     container.replaceChildren();
-    const peers = Array.from(activityCache.messagedPeers || []).sort((a, b) => {
+    const peers = Array.from(activityCache.messagedPeers || []).filter((peerId) => visibleMessagesForPeer(peerId).length > 0).sort((a, b) => {
       const unreadDifference = unreadConversationCount(b) - unreadConversationCount(a);
       if (unreadDifference) return unreadDifference;
       const latestA = latestMessageForPeer(a);
@@ -2871,7 +2987,7 @@
       copy.className = "activity-card-copy";
       const name = document.createElement("strong");
       name.textContent = summary.name;
-      const peerMessages = activityCache.messages.filter((item) => item.sender_id === peerId || item.recipient_id === peerId);
+      const peerMessages = visibleMessagesForPeer(peerId);
       const latest = peerMessages[peerMessages.length - 1];
       const detail = document.createElement("p");
       detail.className = "activity-message-preview";
@@ -2887,6 +3003,17 @@
         unread.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
         unread.setAttribute("aria-label", unreadCount + " ungelesene Nachrichten");
         titleRow.append(unread);
+      }
+      if (conversationHideFeatureAvailable) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "conversation-delete-button";
+        remove.textContent = "⋯";
+        remove.setAttribute("aria-label", "Chat mit " + summary.name + " löschen");
+        remove.title = "Chat aus deiner Übersicht löschen";
+        remove.dataset.deleteConversation = peerId;
+        remove.dataset.deleteConversationKind = "match";
+        titleRow.append(remove);
       }
       copy.append(titleRow, detail);
       if (latest && latest.sender_id === currentUser.id && !latest.deleted_at) {
@@ -2904,7 +3031,7 @@
       container.append(card);
     });
     const supportChatThreads = (activityCache.supportThreads || [])
-      .filter((thread) => thread.channel === "chat")
+      .filter((thread) => thread.channel === "chat" && visibleSupportMessagesForThread(thread.id).length > 0)
       .sort((a, b) => {
         const unreadDifference = unreadSupportCount(b.id) - unreadSupportCount(a.id);
         if (unreadDifference) return unreadDifference;
@@ -2925,7 +3052,7 @@
       copy.className = "activity-card-copy";
       const name = document.createElement("strong");
       name.textContent = supportOperator ? "Support · " + (thread.subject || "Anfrage") : "WedConnect-Team";
-      const messages = (activityCache.supportMessages || []).filter((item) => item.thread_id === thread.id);
+      const messages = visibleSupportMessagesForThread(thread.id);
       const latest = messages[messages.length - 1];
       const detail = document.createElement("p");
       detail.className = "activity-message-preview";
@@ -2939,6 +3066,17 @@
         unread.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
         unread.setAttribute("aria-label", unreadCount + " ungelesene Nachrichten");
         titleRow.append(unread);
+      }
+      if (supportHideFeatureAvailable) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "conversation-delete-button";
+        remove.textContent = "⋯";
+        remove.setAttribute("aria-label", "Supportchat löschen");
+        remove.title = "Chat aus deiner Übersicht löschen";
+        remove.dataset.deleteConversation = thread.id;
+        remove.dataset.deleteConversationKind = "support";
+        titleRow.append(remove);
       }
       copy.append(titleRow, detail);
       const latestIsOwn = latest && latest.sender_id === currentUser.id;
@@ -2986,9 +3124,11 @@
       const result = await loadProfileMessages(currentUser.id);
       if (result.error) return;
       activityCache.messages = result.data || [];
-      activityCache.messagedPeers = new Set(activityCache.messages.map((item) =>
+      activityCache.conversationHidden = await loadConversationHides(currentUser.id);
+      const allPeers = new Set(activityCache.messages.map((item) =>
         item.sender_id === currentUser.id ? item.recipient_id : item.sender_id
       ));
+      activityCache.messagedPeers = new Set(Array.from(allPeers).filter((peerId) => visibleMessagesForPeer(peerId).length > 0));
       activityCache.conversationReads = await loadConversationReads(currentUser.id);
       for (const peerId of activityCache.messagedPeers) {
         if (!activityCache.summaries.has(peerId)) {
@@ -3506,7 +3646,7 @@
     container.replaceChildren();
     const userId = currentUser.id;
     if (activeSupportThreadId) {
-      const supportMessages = (activityCache.supportMessages || []).filter((item) => item.thread_id === activeSupportThreadId);
+      const supportMessages = visibleSupportMessagesForThread(activeSupportThreadId);
       if (!supportMessages.length) {
         const empty = document.createElement("p");
         empty.className = "conversation-empty";
@@ -3528,9 +3668,7 @@
       if (wasNearBottom) container.scrollTop = container.scrollHeight;
       return;
     }
-    const messages = activityCache.messages.filter((item) =>
-      (item.sender_id === userId && item.recipient_id === activeConversationPeer)
-      || (item.sender_id === activeConversationPeer && item.recipient_id === userId));
+    const messages = visibleMessagesForPeer(activeConversationPeer);
     if (!messages.length) {
       const empty = document.createElement("p");
       empty.className = "conversation-empty";
@@ -3607,10 +3745,10 @@
     conversationRefreshBusy = true;
     try {
       if (supportThreadId) {
-        const before = (activityCache.supportMessages || []).filter((item) => item.thread_id === supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
+        const before = visibleSupportMessagesForThread(supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
         const loaded = await loadSupportData(false);
         if (!loaded || supportThreadId !== activeSupportThreadId) return;
-        const after = (activityCache.supportMessages || []).filter((item) => item.thread_id === supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
+        const after = visibleSupportMessagesForThread(supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
         if (before !== after) {
           await markSupportThreadRead(supportThreadId);
           renderMessagesList();
@@ -3664,7 +3802,7 @@
         await markConversationRead(peerId);
       }
       if (activityCache.messagedPeers) {
-        if (allPeerMessages.length) activityCache.messagedPeers.add(peerId);
+        if (visibleMessagesForPeer(peerId).length) activityCache.messagedPeers.add(peerId);
         else activityCache.messagedPeers.delete(peerId);
       }
       if (peerReactions !== null) {
@@ -4051,6 +4189,10 @@
     pendingDeleteMessageId = "";
     document.querySelector("#delete-message-confirm").disabled = false;
   });
+  document.querySelector("#delete-conversation-dialog").addEventListener("close", () => {
+    pendingDeleteConversation = null;
+    document.querySelector("#delete-conversation-confirm").disabled = false;
+  });
   if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   const accountPhotoPreview = document.querySelector("#account-photo-preview");
@@ -4186,10 +4328,64 @@
   document.addEventListener("pointerup", cancelMessageLongPress);
   document.addEventListener("pointercancel", cancelMessageLongPress);
 
+  const messagesListForDelete = document.querySelector("#messages-list");
+  const cancelConversationLongPress = () => {
+    if (conversationLongPressTimer) window.clearTimeout(conversationLongPressTimer);
+    conversationLongPressTimer = null;
+    conversationLongPressStart = null;
+  };
+  messagesListForDelete.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" || event.target.closest("[data-delete-conversation]")) return;
+    const card = event.target.closest(".activity-message-card");
+    if (!card) return;
+    const kind = card.dataset.openSupportThread ? "support" : "match";
+    const id = card.dataset.openSupportThread || card.dataset.openConversation;
+    if (!id) return;
+    conversationLongPressStart = { x: event.clientX, y: event.clientY };
+    conversationLongPressTimer = window.setTimeout(() => {
+      conversationLongPressTimer = null;
+      conversationLongPressStart = null;
+      suppressConversationClickUntil = Date.now() + 1000;
+      openDeleteConversationDialog(kind, id);
+    }, 550);
+  });
+  messagesListForDelete.addEventListener("contextmenu", (event) => {
+    if (event.target.closest("[data-delete-conversation]")) return;
+    const card = event.target.closest(".activity-message-card");
+    if (!card) return;
+    event.preventDefault();
+    const kind = card.dataset.openSupportThread ? "support" : "match";
+    openDeleteConversationDialog(kind, card.dataset.openSupportThread || card.dataset.openConversation);
+  });
+  document.addEventListener("pointermove", (event) => {
+    if (!conversationLongPressTimer || !conversationLongPressStart) return;
+    if (Math.hypot(event.clientX - conversationLongPressStart.x, event.clientY - conversationLongPressStart.y) > 12) cancelConversationLongPress();
+  });
+  document.addEventListener("pointerup", cancelConversationLongPress);
+  document.addEventListener("pointercancel", cancelConversationLongPress);
+
   document.addEventListener("click", async (event) => {
+    if (Date.now() < suppressConversationClickUntil && event.target.closest("#messages-list .activity-message-card")) {
+      suppressConversationClickUntil = 0;
+      event.preventDefault();
+      return;
+    }
     if (Date.now() < suppressOwnMessageClickUntil && event.target.closest("#delete-message-dialog")) {
       suppressOwnMessageClickUntil = 0;
       event.preventDefault();
+      return;
+    }
+    const deleteConversationButton = event.target.closest("[data-delete-conversation]");
+    if (deleteConversationButton) {
+      event.preventDefault();
+      openDeleteConversationDialog(deleteConversationButton.dataset.deleteConversationKind, deleteConversationButton.dataset.deleteConversation);
+      return;
+    }
+    const confirmConversationDelete = event.target.closest("#delete-conversation-confirm");
+    if (confirmConversationDelete) {
+      confirmConversationDelete.disabled = true;
+      document.querySelector("#delete-conversation-status").textContent = "Chat wird aus deiner Übersicht entfernt …";
+      await deleteConversationForCurrentUser();
       return;
     }
     const supportInboxButton = event.target.closest("[data-open-support-inbox-thread]");
