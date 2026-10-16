@@ -1,7 +1,7 @@
 # WedConnect · Project Bible
 
-**Version:** 2.5  
-**Stand:** 15. Oktober 2026  
+**Version:** 2.6  
+**Stand:** 16. Oktober 2026  
 **Status:** maßgebliche Produkt- und Projektentscheidungen
 
 ## Zweck und Vorrang
@@ -77,6 +77,15 @@ Nutzer:innen steuern in den Einstellungen pro Ereignis, ob WedConnect E-Mails zu
 ## Konto und Hilfe
 
 Der Bereich **Konto und Einstellungen** ist der erweiterbare Ort für Kontodaten, Profilfoto, Rollenverwaltung, Hilfe und spätere Einstellungen. Die Hauptnavigation bleibt während der Profilbearbeitung erreichbar. Erklärungen im Dashboard sind kurz und selbsterklärend; ausführliche Hilfetexte gehören in einen eigenen Hilfe-Bereich.
+
+### Kontakt und Feedback
+
+- Im Kontobereich kann ein Konto WedConnect per **Chat** oder **E-Mail** kontaktieren.
+- Support-Chats erscheinen als eigene Unterhaltung unter „Nachrichten“. E-Mail-Verläufe werden im Kontobereich „Kontakt / Feedback“ geführt.
+- Betreiber:innen können Supportanfragen über einen geschützten Support-Eingang beantworten. Es werden keine Push-Benachrichtigungen versendet.
+- Der E-Mail-Versand erfolgt über einen serverseitigen Anbieter; Zugangsdaten bleiben außerhalb des Frontends.
+- Die vorläufige Support-Empfängeradresse ist `albert.fuerst.usa@gmail.com`. Sie muss vor dem Livegang durch die endgültige WedConnect-Adresse ersetzt und mit einer bestätigten Absenderdomain konfiguriert werden.
+- Beim Löschen einer eigenen Chat-Nachricht für beide Seiten bleibt ein Löschhinweis an der ursprünglichen Position. Er steht rechts bei einer eigenen gesendeten Nachricht und links bei einer empfangenen Nachricht.
 
 ## Arbeits- und Änderungsregeln
 
