@@ -216,3 +216,10 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Auch die Detailseite eines Partnerangebots zeigt oben rechts die Kennzeichnung „Werbung“. Das gilt für die Shira-Testanzeige und alle Partnerangebote.
 - Die Kennzeichnung bleibt auf Mobilgeräten gut sichtbar und vom Inhalt getrennt.
+
+
+## News-Sandbox für Vorschau vor Livegang (16. Oktober 2026)
+
+- Der dauerhafte Git-Branch `news-sandbox` dient als Vorschauumgebung für Entwürfe und Änderungen an App-Neuigkeiten. Änderungen auf diesem Branch lösen über die GitHub-Vercel-Verbindung einen Preview-Deployment aus; sie ändern `main) und die öffentliche Version nicht.
+- Neuigkeiten dort visuell prüfen und erst nach Freigabe per Pull Request nach `main` übernehmen.
+- Einschränkung: Die Preview verwendet weiterhin die verbundene Supabase-Konfiguration. Sie eignet sich für statische Neuigkeiten und Layouttests; keine Profil-, Like- oder Chataktionen in der Sandbox testen. Ein vollständig isolierter Backend-Test erfordert ein separates Supabase-Testprojekt.
