@@ -60,7 +60,7 @@ Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am D
 
 ## Kontakt / Feedback
 
-Der Kontobereich bietet Chat mit dem WedConnect-Team. Beim ersten Start werden Thema, Betreff und Nachricht gemeinsam als erste Chatnachricht übernommen. Der Kontakt-Einstieg öffnet bei bestehenden Unterhaltungen direkt den vorhandenen Support-Chat. Weitere Nachrichten erscheinen in der normalen Nachrichtenansicht. Der Betreiber-Eingang ist über `support_operators` zugriffsgeschützt. Support-E-Mail-Versand und Push-Benachrichtigungen sind nicht vorgesehen.
+Der Kontobereich bietet Chat mit dem WedConnect-Team. Das Kontaktfenster bleibt bei jedem Einstieg sichtbar und fragt Art der Kontaktaufnahme, Betreff und Nachricht ab. Diese Angaben werden gemeinsam in eine Chatnachricht übernommen und an die bestehende Unterhaltung angehängt; nur beim ersten Kontakt wird ein Support-Thread erstellt. Nach dem Absenden öffnet sich der Chat. Der Betreiber-Eingang ist über `support_operators` zugriffsgeschützt. Support-E-Mail-Versand und Push-Benachrichtigungen sind nicht vorgesehen.
 
 Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis „Nachricht wurde gelöscht“ wird rechts für eigene bzw. links für empfangene Nachrichten ausgerichtet.
 
@@ -84,8 +84,8 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 ## Änderungen dieses Feature-Branches
 
-- Kontaktbereich: Chat mit Thema, Betreff und Nachricht im Eröffnungstext.
-- Nachrichten: weitere Supportnachrichten werden an die bestehende Unterhaltung angehängt.
+- Kontaktbereich: Chatformular mit Art der Kontaktaufnahme, Betreff und Nachricht; die Angaben stehen gemeinsam in der Chatnachricht.
+- Nachrichten: weitere Supportnachrichten werden an die bestehende Unterhaltung angehängt. Das Kontaktformular bleibt davor sichtbar.
 - Datenbank: Support-Threads, Nachrichten, Betreiber-Allowlist, RLS-Regeln und RPC zum atomaren Erstellen eines Threads.
 - E-Mail-Support und Push-Benachrichtigungen sind nicht Bestandteil der Funktion.
 - Nachrichtenlöschung: Anzeige bleibt auf der ursprünglichen Absenderseite.
