@@ -3144,7 +3144,7 @@
     if (!messages.length) {
       const empty = document.createElement("p");
       empty.className = "conversation-empty";
-      empty.textContent = "Ihr habt noch keine Nachricht ausgetauscht. Schreib den ersten Satz.";
+      empty.textContent = "Keine sichtbaren Nachrichten. Schreib den ersten Satz.";
       container.append(empty);
       return;
     }
