@@ -1,6 +1,6 @@
 # WedConnect · App Design Bible
 
-**Version:** 0.4  
+**Version:** 0.5  
 **Stand:** 15. Oktober 2026  
 **Status:** App-Baseline aus freigegebenen Entscheidungen und Codeprüfung  
 **Geltungsbereich:** Dashboard, Profil-Onboarding, Profilverwaltung und eingeloggte Ansichten
@@ -60,7 +60,8 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Uploadfehler nennen den Grund. Vergrößern, Verkleinern, Drehen, Abbrechen und Übernehmen müssen sichtbar aktiv wirken.
 
 ## Übersicht, Matches und Benachrichtigungen
-- In der Match-Liste öffnet ein Klick auf die gesamte Karte die Profilansicht innerhalb des Dashboards. Die Matches-Navigation bleibt aktiv; Like-/Dislike- und Chat-Aktionen bleiben separat. Eine Zurück-Schaltfläche führt zur Matchliste.
+- Oben in „Matches“ schalten Tabs zwischen gegenseitigen Matches und erhaltenen, noch offenen Likes um; beide zeigen die Anzahl. Like-Antworten bleiben im Tab „Erhaltene Likes“ verfügbar.
+- Ein Klick auf die gesamte Match-Karte öffnet das Profil innerhalb des Dashboards. Like-/Dislike- und Chat-Aktionen bleiben separat; eine Zurück-Schaltfläche führt zur Liste.
 
 - Die Übersicht ist der Startbildschirm nach dem Login. Sie ergänzt die Hauptnavigation und dupliziert nicht Profil-, Match- oder Nachrichtenlisten.
 - Oben stehen eingegangene, noch unbeantwortete Likes mit den Aktionen „Zurückliken“ und „Nein danke“. Ein Zurücklike erzeugt bei Gegenseitigkeit ein Match.

@@ -2534,11 +2534,31 @@
     offersSection.hidden = !activityCache.offers.length;
   }
 
+  let activeMatchesTab = "matches";
+
+  function setMatchesTab(tab) {
+    activeMatchesTab = tab === "likes" ? "likes" : "matches";
+    document.querySelectorAll("[data-matches-tab]").forEach((button) => {
+      const selected = button.dataset.matchesTab === activeMatchesTab;
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+      button.tabIndex = selected ? 0 : -1;
+    });
+    document.querySelector("#matches-panel-matches").hidden = activeMatchesTab !== "matches";
+    document.querySelector("#matches-panel-likes").hidden = activeMatchesTab !== "likes";
+  }
+
   function renderMatchList() {
     const container = document.querySelector("#matches-list");
+    const likesContainer = document.querySelector("#matches-likes-list");
     container.replaceChildren();
-    activityCache.matches.forEach((summary) => container.append(createActivityCard(summary, activityCache.messagedPeers.has(summary.id) ? "match" : "match")));
+    likesContainer.replaceChildren();
+    activityCache.matches.forEach((summary) => container.append(createActivityCard(summary, "match")));
+    activityCache.incoming.forEach((summary) => likesContainer.append(createActivityCard(summary, "like")));
+    document.querySelector("#matches-count").textContent = String(activityCache.matches.length);
+    document.querySelector("#matches-likes-count").textContent = String(activityCache.incoming.length);
     document.querySelector("#matches-empty-state").hidden = activityCache.matches.length > 0;
+    document.querySelector("#matches-likes-empty-state").hidden = activityCache.incoming.length > 0;
+    setMatchesTab(activeMatchesTab);
   }
 
   function renderMessagesList() {
@@ -3381,12 +3401,27 @@
     beginWizard(currentRole, 0);
   });
   document.addEventListener("keydown", (event) => {
+    const tab = event.target.closest("[data-matches-tab]");
+    if (tab && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+      event.preventDefault();
+      const nextTab = document.querySelector('[data-matches-tab="' + (event.key === "ArrowRight" ? "likes" : "matches") + '"]');
+      if (nextTab) {
+        setMatchesTab(nextTab.dataset.matchesTab);
+        nextTab.focus();
+      }
+      return;
+    }
     const card = event.target.closest(".activity-card-profile-clickable");
     if (!card || event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
     event.preventDefault();
     openMatchedProfile(card.dataset.openProfile);
   });
   document.addEventListener("click", async (event) => {
+    const matchesTab = event.target.closest("[data-matches-tab]");
+    if (matchesTab) {
+      setMatchesTab(matchesTab.dataset.matchesTab);
+      return;
+    }
     const profileBack = event.target.closest("#matched-profile-back");
     if (profileBack) {
       setDashboardView("matches");

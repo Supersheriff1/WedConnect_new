@@ -1,6 +1,6 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 1.7  
+**Version:** 1.8  
 **Stand der Prüfung:** 16. Oktober 2026  
 **Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Branch `main`, geprüft bei `4c8f09696e1700a8a8a97465bc456e77bb1285bc`  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
@@ -22,7 +22,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Übersicht | Startet nach Profilabschluss mit Begrüßung, offenen eingegangenen Likes und beidseitigen Matches ohne erste Nachricht. Abschnitte ohne Inhalte bleiben verborgen. App-Neuigkeiten und Partnerangebote werden rollenbezogen nur bei veröffentlichten Einträgen angezeigt. |
 | Eigene Profilansicht | Vollständiges eigenes Profil mit Galerie unter „Profil“. Hochzeitspaare sehen Key Facts für Datum, Ort und Bildnutzungspräferenz. |
 | Hochzeitspaarfotos | Je ein eigenes Foto pro Person erforderlich, gemeinsames Foto optional; 2-MB-Grenze, Vorname(n) links unten als nicht-destruktive Ansichtseinblendung. |
-| Matches und Nachrichten | Likes lassen sich auf der Übersicht beantworten; gegenseitige Likes werden als Matches angezeigt. Neue Matches können direkt angeschrieben werden; bestehende Nachrichten erscheinen in der Nachrichtenansicht. Im Menü Matches öffnet ein Klick auf die gesamte Karte die Profilansicht im Dashboard; Like-/Dislike- und Chat-Aktionen bleiben separat. Die Matches-Navigation bleibt aktiv, Zurück führt zur Matchliste; Chat bleibt separat. |
+| Matches und Nachrichten | Likes lassen sich auf der Übersicht beantworten; gegenseitige Likes werden als Matches angezeigt. Neue Matches können direkt angeschrieben werden; bestehende Nachrichten erscheinen in der Nachrichtenansicht. Das Menü Matches hat oben Tabs für Matches und erhaltene offene Likes, jeweils mit Anzahl. Likes können dort beantwortet werden. Ein Klick auf die gesamte Karte öffnet das Profil im Dashboard; Like-/Dislike- und Chat-Aktionen bleiben separat. Die Matches-Navigation bleibt aktiv, Zurück führt zur Matchliste; Chat bleibt separat. |
 | E-Mail-Einstellungen | Ereignisbezogene Präferenzen für Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote werden in Supabase gespeichert. Ein Versanddienst, der diese Einstellungen auswertet, ist nicht angeschlossen. |
 | Bearbeitung | Profilentwürfe werden in der Bearbeitung automatisch gespeichert. Navigation und Konto-/Einstellungsdialoge sind im Dashboard vorhanden. |
 | Entdecken | Lädt vollständige Profile der jeweils anderen Rolle. Gesendete Likes werden in `profile_likes` gespeichert; ein gegenseitiges Like erzeugt ein Match. „Überspringen“ wird privat in `profile_skips` gespeichert und blendet das Profil künftig aus. Der Live-End-to-End-Test steht noch aus. |
