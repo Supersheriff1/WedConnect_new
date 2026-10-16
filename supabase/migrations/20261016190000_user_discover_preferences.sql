@@ -1,4 +1,4 @@
--- Private, per-account ordering and visibility preferences for profile details.
+-- Private, per-account criteria used to rank Discover profiles.
 create table if not exists public.user_discover_preferences (
   user_id uuid primary key references public.profiles(id) on delete cascade,
   preferences jsonb not null default '{}'::jsonb,

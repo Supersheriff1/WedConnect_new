@@ -26,7 +26,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | E-Mail-Einstellungen | Ereignisbezogene Präferenzen für Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote werden in Supabase gespeichert. Ein Versanddienst, der diese Einstellungen auswertet, ist nicht angeschlossen. |
 | Bearbeitung | Profilentwürfe werden in der Bearbeitung automatisch gespeichert. Navigation und Konto-/Einstellungsdialoge sind im Dashboard vorhanden. |
 | Entdecken | Lädt vollständige Profile der jeweils anderen Rolle. Gesendete Likes werden in `profile_likes` gespeichert; ein gegenseitiges Like erzeugt ein Match. „Überspringen“ wird privat in `profile_skips` gespeichert und blendet das Profil künftig aus. Das bloße Ansehen oder ein offenes eingehendes Like entfernt ein Profil nicht aus dem Feed; die aktive Profilkarte bleibt innerhalb der Sitzung erhalten. „Nein danke“ bei einem erhaltenen Like speichert ein dauerhaftes Überspringen. Das Matches-Navigationsbadge zählt offene eingehende Likes und aktualisiert sich alle 15 Sekunden sowie nach Rückkehr in den Tab. Der Live-End-to-End-Test steht noch aus. |
-| Konto → Entdecken & Profile | Die persönliche Ansicht legt die Reihenfolge und Sichtbarkeit von Profilangaben für Fotografen und Hochzeitspaare fest. Die ersten drei sichtbaren Angaben erscheinen kompakt; weitere erscheinen in den Profildetails. Profile bleiben für den Feed vollständig verfügbar. Migration `20261016190000_user_discover_preferences.sql` erforderlich. |
+| Konto → Entdecken & Profile | Nutzer wählen, ob Region/Bundesland und Begleitungsumfang bei der Sortierung zählen. Profile mit den meisten gemeinsamen Merkmalen erscheinen zuerst; alle geeigneten Profile und sämtliche Profilangaben bleiben sichtbar. Migration `20261016190000_user_discover_preferences.sql` erforderlich. |
 | Supabase-Live-Status | Nicht geprüft. Eine Migration im Repository beweist nicht, dass sie auf dem verbundenen Supabase-Projekt ausgeführt wurde. |
 
 ## Ablauf und Profile
@@ -285,8 +285,8 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 ## Konto → Entdecken & Profile (16. Oktober 2026)
 
-- Das Kontomenü enthält „Entdecken & Profile“. Nutzer können für Fotografen- und Hochzeitspaarprofile jeweils die Reihenfolge der Kriterien ändern und Angaben ausblenden.
-- Die ersten drei sichtbaren Angaben erscheinen kompakt auf der Discover-Karte; weitere Angaben stehen in den Profildetails. Dieselben Einstellungen gelten für aufgerufene Like-, Match- und Merklisteprofile.
-- Alle Angaben und alle geeigneten Profile sind standardmäßig sichtbar. Diese Einstellungen verändern weder Feed-Auswahl noch Like-, Skip- oder Matching-Logik.
+- Das Kontomenü enthält „Entdecken & Profile“. Nutzer können einstellen, ob Region/Bundesland und Begleitungsumfang beim Sortieren zählen.
+- Der Discover-Feed zeigt zuerst Profile mit den meisten Übereinstimmungen bei den ausgewählten Kriterien. Bei gleicher Punktzahl bleibt die zufällige Reihenfolge erhalten.
+- Die Einstellung beeinflusst ausschließlich die Reihenfolge: Sie blendet keine Profile oder Profilangaben aus und ändert weder Likes, Überspringen noch Matching.
 - Die persönlichen Einstellungen werden in `user_discover_preferences` gespeichert und durch RLS auf das eigene Konto beschränkt. Voraussetzung: Migration `supabase/migrations/20261016190000_user_discover_preferences.sql` in Supabase ausführen. Fehlt die Tabelle, arbeitet Discover mit den Standardwerten weiter; Speichern wird als nicht verfügbar angezeigt.
 - Verifikation: JavaScript-Syntax und HTML-Parsing lokal prüfen. Supabase-Ausführung und Live-Verhalten sind separat zu bestätigen.

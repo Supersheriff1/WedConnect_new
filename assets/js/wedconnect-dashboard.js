@@ -27,6 +27,7 @@
   let supabase;
   let currentUser = null;
   let currentRole = "";
+  let currentProfile = {};
   let currentGreeting = "";
   let activeConversationPeer = "";
   let activeSupportThreadId = "";
@@ -2012,53 +2013,28 @@
     container.append(item);
   }
 
-  const DISCOVER_PROFILE_FIELDS = {
-    couple: [
-      { key: "wedding_date", label: "Hochzeitsdatum", icon: "calendar" },
-      { key: "location", label: "Hochzeitsort", icon: "pin" },
-      { key: "guest_count", label: "Gästezahl", icon: "people" },
-      { key: "coverage", label: "Gewünschte Begleitung", icon: "clock" },
-      { key: "ceremony_type", label: "Art der Trauung", icon: "sparkle" },
-      { key: "ceremony_location", label: "Location der Trauung", icon: "pin" },
-      { key: "reception_location", label: "Location der Feier", icon: "pin" },
-      { key: "schedule", label: "Ablauf", icon: "clock" },
-      { key: "usage_preference", label: "Nutzung durch den Fotografen", icon: "camera" }
-    ],
-    photographer: [
-      { key: "regions", label: "Einsatzgebiet", icon: "pin" },
-      { key: "compensation", label: "Vergütung", icon: "euro" },
-      { key: "coverage", label: "Begleitungsumfang", icon: "clock" },
-      { key: "experience", label: "Erfahrung", icon: "camera" },
-      { key: "styles", label: "Bildstil", icon: "sparkle" },
-      { key: "weddings", label: "Fotografierte Hochzeiten", icon: "calendar" }
-    ]
-  };
+  const DISCOVER_MATCH_CRITERIA = [
+    { key: "region", label: "Region / Bundesland" },
+    { key: "coverage", label: "Begleitungsumfang" }
+  ];
 
-  function defaultDiscoverPreferences(viewerRole) {
-    const targetRole = viewerRole === "couple" ? "photographer" : "couple";
-    const fields = DISCOVER_PROFILE_FIELDS[targetRole] || [];
-    return {
-      order: fields.map((field) => field.key),
-      visible: Object.fromEntries(fields.map((field) => [field.key, true]))
-    };
+  function defaultDiscoverPreferences() {
+    return { enabled: Object.fromEntries(DISCOVER_MATCH_CRITERIA.map((item) => [item.key, true])) };
   }
 
-  function normalizeDiscoverPreferences(value, viewerRole) {
-    const defaults = defaultDiscoverPreferences(viewerRole);
-    const allowed = new Set(defaults.order);
-    const providedOrder = Array.isArray(value && value.order) ? value.order.filter((key) => allowed.has(key)) : [];
-    const order = [...providedOrder, ...defaults.order.filter((key) => !providedOrder.includes(key))];
-    const visible = { ...defaults.visible };
-    if (value && value.visible && typeof value.visible === "object") {
-      Object.keys(visible).forEach((key) => {
-        if (typeof value.visible[key] === "boolean") visible[key] = value.visible[key];
+  function normalizeDiscoverPreferences(value) {
+    const defaults = defaultDiscoverPreferences();
+    const enabled = { ...defaults.enabled };
+    if (value && value.enabled && typeof value.enabled === "object") {
+      Object.keys(enabled).forEach((key) => {
+        if (typeof value.enabled[key] === "boolean") enabled[key] = value.enabled[key];
       });
     }
-    return { order, visible };
+    return { enabled };
   }
 
   function activeDiscoverPreferences(viewerRole = currentRole) {
-    return normalizeDiscoverPreferences(discoverPreferencesByViewerRole[viewerRole], viewerRole);
+    return normalizeDiscoverPreferences(discoverPreferencesByViewerRole[viewerRole]);
   }
 
   async function loadDiscoverPreferences(force = false) {
@@ -2072,88 +2048,68 @@
     } else {
       const stored = data && data.preferences && typeof data.preferences === "object" ? data.preferences : {};
       discoverPreferencesByViewerRole = {
-        couple: normalizeDiscoverPreferences(stored.couple, "couple"),
-        photographer: normalizeDiscoverPreferences(stored.photographer, "photographer")
+        couple: normalizeDiscoverPreferences(stored.couple),
+        photographer: normalizeDiscoverPreferences(stored.photographer)
       };
     }
     discoverPreferencesLoaded = true;
   }
 
-  function discoverFieldKey(role, label) {
-    const fields = DISCOVER_PROFILE_FIELDS[role] || [];
-    const field = fields.find((item) => item.label === label);
-    return field ? field.key : label;
+  function discoverProfileMatchScore(candidateProfile) {
+    if (!candidateProfile || !currentProfile) return 0;
+    const couple = currentRole === "couple" ? currentProfile : candidateProfile;
+    const photographer = currentRole === "photographer" ? currentProfile : candidateProfile;
+    const prefs = activeDiscoverPreferences(currentRole);
+    let score = 0;
+    if (prefs.enabled.region) {
+      const weddingRegion = couple.region_code || "";
+      const photographerRegions = profileArray(photographer.regions);
+      if (weddingRegion && (photographerRegions.includes("AT") || photographerRegions.includes(weddingRegion))) score += 1;
+    }
+    if (prefs.enabled.coverage) {
+      const coupleCoverage = profileArray(couple.coverage_options);
+      const photographerCoverage = new Set(profileArray(photographer.coverage_options));
+      if (coupleCoverage.some((item) => photographerCoverage.has(item))) score += 1;
+    }
+    return score;
   }
 
-  function applyDiscoverDisplayPreferences(role, details) {
-    const preferences = activeDiscoverPreferences(currentRole);
-    const orderIndex = new Map(preferences.order.map((key, index) => [key, index]));
-    const isVisible = (key) => preferences.visible[key] !== false;
-    const facts = [...(details.keyFacts || []), ...(details.chips || [])]
-      .filter(([, label, value]) => String(value == null ? "" : value).trim())
-      .map(([icon, label, value]) => ({ key: discoverFieldKey(role, label), icon, label, value }))
-      .filter((fact) => isVisible(fact.key))
-      .sort((a, b) => (orderIndex.get(a.key) ?? 999) - (orderIndex.get(b.key) ?? 999));
-    const factKeys = new Set(facts.map((fact) => fact.key));
-    const sections = (details.sections || [])
-      .filter(([, value]) => String(value == null ? "" : value).trim())
-      .map(([label, value]) => ({ key: discoverFieldKey(role, label), label, value }))
-      .filter((section) => isVisible(section.key) && !factKeys.has(section.key))
-      .sort((a, b) => (orderIndex.get(a.key) ?? 999) - (orderIndex.get(b.key) ?? 999));
-    return { facts, sections };
+  async function sortDiscoverProfileIds(ids) {
+    if (!ids.length) return [];
+    const targetRole = currentRole === "couple" ? "photographer" : "couple";
+    const table = targetRole === "couple" ? "couple_profiles" : "photographer_profiles";
+    const columns = targetRole === "couple" ? "id,region_code,coverage_options" : "id,regions,coverage_options";
+    const { data, error } = await supabase.from(table).select(columns).in("id", ids);
+    if (error || !Array.isArray(data)) return ids;
+    const profilesById = new Map(data.map((profile) => [profile.id, profile]));
+    return ids.slice().sort((left, right) =>
+      discoverProfileMatchScore(profilesById.get(right)) - discoverProfileMatchScore(profilesById.get(left))
+    );
   }
 
   function renderDiscoverPreferenceOptions() {
     const list = document.querySelector("#discover-preferences-list");
     const status = document.querySelector("#discover-preferences-status");
     if (!list || !status) return;
-    const viewerRole = currentRole === "couple" ? "couple" : "photographer";
-    const targetRole = viewerRole === "couple" ? "photographer" : "couple";
-    const fields = DISCOVER_PROFILE_FIELDS[targetRole] || [];
-    const preferences = activeDiscoverPreferences(viewerRole);
-    const orderedFields = preferences.order.map((key) => fields.find((field) => field.key === key)).filter(Boolean);
+    const preferences = activeDiscoverPreferences(currentRole);
     list.replaceChildren();
-    orderedFields.forEach((field, index) => {
-      const row = document.createElement("div");
-      row.className = "discover-preference-row";
-      const label = document.createElement("label");
-      label.className = "discover-preference-label";
+    DISCOVER_MATCH_CRITERIA.forEach((criterion) => {
+      const row = document.createElement("label");
+      row.className = "discover-preference-row discover-preference-label";
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.checked = preferences.visible[field.key] !== false;
-      checkbox.dataset.discoverField = field.key;
+      checkbox.checked = preferences.enabled[criterion.key] !== false;
+      checkbox.dataset.discoverCriterion = criterion.key;
       const copy = document.createElement("span");
-      copy.textContent = field.label;
-      label.append(checkbox, copy);
-      const controls = document.createElement("span");
-      controls.className = "discover-preference-order";
-      const up = document.createElement("button");
-      up.type = "button";
-      up.className = "discover-preference-move";
-      up.textContent = "↑";
-      up.setAttribute("aria-label", field.label + " nach oben verschieben");
-      up.disabled = index === 0;
-      up.dataset.discoverMove = "-1";
-      up.dataset.discoverField = field.key;
-      const down = document.createElement("button");
-      down.type = "button";
-      down.className = "discover-preference-move";
-      down.textContent = "↓";
-      down.setAttribute("aria-label", field.label + " nach unten verschieben");
-      down.disabled = index === orderedFields.length - 1;
-      down.dataset.discoverMove = "1";
-      down.dataset.discoverField = field.key;
-      controls.append(up, down);
-      row.append(label, controls);
+      copy.textContent = criterion.label;
+      row.append(checkbox, copy);
       list.append(row);
     });
-    const roleName = targetRole === "photographer" ? "Fotografenprofile" : "Hochzeitspaarprofile";
-    document.querySelector("#discover-preferences-description").textContent = viewerRole === "couple"
-      ? "Sortiere die Angaben zu Fotografenprofilen mit den Pfeilen. Die ersten drei sichtbaren Angaben stehen kompakt auf der Karte; weitere erscheinen in den Profildetails. Entferne ein Häkchen, um eine Angabe auszublenden."
-      : "Sortiere die Angaben zu Hochzeitspaarprofilen mit den Pfeilen. Die ersten drei sichtbaren Angaben stehen kompakt auf der Karte; weitere erscheinen in den Profildetails. Entferne ein Häkchen, um eine Angabe auszublenden.";
+    document.querySelector("#discover-preferences-description").textContent =
+      "Wähle, welche gemeinsamen Merkmale bei der Sortierung zählen. Profile mit mehr Übereinstimmungen erscheinen zuerst. Keine Profile werden dadurch ausgeblendet.";
     status.textContent = discoverPreferencesLoadError
       ? "Deine Auswahl wird angezeigt, kann aber noch nicht gespeichert werden. Bitte führe die Entdecken-Einstellungen-Migration in Supabase aus."
-      : "Änderungen werden automatisch gespeichert. Alle " + roleName + " bleiben weiterhin sichtbar.";
+      : "Änderungen werden automatisch gespeichert. Alle passenden Profile bleiben sichtbar.";
     status.dataset.state = discoverPreferencesLoadError ? "error" : "";
   }
 
@@ -2183,7 +2139,22 @@
     discoverPreferencesLoadError = error || null;
     status.textContent = error ? "Speichern nicht möglich. Bitte prüfe, ob die Supabase-Migration ausgeführt wurde." : "Gespeichert. Alle passenden Profile bleiben sichtbar.";
     status.dataset.state = error ? "error" : "success";
+    if (discoverState.mode === "discover") await refreshDiscoverOrdering();
+  }
+
+  async function refreshDiscoverOrdering() {
+    if (!discoverState.loaded || discoverState.mode !== "discover") return;
+    const viewed = discoverState.ids.slice(0, discoverState.index);
+    const pending = discoverState.ids.slice(discoverState.index);
+    const shuffled = pending.slice();
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const sorted = await sortDiscoverProfileIds(shuffled);
+    discoverState.ids = viewed.concat(sorted);
     if (discoverState.active) renderDiscoverCard(discoverState.active);
+    else if (discoverState.index < discoverState.ids.length) await advanceDiscoverFeed();
   }
 
   function addPreviewSection(container, title, value, className) {
@@ -2215,7 +2186,6 @@
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
           ["pin", "Hochzeitsort", location],
-          ["people", "Gästezahl", profile.guest_count ? profile.guest_count + " Gäste" : ""],
           ["camera", "Nutzung durch den Fotografen", preference]
         ],
         sections: [
@@ -2516,15 +2486,7 @@
       gallery.append(fullscreenButton);
     }
 
-    let detailsData = profileDetailRows(role, profile);
-    if (options.publicView) {
-      const arranged = applyDiscoverDisplayPreferences(role, detailsData);
-      detailsData = {
-        chips: arranged.facts.map((fact) => [fact.icon, fact.label, fact.value]),
-        keyFacts: [],
-        sections: arranged.sections.map((section) => [section.label, section.value])
-      };
-    }
+    const detailsData = profileDetailRows(role, profile);
     const metadata = document.createElement("div");
     metadata.className = role === "couple" ? "profile-preview-key-facts" : "profile-preview-metadata";
     detailsData.chips.forEach(([icon, label, value]) => addPreviewChip(metadata, icon, label, value));
@@ -3799,12 +3761,14 @@
         excluded.add(block.blocker_id === currentUser.id ? block.blocked_id : block.blocker_id);
       });
       const newIds = data.map((profile) => profile.id).filter((id) => id && !knownIds.has(id) && !excluded.has(id));
-      for (let i = newIds.length - 1; i > 0; i -= 1) {
+      const pendingIds = discoverState.ids.slice(discoverState.index).concat(newIds);
+      if (!pendingIds.length) return;
+      for (let i = pendingIds.length - 1; i > 0; i -= 1) {
         const j = Math.floor(Math.random() * (i + 1));
-        [newIds[i], newIds[j]] = [newIds[j], newIds[i]];
+        [pendingIds[i], pendingIds[j]] = [pendingIds[j], pendingIds[i]];
       }
-      if (!newIds.length) return;
-      discoverState.ids.push(...newIds);
+      const sortedPending = await sortDiscoverProfileIds(pendingIds);
+      discoverState.ids = discoverState.ids.slice(0, discoverState.index).concat(sortedPending);
       if (!discoverState.active && discoverState.index >= queuedLength) await advanceDiscoverFeed();
     } catch (_) {
       // Keep the current Discover round usable if a background refresh fails.
@@ -3869,6 +3833,7 @@
         const j = Math.floor(Math.random() * (i + 1));
         [discoverState.ids[i], discoverState.ids[j]] = [discoverState.ids[j], discoverState.ids[i]];
       }
+      discoverState.ids = await sortDiscoverProfileIds(discoverState.ids);
       const savedProfileId = (() => {
         try { return window.sessionStorage.getItem("wedconnect-discover-active:" + currentUser.id) || ""; }
         catch (_) { return ""; }
@@ -3958,9 +3923,10 @@
         title.textContent = candidate.role === "couple"
           ? [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar"
           : candidate.profile.first_name || "Fotograf";
-        const details = applyDiscoverDisplayPreferences(candidate.role, profileDetailRows(candidate.role, candidate.profile));
+        const details = profileDetailRows(candidate.role, candidate.profile);
         const description = document.createElement("p");
-        description.textContent = details.facts.slice(0, 3).map((fact) => fact.value).join(" · ") || "Gespeichertes Profil";
+        const visibleFacts = candidate.role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])];
+        description.textContent = visibleFacts.map(([, , value]) => value).filter(Boolean).join(" · ") || "Gespeichertes Profil";
         copy.append(title, description);
         const actions = document.createElement("div");
         actions.className = "saved-profile-actions";
@@ -4288,15 +4254,18 @@
     const heading = document.createElement("h2");
     heading.className = "discover-profile-name";
     heading.textContent = displayName;
-    const details = applyDiscoverDisplayPreferences(candidate.role, profileDetailRows(candidate.role, candidate.profile));
+    const details = profileDetailRows(candidate.role, candidate.profile);
     const subtitle = document.createElement("p");
     subtitle.className = "discover-profile-subtitle";
-    const subtitleFacts = [];
+    const subtitleFacts = candidate.role === "couple"
+      ? [candidate.profile.guest_count ? candidate.profile.guest_count + " Gäste" : "", ceremonyTypeLabel(candidate.profile.ceremony_type)]
+      : [profileLabels(candidate.profile.regions, REGION_OPTIONS) || candidate.profile.region, candidate.profile.experience_years != null ? candidate.profile.experience_years + (Number(candidate.profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : ""];
     subtitle.textContent = subtitleFacts.filter(Boolean).join(" · ") || (candidate.role === "couple" ? "Hochzeitspaar" : "Hochzeitsfotograf");
     content.append(heading, subtitle);
     const keyFacts = document.createElement("div");
     keyFacts.className = "discover-profile-facts profile-preview-key-facts";
-    details.facts.slice(0, 3).forEach((fact) => addPreviewChip(keyFacts, fact.icon, fact.label, fact.value));
+    const visibleFacts = candidate.role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])];
+    visibleFacts.forEach(([icon, label, value]) => addPreviewChip(keyFacts, icon, label, value));
     if (keyFacts.children.length) content.append(keyFacts);
     const intro = String(candidate.profile.public_intro || "").trim();
     if (intro) {
@@ -4305,18 +4274,11 @@
       about.textContent = intro;
       content.append(about);
     }
-    const preferences = activeDiscoverPreferences(currentRole);
-    const orderIndex = new Map(preferences.order.map((key, index) => [key, index]));
-    const firstFactKeys = new Set(details.facts.slice(0, 3).map((fact) => fact.key));
-    const sections = [
-      ...details.facts.slice(3).map((fact) => ({ key: fact.key, label: fact.label, value: fact.value })),
-      ...details.sections
-    ].filter((section) => !firstFactKeys.has(section.key))
-      .sort((a, b) => (orderIndex.get(a.key) ?? 999) - (orderIndex.get(b.key) ?? 999));
+    const sections = (details.sections || []).filter(([, value]) => String(value || "").trim());
     if (sections.length) {
       const detailList = document.createElement("dl");
       detailList.className = "discover-profile-sections";
-      sections.forEach(({ label, value }) => {
+      sections.forEach(([label, value]) => {
         const row = document.createElement("div");
         const term = document.createElement("dt");
         term.textContent = label;
@@ -4895,6 +4857,7 @@
     onboarding.classList.remove("profile-edit-overlay");
     dashboard.classList.remove("is-editing-profile");
     currentRole = role === "couple" || role === "photographer" ? role : "";
+    currentProfile = profile || {};
     await loadDiscoverPreferences();
     const couple = currentRole === "couple";
     const photographer = currentRole === "photographer";
@@ -5266,26 +5229,14 @@
     openWorkspaceDialog(document.querySelector("#discover-preferences-dialog"));
   });
   document.querySelector("#discover-preferences-list").addEventListener("change", (event) => {
-    const input = event.target.closest("input[data-discover-field]");
+    const input = event.target.closest("input[data-discover-criterion]");
     if (!input) return;
     const preferences = activeDiscoverPreferences(currentRole);
-    preferences.visible[input.dataset.discoverField] = input.checked;
+    preferences.enabled[input.dataset.discoverCriterion] = input.checked;
     discoverPreferencesByViewerRole[currentRole] = preferences;
     const status = document.querySelector("#discover-preferences-status");
-    status.textContent = "Änderung wird gespeichert …";
+    status.textContent = "Sortierung wird aktualisiert …";
     status.dataset.state = "";
-    persistDiscoverPreferences();
-  });
-  document.querySelector("#discover-preferences-list").addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-discover-move]");
-    if (!button || button.disabled) return;
-    const preferences = activeDiscoverPreferences(currentRole);
-    const index = preferences.order.indexOf(button.dataset.discoverField);
-    const nextIndex = index + Number(button.dataset.discoverMove);
-    if (index < 0 || nextIndex < 0 || nextIndex >= preferences.order.length) return;
-    [preferences.order[index], preferences.order[nextIndex]] = [preferences.order[nextIndex], preferences.order[index]];
-    discoverPreferencesByViewerRole[currentRole] = preferences;
-    renderDiscoverPreferenceOptions();
     persistDiscoverPreferences();
   });
   document.querySelector("#email-preferences-form").addEventListener("change", persistEmailPreferences);
