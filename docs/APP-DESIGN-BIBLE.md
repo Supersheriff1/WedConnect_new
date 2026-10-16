@@ -1,7 +1,7 @@
 # WedConnect · App Design Bible
 
-**Version:** 0.7  
-**Stand:** 15. Oktober 2026  
+**Version:** 0.8  
+**Stand:** 16. Oktober 2026  
 **Status:** App-Baseline aus freigegebenen Entscheidungen und Codeprüfung  
 **Geltungsbereich:** Dashboard, Profil-Onboarding, Profilverwaltung und eingeloggte Ansichten
 
@@ -70,6 +70,16 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Die Bereiche bleiben verborgen, solange es keine passenden Einträge gibt. App-Neuigkeiten und Partnerangebote sind rollenbezogen, Partnerangebote deutlich gekennzeichnet und erscheinen nur, wenn sie veröffentlicht und aktuell sind.
 - Unter „Einstellungen“ können E-Mails für neue Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote getrennt gesteuert werden. Hinweise in der App bleiben unabhängig davon sichtbar. Sicherheits- und wichtige Konto-E-Mails sind davon ausgenommen.
 - Voreinstellung: transaktionale Match-Ereignisse aktiviert; App-Neuigkeiten und Partnerangebote deaktiviert. Der E-Mail-Versand muss diese gespeicherten Einstellungen berücksichtigen.
+
+### Kontakt / Feedback
+
+- Der Kontobereich bietet Chat und E-Mail als getrennte Kontaktwege.
+- Chat-Verläufe erscheinen in „Nachrichten“ und lassen sich dort mit dem vorhandenen Chatlayout fortsetzen.
+- E-Mail-Verläufe bleiben im Kontodialog „Kontakt / Feedback“ sichtbar. Antworten werden dort geschrieben und per E-Mail versendet.
+- Der geschützte Support-Eingang steht ausschließlich eingetragenen WedConnect-Betreiberkonten zur Verfügung.
+- Push-Benachrichtigungen sind nicht Teil dieser Funktion.
+- Bis zur endgültigen Konfiguration lautet die Support-Empfängeradresse `albert.fuerst.usa@gmail.com`; vor dem Livegang muss sie geändert werden.
+- Gelöschte Chat-Nachrichten behalten ihren ursprünglichen Absender und stehen deshalb rechts für eigene bzw. links für empfangene Nachrichten.
 
 ## Entdecken und Profilaktionen
 
