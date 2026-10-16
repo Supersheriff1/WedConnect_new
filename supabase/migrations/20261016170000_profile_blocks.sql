@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS public.profile_blocks (
-  blocker_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  blocked_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  blocker_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  blocked_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   created_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT profile_blocks_pkey PRIMARY KEY (blocker_id, blocked_id),
   CONSTRAINT profile_blocks_not_self CHECK (blocker_id <> blocked_id)
@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS public.profile_blocks (
 CREATE INDEX IF NOT EXISTS profile_blocks_blocked_id_idx ON public.profile_blocks (blocked_id);
 
 ALTER TABLE public.profile_blocks ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE public.profile_blocks FROM anon, authenticated;
+GRANT SELECT, INSERT, DELETE ON TABLE public.profile_blocks TO authenticated;
 
 DROP POLICY IF EXISTS "Users can view blocks involving themselves" ON public.profile_blocks;
 CREATE POLICY "Users can view blocks involving themselves"
