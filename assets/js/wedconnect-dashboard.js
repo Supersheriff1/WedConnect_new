@@ -2577,7 +2577,21 @@
     peers.forEach((peerId) => {
       const summary = activityCache.summaries.get(peerId) || { id: peerId, name: "WedConnect-Mitglied", detail: "", photoUrl: "" };
       const card = document.createElement("article");
-      card.className = "activity-card";
+      card.className = "activity-card activity-message-card";
+      card.dataset.openConversation = peerId;
+      card.tabIndex = 0;
+      card.setAttribute("aria-label", "Gespräch mit " + summary.name + " öffnen");
+      const avatar = document.createElement("div");
+      avatar.className = "activity-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      if (summary.photoUrl) {
+        const image = document.createElement("img");
+        image.src = summary.photoUrl;
+        image.alt = "";
+        avatar.append(image);
+      } else {
+        avatar.textContent = summary.name.trim().slice(0, 1).toUpperCase() || "W";
+      }
       const copy = document.createElement("div");
       copy.className = "activity-card-copy";
       const name = document.createElement("strong");
@@ -2585,14 +2599,10 @@
       const peerMessages = activityCache.messages.filter((item) => item.sender_id === peerId || item.recipient_id === peerId);
       const latest = peerMessages[peerMessages.length - 1];
       const detail = document.createElement("p");
-      detail.textContent = latest ? latest.body : "Gespräch öffnen";
+      detail.className = "activity-message-preview";
+      detail.textContent = latest ? latest.body : "Noch keine Nachricht";
       copy.append(name, detail);
-      const open = document.createElement("button");
-      open.type = "button";
-      open.className = "button button-secondary";
-      open.dataset.openConversation = peerId;
-      open.textContent = "Gespräch öffnen";
-      card.append(copy, open);
+      card.append(avatar, copy);
       container.append(card);
     });
     document.querySelector("#messages-empty-state").hidden = peers.length > 0;
@@ -3418,6 +3428,12 @@
         setMatchesTab(nextTab.dataset.matchesTab);
         nextTab.focus();
       }
+      return;
+    }
+    const messageCard = event.target.closest(".activity-message-card");
+    if (messageCard && event.target === messageCard && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      openConversation(messageCard.dataset.openConversation);
       return;
     }
     const card = event.target.closest(".activity-card-profile-clickable");

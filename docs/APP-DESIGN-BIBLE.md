@@ -1,6 +1,6 @@
 # WedConnect · App Design Bible
 
-**Version:** 0.6  
+**Version:** 0.7  
 **Stand:** 15. Oktober 2026  
 **Status:** App-Baseline aus freigegebenen Entscheidungen und Codeprüfung  
 **Geltungsbereich:** Dashboard, Profil-Onboarding, Profilverwaltung und eingeloggte Ansichten
@@ -64,6 +64,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Ein Klick auf die gesamte Match-Karte öffnet das Profil innerhalb des Dashboards. Like-/Dislike- und Chat-Aktionen bleiben separat; eine Zurück-Schaltfläche führt zur Liste.
 
 - Die Übersicht ist der Startbildschirm nach dem Login. Sie ergänzt die Hauptnavigation und dupliziert nicht Profil-, Match- oder Nachrichtenlisten.
+- In der Nachrichtenansicht zeigt jede Unterhaltung das Profilfoto des Gegenübers und die letzte Nachricht; ein Klick auf die gesamte Karte öffnet den Chat.
 - Oben stehen eingegangene, noch unbeantwortete Likes mit den Aktionen „Zurückliken“ und „Nein danke“. Ein Zurücklike erzeugt bei Gegenseitigkeit ein Match.
 - Darunter erscheinen gegenseitige Matches, bei denen noch niemand eine Nachricht gesendet hat. Die erste Nachricht kann direkt begonnen werden.
 - Die Bereiche bleiben verborgen, solange es keine passenden Einträge gibt. App-Neuigkeiten und Partnerangebote sind rollenbezogen, Partnerangebote deutlich gekennzeichnet und erscheinen nur, wenn sie veröffentlicht und aktuell sind.
