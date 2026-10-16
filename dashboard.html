@@ -489,7 +489,12 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-indicators {
       left:50%!important;right:auto!important;transform:translateX(-50%)!important;
     }
-    </style>
+    
+    /* Like-/Match-Profile: minimaler Abstand zum oberen Bildrand */
+    #dashboard .matched-profile-view-content .profile-preview-gallery:not(.is-fullscreen) .profile-preview-indicators {
+      top:20px!important;
+    }
+</style>
 </head>
 <body>
   <div id="orientation-guard" role="status" aria-live="polite" aria-hidden="true">
