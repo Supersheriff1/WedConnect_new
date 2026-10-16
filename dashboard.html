@@ -420,6 +420,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .offer-card-clickable:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 12px 30px #09090b35}
     .offer-card-clickable:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
     .offer-card-cta{flex:none;color:var(--gold);font-size:12px;font-weight:800;white-space:nowrap}
+    .account-menu-button svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .partner-offers-view .activity-intro{max-width:680px;margin-top:0}
     .offer-detail-card{position:relative;isolation:isolate;overflow:hidden;width:min(760px,100%);margin:0 auto;padding:clamp(24px,5vw,44px);border:1px solid rgb(213 182 122 / 40%);border-radius:16px;background:radial-gradient(ellipse at 12% 0%,rgb(213 182 122 / 13%),transparent 45%),var(--surface);box-shadow:0 20px 50px #09090b33}
     .offer-detail-brand{display:flex;align-items:center;gap:14px;margin-bottom:30px}
     .offer-detail-monogram{width:58px;height:58px;display:grid;place-items:center;flex:none;border:1px solid rgb(213 182 122 / 48%);border-radius:13px;background:rgb(213 182 122 / 9%);color:var(--gold);font-size:18px;font-weight:800;letter-spacing:-.07em}
@@ -482,6 +484,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         <button class="button button-secondary" type="button" id="account-profile-edit">Profil bearbeiten</button>
         <button class="button button-secondary" type="button" id="account-role-change">Rolle wechseln</button>
         <button class="button button-secondary" type="button" id="account-settings-open">Einstellungen</button>
+        <button class="button button-secondary account-menu-button" type="button" id="account-partner-offers-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.4-3.2L12 7Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 7Z"/></svg><span>Partnerangebote</span></button>
         <button class="button button-secondary" type="button" id="account-contact-open">Kontakt / Feedback</button>
         <button class="button button-secondary" type="button" data-signout>Abmelden</button>
       </div>
@@ -631,6 +634,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
           <section id="overview-offers-section" class="activity-section" hidden aria-labelledby="overview-offers-title">
             <div class="activity-heading"><div><p class="eyebrow">AUSGEWÄHLT</p><h2 id="overview-offers-title">Angebote für dich</h2></div></div><div id="overview-offers-list" class="activity-list"></div>
           </section>
+        </section>
+        <section id="partner-offers-view" class="dashboard-view activity-page partner-offers-view" data-dashboard-view="partner-offers" hidden aria-labelledby="page-title">
+          <p class="activity-intro">Hier findest du besondere Angebote unserer Partner. Öffne ein Angebot, um die Details und den Link aufzurufen.</p>
+          <div id="partner-offers-list" class="activity-list"></div>
+          <p id="partner-offers-empty" class="overview-empty-state" hidden>Zurzeit gibt es keine Partnerangebote.</p>
         </section>
         <section id="offer-detail-view" class="dashboard-view offer-detail-view" data-dashboard-view="offer-detail" hidden aria-label="Angebotsdetails">
           <div id="offer-detail-content" aria-live="polite"></div>

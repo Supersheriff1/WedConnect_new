@@ -2434,20 +2434,21 @@
     };
   }
 
-  function createContentCard(item, kind) {
+  function createContentCard(item, kind, sourceView) {
     const card = document.createElement("article");
     const isTestAd = Boolean(item.is_test_ad);
     const isOffer = kind === "offer";
+    const offerReturnView = sourceView === "partner-offers" ? "partner-offers" : "home";
     card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "") + (isOffer ? " offer-card-clickable" : "");
     if (isOffer) {
       card.tabIndex = 0;
       card.setAttribute("role", "button");
       card.setAttribute("aria-label", "Details zum Angebot " + (item.title || "") + " öffnen");
-      card.addEventListener("click", () => openOfferDetails(item.id));
+      card.addEventListener("click", () => openOfferDetails(item.id, offerReturnView));
       card.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          openOfferDetails(item.id);
+          openOfferDetails(item.id, offerReturnView);
         }
       });
     }
@@ -2498,7 +2499,10 @@
     return card;
   }
 
-  function openOfferDetails(offerId) {
+  let offerDetailReturnView = "home";
+
+  function openOfferDetails(offerId, returnView) {
+    offerDetailReturnView = returnView === "partner-offers" ? "partner-offers" : "home";
     const offer = (activityCache.offers || []).find((item) => String(item.id) === String(offerId));
     const container = document.querySelector("#offer-detail-content");
     if (!offer || !container) return;
@@ -3207,8 +3211,13 @@
     const offersSection = document.querySelector("#overview-offers-section");
     const offersList = document.querySelector("#overview-offers-list");
     offersList.replaceChildren();
-    (activityCache.offers || []).forEach((item) => offersList.append(createContentCard(item, "offer")));
+    (activityCache.offers || []).forEach((item) => offersList.append(createContentCard(item, "offer", "home")));
     offersSection.hidden = !activityCache.offers.length;
+    const partnerOffersList = document.querySelector("#partner-offers-list");
+    const partnerOffersEmpty = document.querySelector("#partner-offers-empty");
+    partnerOffersList.replaceChildren();
+    (activityCache.offers || []).forEach((item) => partnerOffersList.append(createContentCard(item, "offer", "partner-offers")));
+    partnerOffersEmpty.hidden = Boolean(activityCache.offers && activityCache.offers.length);
   }
 
   let activeMatchesTab = "matches";
@@ -3808,11 +3817,12 @@
     document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
       section.hidden = section.dataset.dashboardView !== view;
     });
-    setActiveNavigation(view === "matched-profile" ? "matches" : view === "offer-detail" ? "home" : view);
+    setActiveNavigation(view === "matched-profile" ? "matches" : view === "offer-detail" || view === "partner-offers" ? "home" : view);
     const titles = {
       home: "Willkommen" + (currentGreeting ? ", " + currentGreeting : "") + "!",
       profile: currentRole === "couple" ? "Euer Profil" : "Dein Profil",
       matches: "Matches",
+      "partner-offers": "Partnerangebote",
       "offer-detail": "Angebot",
       "matched-profile": "Profil",
       messages: "Nachrichten",
@@ -3822,8 +3832,11 @@
     pageTitle.textContent = titles[view] || "Willkommen!";
     pageTitle.hidden = view === "matched-profile";
     document.querySelector("#page-title-row").classList.toggle("hidden", view === "matched-profile");
-    document.querySelector("#offer-detail-back").classList.toggle("hidden", view !== "offer-detail");
-    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail";
+    const contextBack = document.querySelector("#offer-detail-back");
+    contextBack.classList.toggle("hidden", view !== "offer-detail" && view !== "partner-offers");
+    contextBack.textContent = view === "offer-detail" && offerDetailReturnView === "partner-offers" ? "‹ Partnerangebote" : "‹ Übersicht";
+    contextBack.setAttribute("aria-label", view === "offer-detail" && offerDetailReturnView === "partner-offers" ? "Zurück zu Partnerangeboten" : "Zurück zur Übersicht");
+    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail" || view === "partner-offers";
   }
 
   async function openConversation(peerId) {
@@ -4658,6 +4671,14 @@
       await openSupportConversation(supportInboxButton.dataset.openSupportInboxThread);
       return;
     }
+    const partnerOffersOpen = event.target.closest("#account-partner-offers-open");
+    if (partnerOffersOpen) {
+      if (accountDialog && accountDialog.open) accountDialog.close();
+      setDashboardView("partner-offers");
+      await refreshActivityViews();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     const contactOpen = event.target.closest("#account-contact-open");
     if (contactOpen) {
       if (accountDialog && accountDialog.open) accountDialog.close();
@@ -4709,7 +4730,8 @@
     }
     const offerBack = event.target.closest("#offer-detail-back");
     if (offerBack) {
-      setDashboardView("home");
+      const currentPartnerOffersView = !document.querySelector("#partner-offers-view").hidden;
+      setDashboardView(currentPartnerOffersView ? "home" : offerDetailReturnView);
       return;
     }
     const profileBack = event.target.closest("#matched-profile-back");

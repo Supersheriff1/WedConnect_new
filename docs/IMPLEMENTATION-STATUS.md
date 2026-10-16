@@ -19,7 +19,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Fotografen-Profil | Strukturierte Einsatzgebiete, Erfahrung, Stile, Begleitungsumfang, Galerie, Vergütung, Vorstellung und optionale Links sind im Code abgebildet. |
 | Galerie | Bis zu 20 normale Fotografenfotos, maximal 2 MB pro Foto. Kein Highlight-Stern und keine Highlight-Auswahl in der aktuellen Oberfläche. Fotos können angesehen, zugeschnitten, ersetzt und gelöscht werden. |
 | Profilfoto des Kontos | Upload, Zuschnitt/Ausrichtung und Entfernen über den Konto-Dialog sind implementiert. |
-| Übersicht | Startet nach Profilabschluss mit Begrüßung, offenen eingegangenen Likes und beidseitigen Matches ohne erste Nachricht. Abschnitte ohne Inhalte bleiben verborgen. App-Neuigkeiten und Partnerangebote werden rollenbezogen angezeigt. Zusätzlich ist derzeit eine klar markierte, statische Testanzeige von Shira Rachel Photography für alle Rollen eingeblendet. Angebotskarten öffnen eine interne Detailseite mit Website-Link. |
+| Übersicht | Startet nach Profilabschluss mit Begrüßung, offenen eingegangenen Likes und beidseitigen Matches ohne erste Nachricht. Abschnitte ohne Inhalte bleiben verborgen. App-Neuigkeiten und Partnerangebote werden rollenbezogen angezeigt. Zusätzlich ist derzeit eine klar markierte, statische Testanzeige von Shira Rachel Photography für alle Rollen eingeblendet. Angebotskarten öffnen eine interne Detailseite mit Website-Link. Der Kontobereich bietet jetzt einen eigenen Einstieg in Partnerangebote. |
 | Eigene Profilansicht | Vollständiges eigenes Profil mit Galerie unter „Profil“. Hochzeitspaare sehen Key Facts für Datum, Ort und Bildnutzungspräferenz. |
 | Hochzeitspaarfotos | Je ein eigenes Foto pro Person erforderlich, gemeinsames Foto optional; 2-MB-Grenze, Vorname(n) links unten als nicht-destruktive Ansichtseinblendung. |
 | Matches und Nachrichten | Chats aktualisieren offene Gespräche automatisch alle fünf Sekunden und beim Zurückkehren in den Browser-Tab. Nachrichten können mit einem Herz markiert werden; jede Person kann ihr eigenes Herz wieder entfernen. Dazu ist die Migration `20261016090000_profile_message_reactions.sql` erforderlich. Likes lassen sich auf der Übersicht beantworten; gegenseitige Likes werden als Matches angezeigt. Neue Matches können direkt angeschrieben werden; bestehende Nachrichten erscheinen in der Nachrichtenansicht mit Profilfoto des Gegenübers und der letzten Nachricht; ein Klick auf die gesamte Unterhaltungskarte öffnet den Chat. Das Menü Matches hat oben Tabs für Matches und erhaltene offene Likes, jeweils mit Anzahl. Hinweistexte und Leerzustände sprechen Hochzeitspaare mit „ihr/euch“ und Fotografen mit „du/dir“ an. Likes können dort beantwortet werden. Ein Klick auf die gesamte Karte öffnet das vollständige Profil im Dashboard. Die Like-Profilansicht nutzt denselben Profil-Renderer und dieselbe Galerie wie das eigene Profil; Inhalte verwenden die Ich-Perspektive des angezeigten Profils. Like-/Dislike- und Chat-Aktionen bleiben separat. Die Matches-Navigation bleibt aktiv, Zurück führt zur Matchliste; Chat bleibt separat. |
@@ -132,4 +132,12 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Angebotskarten im Abschnitt „Angebote für dich“ lassen sich anklicken und per Tastatur öffnen.
 - Eine eigene Dashboard-Detailansicht zeigt Partnername, Titel, Beschreibung und optionale Bedingungen. Ein externer Website-Link wird erst dort angeboten.
 - Die Rückkehr führt direkt zur Übersicht. Der kleine, dezente Zurück-Button steht rechts neben der Überschrift „Angebot“. Die Funktion gilt für die Testanzeige und veröffentlichte Partnerangebote; Neuigkeiten behalten ihren direkten Link.
+
+
+
+## Partnerangebote im Kontobereich (16. Oktober 2026)
+
+- Im Konto-Dialog oben rechts führt der neue Eintrag „Partnerangebote“ zu einer eigenen Übersicht aller aktuell geladenen Angebote für die jeweilige Rolle.
+- Die Angebotsübersicht zeigt aktive veröffentlichte Angebote sowie die temporäre Testanzeige. Jede Karte öffnet die gemeinsame Detailansicht; dort führt der Link aus dem Feld `destination_url` weiter (Affiliate-Link, sofern dort hinterlegt).
+- Das Zurückverhalten passt sich dem Einstieg an: Von Partnerangebotsdetails geht es zurück zur Angebotsübersicht, von der Übersicht zurück zum Dashboard.
 
