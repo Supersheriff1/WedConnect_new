@@ -3808,37 +3808,71 @@
     if (!body || !supportFeatureAvailable) return;
     submit.disabled = true;
     status.textContent = "Wird gesendet …";
-    const { data, error } = await supabase.rpc("create_support_thread", {
-      p_channel: channel,
-      p_category: category,
-      p_subject: subject || (channel === "chat" ? "Support-Chat" : "Kontakt / Feedback"),
-      p_body: body
-    });
-    if (error || !data || !data.length) {
-      submit.disabled = false;
-      status.textContent = "Deine Nachricht konnte nicht gespeichert werden. Bitte versuche es erneut.";
-      return;
+
+    let threadId = "";
+    let messageId = "";
+    if (channel === "chat") {
+      const supportDataLoaded = await loadSupportData(false);
+      if (!supportDataLoaded) {
+        submit.disabled = false;
+        status.textContent = "Deine Support-Unterhaltungen konnten nicht geladen werden. Bitte versuche es erneut.";
+        return;
+      }
+      const existingThread = (activityCache.supportThreads || [])
+        .filter((thread) => thread.channel === "chat" && thread.user_id === currentUser.id)
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
+      if (existingThread) {
+        const { data, error } = await supabase.from("support_messages").insert({
+          thread_id: existingThread.id,
+          sender_id: currentUser.id,
+          sender_type: supportOperator ? "operator" : "user",
+          body
+        }).select("id").single();
+        if (error || !data) {
+          submit.disabled = false;
+          status.textContent = "Deine Nachricht konnte nicht zur bestehenden Unterhaltung hinzugefügt werden. Bitte versuche es erneut.";
+          return;
+        }
+        threadId = existingThread.id;
+        messageId = data.id;
+      }
     }
-    const created = data[0];
+
+    if (!threadId) {
+      const { data, error } = await supabase.rpc("create_support_thread", {
+        p_channel: channel,
+        p_category: category,
+        p_subject: subject || (channel === "chat" ? "Support-Chat" : "Kontakt / Feedback"),
+        p_body: body
+      });
+      if (error || !data || !data.length) {
+        submit.disabled = false;
+        status.textContent = "Deine Nachricht konnte nicht gespeichert werden. Bitte versuche es erneut.";
+        return;
+      }
+      threadId = data[0].thread_id;
+      messageId = data[0].message_id;
+    }
+
     form.reset();
     await loadSupportData(false);
     if (channel === "email") {
-      const delivery = await sendSupportEmail(created.message_id);
+      const delivery = await sendSupportEmail(messageId);
       await loadSupportData(false);
       submit.disabled = false;
       status.textContent = delivery.ok
         ? "Deine E-Mail wurde versendet. Der Verlauf bleibt hier gespeichert."
         : "Deine Nachricht ist gespeichert, aber die E-Mail konnte noch nicht versendet werden. Du kannst sie im Verlauf erneut senden.";
-      activeSupportEmailThreadId = created.thread_id;
+      activeSupportEmailThreadId = threadId;
       renderSupportEmailThreads();
-      const threadDetails = document.querySelector('[data-support-email-thread="' + created.thread_id + '"]');
+      const threadDetails = document.querySelector('[data-support-email-thread="' + threadId + '"]');
       if (threadDetails) { threadDetails.open = true; threadDetails.scrollIntoView({ behavior: "smooth", block: "center" }); }
       return;
     }
     submit.disabled = false;
     status.textContent = "";
     if (contactDialog && contactDialog.open) contactDialog.close();
-    await openSupportConversation(created.thread_id);
+    await openSupportConversation(threadId);
     renderMessagesList();
   });
 
