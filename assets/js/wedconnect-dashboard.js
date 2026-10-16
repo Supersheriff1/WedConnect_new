@@ -4512,6 +4512,8 @@
       conversationLongPressTimer = null;
       conversationLongPressStart = null;
       suppressConversationClickUntil = Date.now() + 1000;
+      const selection = window.getSelection && window.getSelection();
+      if (selection) selection.removeAllRanges();
       openDeleteConversationDialog(kind, id);
     }, 550);
   });
