@@ -392,40 +392,20 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .support-dialog{width:min(720px,calc(100% - 32px));max-height:calc(100dvh - 32px);max-width:none;overflow:hidden}
     .support-dialog .workspace-dialog-content{max-height:calc(100dvh - 32px);overflow:auto}
     .support-intro,.support-operator-copy{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.55}
-    .support-channel-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 16px;padding:0;border:0}
-    .support-channel-options legend{grid-column:1/-1;margin-bottom:7px;color:var(--ink);font-size:13px;font-weight:700}
-    .support-channel-option{display:flex;align-items:flex-start;gap:10px;padding:13px;border:1px solid var(--border);border-radius:10px;background:var(--raised);cursor:pointer}
-    .support-channel-option:has(input:checked){border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
-    .support-channel-option input{margin-top:3px;accent-color:var(--gold)}
-    .support-channel-option span{display:grid;gap:4px}
-    .support-channel-option strong{color:var(--ink);font-size:13px}
-    .support-channel-option small{color:var(--muted);font-size:11px;line-height:1.4}
     .support-compose-fields{display:grid;gap:7px}
     .support-compose-fields label{margin-top:4px;color:var(--ink);font-size:12px;font-weight:650}
-    .support-compose-fields label span{color:var(--muted);font-weight:400}
-    .support-compose-fields input,.support-compose-fields select,.support-compose-fields textarea,.support-email-reply textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--canvas);color:var(--body);font:400 13px/1.5 var(--sans)}
-    .support-compose-fields textarea,.support-email-reply textarea{resize:vertical;min-height:90px}
-    .support-compose-fields :focus-visible,.support-email-reply textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    .support-compose-fields input,.support-compose-fields select,.support-compose-fields textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--canvas);color:var(--body);font:400 13px/1.5 var(--sans)}
+    .support-compose-fields textarea{resize:vertical;min-height:90px}
+    .support-compose-fields :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
     #support-new-submit{width:100%;margin-top:14px}
-    .support-email-section,.support-operator-inbox{margin-top:26px;padding-top:20px;border-top:1px solid var(--border)}
-    .support-email-section h3,.support-operator-inbox h3{margin:0 0 12px;color:var(--ink);font-size:16px}
+    .support-operator-inbox{margin-top:26px;padding-top:20px;border-top:1px solid var(--border)}
+    .support-operator-inbox h3{margin:0 0 12px;color:var(--ink);font-size:16px}
     .support-thread-list{display:grid;gap:10px}
     .support-operator-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--raised);color:var(--body);font-size:12px}
     .support-operator-row .button{min-height:38px;padding:8px 12px;font-size:11px}
     .support-thread-empty{margin:0;padding:14px;border:1px dashed var(--border);border-radius:9px;color:var(--muted);font-size:12px}
-    .support-email-thread{border:1px solid var(--border);border-radius:10px;background:var(--raised);overflow:hidden}
-    .support-email-thread summary{padding:13px;cursor:pointer;list-style:none}
-    .support-email-thread summary::-webkit-details-marker{display:none}
-    .support-thread-title{display:block;color:var(--ink);font-size:13px;font-weight:700}
-    .support-thread-preview{display:block;margin-top:5px;color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .support-thread-messages{display:grid;gap:8px;padding:0 12px 10px}
-    .support-thread-message{justify-self:start;max-width:90%;padding:9px 11px;border:1px solid var(--border);border-radius:12px 12px 12px 4px;background:var(--surface);color:var(--body);font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
-    .support-thread-message.is-own{justify-self:end;border-color:rgb(213 182 122 / 48%);border-radius:12px 12px 4px 12px;background:var(--gold);color:var(--gold-ink)}
-    .support-thread-message small{display:block;margin-top:5px;opacity:.7;font-size:10px}
-    .support-email-reply{display:grid;gap:8px;padding:0 12px 12px}
-    .support-email-reply .button{justify-self:end}
     .support-operator-open{width:100%;justify-content:flex-start}
-    @media(max-width:600px){.support-dialog{inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0}.support-dialog .workspace-dialog-content{max-height:100dvh;padding:20px 16px max(22px,env(safe-area-inset-bottom))}.support-channel-options{grid-template-columns:1fr}}
+    @media(max-width:600px){.support-dialog{inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0}.support-dialog .workspace-dialog-content{max-height:100dvh;padding:20px 16px max(22px,env(safe-area-inset-bottom))}}
   </style>
 </head>
 <body>
@@ -522,33 +502,24 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <dialog id="contact-feedback-dialog" class="workspace-dialog support-dialog" aria-labelledby="contact-feedback-title">
     <div class="workspace-dialog-content">
       <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="contact-feedback-title">Kontakt / Feedback</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
-      <p class="support-intro">Wähle, wie du uns schreiben möchtest. Chat-Unterhaltungen findest du danach auch unter „Nachrichten“; E-Mail-Verläufe bleiben hier.</p>
+      <p class="support-intro">Schreib dem WedConnect-Team. Beim Start der Unterhaltung senden wir Thema, Betreff und Nachricht als erste Chatnachricht. Antworten und weitere Nachrichten findest du unter „Nachrichten“.</p>
       <form id="support-new-form" class="support-compose">
-        <fieldset class="support-channel-options">
-          <legend>Kontaktweg</legend>
-          <label class="support-channel-option"><input type="radio" name="channel" value="chat" checked><span><strong>Chat</strong><small>Direkt in WedConnect schreiben.</small></span></label>
-          <label class="support-channel-option"><input type="radio" name="channel" value="email"><span><strong>E-Mail</strong><small>Der Verlauf bleibt in diesem Bereich.</small></span></label>
-        </fieldset>
         <div class="support-compose-fields">
           <label for="support-category">Thema</label>
-          <select id="support-category" name="category">
+          <select id="support-category" name="category" required>
             <option value="question">Frage</option><option value="feedback">Feedback oder Vorschlag</option><option value="issue">Problem melden</option><option value="other">Sonstiges</option>
           </select>
-          <label for="support-subject">Betreff <span>(optional)</span></label>
-          <input id="support-subject" name="subject" type="text" maxlength="120" autocomplete="off" placeholder="Worum geht es?">
+          <label for="support-subject">Betreff</label>
+          <input id="support-subject" name="subject" type="text" maxlength="120" autocomplete="off" required placeholder="Worum geht es?">
           <label for="support-body">Deine Nachricht</label>
           <textarea id="support-body" name="body" maxlength="2000" rows="4" required placeholder="Schreib uns …"></textarea>
         </div>
-        <button id="support-new-submit" class="button button-primary" type="submit">Kontakt aufnehmen</button>
+        <button id="support-new-submit" class="button button-primary" type="submit">Chat starten</button>
         <p id="support-new-status" class="settings-save-status" role="status" aria-live="polite"></p>
       </form>
-      <section class="support-email-section" aria-labelledby="support-email-title">
-        <h3 id="support-email-title">E-Mail-Verläufe</h3>
-        <div id="support-email-threads" class="support-thread-list"></div>
-      </section>
       <section id="support-operator-inbox" class="support-operator-inbox" hidden aria-labelledby="support-inbox-title">
         <h3 id="support-inbox-title">Support-Eingang</h3>
-        <p class="support-operator-copy">Hier siehst du Kontaktanfragen aus Chat und E-Mail.</p>
+        <p class="support-operator-copy">Hier siehst du Chat-Anfragen.</p>
         <div id="support-operator-list" class="support-thread-list"></div>
       </section>
     </div>
@@ -658,7 +629,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-contact-feedback-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-support-chat-only-v1"></script>
 </body>
 </html>
 
