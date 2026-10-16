@@ -3054,6 +3054,7 @@
       discover: currentRole === "couple" ? "Fotografen entdecken" : "Hochzeiten entdecken"
     };
     document.querySelector("#page-title").textContent = titles[view] || "Willkommen!";
+    document.querySelector("#role-eyebrow").hidden = view === "messages";
   }
 
   async function openConversation(peerId) {
