@@ -85,7 +85,7 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Entdecken zeigt jeweils ein vollständiges Profil der anderen Rolle mit Fotos, Eckdaten und Vorstellung.
 - Die Aktion „Interesse zeigen“ speichert ein Like; gegenseitige Likes ergeben ein Match.
 - „Überspringen“ ist eine private, dauerhaft gespeicherte Entscheidung des eigenen Kontos. Sie wird der anderen Person nicht angezeigt und erzeugt kein Match.
-- Profile, die das eigene Konto bereits gelikt oder bewusst übersprungen hat, erscheinen nicht erneut im Feed. Das bloße Ansehen entfernt ein Profil nicht. Ein noch offenes eingehendes Like blendet das Profil ebenfalls nicht aus Entdecken aus; es erscheint zusätzlich unter „Erhaltene Likes“ in Matches.
+- Profile, die das eigene Konto bereits gelikt oder bewusst übersprungen hat, erscheinen nicht erneut im Feed. Das bloße Ansehen entfernt ein Profil nicht. Ein noch offenes eingehendes Like blendet das Profil ebenfalls nicht aus Entdecken aus; es erscheint zusätzlich unter „Erhaltene Likes“ in Matches. Die Aktion „Nein danke“ im Tab „Erhaltene Likes“ speichert ebenfalls ein dauerhaftes Überspringen.
 - Das Badge bei „Matches“ zeigt die Anzahl der offenen eingegangenen Likes und aktualisiert sich automatisch, während die App geöffnet ist.
 
 ## Eingaben und Onboarding
