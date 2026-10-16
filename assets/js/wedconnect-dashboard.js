@@ -34,7 +34,12 @@
   let conversationRefreshBusy = false;
   let reactionFeatureAvailable = false;
   let reactionMigrationNoticeShown = false;
-  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], summaries: new Map() };
+  let messageDeletionFeatureAvailable = false;
+  let messageDeletionNoticeShown = false;
+  let activeMessageMenuId = "";
+  let messageLongPressTimer = null;
+  let suppressOwnMessageClickUntil = 0;
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], hiddenMessageIds: new Set(), summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2482,12 +2487,21 @@
   async function loadActivityData() {
     const userId = currentUser && currentUser.id;
     if (!userId) return;
-    const [inboundResult, outboundResult] = await Promise.all([
+    const [inboundResult, outboundResult, hiddenResult] = await Promise.all([
       supabase.from("profile_likes").select("liker_id,created_at").eq("liked_id", userId).order("created_at", { ascending: false }),
-      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false })
+      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false }),
+      supabase.from("profile_message_hidden").select("message_id").eq("user_id", userId)
     ]);
     if (inboundResult.error || outboundResult.error) throw new Error("Likes konnten nicht geladen werden. Prüfe die Profil-Likes-Migration in Supabase.");
     const inbound = inboundResult.data || [];
+    messageDeletionFeatureAvailable = !hiddenResult.error;
+    if (hiddenResult.error) {
+      if (!messageDeletionNoticeShown) {
+        showNotice("Nachrichten löschen ist noch nicht eingerichtet. Bitte führe die Nachrichten-ausblenden-Migration in Supabase aus.");
+        messageDeletionNoticeShown = true;
+      }
+    }
+    const hiddenMessageIds = new Set((hiddenResult.data || []).map((item) => item.message_id));
     const outgoingIds = new Set((outboundResult.data || []).map((item) => item.liked_id));
     const matches = inbound.filter((item) => outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
     const incoming = inbound.filter((item) => !outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
@@ -2507,6 +2521,7 @@
       if (!result.error) messages = result.data || [];
     }
     const messagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
+    const visibleMessages = messages.filter((item) => !hiddenMessageIds.has(item.id));
     const newMatches = matches.filter((peerId) => !messagedPeers.has(peerId));
     const ids = Array.from(new Set([...incoming, ...matches]));
     const summaries = await Promise.all(ids.map((id) => loadPublicProfileSummary(id)));
@@ -2515,8 +2530,9 @@
       incoming: incoming.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       matches: matches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
-      messages,
+      messages: visibleMessages,
       messagedPeers,
+      hiddenMessageIds,
       reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
@@ -2626,7 +2642,7 @@
       const latest = peerMessages[peerMessages.length - 1];
       const detail = document.createElement("p");
       detail.className = "activity-message-preview";
-      detail.textContent = latest ? latest.body : "Noch keine Nachricht";
+      detail.textContent = latest ? latest.body : "Keine sichtbaren Nachrichten";
       card.dataset.searchText = (summary.name + " " + detail.textContent).toLocaleLowerCase("de");
       card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
       copy.append(name, detail);
@@ -3147,6 +3163,26 @@
       time.dateTime = item.created_at;
       time.textContent = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(item.created_at));
       bubble.append(body, time);
+      if (messageDeletionFeatureAvailable && item.sender_id === userId) {
+        bubble.dataset.ownMessage = item.id;
+        const menuTrigger = document.createElement("button");
+        menuTrigger.type = "button";
+        menuTrigger.className = "message-more-button";
+        menuTrigger.dataset.ownMessageMenu = item.id;
+        menuTrigger.setAttribute("aria-label", "Nachrichtenoptionen");
+        menuTrigger.textContent = "⋯";
+        bubble.append(menuTrigger);
+        if (activeMessageMenuId === item.id) {
+          const menu = document.createElement("div");
+          menu.className = "message-own-menu";
+          const deleteAction = document.createElement("button");
+          deleteAction.type = "button";
+          deleteAction.dataset.deleteOwnMessage = item.id;
+          deleteAction.textContent = "Für mich löschen";
+          menu.append(deleteAction);
+          bubble.append(menu);
+        }
+      }
       if (reactionFeatureAvailable) {
         const messageReactions = (activityCache.reactions || []).filter((reaction) => reaction.message_id === item.id && reaction.reaction === "heart");
         const ownHeart = messageReactions.some((reaction) => reaction.user_id === userId);
@@ -3186,10 +3222,25 @@
         .order("created_at", { ascending: true });
       if (error || peerId !== activeConversationPeer) return;
       const incoming = data || [];
+      const { data: hiddenRows, error: hiddenError } = await supabase.from("profile_message_hidden")
+        .select("message_id").eq("user_id", userId);
+      if (hiddenError) {
+        messageDeletionFeatureAvailable = false;
+        if (!messageDeletionNoticeShown) {
+          showNotice("Nachrichten löschen ist noch nicht eingerichtet. Bitte führe die Nachrichten-ausblenden-Migration in Supabase aus.");
+          messageDeletionNoticeShown = true;
+        }
+      } else {
+        messageDeletionFeatureAvailable = true;
+      }
+      const hiddenMessageIds = hiddenError
+        ? activityCache.hiddenMessageIds || new Set()
+        : new Set((hiddenRows || []).map((item) => item.message_id));
+      activityCache.hiddenMessageIds = hiddenMessageIds;
       const forPeer = (items) => items.filter((item) =>
         (item.sender_id === userId && item.recipient_id === peerId)
         || (item.sender_id === peerId && item.recipient_id === userId));
-      const peerMessages = forPeer(incoming);
+      const peerMessages = forPeer(incoming).filter((item) => !hiddenMessageIds.has(item.id));
       const previous = forPeer(activityCache.messages || []);
       const latestKey = (items) => {
         const last = items[items.length - 1];
@@ -3254,6 +3305,8 @@
   document.querySelector("#conversation-dialog").addEventListener("close", () => {
     stopConversationMessagePolling();
     activeConversationPeer = "";
+    activeMessageMenuId = "";
+    cancelMessageLongPress();
   });
 
   document.addEventListener("visibilitychange", () => {
@@ -3615,8 +3668,75 @@
     }
   });
 
+  const conversationThread = document.querySelector("#conversation-thread");
+  if (conversationThread) {
+    conversationThread.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" || event.target.closest("[data-own-message-menu], .message-own-menu")) return;
+      const bubble = event.target.closest("[data-own-message]");
+      if (!bubble || !messageDeletionFeatureAvailable) return;
+      if (messageLongPressTimer) window.clearTimeout(messageLongPressTimer);
+      const messageId = bubble.dataset.ownMessage;
+      messageLongPressTimer = window.setTimeout(() => {
+        messageLongPressTimer = null;
+        activeMessageMenuId = messageId;
+        suppressOwnMessageClickUntil = Date.now() + 900;
+        renderConversationThread();
+      }, 550);
+    });
+    conversationThread.addEventListener("contextmenu", (event) => {
+      const bubble = event.target.closest("[data-own-message]");
+      if (!bubble || !messageDeletionFeatureAvailable) return;
+      event.preventDefault();
+      activeMessageMenuId = bubble.dataset.ownMessage;
+      renderConversationThread();
+    });
+  }
+  const cancelMessageLongPress = () => {
+    if (messageLongPressTimer) window.clearTimeout(messageLongPressTimer);
+    messageLongPressTimer = null;
+  };
+  document.addEventListener("pointerup", cancelMessageLongPress);
+  document.addEventListener("pointercancel", cancelMessageLongPress);
+
   document.addEventListener("click", async (event) => {
+    if (Date.now() < suppressOwnMessageClickUntil && event.target.closest(".conversation-message")) {
+      suppressOwnMessageClickUntil = 0;
+      event.preventDefault();
+      return;
+    }
+    const deleteOwnMessage = event.target.closest("[data-delete-own-message]");
+    if (deleteOwnMessage) {
+      const messageId = deleteOwnMessage.dataset.deleteOwnMessage;
+      const message = (activityCache.messages || []).find((item) => item.id === messageId && item.sender_id === currentUser.id);
+      if (!message || !messageDeletionFeatureAvailable) return;
+      deleteOwnMessage.disabled = true;
+      const { error } = await supabase.from("profile_message_hidden").insert({ user_id: currentUser.id, message_id: messageId });
+      if (error) {
+        deleteOwnMessage.disabled = false;
+        showNotice("Die Nachricht konnte nicht ausgeblendet werden. Prüfe die Nachrichten-ausblenden-Migration in Supabase.");
+        return;
+      }
+      if (!activityCache.hiddenMessageIds) activityCache.hiddenMessageIds = new Set();
+      activityCache.hiddenMessageIds.add(messageId);
+      activityCache.messages = (activityCache.messages || []).filter((item) => item.id !== messageId);
+      activeMessageMenuId = "";
+      await renderConversationThread();
+      renderMessagesList();
+      showNotice("Nachricht aus deiner Ansicht entfernt.");
+      return;
+    }
+    const ownMessageMenuButton = event.target.closest("[data-own-message-menu]");
+    if (ownMessageMenuButton) {
+      const messageId = ownMessageMenuButton.dataset.ownMessageMenu;
+      activeMessageMenuId = activeMessageMenuId === messageId ? "" : messageId;
+      await renderConversationThread();
+      return;
+    }
     if (event.target.closest(".message-reaction-sticker")) return;
+    if (activeMessageMenuId && !event.target.closest(".message-own-menu, [data-own-message-menu]")) {
+      activeMessageMenuId = "";
+      if (document.querySelector("#conversation-dialog")?.open) await renderConversationThread();
+    }
     const matchesTab = event.target.closest("[data-matches-tab]");
     if (matchesTab) {
       setMatchesTab(matchesTab.dataset.matchesTab);
