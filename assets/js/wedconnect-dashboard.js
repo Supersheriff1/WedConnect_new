@@ -4512,6 +4512,61 @@
     loadEmailPreferences();
   });
   document.querySelector("#email-preferences-form").addEventListener("change", persistEmailPreferences);
+  const deleteAccountDialog = document.querySelector("#delete-account-dialog");
+  const deleteAccountForm = document.querySelector("#delete-account-form");
+  const deleteAccountConfirmation = document.querySelector("#delete-account-confirmation");
+  const deleteAccountSubmit = document.querySelector("#delete-account-submit");
+  const deleteAccountStatus = document.querySelector("#delete-account-status");
+  document.querySelector("#account-delete-open").addEventListener("click", () => {
+    if (settingsDialog.open) settingsDialog.close();
+    deleteAccountConfirmation.value = "";
+    deleteAccountSubmit.disabled = true;
+    deleteAccountStatus.textContent = "";
+    deleteAccountStatus.dataset.state = "";
+    openWorkspaceDialog(deleteAccountDialog);
+    deleteAccountConfirmation.focus();
+  });
+  deleteAccountConfirmation.addEventListener("input", () => {
+    deleteAccountSubmit.disabled = deleteAccountConfirmation.value.trim() !== "KONTO LÖSCHEN";
+  });
+  deleteAccountDialog.addEventListener("cancel", (event) => {
+    if (deleteAccountDialog.dataset.busy) event.preventDefault();
+  });
+  deleteAccountDialog.addEventListener("close", () => {
+    if (!deleteAccountSubmit.dataset.busy) {
+      deleteAccountConfirmation.value = "";
+      deleteAccountSubmit.disabled = true;
+      deleteAccountStatus.textContent = "";
+      deleteAccountStatus.dataset.state = "";
+    }
+  });
+  deleteAccountForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!currentUser || deleteAccountConfirmation.value.trim() !== "KONTO LÖSCHEN") return;
+    deleteAccountSubmit.disabled = true;
+    deleteAccountSubmit.dataset.busy = "true";
+    deleteAccountDialog.dataset.busy = "true";
+    deleteAccountDialog.querySelectorAll("[data-dialog-close]").forEach((button) => { button.disabled = true; });
+    deleteAccountStatus.textContent = "Konto und Daten werden dauerhaft gelöscht …";
+    deleteAccountStatus.dataset.state = "";
+    try {
+      const { error } = await supabase.functions.invoke("delete-account", { body: { confirmation: "KONTO LÖSCHEN" } });
+      if (error) throw error;
+      deleteAccountStatus.textContent = "Konto gelöscht. Du wirst abgemeldet …";
+      deleteAccountStatus.dataset.state = "success";
+      await supabase.auth.signOut({ scope: "local" });
+      window.location.assign(new URL("index.html?auth=signin&account=deleted", window.location.href).toString());
+    } catch (error) {
+      deleteAccountStatus.textContent = error && error.message
+        ? "Die Löschung konnte nicht abgeschlossen werden. " + error.message
+        : "Die Löschung konnte nicht abgeschlossen werden. Bitte versuche es erneut.";
+      deleteAccountStatus.dataset.state = "error";
+      deleteAccountSubmit.dataset.busy = "";
+      deleteAccountDialog.dataset.busy = "";
+      deleteAccountDialog.querySelectorAll("[data-dialog-close]").forEach((button) => { button.disabled = false; });
+      deleteAccountSubmit.disabled = deleteAccountConfirmation.value.trim() !== "KONTO LÖSCHEN";
+    }
+  });
   document.querySelector("#account-profile-edit").addEventListener("click", () => {
     if (accountDialog.open) accountDialog.close();
     beginWizard(currentRole, currentRole ? 1 : 0);
