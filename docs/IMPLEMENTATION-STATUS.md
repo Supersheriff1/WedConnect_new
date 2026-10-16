@@ -166,3 +166,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Discover-Profilfotos füllen den Bildrahmen jetzt wie die Galerie im vollständigen Profil; `object-fit: cover` verhindert schwarze Balken. Der Namenszug liegt links unten direkt auf dem Foto über einem leichten Verlauf, der Fotozähler rechts unten auf einer dezenten halbtransparenten Fläche.
 - Der Cover-Zuschnitt kann je nach Fotoformat Bildränder abschneiden; die Darstellung folgt dadurch der Vollprofil-Galerie.
+
+
+## Discover-Bilder auf Mobilgeräten (16. Oktober 2026)
+
+- Mobile Ansicht: Pfeiltasten auf Profilbildern ausgeblendet; stattdessen erscheinen oben segmentierte Fortschrittsbalken, die beim Wischen das aktuelle Foto anzeigen und direkt anwählbar sind.
+- Fotozähler unten rechts aktualisiert sich beim Wischen ebenfalls.
