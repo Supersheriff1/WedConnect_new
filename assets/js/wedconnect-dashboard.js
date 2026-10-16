@@ -63,7 +63,7 @@
   let blockFeatureNoticeShown = false;
   let pendingBlockPeerId = "";
   const profilePhotoUrlCache = new Map();
-  let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0, mode: "discover", savedIds: new Set(), likedIds: new Set(), skippedIds: new Set(), busy: false };
+  let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0, mode: "discover", savedIds: new Set(), likedIds: new Set(), skippedIds: new Set(), savedFeatureAvailable: true, busy: false };
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
@@ -3574,9 +3574,10 @@
         supabase.from("profile_blocks").select("blocker_id,blocked_id").or("blocker_id.eq." + currentUser.id + ",blocked_id.eq." + currentUser.id)
       ]);
       if (!blocksResult.error) activityCache.profileBlocks = blocksResult.data || [];
-      if (profilesResult.error || outgoingResult.error || skipsResult.error || savedResult.error || blocksResult.error) {
-        throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob Profil-Likes, Überspringen, Merkliste und Blockieren in Supabase eingerichtet sind.");
+      if (profilesResult.error || outgoingResult.error || skipsResult.error || blocksResult.error) {
+        throw new Error("Entdecken konnte nicht geladen werden. Bitte prüfe, ob Profil-Likes, Überspringen und Blockieren in Supabase eingerichtet sind.");
       }
+      discoverState.savedFeatureAvailable = !savedResult.error;
       discoverState.likedIds = new Set((outgoingResult.data || []).map((item) => item.liked_id));
       discoverState.skippedIds = new Set((skipsResult.data || []).map((item) => item.skipped_id));
       discoverState.savedIds = new Set((savedResult.data || []).map((item) => item.saved_profile_id));
@@ -3630,6 +3631,13 @@
     discoverState.mode = "saved";
     updateDiscoverModeButtons();
     container.replaceChildren();
+    if (!discoverState.savedFeatureAvailable) {
+      const unavailable = document.createElement("p");
+      unavailable.className = "overview-empty-state";
+      unavailable.textContent = "Die Merkliste wird nach der Einrichtung der Supabase-Migration verfügbar.";
+      container.append(unavailable);
+      return;
+    }
     const loading = document.createElement("p");
     loading.className = "overview-empty-state";
     loading.textContent = "Deine Merkliste wird geladen …";
@@ -4118,6 +4126,12 @@
       }
       discoverState.skippedIds.add(candidate.id);
     } else if (action === "save") {
+      if (!discoverState.savedFeatureAvailable) {
+        showNotice("Die Merkliste ist noch nicht eingerichtet. Bitte führe zuerst die Merkliste-Migration in Supabase aus.");
+        buttons.forEach((button) => { button.disabled = false; });
+        discoverState.busy = false;
+        return;
+      }
       const { error } = await supabase.from("profile_saved_profiles").insert({ user_id: currentUser.id, saved_profile_id: candidate.id });
       if (error && !/duplicate|unique/i.test(error.message || "")) {
         showNotice("Das Profil konnte nicht gemerkt werden. Bitte prüfe die Merkliste-Migration in Supabase.");
