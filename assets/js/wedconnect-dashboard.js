@@ -2335,7 +2335,9 @@
     const aboutHeader = document.createElement("div");
     aboutHeader.className = "profile-preview-about-header";
     const aboutTitle = document.createElement("h4");
-    aboutTitle.textContent = role === "couple" ? "Über euch" : "Über mich";
+    aboutTitle.textContent = options.publicView
+      ? (role === "couple" ? "Über uns" : "Über mich")
+      : (role === "couple" ? "Über euch" : "Über mich");
     aboutHeader.append(aboutTitle);
     about.append(aboutHeader);
 
@@ -3441,7 +3443,8 @@
         : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
       await renderOwnProfilePreview(role, profile, photos, container, {
         showActions: false,
-        showIdentity: false
+        showIdentity: false,
+        publicView: true
       });
     } catch (_) {
       if (profileView.hidden) return;
