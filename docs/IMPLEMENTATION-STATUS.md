@@ -139,5 +139,5 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Im Konto-Dialog oben rechts führt der neue Eintrag „Partnerangebote“ zu einer eigenen Übersicht aller aktuell geladenen Angebote für die jeweilige Rolle.
 - Die Angebotsübersicht zeigt aktive veröffentlichte Angebote sowie die temporäre Testanzeige. Jede Karte öffnet die gemeinsame Detailansicht; dort führt der Link aus dem Feld `destination_url` weiter (Affiliate-Link, sofern dort hinterlegt).
-- Das Zurückverhalten passt sich dem Einstieg an: Von Partnerangebotsdetails geht es zurück zur Angebotsübersicht, von der Übersicht zurück zum Dashboard.
+- Das Zurückverhalten passt sich dem Einstieg an: Von Partnerangebotsdetails geht es zurück zur Angebotsübersicht, von der Angebotsübersicht zurück zum geöffneten Konto-Menü. Zwischen der Überschrift und dem Einleitungstext sowie zwischen Einleitung und erstem Angebot ist zusätzlicher Abstand ergänzt.
 

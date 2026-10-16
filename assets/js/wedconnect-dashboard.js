@@ -3834,8 +3834,10 @@
     document.querySelector("#page-title-row").classList.toggle("hidden", view === "matched-profile");
     const contextBack = document.querySelector("#offer-detail-back");
     contextBack.classList.toggle("hidden", view !== "offer-detail" && view !== "partner-offers");
-    contextBack.textContent = view === "offer-detail" && offerDetailReturnView === "partner-offers" ? "‹ Partnerangebote" : "‹ Übersicht";
-    contextBack.setAttribute("aria-label", view === "offer-detail" && offerDetailReturnView === "partner-offers" ? "Zurück zu Partnerangeboten" : "Zurück zur Übersicht");
+    const returnFromPartnerList = view === "partner-offers";
+    const returnFromPartnerDetail = view === "offer-detail" && offerDetailReturnView === "partner-offers";
+    contextBack.textContent = returnFromPartnerList ? "‹ Konto" : returnFromPartnerDetail ? "‹ Partnerangebote" : "‹ Übersicht";
+    contextBack.setAttribute("aria-label", returnFromPartnerList ? "Zurück zum Konto-Menü" : returnFromPartnerDetail ? "Zurück zu Partnerangeboten" : "Zurück zur Übersicht");
     document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail" || view === "partner-offers";
   }
 
@@ -4731,7 +4733,12 @@
     const offerBack = event.target.closest("#offer-detail-back");
     if (offerBack) {
       const currentPartnerOffersView = !document.querySelector("#partner-offers-view").hidden;
-      setDashboardView(currentPartnerOffersView ? "home" : offerDetailReturnView);
+      if (currentPartnerOffersView) {
+        setDashboardView("home");
+        openWorkspaceDialog(accountDialog);
+      } else {
+        setDashboardView(offerDetailReturnView);
+      }
       return;
     }
     const profileBack = event.target.closest("#matched-profile-back");
