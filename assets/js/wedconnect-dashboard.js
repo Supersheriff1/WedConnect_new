@@ -64,6 +64,9 @@
   let pendingBlockPeerId = "";
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0, mode: "discover", savedIds: new Set(), likedIds: new Set(), skippedIds: new Set(), savedFeatureAvailable: true, busy: false };
+  let activeMatchedProfileContext = "match";
+  let pendingMatchPeerId = "";
+  let pendingMatchFromDiscover = false;
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
@@ -2196,6 +2199,36 @@
     enqueueNearby();
   }
 
+  function createProfileDecisionBar(profileId, context) {
+    const bar = document.createElement("div");
+    bar.className = "profile-decision-bar";
+    bar.setAttribute("aria-label", "Profilaktionen");
+    const saved = discoverState.savedIds.has(profileId);
+    const liked = discoverState.likedIds.has(profileId);
+    const actions = [
+      { action: "skip", label: "Überspringen", style: "button button-secondary", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>' },
+      { action: saved ? "unsave" : "save", label: saved ? "Entmerken" : "Merken", style: "button button-secondary", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg>' },
+      { action: "like", label: liked ? "Interesse gezeigt" : "Interesse zeigen", style: "button button-primary profile-decision-action--like", icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>' }
+    ];
+    actions.forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = item.style + " profile-decision-action";
+      button.dataset.profileDecision = item.action;
+      button.dataset.profileId = profileId;
+      button.dataset.profileContext = context;
+      button.setAttribute("aria-label", item.label);
+      button.title = item.label;
+      button.innerHTML = item.icon + "<span>" + escapeHtml(item.label) + "</span>";
+      if (item.action === "like" && liked) {
+        button.disabled = true;
+        button.title = "Interesse wurde bereits gezeigt";
+      }
+      bar.append(button);
+    });
+    return bar;
+  }
+
   async function renderOwnProfilePreview(role, profile, photos, targetContainer, renderOptions) {
     const container = targetContainer || document.querySelector("#profile-preview");
     const options = renderOptions || {};
@@ -2366,6 +2399,7 @@
     content.append(about, additional);
     card.append(gallery, content);
     container.append(card);
+    if (options.profileActionContext) container.append(createProfileDecisionBar(profile.id, options.profileActionContext));
     setupProfileGallery(gallery, renderedCount);
     loadProfileGalleryImages(gallery);
   }
@@ -2651,12 +2685,14 @@
     const card = document.createElement("article");
     card.className = "activity-card activity-card-profile-clickable";
     card.dataset.openProfile = summary.id;
+    card.dataset.profileContext = kind;
     card.tabIndex = 0;
     card.setAttribute("aria-label", "Profil von " + summary.name + " öffnen");
     const avatar = document.createElement("button");
     avatar.type = "button";
     avatar.className = "activity-avatar activity-profile-open";
     avatar.dataset.openProfile = summary.id;
+    avatar.dataset.profileContext = kind;
     avatar.setAttribute("aria-label", "Profil von " + summary.name + " öffnen");
     if (summary.photoUrl) {
       const image = document.createElement("img");
@@ -2673,6 +2709,7 @@
     name.type = "button";
     name.className = "activity-name-button";
     name.dataset.openProfile = summary.id;
+    name.dataset.profileContext = kind;
     name.textContent = summary.name;
     const detail = document.createElement("p");
     detail.textContent = summary.detail || (summary.role === "couple" ? "Hochzeitspaar" : "Fotograf");
@@ -3698,7 +3735,7 @@
           preview.hidden = !opening;
           view.textContent = opening ? "Profil schließen" : "Profil ansehen";
           if (opening && !preview.dataset.loaded) {
-            await renderOwnProfilePreview(candidate.role, candidate.profile, candidate.photos, preview, { publicView: true, showActions: false });
+            await renderOwnProfilePreview(candidate.role, candidate.profile, candidate.photos, preview, { publicView: true, showActions: false, profileActionContext: activityCache.matches.some((match) => match.id === candidate.id) ? "" : "saved" });
             preview.dataset.loaded = "true";
           }
         });
@@ -3790,7 +3827,8 @@
     }
   }
 
-  async function openMatchedProfile(userId) {
+  async function openMatchedProfile(userId, profileContext = "match") {
+    activeMatchedProfileContext = profileContext;
     const profileView = document.querySelector("#matched-profile-view");
     const container = document.querySelector("#matched-profile-content");
     const profileTitle = document.querySelector("#matched-profile-title");
@@ -3837,7 +3875,8 @@
       await renderOwnProfilePreview(role, profile, photos, container, {
         showActions: false,
         showIdentity: false,
-        publicView: true
+        publicView: true,
+        profileActionContext: profileContext === "like" ? "incoming" : ""
       });
     } catch (_) {
       if (profileView.hidden) return;
@@ -4095,6 +4134,28 @@
     container.append(card);
   }
 
+  function openMatchDialog(peerId, fromDiscover) {
+    const dialog = document.querySelector("#match-dialog");
+    if (!dialog || !peerId) return;
+    pendingMatchPeerId = peerId;
+    pendingMatchFromDiscover = Boolean(fromDiscover);
+    dialog.classList.remove("is-flashing");
+    dialog.showModal();
+    window.requestAnimationFrame(() => dialog.classList.add("is-flashing"));
+    window.setTimeout(() => dialog.classList.remove("is-flashing"), 500);
+  }
+
+  async function sendProfileLike(profileId) {
+    const alreadyLiked = discoverState.likedIds.has(profileId);
+    const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: profileId });
+    if (error && !/duplicate|unique/i.test(error.message || "")) return { error, matched: false, newMatch: false };
+    discoverState.likedIds.add(profileId);
+    const reciprocal = await supabase.from("profile_likes").select("liker_id")
+      .eq("liker_id", profileId).eq("liked_id", currentUser.id).maybeSingle();
+    const matched = !reciprocal.error && Boolean(reciprocal.data);
+    return { error: null, matched, newMatch: matched && !alreadyLiked };
+  }
+
   async function handleDiscoverAction(actionButton) {
     const candidate = discoverState.active;
     if (actionButton.disabled) return;
@@ -4105,17 +4166,17 @@
     const buttons = document.querySelectorAll("[data-discover-action]");
     buttons.forEach((button) => { button.disabled = true; });
     const action = actionButton.dataset.discoverAction;
+    let newMatch = false;
     if (action === "like") {
-      const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: candidate.id });
-      if (error && !/duplicate|unique/i.test(error.message || "")) {
+      const result = await sendProfileLike(candidate.id);
+      if (result.error) {
         showNotice("Dein Interesse konnte nicht gespeichert werden. Bitte versuche es erneut.");
         buttons.forEach((button) => { button.disabled = false; });
         discoverState.busy = false;
         return;
       }
-      discoverState.likedIds.add(candidate.id);
-      const { data: reciprocal, error: reciprocalError } = await supabase.from("profile_likes").select("liker_id").eq("liker_id", candidate.id).eq("liked_id", currentUser.id).maybeSingle();
-      showNotice(!reciprocalError && reciprocal ? "Es ist ein Match! Ihr könnt euch jetzt schreiben." : "Interesse gesendet.");
+      newMatch = result.newMatch;
+      if (!result.matched) showNotice("Interesse gesendet.");
     } else if (action === "skip") {
       const { error } = await supabase.from("profile_skips").insert({ skipper_id: currentUser.id, skipped_id: candidate.id });
       if (error && !/duplicate|unique/i.test(error.message || "")) {
@@ -4125,6 +4186,8 @@
         return;
       }
       discoverState.skippedIds.add(candidate.id);
+      const dismissedLike = await supabase.from("profile_likes").delete().eq("liker_id", candidate.id).eq("liked_id", currentUser.id);
+      if (dismissedLike.error) showNotice("Das Like konnte nicht aus deiner Übersicht entfernt werden.");
     } else if (action === "save") {
       if (!discoverState.savedFeatureAvailable) {
         showNotice("Die Merkliste ist noch nicht eingerichtet. Bitte führe zuerst die Merkliste-Migration in Supabase aus.");
@@ -4146,6 +4209,92 @@
     await advanceDiscoverFeed();
     discoverState.busy = false;
     await refreshActivityViews();
+    if (newMatch) openMatchDialog(candidate.id, true);
+  }
+
+  async function handleProfileDecision(button) {
+    const profileId = button.dataset.profileId;
+    const action = button.dataset.profileDecision;
+    const context = button.dataset.profileContext;
+    if (!profileId || !action || button.disabled) return;
+    const bar = button.closest(".profile-decision-bar");
+    if (bar) bar.querySelectorAll("button").forEach((item) => { item.disabled = true; });
+    if (action === "like") {
+      const result = await sendProfileLike(profileId);
+      if (result.error) {
+        showNotice("Dein Interesse konnte nicht gespeichert werden. Bitte versuche es erneut.");
+        if (bar) bar.querySelectorAll("button").forEach((item) => { item.disabled = false; });
+        return;
+      }
+      if (discoverState.savedIds.has(profileId)) {
+        const removed = await supabase.from("profile_saved_profiles").delete().eq("user_id", currentUser.id).eq("saved_profile_id", profileId);
+        if (!removed.error) discoverState.savedIds.delete(profileId);
+      }
+      updateDiscoverModeButtons();
+      await refreshActivityViews();
+      if (result.matched && bar) bar.remove();
+      if (context === "saved") await showSavedProfiles();
+      if (result.newMatch) openMatchDialog(profileId, false);
+      else if (result.matched) showNotice("Ihr habt bereits ein Match.");
+      else {
+        if (bar) bar.replaceWith(createProfileDecisionBar(profileId, context));
+        showNotice("Interesse gesendet.");
+      }
+      return;
+    }
+    if (action === "skip") {
+      const skipped = await supabase.from("profile_skips").insert({ skipper_id: currentUser.id, skipped_id: profileId });
+      if (skipped.error && !/duplicate|unique/i.test(skipped.error.message || "")) {
+        showNotice("Das Profil konnte gerade nicht übersprungen werden. Bitte versuche es erneut.");
+        if (bar) bar.querySelectorAll("button").forEach((item) => { item.disabled = false; });
+        return;
+      }
+      discoverState.skippedIds.add(profileId);
+      const dismissed = await supabase.from("profile_likes").delete().eq("liker_id", profileId).eq("liked_id", currentUser.id);
+      if (dismissed.error) showNotice("Das Like konnte nicht aus deiner Übersicht entfernt werden.");
+      if (discoverState.savedIds.has(profileId)) {
+        const removed = await supabase.from("profile_saved_profiles").delete().eq("user_id", currentUser.id).eq("saved_profile_id", profileId);
+        if (!removed.error) discoverState.savedIds.delete(profileId);
+        else showNotice("Das Profil wurde übersprungen, konnte aber nicht aus der Merkliste entfernt werden.");
+      }
+      updateDiscoverModeButtons();
+      await refreshActivityViews();
+      if (context === "incoming") {
+        setMatchesTab("likes");
+        setDashboardView("matches");
+      } else if (context === "saved") {
+        await showSavedProfiles();
+      }
+      return;
+    }
+    if (action === "save" || action === "unsave") {
+      const save = action === "save";
+      const result = save
+        ? await supabase.from("profile_saved_profiles").insert({ user_id: currentUser.id, saved_profile_id: profileId })
+        : await supabase.from("profile_saved_profiles").delete().eq("user_id", currentUser.id).eq("saved_profile_id", profileId);
+      if (result.error && !(save && /duplicate|unique/i.test(result.error.message || ""))) {
+        showNotice("Das Profil konnte nicht in der Merkliste aktualisiert werden. Prüfe die Merkliste-Migration in Supabase.");
+        if (bar) bar.querySelectorAll("button").forEach((item) => { item.disabled = false; });
+        return;
+      }
+      if (save) discoverState.savedIds.add(profileId);
+      else discoverState.savedIds.delete(profileId);
+      updateDiscoverModeButtons();
+      if (context === "saved") await showSavedProfiles();
+      else {
+        const bookmark = bar && bar.querySelector("[data-profile-decision=\"save\"], [data-profile-decision=\"unsave\"]");
+        if (bookmark) {
+          bookmark.dataset.profileDecision = save ? "unsave" : "save";
+          const label = save ? "Entmerken" : "Merken";
+          bookmark.setAttribute("aria-label", label);
+          bookmark.title = label;
+          bookmark.querySelector("span").textContent = label;
+          bookmark.disabled = false;
+        }
+        if (bar) bar.querySelectorAll("button").forEach((item) => { if (item !== bookmark) item.disabled = false; });
+      }
+      showNotice(save ? "Profil in deiner Merkliste gespeichert." : "Profil aus deiner Merkliste entfernt.");
+    }
   }
 
   function syncOverviewScrollHint() {
@@ -4945,7 +5094,7 @@
     const card = event.target.closest(".activity-card-profile-clickable");
     if (!card || event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
     event.preventDefault();
-    openMatchedProfile(card.dataset.openProfile);
+    openMatchedProfile(card.dataset.openProfile, card.dataset.profileContext || "match");
   });
   document.querySelector("#conversation-thread")?.addEventListener("keydown", (event) => {
     if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-message-bubble]")) {
@@ -5147,15 +5296,18 @@
     }
     const profileBack = event.target.closest("#matched-profile-back");
     if (profileBack) {
+      if (activeMatchedProfileContext === "like") setMatchesTab("likes");
       setDashboardView("matches");
       return;
     }
     const cardAction = event.target.closest("[data-like-back], [data-dismiss-like], [data-open-conversation]");
     const profileButton = cardAction ? null : event.target.closest("[data-open-profile]");
     if (profileButton) {
-      openMatchedProfile(profileButton.dataset.openProfile);
+      openMatchedProfile(profileButton.dataset.openProfile, profileButton.dataset.profileContext || "match");
       return;
     }
+    const profileDecision = event.target.closest("[data-profile-decision]");
+    if (profileDecision) { await handleProfileDecision(profileDecision); return; }
     const discoverMode = event.target.closest("[data-discover-mode]");
     if (discoverMode) {
       await setDiscoverMode(discoverMode.dataset.discoverMode);
@@ -5207,9 +5359,15 @@
     const likeBack = event.target.closest("[data-like-back]");
     if (likeBack) {
       likeBack.disabled = true;
-      const { error } = await supabase.from("profile_likes").insert({ liker_id: currentUser.id, liked_id: likeBack.dataset.likeBack });
-      if (error && !/duplicate|unique/i.test(error.message || "")) showNotice("Dein Like konnte nicht gespeichert werden.");
+      const peerId = likeBack.dataset.likeBack;
+      const result = await sendProfileLike(peerId);
+      if (result.error) {
+        showNotice("Dein Like konnte nicht gespeichert werden.");
+        likeBack.disabled = false;
+        return;
+      }
       await refreshActivityViews();
+      if (result.newMatch) openMatchDialog(peerId, false);
       return;
     }
     const dismiss = event.target.closest("[data-dismiss-like]");
@@ -5228,6 +5386,10 @@
       const { error } = await supabase.from("profile_likes").delete()
         .eq("liker_id", skippedId).eq("liked_id", currentUser.id);
       if (error) showNotice("Das Like konnte nicht ausgeblendet werden. Prüfe die Profil-Likes-Migration.");
+      else {
+        discoverState.skippedIds.add(skippedId);
+        discoverState.ids = discoverState.ids.filter((id) => id !== skippedId);
+      }
       await refreshActivityViews();
       return;
     }
@@ -5236,6 +5398,44 @@
     const openMessage = event.target.closest("[data-open-conversation]");
     if (openMessage) await openConversation(openMessage.dataset.openConversation);
   });
+
+  const matchDialog = document.querySelector("#match-dialog");
+  if (matchDialog) {
+    matchDialog.addEventListener("click", async (event) => {
+      const close = event.target.closest("[data-match-close]");
+      if (close || event.target === matchDialog) {
+        matchDialog.close();
+        pendingMatchPeerId = "";
+        return;
+      }
+      if (event.target.closest("[data-match-message]")) {
+        const peerId = pendingMatchPeerId;
+        matchDialog.close();
+        pendingMatchPeerId = "";
+        if (!peerId) return;
+        setDashboardView("messages");
+        await openConversation(peerId);
+        return;
+      }
+      if (event.target.closest("[data-match-discover]")) {
+        const fromDiscover = pendingMatchFromDiscover;
+        matchDialog.close();
+        pendingMatchPeerId = "";
+        if (fromDiscover) return;
+        setDashboardView("discover");
+        discoverState.mode = "discover";
+        discoverState.loaded = false;
+        discoverState.active = null;
+        discoverState.ids = [];
+        discoverState.index = 0;
+        await loadDiscoverFeed();
+      }
+    });
+    matchDialog.addEventListener("close", () => {
+      matchDialog.classList.remove("is-flashing");
+      if (!matchDialog.open) pendingMatchPeerId = "";
+    });
+  }
 
   document.querySelector("#conversation-input").addEventListener("input", (event) => {
     const input = event.currentTarget;

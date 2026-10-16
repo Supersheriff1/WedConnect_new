@@ -521,6 +521,22 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .saved-profile-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}.saved-profile-actions .button{min-height:38px;padding:8px 10px;font-size:10px}
     .saved-profile-preview{grid-column:1/-1;width:100%;padding-top:10px}.saved-profile-preview[hidden]{display:none}
     @media(max-width:650px){.discover-photo-actions{bottom:48px;gap:10px}.discover-photo-action{width:44px;height:44px}.discover-photo-action--like{width:54px;height:54px}.discover-back-button{top:39px;left:10px;width:36px;height:36px}.saved-profile-item{grid-template-columns:68px minmax(0,1fr);gap:10px;padding:10px}.saved-profile-thumbnail{width:68px;height:68px}.saved-profile-actions{grid-column:1/-1;justify-content:stretch}.saved-profile-actions .button{flex:1}.saved-profile-preview{grid-column:1/-1}}
+  
+    .profile-decision-bar{width:min(760px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 auto;padding:14px clamp(14px,3vw,24px) 22px}
+    .profile-decision-action{min-width:0;min-height:46px;gap:7px;padding:9px 10px;font-size:12px;white-space:nowrap}
+    .profile-decision-action svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .profile-decision-action--like svg{fill:currentColor;stroke-width:1.2}
+    .profile-decision-action:disabled{opacity:.62;cursor:default}
+    .match-dialog .workspace-dialog-content{text-align:center}
+    .match-dialog .workspace-dialog-header{align-items:center;text-align:left}
+    .match-dialog-copy{margin:8px 0 22px;color:var(--body);font-size:15px}
+    .match-dialog-actions{display:grid;gap:10px}
+    .match-dialog-actions .button{width:100%}
+    .match-dialog.is-flashing::backdrop{animation:match-camera-flash 420ms ease-out both}
+    @keyframes match-camera-flash{0%{background:rgb(255 255 255 / 94%);backdrop-filter:none}18%{background:rgb(255 255 255 / 78%)}100%{background:rgb(12 12 15 / 78%);backdrop-filter:blur(5px)}}
+    @media(max-width:480px){.profile-decision-bar{gap:6px;padding-inline:10px}.profile-decision-action{gap:5px;padding:8px 5px;font-size:10px}}
+    @media(prefers-reduced-motion:reduce){.match-dialog.is-flashing::backdrop{animation:none;background:rgb(12 12 15 / 78%)}}
+
   </style>
 </head>
 <body>
@@ -767,10 +783,17 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     </section>
     <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile Hauptnavigation"></nav>
   </main>
+  <dialog id="match-dialog" class="workspace-dialog match-dialog" aria-labelledby="match-dialog-title">
+    <div class="workspace-dialog-content">
+      <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="match-dialog-title">Match</h2></div><button class="dialog-close" type="button" data-match-close aria-label="Schließen">×</button></header>
+      <p class="match-dialog-copy">Ihr habt gegenseitiges Interesse.</p>
+      <div class="match-dialog-actions"><button class="button button-primary" type="button" data-match-message>Nachricht schreiben</button><button class="button button-secondary" type="button" data-match-discover>Weiter entdecken</button></div>
+    </div>
+  </dialog>
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-like-dismiss-persists-skip-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-profile-actions-match-flash-v1"></script>
 </body>
 </html>
 
