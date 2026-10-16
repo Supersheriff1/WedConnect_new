@@ -30,6 +30,7 @@
   let currentGreeting = "";
   let activeConversationPeer = "";
   let activityCache = { incoming: [], matches: [], messages: [], summaries: new Map() };
+  const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
@@ -2351,8 +2352,17 @@
       ? candidates.find((item) => item.photo_type === "couple") || candidates.find((item) => item.photo_type === "partner_one") || candidates[0]
       : candidates[0];
     if (photo) {
-      const { data } = await supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600);
-      if (data && data.signedUrl) summary.photoUrl = data.signedUrl;
+      const photoPath = photo.display_path || photo.object_path;
+      const cachedPhoto = profilePhotoUrlCache.get(photoPath);
+      if (cachedPhoto && cachedPhoto.expiresAt > Date.now() + 30000) {
+        summary.photoUrl = cachedPhoto.url;
+      } else {
+        const { data } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
+        if (data && data.signedUrl) {
+          summary.photoUrl = data.signedUrl;
+          profilePhotoUrlCache.set(photoPath, { url: data.signedUrl, expiresAt: Date.now() + 540000 });
+        }
+      }
     }
     return summary;
   }
@@ -2550,10 +2560,18 @@
   function renderMatchList() {
     const container = document.querySelector("#matches-list");
     const likesContainer = document.querySelector("#matches-likes-list");
-    container.replaceChildren();
-    likesContainer.replaceChildren();
-    activityCache.matches.forEach((summary) => container.append(createActivityCard(summary, "match")));
-    activityCache.incoming.forEach((summary) => likesContainer.append(createActivityCard(summary, "like")));
+    const matchesSignature = JSON.stringify(activityCache.matches.map((summary) => [summary.id, summary.name, summary.detail, summary.photoUrl, activityCache.messagedPeers && activityCache.messagedPeers.has(summary.id)]));
+    const likesSignature = JSON.stringify(activityCache.incoming.map((summary) => [summary.id, summary.name, summary.detail, summary.photoUrl]));
+    if (container.dataset.renderSignature !== matchesSignature) {
+      container.replaceChildren();
+      activityCache.matches.forEach((summary) => container.append(createActivityCard(summary, "match")));
+      container.dataset.renderSignature = matchesSignature;
+    }
+    if (likesContainer.dataset.renderSignature !== likesSignature) {
+      likesContainer.replaceChildren();
+      activityCache.incoming.forEach((summary) => likesContainer.append(createActivityCard(summary, "like")));
+      likesContainer.dataset.renderSignature = likesSignature;
+    }
     const isCouple = currentRole === "couple";
     document.querySelector("#matches-intro").textContent = isCouple
       ? "Ein Match entsteht, wenn ihr und ein Fotograf gegenseitig Interesse zeigen. Das ist noch keine Buchungszusage."
