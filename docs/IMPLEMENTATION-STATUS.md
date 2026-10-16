@@ -229,3 +229,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Galerie-Fortschrittsbalken in der eigenen Profilansicht, in aufgerufenen Like-/Match-Profilen und in Entdecken verwenden nun dieselbe dezente Darstellung: dünne 2-Pixel-Segmente ohne dunkle, abgerundete Trägerfläche.
 - Die Anpassung liegt zunächst auf `news-sandbox` und wird vor dem Livegang auf Mobilgeräten sowie Desktop geprüft. Keine Supabase-Migration.
+
+
+## Korrektur: kompakte Fotobalken (16. Oktober 2026)
+
+- Die erste Vereinheitlichung zog die Balken über fast die gesamte Bildbreite. Korrigiert: Die Anzeige ist jetzt kurz, zentriert und pro Foto auf 6 Pixel Breite begrenzt, angelehnt an die gewünschte Like-Profilansicht.
+- Die kompakte Darstellung gilt für eigene Profile, aufgerufene Like-/Match-Profile, Entdecken und die Galerie im Vollbild.

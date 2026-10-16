@@ -457,18 +457,20 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   
     @media(max-width:850px){.discover-photo-arrow{display:none!important}}
   
-    /* Einheitliche, dezente Foto-Fortschrittsbalken in allen Profilansichten */
+    /* Kompaktes, zentriertes Balkenschema in allen Profil- und Discover-Galerien */
     #dashboard .profile-preview-gallery:not(.is-fullscreen) .profile-preview-indicators,
     #dashboard .matched-profile-view-content .profile-preview-gallery:not(.is-fullscreen) .profile-preview-indicators,
     #dashboard .discover-photo-indicators {
-      top:14px!important;left:14px!important;right:14px!important;width:auto!important;
+      top:14px!important;left:50%!important;right:auto!important;width:max-content!important;
+      max-width:calc(100% - 28px)!important;transform:translateX(-50%)!important;
       gap:4px!important;padding:0!important;border-radius:0!important;
-      background:transparent!important;backdrop-filter:none!important;transform:none!important;
+      background:transparent!important;backdrop-filter:none!important;
     }
     #dashboard .profile-preview-indicator,
     #dashboard .discover-photo-indicator,
     #fullscreen-gallery-dialog .profile-preview-indicator {
-      height:2px!important;min-width:4px!important;border-radius:999px!important;
+      width:6px!important;height:2px!important;min-width:6px!important;
+      flex:0 0 6px!important;border-radius:999px!important;
     }
     #dashboard .profile-preview-indicator,
     #dashboard .discover-photo-indicator {background:rgb(255 255 255 / 42%)}
@@ -478,8 +480,16 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     #fullscreen-gallery-dialog .profile-preview-indicators {
       gap:4px!important;padding:0!important;border-radius:0!important;
       background:transparent!important;backdrop-filter:none!important;
+      width:max-content!important;max-width:calc(100vw - 24px)!important;
     }
-</style>
+    #fullscreen-gallery-dialog .profile-preview-indicators {
+      left:calc(var(--gallery-indicator-left, 16px) + var(--gallery-indicator-width, 100px) / 2)!important;
+      right:auto!important;transform:translateX(-50%)!important;
+    }
+    #dashboard .profile-preview-gallery.is-fullscreen .profile-preview-indicators {
+      left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+    }
+    </style>
 </head>
 <body>
   <div id="orientation-guard" role="status" aria-live="polite" aria-hidden="true">
