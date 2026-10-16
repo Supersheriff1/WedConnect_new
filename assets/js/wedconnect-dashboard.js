@@ -4087,7 +4087,7 @@
     back.disabled = discoverState.index < 2;
     back.setAttribute("aria-label", "Zum vorherigen Profil");
     back.title = "Vorheriges Profil";
-    back.textContent = "‹";
+    back.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h9a7 7 0 1 1-6.2 10.2"/></svg>';
     photoFrame.append(back);
 
     const photoActions = document.createElement("div");

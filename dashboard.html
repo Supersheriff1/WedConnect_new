@@ -501,7 +501,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .discover-mode-tab.is-active{border-color:rgb(213 182 122 / 44%);background:rgb(213 182 122 / 10%);color:var(--gold)}
     .discover-mode-count{margin-left:5px;color:inherit;font:500 10px var(--mono)}
     .discover-back-button,.discover-photo-action{position:absolute;z-index:5;display:grid;place-items:center;padding:0;border:1px solid rgb(255 255 255 / 48%);border-radius:50%;background:rgb(37 36 43 / 82%);color:#fff;box-shadow:0 5px 18px #0005;backdrop-filter:blur(8px);cursor:pointer}
-    .discover-back-button{top:42px;left:12px;width:38px;height:38px;font-size:27px;line-height:1}
+    .discover-back-button{top:42px;left:12px;width:40px;height:40px;background:var(--ink);color:#77747a;border-color:rgb(255 255 255 / 82%)}.discover-back-button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
     .discover-photo-actions{position:absolute;z-index:4;right:0;bottom:49px;left:0;display:flex;align-items:center;justify-content:center;gap:13px;pointer-events:none}
     .discover-photo-action{position:static;width:48px;height:48px;pointer-events:auto}.discover-photo-action[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
     .discover-photo-action svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -520,7 +520,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     .saved-profile-copy{min-width:0}.saved-profile-copy h3{margin:0;color:var(--ink);font-size:16px}.saved-profile-copy p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
     .saved-profile-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}.saved-profile-actions .button{min-height:38px;padding:8px 10px;font-size:10px}
     .saved-profile-preview{grid-column:1/-1;width:100%;padding-top:10px}.saved-profile-preview[hidden]{display:none}
-    @media(max-width:650px){.discover-photo-actions{bottom:48px;gap:10px}.discover-photo-action{width:44px;height:44px}.discover-photo-action--like{width:54px;height:54px}.discover-back-button{top:39px;left:10px;width:36px;height:36px}.saved-profile-item{grid-template-columns:68px minmax(0,1fr);gap:10px;padding:10px}.saved-profile-thumbnail{width:68px;height:68px}.saved-profile-actions{grid-column:1/-1;justify-content:stretch}.saved-profile-actions .button{flex:1}.saved-profile-preview{grid-column:1/-1}}
+    @media(max-width:650px){.discover-photo-actions{bottom:48px;gap:10px}.discover-photo-action{width:44px;height:44px}.discover-photo-action--like{width:54px;height:54px}.discover-back-button{top:39px;left:10px;width:38px;height:38px}.saved-profile-item{grid-template-columns:68px minmax(0,1fr);gap:10px;padding:10px}.saved-profile-thumbnail{width:68px;height:68px}.saved-profile-actions{grid-column:1/-1;justify-content:stretch}.saved-profile-actions .button{flex:1}.saved-profile-preview{grid-column:1/-1}}
   
     .profile-decision-bar{width:min(760px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 auto;padding:14px clamp(14px,3vw,24px) 22px}
 .profile-decision-bar.is-two-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:510px}
@@ -794,7 +794,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-hide-profile-complete-on-other-pages-v1"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-discover-undo-back-button-v1"></script>
 </body>
 </html>
 

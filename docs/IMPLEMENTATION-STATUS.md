@@ -269,3 +269,8 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - In der Merkliste stehen unter geöffneten Profilen nur „Überspringen“ und „Interesse zeigen“. „Entmerken“ bleibt in der Merkliste selbst verfügbar. Überspringen entfernt das Profil aus der Merkliste und blendet es dauerhaft aus. Bereits gesendete Likes sind als Status erkennbar und können nicht nochmals gesendet werden. Für bereits gematchte Profile erscheinen keine Profilentscheidungs-Buttons.
 - Ein neu entstehendes Match zeigt einen kurzen Kamera-Blitz und einen schlichten Dialog mit „Match“, „Ihr habt gegenseitiges Interesse“, „Nachricht schreiben“ und „Weiter entdecken“. Der Blitz entfällt bei aktivierter Einstellung für reduzierte Bewegung. Eine Sicherung verhindert, dass der Blitz für dasselbe Match während einer Sitzung mehrfach erscheint oder der Dialog doppelt geöffnet wird.
 - Es wird keine neue Supabase-Migration benötigt; Aktionen verwenden die bestehende Likes-, Skip- und Merkliste-Struktur. `node --check` und HTML-Parsing sind erfolgreich. Ein vollständiger Browser-/Supabase-End-to-End-Test wurde nicht durchgeführt; das Produktionsdeployment wird für den Main-Commit geprüft.
+
+
+## Entdecken: Zurück-Pfeil (16. Oktober 2026)
+
+- Die Zurück-Schaltfläche für das vorherige Profil verwendet ein geschwungenes Undo-Symbol anstelle des einfachen Winkelpfeils. Der helle, runde Button hebt sich auf den Profilfotos klar ab.
