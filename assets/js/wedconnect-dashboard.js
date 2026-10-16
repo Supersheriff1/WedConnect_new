@@ -29,6 +29,11 @@
   let currentRole = "";
   let currentGreeting = "";
   let activeConversationPeer = "";
+  let activeSupportThreadId = "";
+  let activeSupportEmailThreadId = "";
+  let supportFeatureAvailable = false;
+  let supportOperator = false;
+  let supportNoticeShown = false;
   let messageReactionPickerId = "";
   let conversationRefreshTimer = null;
   let conversationRefreshBusy = false;
@@ -40,7 +45,7 @@
   let messageLongPressTimer = null;
   let messageLongPressStart = null;
   let suppressOwnMessageClickUntil = 0;
-  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], summaries: new Map() };
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], supportThreads: [], supportMessages: [], summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2485,6 +2490,164 @@
     return card;
   }
 
+  function supportSchemaMissing(error) {
+    return /support_threads|support_messages|support_operators|is_wedconnect_support_operator|create_support_thread|does not exist|schema cache|42P01|42883|could not find the table|could not find the function/i.test(String(error && error.message || ""));
+  }
+
+  async function loadSupportData(showSetupHint = false) {
+    const operatorResult = await supabase.rpc("is_wedconnect_support_operator");
+    if (operatorResult.error) {
+      supportFeatureAvailable = false;
+      if (showSetupHint && !supportNoticeShown) {
+        showNotice("Kontakt / Feedback ist noch nicht eingerichtet. Bitte führe die Support-Migration in Supabase aus.");
+        supportNoticeShown = true;
+      }
+      return false;
+    }
+    supportOperator = Boolean(operatorResult.data);
+    const threadsResult = await supabase.from("support_threads")
+      .select("id,user_id,channel,category,subject,status,created_at,updated_at")
+      .order("updated_at", { ascending: false });
+    if (threadsResult.error) {
+      supportFeatureAvailable = false;
+      if (showSetupHint && !supportNoticeShown) {
+        showNotice("Kontakt / Feedback ist noch nicht eingerichtet. Bitte führe die Support-Migration in Supabase aus.");
+        supportNoticeShown = true;
+      }
+      return false;
+    }
+    const threads = threadsResult.data || [];
+    let messages = [];
+    if (threads.length) {
+      const messageResult = await supabase.from("support_messages")
+        .select("id,thread_id,sender_id,sender_type,body,created_at,email_sent_at")
+        .in("thread_id", threads.map((thread) => thread.id))
+        .order("created_at", { ascending: true });
+      if (messageResult.error) {
+        supportFeatureAvailable = false;
+        if (showSetupHint && !supportNoticeShown) {
+          showNotice("Support-Nachrichten konnten nicht geladen werden. Bitte prüfe die Support-Migration in Supabase.");
+          supportNoticeShown = true;
+        }
+        return false;
+      }
+      messages = messageResult.data || [];
+    }
+    supportFeatureAvailable = true;
+    activityCache.supportThreads = threads;
+    activityCache.supportMessages = messages;
+    renderSupportEmailThreads();
+    renderSupportOperatorInbox();
+    return true;
+  }
+
+  async function sendSupportEmail(messageId) {
+    const { data, error } = await supabase.functions.invoke("send-support-email", { body: { message_id: messageId } });
+    if (error || data && data.error) return { ok: false, message: data && data.error ? data.error : (error && error.message) || "Versand fehlgeschlagen." };
+    return { ok: true };
+  }
+
+  function renderSupportEmailThreads() {
+    const container = document.querySelector("#support-email-threads");
+    if (!container) return;
+    container.replaceChildren();
+    const threads = (activityCache.supportThreads || []).filter((thread) => thread.channel === "email");
+    if (!threads.length) {
+      const empty = document.createElement("p");
+      empty.className = "support-thread-empty";
+      empty.textContent = supportOperator ? "Noch keine E-Mail-Anfragen." : "Deine E-Mail-Verläufe erscheinen hier.";
+      container.append(empty);
+      return;
+    }
+    threads.forEach((thread) => {
+      const details = document.createElement("details");
+      details.className = "support-email-thread";
+      details.dataset.supportEmailThread = thread.id;
+      details.open = activeSupportEmailThreadId === thread.id;
+      const summary = document.createElement("summary");
+      const title = document.createElement("span");
+      title.className = "support-thread-title";
+      title.textContent = thread.subject || "Kontakt / Feedback";
+      const threadMessages = (activityCache.supportMessages || []).filter((message) => message.thread_id === thread.id);
+      const latest = threadMessages[threadMessages.length - 1];
+      const preview = document.createElement("span");
+      preview.className = "support-thread-preview";
+      preview.textContent = (supportOperator && thread.user_id !== currentUser.id ? "Anfrage · " : "") + (latest ? latest.body : "Noch keine Nachricht");
+      summary.append(title, preview);
+      const messageList = document.createElement("div");
+      messageList.className = "support-thread-messages";
+      threadMessages.forEach((message) => {
+        const bubble = document.createElement("div");
+        bubble.className = "support-thread-message" + (message.sender_id === currentUser.id ? " is-own" : "");
+        bubble.textContent = message.body;
+        const meta = document.createElement("small");
+        meta.textContent = (message.sender_id === currentUser.id ? "Du" : (supportOperator ? "Nutzer:in" : "WedConnect-Team"))
+          + " · " + new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(message.created_at));
+        bubble.append(meta);
+        messageList.append(bubble);
+        if (!message.email_sent_at && (message.sender_id === currentUser.id || supportOperator)) {
+          const retry = document.createElement("button");
+          retry.type = "button";
+          retry.className = "support-email-retry";
+          retry.dataset.retrySupportEmail = message.id;
+          retry.textContent = "E-Mail erneut senden";
+          messageList.append(retry);
+        }
+      });
+      details.append(summary, messageList);
+      const replyForm = document.createElement("form");
+      replyForm.className = "support-email-reply";
+      replyForm.dataset.supportEmailReply = thread.id;
+      const reply = document.createElement("textarea");
+      reply.name = "body";
+      reply.maxLength = 2000;
+      reply.required = true;
+      reply.placeholder = supportOperator ? "Antwort an die Person …" : "Antwort an WedConnect …";
+      reply.setAttribute("aria-label", reply.placeholder);
+      const send = document.createElement("button");
+      send.type = "submit";
+      send.className = "button button-primary";
+      send.textContent = supportOperator ? "Antwort senden" : "E-Mail senden";
+      const status = document.createElement("p");
+      status.className = "settings-save-status";
+      status.id = "support-email-status-" + thread.id;
+      status.setAttribute("role", "status");
+      replyForm.append(reply, send, status);
+      details.append(replyForm);
+      container.append(details);
+    });
+  }
+
+  function renderSupportOperatorInbox() {
+    const section = document.querySelector("#support-operator-inbox");
+    const container = document.querySelector("#support-operator-list");
+    if (!section || !container) return;
+    section.hidden = !supportOperator;
+    container.replaceChildren();
+    if (!supportOperator) return;
+    const threads = activityCache.supportThreads || [];
+    if (!threads.length) {
+      const empty = document.createElement("p");
+      empty.className = "support-thread-empty";
+      empty.textContent = "Der Support-Eingang ist derzeit leer.";
+      container.append(empty);
+      return;
+    }
+    threads.forEach((thread) => {
+      const row = document.createElement("div");
+      row.className = "support-operator-row";
+      const label = document.createElement("span");
+      label.textContent = (thread.channel === "chat" ? "Chat" : "E-Mail") + " · " + (thread.subject || "Kontakt / Feedback");
+      const action = document.createElement("button");
+      action.type = "button";
+      action.className = "button button-secondary support-operator-open";
+      action.textContent = thread.channel === "chat" ? "Chat öffnen" : "Verlauf öffnen";
+      action.dataset.openSupportInboxThread = thread.id;
+      row.append(label, action);
+      container.append(row);
+    });
+  }
+
   async function loadProfileMessages(userId) {
     const queryMessages = (columns) => supabase.from("profile_messages")
       .select(columns)
@@ -2533,8 +2696,11 @@
       reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
-      summaries: new Map(summaries.filter(Boolean).map((summary) => [summary.id, summary]))
+      summaries: new Map(summaries.filter(Boolean).map((summary) => [summary.id, summary])),
+      supportThreads: activityCache.supportThreads || [],
+      supportMessages: activityCache.supportMessages || []
     };
+    await loadSupportData(false);
   }
 
   function renderOverviewActivity() {
@@ -2646,7 +2812,33 @@
       card.append(avatar, copy);
       container.append(card);
     });
-    const hasConversations = peers.length > 0;
+    const supportChatThreads = (activityCache.supportThreads || []).filter((thread) => thread.channel === "chat");
+    supportChatThreads.forEach((thread) => {
+      const card = document.createElement("article");
+      card.className = "activity-card activity-message-card";
+      card.dataset.openSupportThread = thread.id;
+      card.tabIndex = 0;
+      card.setAttribute("aria-label", "Support-Chat öffnen");
+      const avatar = document.createElement("div");
+      avatar.className = "activity-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = "W";
+      const copy = document.createElement("div");
+      copy.className = "activity-card-copy";
+      const name = document.createElement("strong");
+      name.textContent = supportOperator ? "Support · " + (thread.subject || "Anfrage") : "WedConnect-Team";
+      const messages = (activityCache.supportMessages || []).filter((item) => item.thread_id === thread.id);
+      const latest = messages[messages.length - 1];
+      const detail = document.createElement("p");
+      detail.className = "activity-message-preview";
+      detail.textContent = latest ? ((latest.sender_id === currentUser.id ? "Du: " : "") + latest.body) : "Support-Chat öffnen";
+      copy.append(name, detail);
+      card.dataset.searchText = (name.textContent + " " + detail.textContent).toLocaleLowerCase("de");
+      card.hidden = Boolean(query && !card.dataset.searchText.includes(query));
+      card.append(avatar, copy);
+      container.append(card);
+    });
+    const hasConversations = peers.length > 0 || supportChatThreads.length > 0;
     const hasVisibleConversations = Array.from(container.children).some((card) => !card.hidden);
     document.querySelector("#messages-empty-state").hidden = hasConversations;
     document.querySelector("#messages-no-results").hidden = !query || !hasConversations || hasVisibleConversations;
@@ -3104,6 +3296,7 @@
   }
 
   async function openConversation(peerId) {
+    activeSupportThreadId = "";
     activeConversationPeer = peerId;
     const summary = activityCache.summaries.get(peerId) || await loadPublicProfileSummary(peerId);
     const partnerName = summary && summary.name ? summary.name : "Nachricht";
@@ -3129,12 +3322,58 @@
     startConversationMessagePolling();
   }
 
+  async function openSupportConversation(threadId) {
+    const thread = (activityCache.supportThreads || []).find((item) => item.id === threadId);
+    if (!thread) return;
+    activeConversationPeer = "";
+    activeSupportThreadId = threadId;
+    const title = supportOperator ? ("Support · " + (thread.subject || "Anfrage")) : "WedConnect-Team";
+    document.querySelector("#conversation-title").textContent = title;
+    const avatar = document.querySelector("#conversation-avatar");
+    avatar.replaceChildren();
+    avatar.textContent = "W";
+    messageReactionPickerId = "";
+    await renderConversationThread(true);
+    document.querySelector("#conversation-status").textContent = "";
+    openWorkspaceDialog(document.querySelector("#conversation-dialog"));
+    const input = document.querySelector("#conversation-input");
+    input.placeholder = "Nachricht an WedConnect schreiben …";
+    input.setAttribute("aria-label", "Nachricht an WedConnect");
+    const threadElement = document.querySelector("#conversation-thread");
+    requestAnimationFrame(() => { if (threadElement) threadElement.scrollTop = threadElement.scrollHeight; });
+    await refreshOpenConversationMessages();
+    startConversationMessagePolling();
+  }
+
   async function renderConversationThread(forceBottom = false) {
     const container = document.querySelector("#conversation-thread");
     if (!container) return;
     const wasNearBottom = forceBottom || container.scrollHeight - container.scrollTop - container.clientHeight < 80;
     container.replaceChildren();
     const userId = currentUser.id;
+    if (activeSupportThreadId) {
+      const supportMessages = (activityCache.supportMessages || []).filter((item) => item.thread_id === activeSupportThreadId);
+      if (!supportMessages.length) {
+        const empty = document.createElement("p");
+        empty.className = "conversation-empty";
+        empty.textContent = "Schreib dem WedConnect-Team deine erste Nachricht.";
+        container.append(empty);
+        return;
+      }
+      supportMessages.forEach((item) => {
+        const bubble = document.createElement("div");
+        bubble.className = "conversation-message" + (item.sender_id === userId ? " is-own" : "");
+        const body = document.createElement("span");
+        body.textContent = item.body;
+        const time = document.createElement("time");
+        time.dateTime = item.created_at;
+        time.textContent = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(item.created_at));
+        bubble.append(body, time);
+        container.append(bubble);
+      });
+      if (wasNearBottom) container.scrollTop = container.scrollHeight;
+      return;
+    }
     const messages = activityCache.messages.filter((item) =>
       (item.sender_id === userId && item.recipient_id === activeConversationPeer)
       || (item.sender_id === activeConversationPeer && item.recipient_id === userId));
@@ -3148,7 +3387,7 @@
     messages.forEach((item) => {
       if (item.deleted_at) {
         const deletionNote = document.createElement("div");
-        deletionNote.className = "conversation-message is-deleted";
+        deletionNote.className = "conversation-message is-deleted" + (item.sender_id === userId ? " is-own" : "");
         deletionNote.setAttribute("aria-label", "Nachricht wurde gelöscht");
         deletionNote.textContent = "Nachricht wurde gelöscht";
         container.append(deletionNote);
@@ -3209,9 +3448,21 @@
   async function refreshOpenConversationMessages() {
     const dialog = document.querySelector("#conversation-dialog");
     const peerId = activeConversationPeer;
-    if (!peerId || !dialog || !dialog.open || document.visibilityState !== "visible" || conversationRefreshBusy) return;
+    const supportThreadId = activeSupportThreadId;
+    if ((!peerId && !supportThreadId) || !dialog || !dialog.open || document.visibilityState !== "visible" || conversationRefreshBusy) return;
     conversationRefreshBusy = true;
     try {
+      if (supportThreadId) {
+        const before = (activityCache.supportMessages || []).filter((item) => item.thread_id === supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
+        const loaded = await loadSupportData(false);
+        if (!loaded || supportThreadId !== activeSupportThreadId) return;
+        const after = (activityCache.supportMessages || []).filter((item) => item.thread_id === supportThreadId).map((item) => [item.id, item.created_at].join("|")).join(";");
+        if (before !== after) {
+          renderMessagesList();
+          await renderConversationThread();
+        }
+        return;
+      }
       const userId = currentUser.id;
       const messageResult = await loadProfileMessages(userId);
       if (messageResult.error || peerId !== activeConversationPeer) return;
@@ -3289,6 +3540,7 @@
   document.querySelector("#conversation-dialog").addEventListener("close", () => {
     stopConversationMessagePolling();
     activeConversationPeer = "";
+    activeSupportThreadId = "";
     pendingDeleteMessageId = "";
     cancelMessageLongPress();
   });
@@ -3541,6 +3793,87 @@
     }
   });
 
+  const contactDialog = document.querySelector("#contact-feedback-dialog");
+  const accountContactOpen = document.querySelector("#account-contact-open");
+  document.querySelector("#support-new-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const channel = String(formData.get("channel") || "chat");
+    const category = String(formData.get("category") || "other");
+    const subject = String(formData.get("subject") || "").trim();
+    const body = String(formData.get("body") || "").trim();
+    const status = document.querySelector("#support-new-status");
+    const submit = document.querySelector("#support-new-submit");
+    if (!body || !supportFeatureAvailable) return;
+    submit.disabled = true;
+    status.textContent = "Wird gesendet …";
+    const { data, error } = await supabase.rpc("create_support_thread", {
+      p_channel: channel,
+      p_category: category,
+      p_subject: subject || (channel === "chat" ? "Support-Chat" : "Kontakt / Feedback"),
+      p_body: body
+    });
+    if (error || !data || !data.length) {
+      submit.disabled = false;
+      status.textContent = "Deine Nachricht konnte nicht gespeichert werden. Bitte versuche es erneut.";
+      return;
+    }
+    const created = data[0];
+    form.reset();
+    await loadSupportData(false);
+    if (channel === "email") {
+      const delivery = await sendSupportEmail(created.message_id);
+      await loadSupportData(false);
+      submit.disabled = false;
+      status.textContent = delivery.ok
+        ? "Deine E-Mail wurde versendet. Der Verlauf bleibt hier gespeichert."
+        : "Deine Nachricht ist gespeichert, aber die E-Mail konnte noch nicht versendet werden. Du kannst sie im Verlauf erneut senden.";
+      activeSupportEmailThreadId = created.thread_id;
+      renderSupportEmailThreads();
+      const threadDetails = document.querySelector('[data-support-email-thread="' + created.thread_id + '"]');
+      if (threadDetails) { threadDetails.open = true; threadDetails.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      return;
+    }
+    submit.disabled = false;
+    status.textContent = "";
+    if (contactDialog && contactDialog.open) contactDialog.close();
+    await openSupportConversation(created.thread_id);
+    renderMessagesList();
+  });
+
+  document.addEventListener("submit", async (event) => {
+    const replyForm = event.target.closest("[data-support-email-reply]");
+    if (!replyForm) return;
+    event.preventDefault();
+    const threadId = replyForm.dataset.supportEmailReply;
+    const body = String(new FormData(replyForm).get("body") || "").trim();
+    const status = replyForm.querySelector(".settings-save-status");
+    const send = replyForm.querySelector('button[type="submit"]');
+    if (!body) return;
+    send.disabled = true;
+    status.textContent = "Wird gesendet …";
+    const { data, error } = await supabase.from("support_messages").insert({
+      thread_id: threadId,
+      sender_id: currentUser.id,
+      sender_type: supportOperator ? "operator" : "user",
+      body
+    }).select("id").single();
+    if (error || !data) {
+      send.disabled = false;
+      status.textContent = "Die Antwort konnte nicht gespeichert werden.";
+      return;
+    }
+    activeSupportEmailThreadId = threadId;
+    const delivery = await sendSupportEmail(data.id);
+    await loadSupportData(false);
+    renderMessagesList();
+    const nextStatus = document.querySelector("#support-email-status-" + threadId);
+    if (nextStatus) nextStatus.textContent = delivery.ok
+      ? "E-Mail wurde versendet."
+      : "Nachricht ist gespeichert, aber der E-Mail-Versand ist noch nicht eingerichtet. Du kannst sie erneut senden.";
+  });
+
   const accountDialog = document.querySelector("#account-dialog");
   const settingsDialog = document.querySelector("#settings-dialog");
   const accountTrigger = document.querySelector("#account-open");
@@ -3648,7 +3981,8 @@
     const messageCard = event.target.closest(".activity-message-card");
     if (messageCard && event.target === messageCard && (event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
-      openConversation(messageCard.dataset.openConversation);
+      if (messageCard.dataset.openSupportThread) openSupportConversation(messageCard.dataset.openSupportThread);
+      else openConversation(messageCard.dataset.openConversation);
       return;
     }
     const card = event.target.closest(".activity-card-profile-clickable");
@@ -3704,6 +4038,35 @@
     if (Date.now() < suppressOwnMessageClickUntil && event.target.closest("#delete-message-dialog")) {
       suppressOwnMessageClickUntil = 0;
       event.preventDefault();
+      return;
+    }
+    const supportInboxButton = event.target.closest("[data-open-support-inbox-thread]");
+    if (supportInboxButton) {
+      const threadId = supportInboxButton.dataset.openSupportInboxThread;
+      const thread = (activityCache.supportThreads || []).find((item) => item.id === threadId);
+      if (thread && thread.channel === "chat") await openSupportConversation(threadId);
+      else {
+        activeSupportEmailThreadId = threadId;
+        renderSupportEmailThreads();
+        const details = document.querySelector('[data-support-email-thread="' + threadId + '"]');
+        if (details) { details.open = true; details.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      }
+      return;
+    }
+    const retrySupportEmail = event.target.closest("[data-retry-support-email]");
+    if (retrySupportEmail) {
+      retrySupportEmail.disabled = true;
+      const result = await sendSupportEmail(retrySupportEmail.dataset.retrySupportEmail);
+      await loadSupportData(false);
+      renderMessagesList();
+      if (!result.ok) showNotice("E-Mail konnte nicht versendet werden. Prüfe die E-Mail-Konfiguration.");
+      return;
+    }
+    const contactOpen = event.target.closest("#account-contact-open");
+    if (contactOpen) {
+      if (accountDialog && accountDialog.open) accountDialog.close();
+      openWorkspaceDialog(contactDialog);
+      await loadSupportData(true);
       return;
     }
     const confirmMessageDelete = event.target.closest("#delete-message-confirm");
@@ -3814,6 +4177,8 @@
       await refreshActivityViews();
       return;
     }
+    const openSupport = event.target.closest("[data-open-support-thread]");
+    if (openSupport) { await openSupportConversation(openSupport.dataset.openSupportThread); return; }
     const openMessage = event.target.closest("[data-open-conversation]");
     if (openMessage) await openConversation(openMessage.dataset.openConversation);
   });
@@ -3830,12 +4195,33 @@
     const input = document.querySelector("#conversation-input");
     const status = document.querySelector("#conversation-status");
     const body = String(input.value || "").trim();
-    if (!body || !activeConversationPeer) return;
+    if (!body || (!activeConversationPeer && !activeSupportThreadId)) return;
     status.textContent = "";
     const form = document.querySelector("#conversation-form");
     form.setAttribute("aria-busy", "true");
     const send = document.querySelector("#conversation-form button[type=submit]");
     send.disabled = true;
+    if (activeSupportThreadId) {
+      const { error: supportError } = await supabase.from("support_messages").insert({
+        thread_id: activeSupportThreadId,
+        sender_id: currentUser.id,
+        sender_type: supportOperator ? "operator" : "user",
+        body
+      });
+      send.disabled = false;
+      form.removeAttribute("aria-busy");
+      if (supportError) {
+        status.textContent = "Nachricht konnte nicht gesendet werden. Prüfe die Support-Migration und deine Berechtigung.";
+        return;
+      }
+      input.value = "";
+      input.style.height = "50px";
+      input.style.overflowY = "hidden";
+      await loadSupportData(false);
+      renderMessagesList();
+      await renderConversationThread(true);
+      return;
+    }
     const { error } = await supabase.from("profile_messages").insert({
       sender_id: currentUser.id,
       recipient_id: activeConversationPeer,
