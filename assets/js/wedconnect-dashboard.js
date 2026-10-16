@@ -2235,6 +2235,11 @@
       track.append(figure);
       renderedCount += 1;
     });
+    if (options.publicView) {
+      indicatorGroup.classList.add("profile-preview-indicators--compact");
+      const compactWidth = Math.min(220, renderedCount * 18 + Math.max(0, renderedCount - 1) * 4);
+      indicatorGroup.style.width = compactWidth + "px";
+    }
     if (!renderedCount) {
       const empty = document.createElement("p");
       empty.className = "profile-preview-empty";
