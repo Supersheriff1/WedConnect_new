@@ -4529,6 +4529,9 @@
   deleteAccountConfirmation.addEventListener("input", () => {
     deleteAccountSubmit.disabled = deleteAccountConfirmation.value.trim() !== "KONTO LÖSCHEN";
   });
+  deleteAccountDialog.addEventListener("cancel", (event) => {
+    if (deleteAccountDialog.dataset.busy) event.preventDefault();
+  });
   deleteAccountDialog.addEventListener("close", () => {
     if (!deleteAccountSubmit.dataset.busy) {
       deleteAccountConfirmation.value = "";
@@ -4542,6 +4545,8 @@
     if (!currentUser || deleteAccountConfirmation.value.trim() !== "KONTO LÖSCHEN") return;
     deleteAccountSubmit.disabled = true;
     deleteAccountSubmit.dataset.busy = "true";
+    deleteAccountDialog.dataset.busy = "true";
+    deleteAccountDialog.querySelectorAll("[data-dialog-close]").forEach((button) => { button.disabled = true; });
     deleteAccountStatus.textContent = "Konto und Daten werden dauerhaft gelöscht …";
     deleteAccountStatus.dataset.state = "";
     try {
@@ -4549,7 +4554,7 @@
       if (error) throw error;
       deleteAccountStatus.textContent = "Konto gelöscht. Du wirst abgemeldet …";
       deleteAccountStatus.dataset.state = "success";
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" });
       window.location.assign(new URL("index.html?auth=signin&account=deleted", window.location.href).toString());
     } catch (error) {
       deleteAccountStatus.textContent = error && error.message
@@ -4557,6 +4562,8 @@
         : "Die Löschung konnte nicht abgeschlossen werden. Bitte versuche es erneut.";
       deleteAccountStatus.dataset.state = "error";
       deleteAccountSubmit.dataset.busy = "";
+      deleteAccountDialog.dataset.busy = "";
+      deleteAccountDialog.querySelectorAll("[data-dialog-close]").forEach((button) => { button.disabled = false; });
       deleteAccountSubmit.disabled = deleteAccountConfirmation.value.trim() !== "KONTO LÖSCHEN";
     }
   });
