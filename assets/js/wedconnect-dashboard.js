@@ -29,6 +29,7 @@
   let currentRole = "";
   let currentGreeting = "";
   let activeConversationPeer = "";
+  let messageReactionPickerId = "";
   let conversationRefreshTimer = null;
   let conversationRefreshBusy = false;
   let reactionFeatureAvailable = false;
@@ -3106,15 +3107,19 @@
     }
     await renderConversationThread();
     document.querySelector("#conversation-status").textContent = "";
+    messageReactionPickerId = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
+    const thread = document.querySelector("#conversation-thread");
+    requestAnimationFrame(() => { if (thread) thread.scrollTop = thread.scrollHeight; });
     await refreshOpenConversationMessages();
+    requestAnimationFrame(() => { if (thread) thread.scrollTop = thread.scrollHeight; });
     startConversationMessagePolling();
   }
 
-  async function renderConversationThread() {
+  async function renderConversationThread(forceBottom = false) {
     const container = document.querySelector("#conversation-thread");
     if (!container) return;
-    const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
+    const wasNearBottom = forceBottom || container.scrollHeight - container.scrollTop - container.clientHeight < 80;
     container.replaceChildren();
     const userId = currentUser.id;
     const messages = activityCache.messages.filter((item) =>
@@ -3130,6 +3135,10 @@
     messages.forEach((item) => {
       const bubble = document.createElement("div");
       bubble.className = "conversation-message" + (item.sender_id === userId ? " is-own" : "");
+      bubble.dataset.messageBubble = item.id;
+      bubble.tabIndex = 0;
+      bubble.setAttribute("role", "group");
+      bubble.setAttribute("aria-label", "Nachricht. Tippen oder Enter drücken, um zu reagieren.");
       const body = document.createElement("span");
       body.textContent = item.body;
       const time = document.createElement("time");
@@ -3139,23 +3148,28 @@
       if (reactionFeatureAvailable) {
         const messageReactions = (activityCache.reactions || []).filter((reaction) => reaction.message_id === item.id && reaction.reaction === "heart");
         const ownHeart = messageReactions.some((reaction) => reaction.user_id === userId);
-        const reactionRow = document.createElement("div");
-        reactionRow.className = "message-reaction-row";
-        const heart = document.createElement("button");
-        heart.type = "button";
-        heart.className = "message-heart-button" + (ownHeart ? " is-active" : "");
-        heart.dataset.messageHeart = item.id;
-        heart.setAttribute("aria-label", ownHeart ? "Herzreaktion entfernen" : "Mit Herz reagieren");
-        heart.setAttribute("aria-pressed", String(ownHeart));
-        heart.textContent = messageReactions.length ? "♥" : "♡";
-        reactionRow.append(heart);
-        bubble.append(reactionRow);
+        if (messageReactions.length) {
+          const sticker = document.createElement("span");
+          sticker.className = "message-reaction-sticker";
+          sticker.setAttribute("aria-label", "Herzreaktion");
+          sticker.textContent = "♥";
+          bubble.append(sticker);
+        }
+        if (messageReactionPickerId === item.id) {
+          const heart = document.createElement("button");
+          heart.type = "button";
+          heart.className = "message-heart-picker" + (ownHeart ? " is-active" : "");
+          heart.dataset.messageHeart = item.id;
+          heart.setAttribute("aria-label", ownHeart ? "Herzreaktion entfernen" : "Mit Herz reagieren");
+          heart.setAttribute("aria-pressed", String(ownHeart));
+          heart.textContent = "♥";
+          bubble.append(heart);
+        }
       }
       container.append(bubble);
     });
     if (wasNearBottom) container.scrollTop = container.scrollHeight;
   }
-
   async function refreshOpenConversationMessages() {
     const dialog = document.querySelector("#conversation-dialog");
     const peerId = activeConversationPeer;
@@ -3590,6 +3604,14 @@
     event.preventDefault();
     openMatchedProfile(card.dataset.openProfile);
   });
+  document.querySelector("#conversation-thread")?.addEventListener("keydown", (event) => {
+    if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-message-bubble]")) {
+      event.preventDefault();
+      messageReactionPickerId = messageReactionPickerId === event.target.dataset.messageBubble ? "" : event.target.dataset.messageBubble;
+      renderConversationThread();
+    }
+  });
+
   document.addEventListener("click", async (event) => {
     const matchesTab = event.target.closest("[data-matches-tab]");
     if (matchesTab) {
@@ -3615,19 +3637,35 @@
     const heartReaction = event.target.closest("[data-message-heart]");
     if (heartReaction) {
       const messageId = heartReaction.dataset.messageHeart;
-      const alreadyReacted = (activityCache.reactions || []).some((reaction) =>
-        reaction.message_id === messageId && reaction.user_id === currentUser.id && reaction.reaction === "heart");
+      const alreadyReacted = (activityCache.reactions || []).some((reaction) => reaction.message_id === messageId && reaction.user_id === currentUser.id && reaction.reaction === "heart");
       heartReaction.disabled = true;
       const result = alreadyReacted
         ? await supabase.from("profile_message_reactions").delete().eq("message_id", messageId).eq("user_id", currentUser.id).eq("reaction", "heart")
         : await supabase.from("profile_message_reactions").insert({ message_id: messageId, user_id: currentUser.id, reaction: "heart" });
-      heartReaction.disabled = false;
       if (result.error) {
+        heartReaction.disabled = false;
         showNotice("Dein Herz konnte nicht gespeichert werden. Prüfe die Nachrichtenreaktions-Migration in Supabase.");
         return;
       }
+      activityCache.reactions = (activityCache.reactions || []).filter((reaction) => !(reaction.message_id === messageId && reaction.user_id === currentUser.id && reaction.reaction === "heart"));
+      if (!alreadyReacted) activityCache.reactions.push({ message_id: messageId, user_id: currentUser.id, reaction: "heart" });
+      messageReactionPickerId = "";
+      await renderConversationThread();
       await refreshOpenConversationMessages();
       return;
+    }
+    const messageBubble = event.target.closest("[data-message-bubble]");
+    if (messageBubble) {
+      if (reactionFeatureAvailable) {
+        const messageId = messageBubble.dataset.messageBubble;
+        messageReactionPickerId = messageReactionPickerId === messageId ? "" : messageId;
+        await renderConversationThread();
+      }
+      return;
+    }
+    if (messageReactionPickerId) {
+      messageReactionPickerId = "";
+      if (document.querySelector("#conversation-dialog")?.open) await renderConversationThread();
     }
     const likeBack = event.target.closest("[data-like-back]");
     if (likeBack) {
