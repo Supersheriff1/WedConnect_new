@@ -160,3 +160,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Einstellungen und der Bestätigungsdialog zur Kontolöschung bleiben bei kleinen und niedrigen Viewports innerhalb der verfügbaren Bildschirmhöhe; ihre Inhalte können bei Bedarf im Dialog gescrollt werden.
 - Der Löschbereich ist durch eine deutlich sichtbare, aber semantisch passende Alert-Farbe hervorgehoben.
+
+
+## Discover-Fotodarstellung (16. Oktober 2026)
+
+- Discover-Profilfotos füllen den Bildrahmen jetzt wie die Galerie im vollständigen Profil; `object-fit: cover` verhindert schwarze Balken. Der Namenszug liegt links unten direkt auf dem Foto über einem leichten Verlauf, der Fotozähler rechts unten auf einer dezenten halbtransparenten Fläche.
+- Der Cover-Zuschnitt kann je nach Fotoformat Bildränder abschneiden; die Darstellung folgt dadurch der Vollprofil-Galerie.
