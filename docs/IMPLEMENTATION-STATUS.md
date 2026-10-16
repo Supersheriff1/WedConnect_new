@@ -101,3 +101,10 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Voraussetzung: Migration `supabase/migrations/20261016150000_message_read_receipts.sql` muss in Supabase ausgeführt werden. Bis dahin bleibt die bestehende Nachrichtenfunktion nutzbar; Lesestatus und Zähler erscheinen erst nach der Migration.
 
 - Nachrichtenübersicht: Chats mit ungelesenen Nachrichten werden farblich hervorgehoben, erhalten einen Zähler und erscheinen vor gelesenen Chats. Beim Zurückkehren in den Tab wird der Status sofort aktualisiert; zusätzlich läuft die Hintergrundprüfung im geöffneten Dashboard weiter.
+
+## Ganze Chats aus der eigenen Nachrichtenübersicht entfernen (16. Oktober 2026)
+
+- Am Handy wird ein Chat durch langes Drücken auf die Karte zum Löschen ausgewählt; ein Bestätigungsdialog erklärt die Wirkung. Auf dem Desktop gibt es ein Kartenmenü und das Kontextmenü.
+- Das Entfernen gilt nur für die eigene Übersicht. Der Verlauf der anderen Person bleibt erhalten. Neue Nachrichten nach dem Löschzeitpunkt lassen den Chat wieder erscheinen.
+- Match-Chats und WedConnect-Supportchats werden unterstützt.
+- Voraussetzung: Migration `supabase/migrations/20261016160000_hide_conversations_for_user.sql` muss in Supabase ausgeführt werden.
