@@ -3699,13 +3699,27 @@
           if (!error && data && data.signedUrl && image.isConnected) image.src = data.signedUrl;
         });
       });
+      const indicators = document.createElement("div");
+      indicators.className = "discover-photo-indicators";
+      indicators.setAttribute("aria-label", "Fotofortschritt");
+      const indicatorButtons = candidate.photos.map((photo, index) => {
+        const indicator = document.createElement("button");
+        indicator.type = "button";
+        indicator.className = "discover-photo-indicator";
+        indicator.setAttribute("aria-label", "Foto " + (index + 1) + " von " + candidate.photos.length);
+        indicator.setAttribute("aria-current", index === 0 ? "true" : "false");
+        indicator.addEventListener("click", () => track.scrollTo({ left: index * track.clientWidth, behavior: "smooth" }));
+        indicators.append(indicator);
+        return indicator;
+      });
       const updatePhotoCounter = () => {
         const index = Math.min(candidate.photos.length - 1, Math.max(0, Math.round(track.scrollLeft / Math.max(track.clientWidth, 1))));
         discoverState.photoIndex = index;
         photoCount.textContent = (index + 1) + " / " + candidate.photos.length;
+        indicatorButtons.forEach((indicator, indicatorIndex) => indicator.setAttribute("aria-current", indicatorIndex === index ? "true" : "false"));
       };
       track.addEventListener("scroll", updatePhotoCounter, { passive: true });
-      photoFrame.append(track, photoCount);
+      photoFrame.append(track, photoCount, indicators);
       if (candidate.photos.length > 1) {
         const previous = document.createElement("button");
         previous.type = "button";
