@@ -131,5 +131,5 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Angebotskarten im Abschnitt „Angebote für dich“ lassen sich anklicken und per Tastatur öffnen.
 - Eine eigene Dashboard-Detailansicht zeigt Partnername, Titel, Beschreibung und optionale Bedingungen. Ein externer Website-Link wird erst dort angeboten.
-- Die Rückkehr führt direkt zur Übersicht. Die Funktion gilt für die Testanzeige und veröffentlichte Partnerangebote; Neuigkeiten behalten ihren direkten Link.
+- Die Rückkehr führt direkt zur Übersicht. Der kleine, dezente Zurück-Button steht rechts neben der Überschrift „Angebot“. Die Funktion gilt für die Testanzeige und veröffentlichte Partnerangebote; Neuigkeiten behalten ihren direkten Link.
 

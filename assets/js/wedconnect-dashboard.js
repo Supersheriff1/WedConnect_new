@@ -3821,6 +3821,8 @@
     const pageTitle = document.querySelector("#page-title");
     pageTitle.textContent = titles[view] || "Willkommen!";
     pageTitle.hidden = view === "matched-profile";
+    document.querySelector("#page-title-row").classList.toggle("hidden", view === "matched-profile");
+    document.querySelector("#offer-detail-back").classList.toggle("hidden", view !== "offer-detail");
     document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail";
   }
 
