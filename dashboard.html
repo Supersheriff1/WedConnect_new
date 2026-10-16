@@ -178,7 +178,7 @@
     @media(max-width:700px){.profile-photo-gallery .photo-preview .photo-highlight-badge{position:absolute!important;top:8px!important;right:8px!important;z-index:20!important;width:30px;height:30px;display:grid!important;place-items:center!important;margin:0!important;background:rgb(37 36 43 / 92%)!important;color:var(--gold)!important;pointer-events:none}}
     @media(max-width:560px){.portfolio-photo-actions .button{width:42px!important;min-width:42px}}
   
-    .overview-profile{display:grid;gap:18px;margin-top:30px}
+    .profile-role-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}.profile-role-row>.eyebrow{margin:0}.profile-role-row .profile-status-pill{flex:none}.overview-profile{display:grid;gap:18px;margin-top:30px}
     .overview-profile-heading{display:flex;align-items:end;justify-content:space-between;gap:18px}
     .overview-profile-title{display:grid;gap:10px}
     .overview-profile-title h2{margin:0;color:var(--ink);font-size:clamp(20px,2.4vw,27px);line-height:1.2;letter-spacing:-.035em}
@@ -692,7 +692,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         <div class="top-actions"><span class="welcome-tag">Dein persönlicher Bereich</span><button id="avatar" class="avatar" type="button" aria-label="Konto öffnen" aria-haspopup="dialog">W</button></div>
       </header>
       <div class="content">
-        <p class="eyebrow" id="role-eyebrow">WedConnect</p>
+        <div class="profile-role-row"><p class="eyebrow" id="role-eyebrow">WedConnect</p><span class="profile-status-pill" id="profile-status-pill" hidden><span class="step-dot"></span><span id="profile-status">Profil vollständig</span></span></div>
         <div id="page-title-row" class="page-title-row">
           <h1 class="page-title" id="page-title">Willkommen!</h1>
           <button id="offer-detail-back" class="matched-profile-back offer-detail-back hidden" type="button" aria-label="Zurück zur Übersicht">‹ Übersicht</button>
@@ -727,7 +727,6 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         <section id="profile-view" class="dashboard-view overview-profile" data-dashboard-view="profile" hidden aria-labelledby="profile-preview-heading">
           <div class="overview-profile-heading">
             <div class="overview-profile-title">
-              <span class="profile-status-pill"><span class="step-dot"></span><span id="profile-status">Profil vollständig</span></span>
               <h2 id="profile-preview-heading">So sehen andere dein Profil</h2>
             </div>
           </div>

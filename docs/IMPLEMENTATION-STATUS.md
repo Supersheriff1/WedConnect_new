@@ -254,3 +254,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Die eigene Profilansicht enthält keine Like- oder Skip-Aktionsbuttons.
 - Voraussetzung: `supabase/migrations/20261016180000_profile_saved_profiles.sql` im aktiven Supabase-Projekt ausführen. Der Live-Migrationsstatus ist nicht bestätigt.
 - JavaScript-Syntax und HTML-Markup statisch geprüft; ein Supabase-/Browser-End-to-End-Test wurde nicht durchgeführt. Ohne neue Migration bleibt Entdecken nutzbar, die Merkliste wird bis zur Migration mit einem Hinweis deaktiviert.
+
+
+## Statuskennzeichnung im eigenen Profil (16. Oktober 2026)
+
+- „Profil vollständig“ steht in der eigenen Profilansicht rechts in derselben Zeile wie die Rollenkennzeichnung „Fotograf“ bzw. „Hochzeitspaar“.
+- Auf anderen Dashboard-Seiten wird der Statushinweis ausgeblendet. Die bisherige Platzierung unter der Profilüberschrift entfällt.

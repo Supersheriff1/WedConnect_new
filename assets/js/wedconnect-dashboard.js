@@ -4186,6 +4186,7 @@
     contextBack.textContent = returnFromPartnerList ? "‹ Konto" : returnFromPartnerDetail ? "‹ Partnerangebote" : "‹ Übersicht";
     contextBack.setAttribute("aria-label", returnFromPartnerList ? "Zurück zum Konto-Menü" : returnFromPartnerDetail ? "Zurück zu Partnerangeboten" : "Zurück zur Übersicht");
     document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail" || view === "partner-offers";
+    document.querySelector("#profile-status-pill").hidden = view !== "profile";
     syncOverviewScrollHint();
   }
 
