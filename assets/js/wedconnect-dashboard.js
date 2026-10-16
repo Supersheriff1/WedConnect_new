@@ -29,6 +29,8 @@
   let currentRole = "";
   let currentGreeting = "";
   let activeConversationPeer = "";
+  let conversationRefreshTimer = null;
+  let conversationRefreshBusy = false;
   let activityCache = { incoming: [], matches: [], messages: [], summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
@@ -3102,11 +3104,14 @@
     await renderConversationThread();
     document.querySelector("#conversation-status").textContent = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
+    await refreshOpenConversationMessages();
+    startConversationMessagePolling();
   }
 
   async function renderConversationThread() {
     const container = document.querySelector("#conversation-thread");
     if (!container) return;
+    const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
     container.replaceChildren();
     const userId = currentUser.id;
     const messages = activityCache.messages.filter((item) =>
@@ -3130,8 +3135,61 @@
       bubble.append(body, time);
       container.append(bubble);
     });
-    container.scrollTop = container.scrollHeight;
+    if (wasNearBottom) container.scrollTop = container.scrollHeight;
   }
+
+  async function refreshOpenConversationMessages() {
+    const dialog = document.querySelector("#conversation-dialog");
+    const peerId = activeConversationPeer;
+    if (!peerId || !dialog || !dialog.open || document.visibilityState !== "visible" || conversationRefreshBusy) return;
+    conversationRefreshBusy = true;
+    try {
+      const userId = currentUser.id;
+      const { data, error } = await supabase.from("profile_messages")
+        .select("sender_id,recipient_id,body,created_at")
+        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
+        .order("created_at", { ascending: true });
+      if (error || peerId !== activeConversationPeer) return;
+      const incoming = data || [];
+      const forPeer = (items) => items.filter((item) =>
+        (item.sender_id === userId && item.recipient_id === peerId)
+        || (item.sender_id === peerId && item.recipient_id === userId));
+      const previous = forPeer(activityCache.messages || []);
+      const latestKey = (items) => {
+        const last = items[items.length - 1];
+        return last ? items.length + "|" + last.created_at + "|" + last.sender_id + "|" + last.body : "0";
+      };
+      if (latestKey(previous) === latestKey(forPeer(incoming))) return;
+      activityCache.messages = (activityCache.messages || [])
+        .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
+        .concat(incoming)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      if (activityCache.messagedPeers) activityCache.messagedPeers.add(peerId);
+      renderMessagesList();
+      await renderConversationThread();
+    } finally {
+      conversationRefreshBusy = false;
+    }
+  }
+
+  function startConversationMessagePolling() {
+    if (conversationRefreshTimer) window.clearInterval(conversationRefreshTimer);
+    conversationRefreshTimer = window.setInterval(refreshOpenConversationMessages, 5000);
+  }
+
+  function stopConversationMessagePolling() {
+    if (conversationRefreshTimer) window.clearInterval(conversationRefreshTimer);
+    conversationRefreshTimer = null;
+  }
+
+  document.querySelector("#conversation-dialog").addEventListener("close", () => {
+    stopConversationMessagePolling();
+    activeConversationPeer = "";
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshOpenConversationMessages();
+  });
 
   async function persistEmailPreferences() {
     const form = document.querySelector("#email-preferences-form");
