@@ -32,6 +32,7 @@ For a new project, execute the SQL files in the order below using the Supabase S
 24. `supabase/migrations/20261016090000_profile_message_reactions.sql`
 25. `supabase/migrations/20261016100000_profile_message_hidden.sql` (legacy; no longer used by the app)
 26. `supabase/migrations/20261016110000_profile_message_delete_for_everyone.sql`
+27. `supabase/migrations/20261016130000_support_contact_feedback.sql`
 
 The couple profile stores a structured ceremony type and guided timeline. Photographer galleries remain ordinary photos without a highlight selection. Couple profiles show wedding date, town and photo-use preference as key facts. Couple uploads require each partner to be represented: either one joint photo (stored as `photo_type = 'couple'`) or at least one individual photo for each partner. A joint photo may also be combined with individual photos. Each new image is limited to 2 MB. The activity migration also adds messages, role-targeted overview announcements/offers, email preferences, and a 2 MB bucket limit. Do not infer that these migrations are live; check the current Supabase migration history.
 
@@ -46,3 +47,22 @@ Configure allowed redirect URLs in Supabase Auth for production and local previe
 The frontend reads the Supabase URL and publishable key from `assets/js/supabase-config.js`. Never place a service-role key in browser code.
 
 The chat supports one removable heart reaction per user per message. Apply migration `20261016090000_profile_message_reactions.sql` before testing reactions. Authors can delete their own sent messages for both participants. The original body is replaced with a deletion placeholder, the app displays “Nachricht wurde gelöscht” at the original position, and existing heart reactions are removed automatically. Apply migration `20261016110000_profile_message_delete_for_everyone.sql` before using this control. Migration `20261016100000_profile_message_hidden.sql` is retained for history but is no longer used by the app. The Discover feed shows complete profiles of the opposite role. Likes are saved in `profile_likes` and can create a match when mutual. “Überspringen” is private to the acting account and saved in `profile_skips`; it never notifies the other profile or creates a match.
+
+## Kontakt / Feedback
+
+The account dialog offers two contact channels: WedConnect chat and e-mail. Chat threads are listed with other conversations; e-mail threads and replies stay in the account dialog. No push notifications are sent. The support inbox is visible only to authenticated operator accounts explicitly allowlisted in `support_operators`.
+
+For each operator, add their authenticated Supabase user UUID in the Supabase SQL Editor:
+
+```sql
+insert into public.support_operators (user_id)
+values ('00000000-0000-0000-0000-000000000000');
+```
+
+The e-mail channel uses the `send-support-email` Supabase Edge Function and Resend. Deploy it and configure these Supabase Function secrets:
+
+- `RESEND_API_KEY`: Resend API key.
+- `SUPPORT_FROM_EMAIL`: sender address on a verified Resend domain.
+- `SUPPORT_EMAIL`: final WedConnect support inbox. Until changed, the function uses `albert.fuerst.usa@gmail.com` as a provisional recipient. **This address must be replaced before the app goes live.**
+
+The function also uses Supabase's `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` runtime secrets. Never place the service-role key in browser code. The Supabase migration and Edge Function deployment/secrets must be applied separately; repository files do not confirm live Supabase configuration.
