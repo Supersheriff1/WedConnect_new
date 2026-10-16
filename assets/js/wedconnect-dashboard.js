@@ -3505,6 +3505,13 @@
     if (openMessage) await openConversation(openMessage.dataset.openConversation);
   });
 
+  document.querySelector("#conversation-input").addEventListener("input", (event) => {
+    const input = event.currentTarget;
+    input.style.height = "50px";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+    input.style.overflowY = input.scrollHeight > 120 ? "auto" : "hidden";
+  });
+
   document.querySelector("#conversation-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const input = document.querySelector("#conversation-input");
@@ -3525,6 +3532,8 @@
       return;
     }
     input.value = "";
+    input.style.height = "50px";
+    input.style.overflowY = "hidden";
     status.textContent = "Nachricht gesendet.";
     await refreshActivityViews();
     await renderConversationThread();
