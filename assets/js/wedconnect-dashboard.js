@@ -3496,9 +3496,6 @@
       }
       const content = document.createElement("div");
       content.className = "discover-profile-content";
-      const heading = document.createElement("h3");
-      heading.className = "discover-profile-name";
-      heading.textContent = title;
       const subtitle = document.createElement("p");
       subtitle.className = "discover-profile-subtitle";
       const details = profileDetailRows(role, profile);
@@ -3506,7 +3503,7 @@
         ? [profile.guest_count ? profile.guest_count + " Gäste" : "", ceremonyTypeLabel(profile.ceremony_type)]
         : [profileLabels(profile.regions, REGION_OPTIONS) || profile.region, profile.experience_years ? profile.experience_years + " Jahre Erfahrung" : ""];
       subtitle.textContent = subtitleValues.filter(Boolean).join(" · ") || (role === "couple" ? "Hochzeitspaar" : "Hochzeitsfotograf");
-      content.append(heading, subtitle);
+      content.append(subtitle);
       const facts = document.createElement("div");
       facts.className = "discover-profile-facts profile-preview-key-facts";
       (role === "couple" ? details.chips : [...(details.keyFacts || []), ...(details.chips || [])]).forEach(([icon, label, value]) => addPreviewChip(facts, icon, label, value));
@@ -3747,8 +3744,10 @@
       messages: "Nachrichten",
       discover: currentRole === "couple" ? "Fotografen entdecken" : "Hochzeiten entdecken"
     };
-    document.querySelector("#page-title").textContent = titles[view] || "Willkommen!";
-    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover";
+    const pageTitle = document.querySelector("#page-title");
+    pageTitle.textContent = titles[view] || "Willkommen!";
+    pageTitle.hidden = view === "matched-profile";
+    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile";
   }
 
   async function openConversation(peerId) {
