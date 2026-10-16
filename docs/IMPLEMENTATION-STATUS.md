@@ -204,3 +204,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 - Alle Karten im Abschnitt „Angebote für dich“ zeigen rechts oben ein dezentes Label „Werbung“, auf Höhe der oberen Kartenkante. Das Label ist auch bei der Testanzeige sichtbar.
 - Neuigkeiten bleiben davon unberührt. Es ist keine Supabase-Migration erforderlich.
+
+
+## Foto in der Shira-Testanzeige (16. Oktober 2026)
+
+- Die Testanzeige verwendet ein Hochzeitsfoto von der Website shira-rachel.com. Das Motiv wird als linkes, abgerundetes Bildfeld mit `object-fit: cover` dargestellt; auf kleinen Bildschirmen wird es kompakter und der Website-Button rückt darunter.
+- Kein Datenbank- oder Storage-Upload erforderlich. Das Bild wird von der Website geladen.
