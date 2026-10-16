@@ -36,10 +36,11 @@
   let reactionMigrationNoticeShown = false;
   let messageDeletionFeatureAvailable = false;
   let messageDeletionNoticeShown = false;
-  let activeMessageMenuId = "";
+  let pendingDeleteMessageId = "";
   let messageLongPressTimer = null;
+  let messageLongPressStart = null;
   let suppressOwnMessageClickUntil = 0;
-  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], hiddenMessageIds: new Set(), summaries: new Map() };
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2484,44 +2485,42 @@
     return card;
   }
 
+  async function loadProfileMessages(userId) {
+    const queryMessages = (columns) => supabase.from("profile_messages")
+      .select(columns)
+      .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
+      .order("created_at", { ascending: true });
+    const result = await queryMessages("id,sender_id,recipient_id,body,created_at,deleted_at");
+    if (!result.error) {
+      messageDeletionFeatureAvailable = true;
+      return result;
+    }
+    if (!/deleted_at|42703|column .* does not exist|could not find the .* column|schema cache/i.test(String(result.error.message || ""))) return result;
+    messageDeletionFeatureAvailable = false;
+    if (!messageDeletionNoticeShown) {
+      showNotice("Löschen für beide ist noch nicht eingerichtet. Bitte führe die Nachrichten-Löschmigration in Supabase aus.");
+      messageDeletionNoticeShown = true;
+    }
+    return queryMessages("id,sender_id,recipient_id,body,created_at");
+  }
+
   async function loadActivityData() {
     const userId = currentUser && currentUser.id;
     if (!userId) return;
-    const [inboundResult, outboundResult, hiddenResult] = await Promise.all([
+    const [inboundResult, outboundResult] = await Promise.all([
       supabase.from("profile_likes").select("liker_id,created_at").eq("liked_id", userId).order("created_at", { ascending: false }),
-      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false }),
-      supabase.from("profile_message_hidden").select("message_id").eq("user_id", userId)
+      supabase.from("profile_likes").select("liked_id,created_at").eq("liker_id", userId).order("created_at", { ascending: false })
     ]);
     if (inboundResult.error || outboundResult.error) throw new Error("Likes konnten nicht geladen werden. Prüfe die Profil-Likes-Migration in Supabase.");
     const inbound = inboundResult.data || [];
-    messageDeletionFeatureAvailable = !hiddenResult.error;
-    if (hiddenResult.error) {
-      if (!messageDeletionNoticeShown) {
-        showNotice("Nachrichten löschen ist noch nicht eingerichtet. Bitte führe die Nachrichten-ausblenden-Migration in Supabase aus.");
-        messageDeletionNoticeShown = true;
-      }
-    }
-    const hiddenMessageIds = new Set((hiddenResult.data || []).map((item) => item.message_id));
     const outgoingIds = new Set((outboundResult.data || []).map((item) => item.liked_id));
     const matches = inbound.filter((item) => outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
     const incoming = inbound.filter((item) => !outgoingIds.has(item.liker_id)).map((item) => item.liker_id);
-    let messages = [];
-    if (matches.length) {
-      const result = await supabase.from("profile_messages")
-        .select("id,sender_id,recipient_id,body,created_at")
-        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
-        .order("created_at", { ascending: true });
-      if (result.error) throw new Error("Nachrichten konnten nicht geladen werden. Führe die WedConnect-Nachrichtenmigration aus.");
-      messages = result.data || [];
-    } else {
-      const result = await supabase.from("profile_messages")
-        .select("id,sender_id,recipient_id,body,created_at")
-        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
-        .order("created_at", { ascending: true });
-      if (!result.error) messages = result.data || [];
-    }
+    const messageResult = await loadProfileMessages(userId);
+    if (messageResult.error) throw new Error("Nachrichten konnten nicht geladen werden. Prüfe die WedConnect-Nachrichtenmigration in Supabase.");
+    const messages = messageResult.data || [];
     const messagedPeers = new Set(messages.map((item) => item.sender_id === userId ? item.recipient_id : item.sender_id));
-    const visibleMessages = messages.filter((item) => !hiddenMessageIds.has(item.id));
+    const visibleMessages = messages.filter((item) => !item.deleted_at);
     const newMatches = matches.filter((peerId) => !messagedPeers.has(peerId));
     const ids = Array.from(new Set([...incoming, ...matches]));
     const summaries = await Promise.all(ids.map((id) => loadPublicProfileSummary(id)));
@@ -2532,7 +2531,6 @@
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       messages: visibleMessages,
       messagedPeers,
-      hiddenMessageIds,
       reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
@@ -3144,7 +3142,7 @@
     if (!messages.length) {
       const empty = document.createElement("p");
       empty.className = "conversation-empty";
-      empty.textContent = "Keine sichtbaren Nachrichten. Schreib den ersten Satz.";
+      empty.textContent = "Ihr habt noch keine Nachricht ausgetauscht. Schreib den ersten Satz.";
       container.append(empty);
       return;
     }
@@ -3163,24 +3161,16 @@
       time.dateTime = item.created_at;
       time.textContent = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(item.created_at));
       bubble.append(body, time);
-      if (messageDeletionFeatureAvailable && item.sender_id === userId) {
+      if (item.sender_id === userId) {
         bubble.dataset.ownMessage = item.id;
-        const menuTrigger = document.createElement("button");
-        menuTrigger.type = "button";
-        menuTrigger.className = "message-more-button";
-        menuTrigger.dataset.ownMessageMenu = item.id;
-        menuTrigger.setAttribute("aria-label", "Nachrichtenoptionen");
-        menuTrigger.textContent = "⋯";
-        bubble.append(menuTrigger);
-        if (activeMessageMenuId === item.id) {
-          const menu = document.createElement("div");
-          menu.className = "message-own-menu";
-          const deleteAction = document.createElement("button");
-          deleteAction.type = "button";
-          deleteAction.dataset.deleteOwnMessage = item.id;
-          deleteAction.textContent = "Für mich löschen";
-          menu.append(deleteAction);
-          bubble.append(menu);
+        if (messageDeletionFeatureAvailable) {
+          const menuTrigger = document.createElement("button");
+          menuTrigger.type = "button";
+          menuTrigger.className = "message-more-button";
+          menuTrigger.dataset.ownMessageMenu = item.id;
+          menuTrigger.setAttribute("aria-label", "Nachricht für alle löschen");
+          menuTrigger.textContent = "⋯";
+          bubble.append(menuTrigger);
         }
       }
       if (reactionFeatureAvailable) {
@@ -3216,37 +3206,17 @@
     conversationRefreshBusy = true;
     try {
       const userId = currentUser.id;
-      const { data, error } = await supabase.from("profile_messages")
-        .select("id,sender_id,recipient_id,body,created_at")
-        .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
-        .order("created_at", { ascending: true });
-      if (error || peerId !== activeConversationPeer) return;
-      const incoming = data || [];
-      const { data: hiddenRows, error: hiddenError } = await supabase.from("profile_message_hidden")
-        .select("message_id").eq("user_id", userId);
-      if (hiddenError) {
-        messageDeletionFeatureAvailable = false;
-        if (!messageDeletionNoticeShown) {
-          showNotice("Nachrichten löschen ist noch nicht eingerichtet. Bitte führe die Nachrichten-ausblenden-Migration in Supabase aus.");
-          messageDeletionNoticeShown = true;
-        }
-      } else {
-        messageDeletionFeatureAvailable = true;
-      }
-      const hiddenMessageIds = hiddenError
-        ? activityCache.hiddenMessageIds || new Set()
-        : new Set((hiddenRows || []).map((item) => item.message_id));
-      activityCache.hiddenMessageIds = hiddenMessageIds;
+      const messageResult = await loadProfileMessages(userId);
+      if (messageResult.error || peerId !== activeConversationPeer) return;
+      const incoming = messageResult.data || [];
       const forPeer = (items) => items.filter((item) =>
         (item.sender_id === userId && item.recipient_id === peerId)
         || (item.sender_id === peerId && item.recipient_id === userId));
-      const peerMessages = forPeer(incoming).filter((item) => !hiddenMessageIds.has(item.id));
+      const allPeerMessages = forPeer(incoming);
+      const peerMessages = allPeerMessages.filter((item) => !item.deleted_at);
       const previous = forPeer(activityCache.messages || []);
-      const latestKey = (items) => {
-        const last = items[items.length - 1];
-        return last ? items.length + "|" + last.id + "|" + last.created_at : "0";
-      };
-      const messagesChanged = latestKey(previous) !== latestKey(peerMessages);
+      const messagesKey = (items) => items.map((item) => [item.id, item.created_at, item.deleted_at || ""].join("|")).join(";");
+      const messagesChanged = messagesKey(previous) !== messagesKey(peerMessages);
       let peerReactions = null;
       if (peerMessages.length) {
         const { data: reactions, error: reactionError } = await supabase.from("profile_message_reactions")
@@ -3277,13 +3247,19 @@
           .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
           .concat(peerMessages)
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        if (activityCache.messagedPeers) activityCache.messagedPeers.add(peerId);
+      }
+      if (activityCache.messagedPeers) {
+        if (allPeerMessages.length) activityCache.messagedPeers.add(peerId);
+        else activityCache.messagedPeers.delete(peerId);
       }
       if (peerReactions !== null) {
         const replacedIds = new Set([...previousMessageIds, ...nextMessageIds]);
         activityCache.reactions = (activityCache.reactions || [])
           .filter((item) => !replacedIds.has(item.message_id))
           .concat(peerReactions);
+      } else if (messagesChanged) {
+        const removedIds = new Set([...previousMessageIds].filter((id) => !nextMessageIds.has(id)));
+        activityCache.reactions = (activityCache.reactions || []).filter((item) => !removedIds.has(item.message_id));
       }
       renderMessagesList();
       await renderConversationThread();
@@ -3305,7 +3281,7 @@
   document.querySelector("#conversation-dialog").addEventListener("close", () => {
     stopConversationMessagePolling();
     activeConversationPeer = "";
-    activeMessageMenuId = "";
+    pendingDeleteMessageId = "";
     cancelMessageLongPress();
   });
 
@@ -3570,6 +3546,18 @@
   function openWorkspaceDialog(dialog) {
     if (dialog && !dialog.open) dialog.showModal();
   }
+
+  function openDeleteMessageDialog(messageId) {
+    const message = (activityCache.messages || []).find((item) => item.id === messageId && item.sender_id === currentUser.id);
+    if (!message || !messageDeletionFeatureAvailable) return;
+    pendingDeleteMessageId = messageId;
+    document.querySelector("#delete-message-status").textContent = "";
+    openWorkspaceDialog(document.querySelector("#delete-message-dialog"));
+  }
+  document.querySelector("#delete-message-dialog").addEventListener("close", () => {
+    pendingDeleteMessageId = "";
+    document.querySelector("#delete-message-confirm").disabled = false;
+  });
   if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
   const accountPhotoPreview = document.querySelector("#account-photo-preview");
@@ -3671,72 +3659,77 @@
   const conversationThread = document.querySelector("#conversation-thread");
   if (conversationThread) {
     conversationThread.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" || event.target.closest("[data-own-message-menu], .message-own-menu")) return;
+      if (event.pointerType === "mouse" || event.target.closest("[data-own-message-menu], .message-reaction-sticker")) return;
       const bubble = event.target.closest("[data-own-message]");
       if (!bubble || !messageDeletionFeatureAvailable) return;
       if (messageLongPressTimer) window.clearTimeout(messageLongPressTimer);
       const messageId = bubble.dataset.ownMessage;
+      messageLongPressStart = { x: event.clientX, y: event.clientY };
       messageLongPressTimer = window.setTimeout(() => {
         messageLongPressTimer = null;
-        activeMessageMenuId = messageId;
+        messageLongPressStart = null;
         suppressOwnMessageClickUntil = Date.now() + 900;
-        renderConversationThread();
+        openDeleteMessageDialog(messageId);
       }, 550);
     });
     conversationThread.addEventListener("contextmenu", (event) => {
+      if (event.target.closest(".message-reaction-sticker")) return;
       const bubble = event.target.closest("[data-own-message]");
       if (!bubble || !messageDeletionFeatureAvailable) return;
       event.preventDefault();
-      activeMessageMenuId = bubble.dataset.ownMessage;
-      renderConversationThread();
+      openDeleteMessageDialog(bubble.dataset.ownMessage);
     });
   }
   const cancelMessageLongPress = () => {
     if (messageLongPressTimer) window.clearTimeout(messageLongPressTimer);
     messageLongPressTimer = null;
+    messageLongPressStart = null;
   };
+  document.addEventListener("pointermove", (event) => {
+    if (!messageLongPressTimer || !messageLongPressStart) return;
+    if (Math.hypot(event.clientX - messageLongPressStart.x, event.clientY - messageLongPressStart.y) > 12) cancelMessageLongPress();
+  });
   document.addEventListener("pointerup", cancelMessageLongPress);
   document.addEventListener("pointercancel", cancelMessageLongPress);
 
   document.addEventListener("click", async (event) => {
-    if (Date.now() < suppressOwnMessageClickUntil && event.target.closest(".conversation-message")) {
+    if (Date.now() < suppressOwnMessageClickUntil && event.target.closest("#delete-message-dialog")) {
       suppressOwnMessageClickUntil = 0;
       event.preventDefault();
       return;
     }
-    const deleteOwnMessage = event.target.closest("[data-delete-own-message]");
-    if (deleteOwnMessage) {
-      const messageId = deleteOwnMessage.dataset.deleteOwnMessage;
+    const confirmMessageDelete = event.target.closest("#delete-message-confirm");
+    if (confirmMessageDelete) {
+      const messageId = pendingDeleteMessageId;
       const message = (activityCache.messages || []).find((item) => item.id === messageId && item.sender_id === currentUser.id);
       if (!message || !messageDeletionFeatureAvailable) return;
-      deleteOwnMessage.disabled = true;
-      const { error } = await supabase.from("profile_message_hidden").insert({ user_id: currentUser.id, message_id: messageId });
-      if (error) {
-        deleteOwnMessage.disabled = false;
-        showNotice("Die Nachricht konnte nicht ausgeblendet werden. Prüfe die Nachrichten-ausblenden-Migration in Supabase.");
+      const status = document.querySelector("#delete-message-status");
+      confirmMessageDelete.disabled = true;
+      status.textContent = "Nachricht wird für beide gelöscht …";
+      const { data, error } = await supabase.from("profile_messages")
+        .update({ body: "[Diese Nachricht wurde gelöscht.]", deleted_at: new Date().toISOString() })
+        .eq("id", messageId).eq("sender_id", currentUser.id).is("deleted_at", null)
+        .select("id").maybeSingle();
+      confirmMessageDelete.disabled = false;
+      if (error || !data) {
+        status.textContent = error ? "Die Nachricht konnte nicht gelöscht werden. Bitte prüfe die Nachrichten-Löschmigration in Supabase." : "Die Nachricht wurde bereits gelöscht oder ist nicht mehr verfügbar.";
         return;
       }
-      if (!activityCache.hiddenMessageIds) activityCache.hiddenMessageIds = new Set();
-      activityCache.hiddenMessageIds.add(messageId);
       activityCache.messages = (activityCache.messages || []).filter((item) => item.id !== messageId);
-      activeMessageMenuId = "";
+      activityCache.reactions = (activityCache.reactions || []).filter((item) => item.message_id !== messageId);
+      pendingDeleteMessageId = "";
+      document.querySelector("#delete-message-dialog").close();
       await renderConversationThread();
       renderMessagesList();
-      showNotice("Nachricht aus deiner Ansicht entfernt.");
+      showNotice("Nachricht wurde für beide Seiten gelöscht.");
       return;
     }
     const ownMessageMenuButton = event.target.closest("[data-own-message-menu]");
     if (ownMessageMenuButton) {
-      const messageId = ownMessageMenuButton.dataset.ownMessageMenu;
-      activeMessageMenuId = activeMessageMenuId === messageId ? "" : messageId;
-      await renderConversationThread();
+      openDeleteMessageDialog(ownMessageMenuButton.dataset.ownMessageMenu);
       return;
     }
     if (event.target.closest(".message-reaction-sticker")) return;
-    if (activeMessageMenuId && !event.target.closest(".message-own-menu, [data-own-message-menu]")) {
-      activeMessageMenuId = "";
-      if (document.querySelector("#conversation-dialog")?.open) await renderConversationThread();
-    }
     const matchesTab = event.target.closest("[data-matches-tab]");
     if (matchesTab) {
       setMatchesTab(matchesTab.dataset.matchesTab);
