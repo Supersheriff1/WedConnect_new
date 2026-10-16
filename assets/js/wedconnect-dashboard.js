@@ -31,7 +31,9 @@
   let activeConversationPeer = "";
   let conversationRefreshTimer = null;
   let conversationRefreshBusy = false;
-  let activityCache = { incoming: [], matches: [], messages: [], summaries: new Map() };
+  let reactionFeatureAvailable = false;
+  let reactionMigrationNoticeShown = false;
+  let activityCache = { incoming: [], matches: [], messages: [], reactions: [], summaries: new Map() };
   const profilePhotoUrlCache = new Map();
   let discoverState = { loaded: false, loading: false, ids: [], index: 0, active: null, photoIndex: 0 };
   let accountAvatarPath = "";
@@ -2491,14 +2493,14 @@
     let messages = [];
     if (matches.length) {
       const result = await supabase.from("profile_messages")
-        .select("sender_id,recipient_id,body,created_at")
+        .select("id,sender_id,recipient_id,body,created_at")
         .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
         .order("created_at", { ascending: true });
       if (result.error) throw new Error("Nachrichten konnten nicht geladen werden. Führe die WedConnect-Nachrichtenmigration aus.");
       messages = result.data || [];
     } else {
       const result = await supabase.from("profile_messages")
-        .select("sender_id,recipient_id,body,created_at")
+        .select("id,sender_id,recipient_id,body,created_at")
         .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
         .order("created_at", { ascending: true });
       if (!result.error) messages = result.data || [];
@@ -2514,6 +2516,7 @@
       newMatches: newMatches.map((id) => summaries.find((summary) => summary && summary.id === id)).filter(Boolean),
       messages,
       messagedPeers,
+      reactions: activityCache.reactions || [],
       news: content.news,
       offers: content.offers,
       summaries: new Map(summaries.filter(Boolean).map((summary) => [summary.id, summary]))
@@ -3133,6 +3136,27 @@
       time.dateTime = item.created_at;
       time.textContent = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(item.created_at));
       bubble.append(body, time);
+      if (reactionFeatureAvailable) {
+        const messageReactions = (activityCache.reactions || []).filter((reaction) => reaction.message_id === item.id && reaction.reaction === "heart");
+        const ownHeart = messageReactions.some((reaction) => reaction.user_id === userId);
+        const reactionRow = document.createElement("div");
+        reactionRow.className = "message-reaction-row";
+        const heart = document.createElement("button");
+        heart.type = "button";
+        heart.className = "message-heart-button" + (ownHeart ? " is-active" : "");
+        heart.dataset.messageHeart = item.id;
+        heart.setAttribute("aria-label", ownHeart ? "Herzreaktion entfernen" : "Mit Herz reagieren");
+        heart.setAttribute("aria-pressed", String(ownHeart));
+        heart.textContent = messageReactions.length ? "♥" : "♡";
+        reactionRow.append(heart);
+        if (messageReactions.length) {
+          const count = document.createElement("span");
+          count.className = "message-heart-count";
+          count.textContent = String(messageReactions.length);
+          reactionRow.append(count);
+        }
+        bubble.append(reactionRow);
+      }
       container.append(bubble);
     });
     if (wasNearBottom) container.scrollTop = container.scrollHeight;
@@ -3146,7 +3170,7 @@
     try {
       const userId = currentUser.id;
       const { data, error } = await supabase.from("profile_messages")
-        .select("sender_id,recipient_id,body,created_at")
+        .select("id,sender_id,recipient_id,body,created_at")
         .or("sender_id.eq." + userId + ",recipient_id.eq." + userId)
         .order("created_at", { ascending: true });
       if (error || peerId !== activeConversationPeer) return;
@@ -3158,14 +3182,47 @@
       const previous = forPeer(activityCache.messages || []);
       const latestKey = (items) => {
         const last = items[items.length - 1];
-        return last ? items.length + "|" + last.created_at + "|" + last.sender_id + "|" + last.body : "0";
+        return last ? items.length + "|" + last.id + "|" + last.created_at : "0";
       };
-      if (latestKey(previous) === latestKey(peerMessages)) return;
-      activityCache.messages = (activityCache.messages || [])
-        .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
-        .concat(peerMessages)
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      if (activityCache.messagedPeers) activityCache.messagedPeers.add(peerId);
+      const messagesChanged = latestKey(previous) !== latestKey(peerMessages);
+      let peerReactions = null;
+      if (peerMessages.length) {
+        const { data: reactions, error: reactionError } = await supabase.from("profile_message_reactions")
+          .select("message_id,user_id,reaction,created_at")
+          .in("message_id", peerMessages.map((item) => item.id));
+        if (reactionError) {
+          if (!reactionMigrationNoticeShown) {
+            const missingTable = /does not exist|schema cache|42P01|could not find the table/i.test(String(reactionError.message || ""));
+            showNotice(missingTable
+              ? "Herzreaktionen sind noch nicht eingerichtet. Bitte führe die Nachrichtenreaktions-Migration in Supabase aus."
+              : "Herzreaktionen konnten gerade nicht geladen werden.");
+            reactionMigrationNoticeShown = true;
+          }
+          reactionFeatureAvailable = false;
+        } else {
+          reactionFeatureAvailable = true;
+          peerReactions = reactions || [];
+        }
+      }
+      const previousMessageIds = new Set(previous.map((item) => item.id));
+      const nextMessageIds = new Set(peerMessages.map((item) => item.id));
+      const reactionKey = (items) => items.map((item) => [item.message_id, item.user_id, item.reaction].join("|")).sort().join(";");
+      const oldPeerReactions = (activityCache.reactions || []).filter((item) => previousMessageIds.has(item.message_id));
+      const reactionsChanged = peerReactions !== null && reactionKey(oldPeerReactions) !== reactionKey(peerReactions);
+      if (!messagesChanged && !reactionsChanged) return;
+      if (messagesChanged) {
+        activityCache.messages = (activityCache.messages || [])
+          .filter((item) => item.sender_id !== peerId && item.recipient_id !== peerId)
+          .concat(peerMessages)
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        if (activityCache.messagedPeers) activityCache.messagedPeers.add(peerId);
+      }
+      if (peerReactions !== null) {
+        const replacedIds = new Set([...previousMessageIds, ...nextMessageIds]);
+        activityCache.reactions = (activityCache.reactions || [])
+          .filter((item) => !replacedIds.has(item.message_id))
+          .concat(peerReactions);
+      }
       renderMessagesList();
       await renderConversationThread();
     } finally {
@@ -3559,6 +3616,23 @@
     const discoverAction = event.target.closest("[data-discover-action]");
     if (discoverAction) {
       await handleDiscoverAction(discoverAction);
+      return;
+    }
+    const heartReaction = event.target.closest("[data-message-heart]");
+    if (heartReaction) {
+      const messageId = heartReaction.dataset.messageHeart;
+      const alreadyReacted = (activityCache.reactions || []).some((reaction) =>
+        reaction.message_id === messageId && reaction.user_id === currentUser.id && reaction.reaction === "heart");
+      heartReaction.disabled = true;
+      const result = alreadyReacted
+        ? await supabase.from("profile_message_reactions").delete().eq("message_id", messageId).eq("user_id", currentUser.id).eq("reaction", "heart")
+        : await supabase.from("profile_message_reactions").insert({ message_id: messageId, user_id: currentUser.id, reaction: "heart" });
+      heartReaction.disabled = false;
+      if (result.error) {
+        showNotice("Dein Herz konnte nicht gespeichert werden. Prüfe die Nachrichtenreaktions-Migration in Supabase.");
+        return;
+      }
+      await refreshOpenConversationMessages();
       return;
     }
     const likeBack = event.target.closest("[data-like-back]");
