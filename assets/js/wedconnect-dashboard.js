@@ -3592,62 +3592,62 @@
     card.className = "discover-profile-card";
     const photoFrame = document.createElement("div");
     photoFrame.className = "discover-photo-frame";
-    const image = document.createElement("img");
-    image.alt = "";
-    image.loading = "eager";
-    image.decoding = "async";
     const coupleName = [candidate.profile.partner_one_first_name, candidate.profile.partner_two_first_name].filter(Boolean).join(" & ");
     const displayName = candidate.role === "couple" ? coupleName || "Hochzeitspaar" : candidate.profile.first_name || "Fotograf";
-    if (candidate.photos.length) {
-      const firstPhoto = candidate.photos[0];
-      supabase.storage.from(photoBucket).createSignedUrl(firstPhoto.display_path || firstPhoto.object_path, 600).then(({ data, error }) => {
-        if (!error && data && data.signedUrl && image.isConnected) image.src = data.signedUrl;
-      });
-      if (candidate.role === "couple") {
-        const nameOverlay = createCouplePhotoNameOverlay(firstPhoto.photo_type, candidate.profile);
-        if (nameOverlay) photoFrame.append(nameOverlay);
-      }
-    } else {
-      image.className = "discover-photo-placeholder";
-    }
-    photoFrame.prepend(image);
     const photoCount = document.createElement("span");
     photoCount.className = "discover-photo-count";
     photoCount.textContent = candidate.photos.length ? "1 / " + candidate.photos.length : "Kein Profilfoto";
-    if (candidate.photos.length > 1) {
-      const previous = document.createElement("button");
-      previous.type = "button";
-      previous.className = "discover-photo-arrow discover-photo-arrow--previous";
-      previous.setAttribute("aria-label", "Vorheriges Foto");
-      previous.textContent = "‹";
-      previous.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex - 1, image, photoCount));
-      const next = document.createElement("button");
-      next.type = "button";
-      next.className = "discover-photo-arrow discover-photo-arrow--next";
-      next.setAttribute("aria-label", "Nächstes Foto");
-      next.textContent = "›";
-      next.addEventListener("click", () => setDiscoverPhoto(candidate, discoverState.photoIndex + 1, image, photoCount));
-      photoFrame.append(previous, next);
-      let touchStart = null;
-      photoFrame.addEventListener("touchstart", (event) => {
-        if (event.touches.length !== 1 || event.target.closest(".discover-photo-arrow")) return;
-        const touch = event.touches[0];
-        touchStart = { x: touch.clientX, y: touch.clientY };
-      }, { passive: true });
-      photoFrame.addEventListener("touchend", (event) => {
-        if (!touchStart || !event.changedTouches.length) return;
-        const start = touchStart;
-        touchStart = null;
-        const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - start.x;
-        const deltaY = touch.clientY - start.y;
-        if (Math.abs(deltaX) < 48 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
-        const direction = deltaX < 0 ? 1 : -1;
-        setDiscoverPhoto(candidate, discoverState.photoIndex + direction, image, photoCount);
-      }, { passive: true });
-      photoFrame.addEventListener("touchcancel", () => { touchStart = null; }, { passive: true });
+    if (candidate.photos.length) {
+      const track = document.createElement("div");
+      track.className = "discover-photo-track";
+      track.setAttribute("aria-label", "Profilfotos");
+      candidate.photos.forEach((photo, index) => {
+        const slide = document.createElement("div");
+        slide.className = "discover-photo-slide";
+        const image = document.createElement("img");
+        image.alt = candidate.role === "couple"
+          ? "Foto von " + coupleName
+          : "Portfoliofoto von " + (candidate.profile.first_name || "Fotograf");
+        image.loading = index < 2 ? "eager" : "lazy";
+        image.decoding = "async";
+        slide.append(image);
+        if (candidate.role === "couple") {
+          const nameOverlay = createCouplePhotoNameOverlay(photo.photo_type, candidate.profile);
+          if (nameOverlay) slide.append(nameOverlay);
+        }
+        track.append(slide);
+        supabase.storage.from(photoBucket).createSignedUrl(photo.display_path || photo.object_path, 600).then(({ data, error }) => {
+          if (!error && data && data.signedUrl && image.isConnected) image.src = data.signedUrl;
+        });
+      });
+      const updatePhotoCounter = () => {
+        const index = Math.min(candidate.photos.length - 1, Math.max(0, Math.round(track.scrollLeft / Math.max(track.clientWidth, 1))));
+        discoverState.photoIndex = index;
+        photoCount.textContent = (index + 1) + " / " + candidate.photos.length;
+      };
+      track.addEventListener("scroll", updatePhotoCounter, { passive: true });
+      photoFrame.append(track, photoCount);
+      if (candidate.photos.length > 1) {
+        const previous = document.createElement("button");
+        previous.type = "button";
+        previous.className = "discover-photo-arrow discover-photo-arrow--previous";
+        previous.setAttribute("aria-label", "Vorheriges Foto");
+        previous.textContent = "‹";
+        previous.addEventListener("click", () => track.scrollBy({ left: -track.clientWidth, behavior: "smooth" }));
+        const next = document.createElement("button");
+        next.type = "button";
+        next.className = "discover-photo-arrow discover-photo-arrow--next";
+        next.setAttribute("aria-label", "Nächstes Foto");
+        next.textContent = "›";
+        next.addEventListener("click", () => track.scrollBy({ left: track.clientWidth, behavior: "smooth" }));
+        photoFrame.append(previous, next);
+      }
+    } else {
+      const image = document.createElement("img");
+      image.className = "discover-photo-placeholder";
+      image.alt = "Kein Profilfoto vorhanden";
+      photoFrame.append(image, photoCount);
     }
-    photoFrame.append(photoCount);
     card.append(photoFrame);
 
     const content = document.createElement("div");
