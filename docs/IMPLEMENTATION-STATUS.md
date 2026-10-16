@@ -154,3 +154,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - In den Einstellungen ist ein eigener Bereich „Konto löschen“ ergänzt. Eine zweite Bestätigungsansicht beschreibt die Folgen; die Schaltfläche bleibt gesperrt, bis exakt `KONTO LÖSCHEN` eingegeben wurde.
 - Die Supabase Edge Function authentifiziert den Aufrufer, löscht Dateien aus dem privaten Profilfoto-Bucket und entfernt anschließend den Auth-Nutzer. Verknüpfte Profil-, Like-, Match-, Chat-, Support- und Einstellungsdaten werden über bestehende `ON DELETE CASCADE`-Beziehungen entfernt. Eigene Nachrichten verschwinden auch für die Chatpartner.
 - Voraussetzung vor Live-Nutzung: `supabase functions deploy delete-account` im richtigen Supabase-Projekt ausführen. Die erforderlichen Supabase-Standard-Secrets müssen verfügbar sein. Die Ausführung in Produktion wurde noch nicht verifiziert.
+
+
+## Layout des Konto-Löschdialogs (16. Oktober 2026)
+
+- Einstellungen und der Bestätigungsdialog zur Kontolöschung bleiben bei kleinen und niedrigen Viewports innerhalb der verfügbaren Bildschirmhöhe; ihre Inhalte können bei Bedarf im Dialog gescrollt werden.
+- Der Löschbereich ist durch eine deutlich sichtbare, aber semantisch passende Alert-Farbe hervorgehoben.
