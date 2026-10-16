@@ -238,3 +238,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 
 - Galerie-Indikatoren gelten rollenunabhängig für Hochzeitsprofile und Fotografenprofile. Im Like-/Match-Profil sitzen die kurzen Balken leicht tiefer (20 px vom oberen Bildrand) als in den übrigen Ansichten.
+
+
+## Discover: Aktionsbuttons unter den Profilinhalten (16. Oktober 2026)
+
+- Auf schmalen Ansichten bleiben „Überspringen“ und „Interesse zeigen“ nicht mehr sticky über dem Profiltext. Sie stehen im normalen Seitenfluss unter allen Profilangaben, einschließlich der Nutzungsbedingungen, am Ende der Profilbox.
+- Dadurch überdecken die Buttons beim Scrollen keinen Inhalt.
