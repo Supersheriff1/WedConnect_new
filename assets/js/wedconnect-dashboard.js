@@ -3069,7 +3069,18 @@
   async function openConversation(peerId) {
     activeConversationPeer = peerId;
     const summary = activityCache.summaries.get(peerId) || await loadPublicProfileSummary(peerId);
-    document.querySelector("#conversation-title").textContent = summary ? summary.name : "Nachricht";
+    const partnerName = summary && summary.name ? summary.name : "Nachricht";
+    document.querySelector("#conversation-title").textContent = partnerName;
+    const avatar = document.querySelector("#conversation-avatar");
+    avatar.replaceChildren();
+    if (summary && summary.photoUrl) {
+      const image = document.createElement("img");
+      image.src = summary.photoUrl;
+      image.alt = "";
+      avatar.append(image);
+    } else {
+      avatar.textContent = partnerName.trim().slice(0, 1).toUpperCase() || "W";
+    }
     await renderConversationThread();
     document.querySelector("#conversation-status").textContent = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
