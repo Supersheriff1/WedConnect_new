@@ -3616,6 +3616,7 @@
   });
 
   document.addEventListener("click", async (event) => {
+    if (event.target.closest(".message-reaction-sticker")) return;
     const matchesTab = event.target.closest("[data-matches-tab]");
     if (matchesTab) {
       setMatchesTab(matchesTab.dataset.matchesTab);
