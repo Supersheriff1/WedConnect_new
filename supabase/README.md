@@ -35,8 +35,9 @@ For a new project, execute the SQL files in the order below using the Supabase S
 27. `supabase/migrations/20261016130000_support_contact_feedback.sql`
 28. `supabase/migrations/20261016170000_profile_blocks.sql`
 29. `supabase/migrations/20261016180000_profile_saved_profiles.sql`
+30. `supabase/migrations/20261016190000_user_discover_preferences.sql`
 
-The couple profile stores a structured ceremony type and guided timeline. Photographer galleries remain ordinary photos without a highlight selection. Couple profiles show wedding date, town and photo-use preference as key facts. Couple uploads require each partner to be represented: either one joint photo (stored as `photo_type = 'couple'`) or at least one individual photo for each partner. A joint photo may also be combined with individual photos. Each new image is limited to 2 MB. The activity migration also adds messages, role-targeted overview announcements/offers, email preferences, and a 2 MB bucket limit. Do not infer that these migrations are live; check the current Supabase migration history.
+The couple profile stores a structured ceremony type and guided timeline. Photographer galleries remain ordinary photos without a highlight selection. Couple profiles show wedding date, town and photo-use preference as key facts. Couple uploads require each partner to be represented: either one joint photo (stored as `photo_type = 'couple'`) or at least one individual photo for each partner. A joint photo may also be combined with individual photos. Each new image is limited to 2 MB. The activity migration also adds messages, role-targeted overview announcements/offers, email preferences, and a 2 MB bucket limit. The discover-preferences migration stores each account's per-role field ordering and visibility under RLS. It affects displayed profile facts only; all eligible profiles continue to appear. Do not infer that these migrations are live; check the current Supabase migration history.
 
 ## Chat blockieren
 
