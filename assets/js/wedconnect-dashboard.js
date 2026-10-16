@@ -2702,6 +2702,21 @@
     setConversationMenuOpen(false);
   }
 
+  function resetConversationComposer(placeholder, ariaLabel) {
+    const input = document.querySelector("#conversation-input");
+    const form = document.querySelector("#conversation-form");
+    if (!input || !form) return;
+    input.value = "";
+    input.style.removeProperty("height");
+    input.style.removeProperty("overflow-y");
+    input.disabled = false;
+    input.placeholder = placeholder;
+    input.setAttribute("aria-label", ariaLabel);
+    const sendButton = form.querySelector('button[type="submit"]');
+    if (sendButton) sendButton.disabled = false;
+    form.removeAttribute("aria-busy");
+  }
+
   function openBlockProfileDialog() {
     if (!activeConversationPeer || !blockFeatureAvailable) {
       showNotice("Blockieren ist noch nicht eingerichtet. Bitte führe die Profil-Blockiermigration in Supabase aus.");
@@ -3739,6 +3754,7 @@
   async function openConversation(peerId) {
     activeSupportThreadId = "";
     activeConversationPeer = peerId;
+    resetConversationComposer("Nachricht schreiben …", "Nachricht");
     const summary = activityCache.summaries.get(peerId) || await loadPublicProfileSummary(peerId);
     const partnerName = summary && summary.name ? summary.name : "Nachricht";
     document.querySelector("#conversation-title").textContent = partnerName;
@@ -3770,6 +3786,7 @@
     if (!thread) return;
     activeConversationPeer = "";
     activeSupportThreadId = threadId;
+    resetConversationComposer("Nachricht an WedConnect schreiben …", "Nachricht an WedConnect");
     updateConversationBlockUI("");
     setConversationMenuOpen(false);
     const title = supportOperator ? ("Support · " + (thread.subject || "Anfrage")) : "WedConnect-Team";
@@ -3782,9 +3799,6 @@
     document.querySelector("#conversation-status").textContent = "";
     openWorkspaceDialog(document.querySelector("#conversation-dialog"));
     await markSupportThreadRead(threadId);
-    const input = document.querySelector("#conversation-input");
-    input.placeholder = "Nachricht an WedConnect schreiben …";
-    input.setAttribute("aria-label", "Nachricht an WedConnect");
     const threadElement = document.querySelector("#conversation-thread");
     requestAnimationFrame(() => { if (threadElement) threadElement.scrollTop = threadElement.scrollHeight; });
     await refreshOpenConversationMessages();
