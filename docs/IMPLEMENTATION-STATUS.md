@@ -175,3 +175,9 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 
 
 - Korrektur: Die mobile Ausblendung der Discover-Pfeile steht nun nach den allgemeinen Pfeilregeln und kann durch diese nicht mehr überschrieben werden.
+
+
+## Startübersicht: Scroll-Hinweis und schließbare Inhalte (16. Oktober 2026)
+
+- Ein dezenter Hinweis „Weiter unten“ erscheint unten rechts, solange die Übersicht am Seitenanfang steht und weitere Inhalte vorhanden sind. Er verschwindet beim Scrollen, am Seitenende sowie außerhalb der Übersicht.
+- Inhalte erhalten keinen einheitlichen Schließen-Button: offene Likes bleiben bis zur Reaktion sichtbar; neue Matches ohne Nachricht bis zum Chatstart. Nicht dringende App-Neuigkeiten können als gelesen markiert oder ausgeblendet werden. Anzeigen und Partnerangebote bleiben ohne Schließen-X sichtbar und werden über Laufzeit, Zielgruppe und Werbeeinstellungen gesteuert.
