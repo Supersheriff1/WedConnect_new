@@ -1,8 +1,8 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Stand der Prüfung:** 16. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` sowie der Änderungsbranch für das Löschen von Nachrichten für beide Seiten  
+**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` sowie der Feature-Branch für Kontakt / Feedback und Nachrichtenlöschung  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
 **Prüfart:** Quellcode und SQL geprüft; JavaScript-Syntax geprüft; kein Live-End-to-End-Test; aktiver Supabase-Migrationsstatus nicht geprüft
 
@@ -58,9 +58,15 @@ Die Discover-Migration `20261015200000_profile_skips_for_discover.sql` ergänzt 
 
 Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am Desktop über das Nachrichtenmenü für beide Seiten gelöscht werden. Ein Bestätigungsdialog erklärt die Auswirkung. Beim Bestätigen wird der Nachrichtentext in der Datenbank durch einen Löschhinweis ersetzt und die App zeigt an der ursprünglichen Stelle für beide Beteiligten den neutralen Hinweis „Nachricht wurde gelöscht“; vorhandene Herzreaktionen werden entfernt. Dafür muss `supabase/migrations/20261016110000_profile_message_delete_for_everyone.sql` im aktiven Supabase-Projekt ausgeführt werden. Die frühere Migration `20261016100000_profile_message_hidden.sql` bleibt aus Migrationshistorie bestehen, wird von der Oberfläche aber nicht mehr verwendet.
 
+## Kontakt / Feedback
+
+Der Feature-Branch ergänzt im Kontodialog zwei Kontaktwege. Support-Chats werden als Unterhaltung in „Nachrichten“ angezeigt und dort im normalen Chatdialog fortgeführt. E-Mail-Verläufe bleiben im Kontobereich sichtbar; Antworten versendet die Supabase Edge Function `send-support-email` über Resend. Es werden keine Push-Nachrichten versendet. Ein Support-Eingang für Betreiberkonten ist über `support_operators` zugriffsgeschützt. Die Empfängeradresse `albert.fuerst.usa@gmail.com` ist ausdrücklich vorläufig und muss vor dem Livegang geändert werden. Für den E-Mail-Kanal sind Migration, Edge-Function-Deployment, Resend-API-Key, bestätigte Absenderadresse und finale Empfängeradresse erforderlich. Diese externen Einstellungen und ein erfolgreicher Versand sind nicht durch den Quellcode verifiziert.
+
+Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis „Nachricht wurde gelöscht“ wird entsprechend rechts für eigene gesendete bzw. links für empfangene Nachrichten ausgerichtet.
+
 ## Verifikation und Grenzen
 
-- Der aktuelle Umsetzungsstand wurde auf `feature/couple-wedding-timeline-20261015` gegen die GitHub-Dateien geprüft; JavaScript-Syntax wurde lokal geparst. Der Branch enthält Profil-, Aktivitäts- und Einstellungsänderungen, ist aber nicht mit `main` zusammengeführt.
+- Der Kontakt-/Feedback-Stand und die Ausrichtung der Nachrichtenlöschvermerke wurden auf einem Feature-Branch gegen `main` geprüft. Das Dashboard-JavaScript wurde syntaktisch geparst. Der Branch enthält Profil-, Aktivitäts- und Einstellungsänderungen, ist aber nicht mit `main` zusammengeführt.
 - Der zuletzt vom Nutzer bestätigte Login-Ablauf bleibt als Nutzerbeobachtung dokumentiert; in dieser Runde erfolgte kein erneuter Google- oder E-Mail-Test.
 - Der PR meldet den automatischen Vercel-Preview-Build als „Ready“ und der Vercel-Statuscheck ist erfolgreich. Der geschützte Preview-Inhalt ließ sich über die verbundene Vercel-Verbindung nicht abrufen; ein UI-End-to-End-Test fand daher nicht statt. Nachträgliche Korrekturen am Profilabschluss und an der Foto-Regel liegen auf dem Branch und benötigen einen neuen Preview-Build. Produktionsverhalten und aktive Supabase-Migrationen bleiben ungeprüft; für Aktivitätsansicht, 2-MB-Grenze und Einstellungen sind die neuen Hochzeitsprofil- und Aktivitätsmigrationen erforderlich.
 - Ein Verwaltungsbildschirm zum Erstellen/Planen von Neuigkeiten und Partnerangeboten existiert nicht; veröffentlichte Inhalte können erst nach einer separaten Admin-Funktion gepflegt werden.
@@ -74,3 +80,14 @@ Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am D
 - Verifikation: lokal, Preview oder Produktion samt Commit/Deployment
 - Abweichungen zwischen Produktentscheidung, Code und Live-System
 
+
+
+## Änderungen dieses Feature-Branches
+
+- Konto-Dialog: Kontakt / Feedback mit Chat und E-Mail, E-Mail-Verlauf und zugriffsgeschütztem Betreiber-Eingang.
+- Nachrichten: Support-Chatkarten, Chatfortsetzung im bestehenden Nachrichtenfenster und Betreiberzugriff aus dem Support-Eingang.
+- Datenbank: neue Support-Threads, Nachrichten, Betreiber-Allowlist, RLS-Regeln und RPC zum atomaren Erstellen eines Threads.
+- E-Mail: serverseitige Supabase Edge Function für Resend; benötigte Secrets und Betreiberkonfiguration stehen in [supabase/README.md](../supabase/README.md).
+- Vorläufige Empfängeradresse: `albert.fuerst.usa@gmail.com`; vor Livegang ersetzen.
+- Nachrichtenlöschung: Anzeige bleibt auf der ursprünglichen Absenderseite.
+- Die Migration, Edge Function und externen Secrets müssen noch im Supabase-Projekt eingerichtet werden. Eine Live-DB-Migration, Betreiberfreischaltung und E-Mail-Zustellung wurden nicht getestet.
