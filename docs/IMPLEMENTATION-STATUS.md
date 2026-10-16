@@ -4,7 +4,7 @@
 **Stand der Prüfung:** 16. Oktober 2026  
 **Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` sowie der Änderungsbranch für das Löschen von Nachrichten für beide Seiten  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
-**Prüfart:** Quellcode und SQL geprüft; JavaScript-Syntax geprüft und Vercel-Preview-Status erfolgreich; aktiver Supabase-Migrationsstatus nicht geprüft
+**Prüfart:** Quellcode und SQL geprüft; JavaScript-Syntax geprüft; kein Live-End-to-End-Test; aktiver Supabase-Migrationsstatus nicht geprüft
 
 Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementierten Code von bestätigtem Live-Betrieb.
 
