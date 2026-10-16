@@ -2437,7 +2437,20 @@
   function createContentCard(item, kind) {
     const card = document.createElement("article");
     const isTestAd = Boolean(item.is_test_ad);
-    card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "");
+    const isOffer = kind === "offer";
+    card.className = "activity-card content-card" + (isTestAd ? " test-ad-card" : "") + (isOffer ? " offer-card-clickable" : "");
+    if (isOffer) {
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", "Details zum Angebot " + (item.title || "") + " öffnen");
+      card.addEventListener("click", () => openOfferDetails(item.id));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openOfferDetails(item.id);
+        }
+      });
+    }
     const copy = document.createElement("div");
     copy.className = "activity-card-copy";
     const label = document.createElement("span");
@@ -2460,22 +2473,99 @@
       card.append(monogram);
     }
     card.append(copy);
-    const rawUrl = item.destination_url || "";
-    if (rawUrl) {
+    if (isOffer) {
+      const detailsHint = document.createElement("span");
+      detailsHint.className = "offer-card-cta";
+      detailsHint.textContent = "Details ansehen →";
+      card.append(detailsHint);
+    } else {
+      const rawUrl = item.destination_url || "";
+      if (rawUrl) {
+        try {
+          const url = new URL(rawUrl, window.location.href);
+          if (["http:", "https:"].includes(url.protocol)) {
+            const link = document.createElement("a");
+            link.className = "button button-secondary";
+            link.href = url.toString();
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "Mehr erfahren";
+            card.append(link);
+          }
+        } catch (_) {}
+      }
+    }
+    return card;
+  }
+
+  function openOfferDetails(offerId) {
+    const offer = (activityCache.offers || []).find((item) => String(item.id) === String(offerId));
+    const container = document.querySelector("#offer-detail-content");
+    if (!offer || !container) return;
+    const card = document.createElement("article");
+    card.className = "offer-detail-card";
+    const brand = document.createElement("div");
+    brand.className = "offer-detail-brand";
+    if (offer.is_test_ad) {
+      const monogram = document.createElement("span");
+      monogram.className = "offer-detail-monogram";
+      monogram.setAttribute("aria-hidden", "true");
+      monogram.textContent = "SR";
+      brand.append(monogram);
+    }
+    const brandCopy = document.createElement("div");
+    const kicker = document.createElement("span");
+    kicker.className = "offer-detail-kicker";
+    kicker.textContent = offer.is_test_ad ? "Testanzeige" : "Partnerangebot";
+    const partner = document.createElement("p");
+    partner.className = "offer-detail-partner";
+    partner.textContent = offer.partner_name || "WedConnect-Partner";
+    brandCopy.append(kicker, partner);
+    brand.append(brandCopy);
+    const title = document.createElement("h2");
+    title.className = "offer-detail-title";
+    title.textContent = offer.title || "Angebot";
+    const description = document.createElement("p");
+    description.className = "offer-detail-description";
+    description.textContent = offer.description || "";
+    card.append(brand, title, description);
+    if (offer.details) {
+      const details = document.createElement("p");
+      details.className = "offer-detail-extra";
+      details.textContent = offer.details;
+      card.append(details);
+    }
+    if (offer.terms) {
+      const terms = document.createElement("div");
+      terms.className = "offer-detail-terms";
+      const heading = document.createElement("strong");
+      heading.textContent = "Bedingungen";
+      const copy = document.createElement("p");
+      copy.textContent = offer.terms;
+      terms.append(heading, copy);
+      card.append(terms);
+    }
+    const destination = offer.destination_url || "";
+    if (destination) {
       try {
-        const url = new URL(rawUrl, window.location.href);
+        const url = new URL(destination, window.location.href);
         if (["http:", "https:"].includes(url.protocol)) {
+          const actions = document.createElement("div");
+          actions.className = "offer-detail-actions";
           const link = document.createElement("a");
-          link.className = "button " + (isTestAd ? "button-primary" : "button-secondary");
+          link.className = "button button-primary";
           link.href = url.toString();
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = isTestAd ? "shira-rachel.com besuchen" : kind === "offer" ? "Zum Angebot" : "Mehr erfahren";
-          card.append(link);
+          link.textContent = "Website besuchen";
+          actions.append(link);
+          card.append(actions);
         }
       } catch (_) {}
     }
-    return card;
+    container.replaceChildren(card);
+    setDashboardView("offer-detail");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function createActivityCard(summary, kind) {
@@ -3718,11 +3808,12 @@
     document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
       section.hidden = section.dataset.dashboardView !== view;
     });
-    setActiveNavigation(view === "matched-profile" ? "matches" : view);
+    setActiveNavigation(view === "matched-profile" ? "matches" : view === "offer-detail" ? "home" : view);
     const titles = {
       home: "Willkommen" + (currentGreeting ? ", " + currentGreeting : "") + "!",
       profile: currentRole === "couple" ? "Euer Profil" : "Dein Profil",
       matches: "Matches",
+      "offer-detail": "Angebot",
       "matched-profile": "Profil",
       messages: "Nachrichten",
       discover: currentRole === "couple" ? "Fotografen entdecken" : "Hochzeiten entdecken"
@@ -3730,7 +3821,7 @@
     const pageTitle = document.querySelector("#page-title");
     pageTitle.textContent = titles[view] || "Willkommen!";
     pageTitle.hidden = view === "matched-profile";
-    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile";
+    document.querySelector("#role-eyebrow").hidden = view === "messages" || view === "matches" || view === "discover" || view === "matched-profile" || view === "offer-detail";
   }
 
   async function openConversation(peerId) {
@@ -4612,6 +4703,11 @@
     const matchesTab = event.target.closest("[data-matches-tab]");
     if (matchesTab) {
       setMatchesTab(matchesTab.dataset.matchesTab);
+      return;
+    }
+    const offerBack = event.target.closest("#offer-detail-back");
+    if (offerBack) {
+      setDashboardView("home");
       return;
     }
     const profileBack = event.target.closest("#matched-profile-back");
