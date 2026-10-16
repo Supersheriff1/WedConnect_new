@@ -2,9 +2,9 @@
 
 **Version:** 2.0  
 **Stand der Prüfung:** 16. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, Branch `main`, geprüft bei `4c8f09696e1700a8a8a97465bc456e77bb1285bc`  
+**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` sowie der Änderungsbranch für das Löschen von Nachrichten für beide Seiten  
 **Geprüfte Dateien:** Dashboard, Onboarding-JavaScript, Hochzeitsprofil- und Aktivitätsmigrationen sowie Projekt- und App-Design-Bibles auf dem Feature-Branch  
-**Prüfart:** Quellcode und SQL geprüft; keine Live-Prüfung von Vercel oder dem aktiven Supabase-Migrationsstatus
+**Prüfart:** Quellcode und SQL geprüft; JavaScript-Syntax geprüft und Vercel-Preview-Status erfolgreich; aktiver Supabase-Migrationsstatus nicht geprüft
 
 Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementierten Code von bestätigtem Live-Betrieb.
 
@@ -53,6 +53,10 @@ Die Migrationsdateien umfassen Profilanlage, rollenabhängige Felder, schrittwei
 Die ältere Migration `20261013200000_portfolio_highlight_star.sql` bleibt aus Datenbank-Historiegründen vorhanden. Die aktuelle Oberfläche und das aktuelle Dashboard-JS verwenden keine Highlight-Markierung; die Produktentscheidung sind bis zu 20 normale Galeriefotos. Eine Bereinigung alter Schemafelder wäre eine gesondert zu prüfende Migration und ist nicht Teil dieses Statusupdates.
 
 Die Discover-Migration `20261015200000_profile_skips_for_discover.sql` ergänzt private, kontobezogene Überspringen-Einträge. Sie muss vor dem Discover-Live-Test in Supabase ausgeführt sein. Die neue Aktivitätsmigration setzt die Grenze des privaten Buckets `wedconnect-profile-photos` auf 2 MB pro gespeicherter Datei. Fotografen- und Paaroberfläche begrenzen Uploads ebenfalls auf 2 MB. Für ein bestehendes Supabase-Projekt den tatsächlich ausgeführten Migrationsverlauf prüfen; Dateien nicht blind erneut ausführen.
+
+## Nachrichtenlöschung im Chat
+
+Eigene gesendete Nachrichten können am Handy durch längeres Drücken oder am Desktop über das Nachrichtenmenü für beide Seiten gelöscht werden. Ein Bestätigungsdialog erklärt die Auswirkung. Beim Bestätigen wird der Nachrichtentext in der Datenbank durch einen Löschhinweis ersetzt und die App blendet den Eintrag für beide Beteiligten aus; vorhandene Herzreaktionen werden entfernt. Dafür muss `supabase/migrations/20261016110000_profile_message_delete_for_everyone.sql` im aktiven Supabase-Projekt ausgeführt werden. Die frühere Migration `20261016100000_profile_message_hidden.sql` bleibt aus Migrationshistorie bestehen, wird von der Oberfläche aber nicht mehr verwendet.
 
 ## Verifikation und Grenzen
 
