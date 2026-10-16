@@ -50,19 +50,13 @@ The chat supports one removable heart reaction per user per message. Apply migra
 
 ## Kontakt / Feedback
 
-The account dialog offers two contact channels: WedConnect chat and e-mail. Chat threads are listed with other conversations; e-mail threads and replies stay in the account dialog. No push notifications are sent. The support inbox is visible only to authenticated operator accounts explicitly allowlisted in `support_operators`.
+Der Kontobereich bietet einen einzigen Kontaktweg: Chat mit dem WedConnect-Team. Thema, Betreff und Nachricht werden beim Start einer Unterhaltung als erste Chatnachricht übernommen. Pro Konto wird eine bestehende Support-Unterhaltung fortgeführt; weitere Nachrichten erscheinen mit den anderen Unterhaltungen unter „Nachrichten“. Push-Nachrichten und Support-E-Mail-Versand sind nicht Teil dieser Funktion.
 
-For each operator, add their authenticated Supabase user UUID in the Supabase SQL Editor:
+Der Support-Eingang ist nur für angemeldete Betreiberkonten sichtbar, die in `support_operators` eingetragen sind. Betreiberkonten erhalten diesen Zugang durch Einfügen ihrer authentifizierten Supabase-User-ID im Supabase SQL Editor:
 
 ```sql
 insert into public.support_operators (user_id)
 values ('00000000-0000-0000-0000-000000000000');
 ```
 
-The e-mail channel uses the `send-support-email` Supabase Edge Function and Resend. Deploy it and configure these Supabase Function secrets:
-
-- `RESEND_API_KEY`: Resend API key.
-- `SUPPORT_FROM_EMAIL`: sender address on a verified Resend domain.
-- `SUPPORT_EMAIL`: final WedConnect support inbox. Until changed, the function uses `albert.fuerst.usa@gmail.com` as a provisional recipient. **This address must be replaced before the app goes live.**
-
-The function also uses Supabase's `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` runtime secrets. Never place the service-role key in browser code. The Supabase migration and Edge Function deployment/secrets must be applied separately; repository files do not confirm live Supabase configuration.
+Führe für die Chat-Funktion `supabase/migrations/20261016130000_support_contact_feedback.sql` aus. Die Migration und die Betreiberfreischaltung in Supabase müssen separat erfolgen; das Vorhandensein der Dateien im Repository bestätigt keine Live-Einrichtung.
