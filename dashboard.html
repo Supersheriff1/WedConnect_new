@@ -502,10 +502,10 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <dialog id="contact-feedback-dialog" class="workspace-dialog support-dialog" aria-labelledby="contact-feedback-title">
     <div class="workspace-dialog-content">
       <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="contact-feedback-title">Kontakt / Feedback</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
-      <p class="support-intro">Schreib dem WedConnect-Team. Beim Start der Unterhaltung senden wir Thema, Betreff und Nachricht als erste Chatnachricht. Antworten und weitere Nachrichten findest du unter „Nachrichten“.</p>
+      <p class="support-intro">Wähle die Art der Kontaktaufnahme, gib einen Betreff und deine Nachricht ein. Thema, Betreff und Nachricht erscheinen im Chat. Deine Nachricht wird an die bestehende Unterhaltung angehängt.</p>
       <form id="support-new-form" class="support-compose">
         <div class="support-compose-fields">
-          <label for="support-category">Thema</label>
+          <label for="support-category">Art der Kontaktaufnahme</label>
           <select id="support-category" name="category" required>
             <option value="question">Frage</option><option value="feedback">Feedback oder Vorschlag</option><option value="issue">Problem melden</option><option value="other">Sonstiges</option>
           </select>
@@ -514,7 +514,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
           <label for="support-body">Deine Nachricht</label>
           <textarea id="support-body" name="body" maxlength="2000" rows="4" required placeholder="Schreib uns …"></textarea>
         </div>
-        <button id="support-new-submit" class="button button-primary" type="submit">Chat starten</button>
+        <button id="support-new-submit" class="button button-primary" type="submit">Nachricht senden</button>
         <p id="support-new-status" class="settings-save-status" role="status" aria-live="polite"></p>
       </form>
       <section id="support-operator-inbox" class="support-operator-inbox" hidden aria-labelledby="support-inbox-title">
