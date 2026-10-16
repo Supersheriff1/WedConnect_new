@@ -2433,9 +2433,23 @@
       body: "Hier teilen wir künftig wichtige Updates und neue Funktionen. Diese Testneuigkeit dient dazu, die Darstellung auf der Übersicht für alle Profile zu prüfen.",
       is_test_news: true
     };
+    const additionalTestNews = [
+      {
+        id: "test-news-profile-tips",
+        title: "Mach dein Profil noch persönlicher",
+        body: "Ein paar aussagekräftige Details helfen anderen, einen besseren Eindruck von euch oder deiner Arbeit zu bekommen. Diese Testneuigkeit wird allen Profilen angezeigt.",
+        is_test_news: true
+      },
+      {
+        id: "test-news-new-connections",
+        title: "Neue Begegnungen warten auf dich",
+        body: "Schau regelmäßig bei Entdecken vorbei, um passende Hochzeitspaare oder Fotografen kennenzulernen. Diese Testneuigkeit wird allen Profilen angezeigt.",
+        is_test_news: true
+      }
+    ];
     const liveOffers = offersResult.error ? [] : active(offersResult.data, "starts_at");
     return {
-      news: [testNews, ...(newsResult.error ? [] : active(newsResult.data, "published_at"))]
+      news: [testNews, ...additionalTestNews, ...(newsResult.error ? [] : active(newsResult.data, "published_at"))]
         .filter((item) => !getDismissedNewsIds().has(String(item.id))),
       offers: [testAdvertisement, ...liveOffers]
     };
