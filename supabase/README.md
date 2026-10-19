@@ -36,8 +36,10 @@ For a new project, execute the SQL files in the order below using the Supabase S
 28. `supabase/migrations/20261016170000_profile_blocks.sql`
 29. `supabase/migrations/20261016180000_profile_saved_profiles.sql`
 30. `supabase/migrations/20261016190000_user_discover_preferences.sql`
+31. `supabase/migrations/20261018100000_mutual_matching_preferences.sql`
+32. `supabase/migrations/20261019100000_collaboration_model_and_profile_consent.sql`
 
-The couple profile stores a structured ceremony type and guided timeline. Photographer galleries remain ordinary photos without a highlight selection. Couple profiles show wedding date, town and photo-use preference as key facts. Couple uploads require each partner to be represented: either one joint photo (stored as `photo_type = 'couple'`) or at least one individual photo for each partner. A joint photo may also be combined with individual photos. Each new image is limited to 2 MB. The activity migration also adds messages, role-targeted overview announcements/offers, email preferences, and a 2 MB bucket limit. The discover-preferences migration stores each account's per-role criteria for ranking Discover profiles under RLS. Profiles with more selected shared criteria appear first; no profiles or profile facts are hidden. Do not infer that these migrations are live; check the current Supabase migration history.
+The collaboration migration adds mandatory pair consent for use of selected photos subject to approval before publication, a pair's willingness to consider a reduced contribution (`yes`, `no`, or `depends`), and the photographer's offer (`free`, `reduced`, or `both`) plus agreement to submit photos for approval before publication. The exact reduced price remains negotiable according to coverage scope. Existing completed profiles are reopened so their owners can confirm the new terms; profile data and photos remain stored. Profile completion enforces the terms in Supabase. Discover sorts by region first and collaboration-model compatibility second; no soft preference hides profiles or restricts likes. Likes still work for any visible profile, even when the compensation model does not align. Do not infer that these migrations are live; check the current Supabase migration history.
 
 ## Chat blockieren
 
