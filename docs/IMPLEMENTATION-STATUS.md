@@ -1,8 +1,8 @@
 # WedConnect · Implementierungsstand
 
-**Version:** 2.2  
-**Stand der Prüfung:** 16. Oktober 2026  
-**Geprüfte Referenz:** GitHub `Supersheriff1/WedConnect_new`, `main` (`3fbf7304577dade6826c1692719140a1df988947`)  
+**Version:** 2.3  
+**Stand der Prüfung:** 19. Oktober 2026  
+**Geprüfte Referenz:** Arbeitsänderungen für `Supersheriff1/WedConnect_new` auf einem Feature-Branch; noch nicht in `main` zusammengeführt  
 **Geprüfte Dateien:** Dashboard, Dashboard-JavaScript, Support- und Nachrichtenmigrationen, Supabase Edge Function, Supabase-Setup sowie Projekt-, App-Design- und Ideen-Bibles  
 **Prüfart:** Quellcode und SQL geprüft; JavaScript-Syntax geprüft; kein Live-End-to-End-Test; aktiver Supabase-Migrationsstatus nicht geprüft
 
@@ -15,8 +15,8 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Öffentliche Seiten | `index.html`, `hochzeitspaare.html` und `fotografen.html` sind vorhanden. Die Fotografen-Seite bleibt eingefroren. |
 | Anmeldung | Supabase Auth für E-Mail/Passwort und Google ist eingebunden. Die Anmeldung fragt keine Rolle ab. Der Nutzer hat Anmeldung und Weiterleitung zuvor als funktionierend bestätigt. |
 | Einstieg nach Login | `dashboard.html` prüft die Auth-Sitzung. Unvollständige Konten beginnen dort mit der Profilanlage; die Rolle wird als erster Profilschritt gewählt. |
-| Hochzeitspaar-Profil | In `main`: Trauungsart als Pflichtauswahl, Ort der Hochzeit plus getrennte optionale Locations für Trauung und Feier, strukturierte Begleitung und geführter Ablauf mit bis zu sieben Programmpunkten. Bildstil und Bildwünsche sind aus der Oberfläche entfernt; die Nutzungspräferenz bleibt. Die neue SQL-Migration liegt bei, ist aber nicht live verifiziert. |
-| Fotografen-Profil | Strukturierte Einsatzgebiete, Erfahrung, Stile, Begleitungsumfang, Galerie, Vergütung, Vorstellung und optionale Links sind im Code abgebildet. |
+| Hochzeitspaar-Profil | Trauungsart, Ort und getrennte Locations, Begleitung sowie Ablauf. Neu: erforderliche Zustimmung zur Nutzung ausgewählter Fotos nach vorheriger Freigabe und Zahlungsbereitschaft für einen reduzierten Betrag (Ja/Nein/abhängig von Umfang und Angebot). |
+| Fotografen-Profil | Strukturierte Einsatzgebiete, Erfahrung, Stile, Begleitungsumfang, Galerie, Vorstellung und Links. Vergütung wählbar: kostenlos (TFP), reduzierter Preis oder beides. Fotograf bestätigt, ausgewählte Fotos vor Veröffentlichung dem Paar zur Freigabe vorzulegen. Ein fester Profilbetrag wird nicht mehr verlangt. |
 | Galerie | Bis zu 20 normale Fotografenfotos, maximal 2 MB pro Foto. Kein Highlight-Stern und keine Highlight-Auswahl in der aktuellen Oberfläche. Fotos können angesehen, zugeschnitten, ersetzt und gelöscht werden. |
 | Profilfoto des Kontos | Upload, Zuschnitt/Ausrichtung und Entfernen über den Konto-Dialog sind implementiert. |
 | Übersicht | Startet nach Profilabschluss mit Begrüßung, offenen eingegangenen Likes und beidseitigen Matches ohne erste Nachricht. Abschnitte ohne Inhalte bleiben verborgen. App-Neuigkeiten und Partnerangebote werden rollenbezogen angezeigt. Zusätzlich ist derzeit eine klar markierte, statische Testanzeige von Shira Rachel Photography für alle Rollen eingeblendet. Angebotskarten öffnen eine interne Detailseite mit Website-Link. Der Kontobereich bietet jetzt einen eigenen Einstieg in Partnerangebote. |
@@ -26,16 +26,18 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | E-Mail-Einstellungen | Ereignisbezogene Präferenzen für Likes, Matches, Nachrichten, App-Neuigkeiten und Partnerangebote werden in Supabase gespeichert. Ein Versanddienst, der diese Einstellungen auswertet, ist nicht angeschlossen. |
 | Bearbeitung | Profilentwürfe werden in der Bearbeitung automatisch gespeichert. Navigation und Konto-/Einstellungsdialoge sind im Dashboard vorhanden. |
 | Entdecken | Lädt vollständige Profile der jeweils anderen Rolle. Gesendete Likes werden in `profile_likes` gespeichert; ein gegenseitiges Like erzeugt ein Match. „Überspringen“ wird privat in `profile_skips` gespeichert und blendet das Profil künftig aus. Das bloße Ansehen oder ein offenes eingehendes Like entfernt ein Profil nicht aus dem Feed; die aktive Profilkarte bleibt innerhalb der Sitzung erhalten. „Nein danke“ bei einem erhaltenen Like speichert ein dauerhaftes Überspringen. Das Matches-Navigationsbadge zählt offene eingehende Likes und aktualisiert sich alle 15 Sekunden sowie nach Rückkehr in den Tab. Der Live-End-to-End-Test steht noch aus. |
-| Konto → Entdecken & Profile | Nutzer wählen, ob Region/Bundesland und Begleitungsumfang bei der Sortierung zählen. Profile mit den meisten gemeinsamen Merkmalen erscheinen zuerst; alle geeigneten Profile und sämtliche Profilangaben bleiben sichtbar. Migration `20261016190000_user_discover_preferences.sql` erforderlich. |
-| Supabase-Live-Status | Nicht geprüft. Eine Migration im Repository beweist nicht, dass sie auf dem verbundenen Supabase-Projekt ausgeführt wurde. |
+| Konto → Entdecken & Profile | Region/Bundesland wird zuerst gewichtet, danach die Passung zwischen Zahlungsbereitschaft des Paars und Vergütungsmodell des Fotografen. Präferenzen ändern nur die Reihenfolge. Alle aktiven Profile bleiben sichtbar; jedes Profil kann gelikt werden, auch bei abweichender Preisvorstellung. |
+| Supabase-Live-Status | Migration `20261019100000_collaboration_model_and_profile_consent.sql` muss im richtigen Supabase-Projekt ausgeführt werden. Eine Migration im Repository beweist nicht, dass sie live ausgeführt wurde. |
 
 ## Ablauf und Profile
 
 Die Anmeldung ist für alle gleich und rollenfrei. Nach erfolgreicher Authentifizierung führt der Einstieg zu `dashboard.html`. Wenn noch keine Rolle gespeichert ist, startet die Profilanlage mit der Auswahl „Hochzeitspaar“ oder „Fotograf“. Die Rolle ist der erste Schritt des Profils, nicht der Anmeldung.
 
-Der Hochzeitsprofil-Code enthält in `main` eine Pflichtauswahl zur Trauungsart (standesamtlich, kirchlich oder frei), österreichisches Bundesland, Ort der Hochzeit und separate optionale Locations für Trauung und Feier, strukturierten Begleitungsumfang und einen geführten Tagesablauf mit bis zu sieben Programmpunkten, jeweils mit ungefährer Uhrzeit und optionalen Hinweisen. Bildstil und separate Bildwünsche werden im Paarformular nicht mehr angezeigt. Die Bildnutzungspräferenz bleibt bestehen. Die SQL-Migration ergänzt `ceremony_type`, `schedule_items`, `wedding_town` und getrennte Felder für Trauungs- und Feierlocation. Vorhandene Ortsangaben werden nach `wedding_town` übernommen; alte Textspalten bleiben zur Kompatibilität erhalten. Für Fotos muss jede Person repräsentiert sein: entweder durch ein gemeinsames Foto oder durch je ein individuelles Foto. Ein gemeinsames Foto kann mit individuellen Fotos kombiniert werden. Nach Auswahl und Zuschnittsbestätigung startet der Upload sofort.
+Das Hochzeitspaar-Profil erfasst eine Pflichtauswahl zur Trauungsart, österreichisches Bundesland, Ort der Hochzeit und getrennte optionale Locations für Trauung und Feier, strukturierten Begleitungsumfang und einen geführten Tagesablauf. Paare müssen der Nutzung ausgewählter Fotos zustimmen; vor Veröffentlichung legt der Fotograf jedes Bild zur Freigabe vor. Ein Nein ist nicht vorgesehen. Zusätzlich wählen Paare Ja/Nein/abhängig von Umfang und Angebot bei der Bereitschaft zu einem reduzierten Preis. Ein konkreter Preis wird nicht abgefragt. Für Fotos muss jede Person repräsentiert sein: entweder durch ein gemeinsames Foto oder durch je ein individuelles Foto. Nach Auswahl und Zuschnittsbestätigung startet der Upload sofort.
 
-Das Fotografenprofil enthält strukturierte Einsatzgebiete und Stile, Erfahrungsangaben, Begleitungsumfang, persönliche Vorstellung, optionale Instagram-/Website-Angaben sowie die Vergütungsauswahl „Unentgeltlich“ oder „Fixbetrag“. Bei Fixbetrag ist ein Betrag erforderlich. Die Galerie erlaubt bis zu 20 Fotos mit 2-MB-Grenze je Foto. Die Aktivitätsmigration setzt den privaten Foto-Bucket ebenfalls auf maximal 2 MB pro Datei; der Status dieser Migration im Live-Supabase ist nicht geprüft.
+Das Fotografenprofil enthält strukturierte Einsatzgebiete und Stile, Erfahrungsangaben, Begleitungsumfang, persönliche Vorstellung, optionale Instagram-/Website-Angaben sowie die Vergütungsauswahl „Kostenlos (TFP)“, „Reduzierter Preis“ oder „Beides ist möglich“. Ein reduzierter Preis richtet sich nach dem Begleitungsumfang und wird individuell im Chat vereinbart. Fotografen bestätigen, ausgewählte Fotos vor einer Veröffentlichung dem Paar zur Freigabe vorzulegen. Die Galerie erlaubt bis zu 20 Fotos mit 2-MB-Grenze je Foto.
+
+Die Entdecken-Sortierung gewichtet Region am stärksten und berücksichtigt danach die Zahlungsbereitschaft des Paars und das angebotene Vergütungsmodell. Bei fehlender Übereinstimmung bleibt ein Profil sichtbar und kann weiterhin gelikt werden. Vergütung entscheidet nicht darüber, ob ein Like oder Match möglich ist. Die neue Migration öffnet bestehende abgeschlossene Profile erneut, damit beide Seiten die erforderlichen Angaben bestätigen können. Vor dem Live-Test ist die Migration in Supabase auszuführen.
 
 Nach Profilabschluss führt das Dashboard zur Übersicht; die vollständige eigene Profilansicht liegt unter „Profil“. Eingehende Likes können beantwortet und Matches direkt angeschrieben werden. Konto-Profilfoto und Kontoeinstellungen liegen in Dialogen. Änderungen im Profilbearbeitungsmodus werden automatisch gespeichert. Nicht angemeldete Besucher werden vom Dashboard zur Anmeldung geleitet.
 
@@ -283,10 +285,10 @@ Gelöschte Chat-Nachrichten behalten den ursprünglichen Absender. Der Hinweis �
 - Neue Profile werden ans Ende der laufenden Runde angehängt. Das gerade angezeigte Profil und der Fortschritt der Runde bleiben erhalten. Aktualisierung pausiert außerhalb von „Entdecken“, in der Merkliste und solange der Browser-Tab im Hintergrund liegt; bei Rückkehr in den Tab wird sofort erneut geprüft.
 - Es ist keine Supabase-Migration erforderlich.
 
-## Konto → Entdecken & Profile (16. Oktober 2026)
+## Konto → Entdecken & Profile (19. Oktober 2026)
 
-- Das Kontomenü enthält „Entdecken & Profile“. Nutzer können einstellen, ob Region/Bundesland und Begleitungsumfang beim Sortieren zählen.
-- Der Discover-Feed zeigt zuerst Profile mit den meisten Übereinstimmungen bei den ausgewählten Kriterien. Bei gleicher Punktzahl bleibt die zufällige Reihenfolge erhalten.
-- Die Einstellung beeinflusst ausschließlich die Reihenfolge: Sie blendet keine Profile oder Profilangaben aus und ändert weder Likes, Überspringen noch Matching.
-- Die persönlichen Einstellungen werden in `user_discover_preferences` gespeichert und durch RLS auf das eigene Konto beschränkt. Voraussetzung: Migration `supabase/migrations/20261016190000_user_discover_preferences.sql` in Supabase ausführen. Fehlt die Tabelle, arbeitet Discover mit den Standardwerten weiter; Speichern wird als nicht verfügbar angezeigt.
-- Verifikation: JavaScript-Syntax und HTML-Parsing lokal prüfen. Supabase-Ausführung und Live-Verhalten sind separat zu bestätigen.
+- Region/Bundesland zählt am stärksten. Danach sortiert WedConnect nach der Passung des Vergütungsmodells: kostenlose Zusammenarbeit, reduzierter Preis oder abhängig vom Umfang.
+- Hochzeitspaare geben im Profil ihre Bereitschaft zu einem reduzierten Beitrag an. Fotografen bieten kostenlos, reduziert oder beides an. Der genaue Preis wird passend zum Umfang im Chat vereinbart.
+- Alle aktiven Profile bleiben sichtbar. Die Vergütungsangaben beeinflussen nur die Reihenfolge; sie begrenzen nicht, wen Nutzer liken oder mit wem ein Match entsteht.
+- Voraussetzungen in Supabase: `20261016190000_user_discover_preferences.sql` und `20261019100000_collaboration_model_and_profile_consent.sql`. Der Live-Migrationsstatus ist nicht geprüft.
+- Verifikation vor Merge: JavaScript-Syntax und HTML-Parsing lokal prüfen. Supabase-Ausführung und Live-Verhalten sind separat zu bestätigen.
