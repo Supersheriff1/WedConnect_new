@@ -289,16 +289,23 @@
       ).join("") + '</select><p class="setup-hint">' + hint + "</p></div>";
   }
 
+  function consentField(name, legend, statement, hint) {
+    const savedValue = valueOf(name);
+    const checked = savedValue === true || savedValue === "true" || (Array.isArray(savedValue) && savedValue.includes("yes"));
+    return '<fieldset class="setup-group"><legend>' + legend + ' *</legend><label class="schedule-event-choice"><input type="checkbox" name="' + name + '" value="yes" data-profile-field data-profile-boolean required' + (checked ? " checked" : "") + '><span><strong>' + statement + '</strong></span></label><p class="setup-hint">' + hint + "</p></fieldset>";
+  }
+
   function renderCoupleDetails() {
     return field("public_intro", "Eure Vorstellung", "textarea", "Optional · erscheint in eurem Profil.", false, ' maxlength="1200"') +
       choiceField("ceremony_type", "Art der Trauung", CEREMONY_OPTIONS, "Bitte wählt standesamtlich, kirchlich oder frei.") +
       multiSelectField("coverage_options", "Gewünschte Begleitung", COVERAGE_OPTIONS, "Wählt alle Abschnitte aus, die fotografisch begleitet werden sollen.") +
       renderWeddingTimeline() +
-      choiceField("photographer_usage_preference", "Fotos durch den Fotografen nutzbar?", [
-        ["open", "Grundsätzlich offen"],
-        ["case_by_case", "Nur nach Absprache"],
-        ["no", "Nein"]
-      ], "Die konkrete Freigabe wird separat vereinbart.");
+      consentField("photo_use_consent", "Bildnutzung", "Wir stimmen grundsätzlich zu, dass der Fotograf ausgewählte Fotos verwenden darf.", "Vor jeder Veröffentlichung legt der Fotograf euch die betreffenden Fotos zur Freigabe vor. Ihr entscheidet über die einzelnen Bilder.") +
+      choiceField("reduced_payment_willingness", "Wärt ihr bereit, einen reduzierten Betrag zu bezahlen?", [
+        ["yes", "Ja"],
+        ["no", "Nein"],
+        ["depends", "Kommt auf Umfang und Angebot an"]
+      ], "Gemeint ist ein reduzierter Preis im Gegenzug zur vereinbarten Bildnutzung. Den konkreten Preis besprecht ihr passend zum Begleitungsumfang.");
   }
 
   const REGION_OPTIONS = [
@@ -413,7 +420,6 @@
   }
 
   function renderPhotographerBasics() {
-    const compensationType = valueOf("compensation_type");
     return '<div class="photographer-basics">' +
       field("first_name", "Dein Vorname", "text", "", true, ' autocomplete="given-name" maxlength="80"') +
       multiSelectField("regions", "Region und Einsatzgebiet", REGION_OPTIONS, "Wähle ein oder mehrere Bundesländer. „Ganz Österreich“ schließt einzelne Bundesländer aus.") +
@@ -422,17 +428,18 @@
       field("weddings_photographed", "Fotografierte Hochzeiten", "number", "Optional, wenn du stattdessen Jahre angibst.", false, ' min="0" max="10000" step="1" inputmode="numeric"') +
       "</div>" +
       multiSelectField("styles", "Dein Bildstil", STYLE_OPTIONS, "Wähle alle Bildstile, die deine Arbeit beschreiben.") +
-      choiceField("compensation_type", "Vergütung für deine fotografische Leistung", [
-        ["free", "Unentgeltlich"],
-        ["fixed", "Fixbetrag"]
-      ], "Lege fest, welche Vergütung du für deinen fotografischen Einsatz erwartest.") +
-      '<div id="compensation-amount-wrap" class="setup-field"' + (compensationType === "fixed" ? "" : " hidden") + '><label for="field-compensation_amount_eur">Gewünschter Betrag in Euro *</label><div class="input-with-suffix"><input id="field-compensation_amount_eur" name="compensation_amount_eur" data-profile-field type="number" min="1" max="100000" step="1" inputmode="numeric" value="' + escapeHtml(valueOf("compensation_amount_eur")) + '"' + (compensationType === "fixed" ? " required" : "") + '><span>€</span></div></div>' +
+      choiceField("compensation_model", "Dein Vergütungsmodell bei vereinbarter Bildnutzung", [
+        ["free", "Kostenlos (TFP)"],
+        ["reduced", "Reduzierter Preis"],
+        ["both", "Beides ist möglich"]
+      ], "Ein reduzierter Preis hängt vom gewünschten Begleitungsumfang ab. Den konkreten Betrag vereinbarst du später mit dem Paar.") +
       "</div>";
   }
 
   function renderPhotographerDetails() {
     return field("public_intro", "Deine Vorstellung", "textarea", "Stell dich und deine Arbeit kurz vor. Dieser Text erscheint über deinen Fotos im Profil.", false, ' maxlength="1200"') +
       multiSelectField("coverage_options", "Begleitungsumfang", COVERAGE_OPTIONS, "Wähle alle Teile einer Hochzeit aus, die dir für dein Portfolio noch fehlen und die du gerne fotografieren möchtest.") +
+      consentField("photo_use_approval", "Bildfreigabe", "Ich lege dem Paar ausgewählte Fotos vor einer Veröffentlichung zur Freigabe vor.", "Die Bildnutzung ausgewählter Fotos nach vorheriger Freigabe ist Grundlage der Zusammenarbeit auf WedConnect.") +
       field("instagram_url", "Instagram (optional)", "text", "@name oder instagram.com/name", false, ' class="social-link-input instagram-input" maxlength="300"') +
       '<a class="profile-social-link setup-link-check" id="instagram-link-check" target="_blank" rel="noopener noreferrer" hidden>Instagram-Profil öffnen ↗</a>' +
       field("website_url", "Website (optional)", "text", "https://…", false, ' class="social-link-input website-input" inputmode="url" maxlength="500"') +
@@ -702,7 +709,8 @@
           ["Art der Trauung", ceremonyTypeLabel(data.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(data.coverage_options, COVERAGE_OPTIONS) || data.coverage_scope],
           ["Ablauf", formatScheduleItems(data.schedule_items) || data.schedule],
-          ["Nutzung durch Fotograf", data.photographer_usage_preference === "open" ? "Grundsätzlich offen" : data.photographer_usage_preference === "case_by_case" ? "Nur nach Absprache" : "Nein"],
+          ["Bildnutzung", data.photo_use_consent ? "Ausgewählte Fotos nach vorheriger Freigabe" : "Noch nicht bestätigt"],
+          ["Bereitschaft zu reduziertem Preis", reducedPaymentWillingnessLabel(data.reduced_payment_willingness)],
           ["Fotos", currentPhotoCount("couple") ? "Gemeinsames Foto hochgeladen" : Math.min(2, Number(currentPhotoCount("partner_one") > 0) + Number(currentPhotoCount("partner_two") > 0)) + " von 2 Einzelfotos hochgeladen"]
         ]
       : [
@@ -712,7 +720,8 @@
           ["Erfahrung", [data.experience_years !== null && data.experience_years !== undefined && data.experience_years !== "" ? data.experience_years + (Number(data.experience_years) === 1 ? " Jahr" : " Jahre") : "", data.weddings_photographed !== null && data.weddings_photographed !== undefined && data.weddings_photographed !== "" ? data.weddings_photographed + " Hochzeiten" : ""].filter(Boolean).join(" · ") || data.experience],
           ["Bildstil", (Array.isArray(data.styles) ? data.styles : []).map((value) => (STYLE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ") || data.visual_style],
           ["Begleitung", data.coverage_scope],
-          ["Vergütung", data.compensation_type === "free" ? "Unentgeltlich" : data.compensation_type === "fixed" ? "Fixbetrag " + Number(data.compensation_amount_eur).toLocaleString("de-AT") + " €" : "Nicht angegeben"],
+          ["Vergütung", compensationModelLabel(data.compensation_model)],
+          ["Bildfreigabe", data.photo_use_approval ? "Ausgewählte Fotos nach vorheriger Freigabe" : "Noch nicht bestätigt"],
           ["Fotos", portfolioPhotoCounts().gallery + " Fotos in der Galerie"],
           ["Instagram", data.instagram_url || "Nicht angegeben"], ["Website", data.website_url || "Nicht angegeben"]
         ];
@@ -733,6 +742,14 @@
       }
       return "<div><strong>" + escapeHtml(entry[0]) + "</strong><span>" + escapeHtml(entry[1]) + "</span></div>";
     }).join("") + "</div>";
+  }
+
+  function reducedPaymentWillingnessLabel(value) {
+    return value === "yes" ? "Ja, grundsätzlich bereit" : value === "no" ? "Nein" : value === "depends" ? "Abhängig von Umfang und Angebot" : "Nicht angegeben";
+  }
+
+  function compensationModelLabel(value) {
+    return value === "free" ? "Kostenlos (TFP)" : value === "reduced" ? "Reduzierter Preis" : value === "both" ? "Kostenlos oder reduziert" : "Nicht angegeben";
   }
 
   function renderWizard() {
@@ -1570,8 +1587,11 @@
     const values = {};
     fields.querySelectorAll("[data-profile-field]").forEach((element) => {
       if (element.type === "checkbox") {
-        if (!values[element.name]) values[element.name] = [];
-        if (element.checked) values[element.name].push(element.value);
+        if (element.hasAttribute("data-profile-boolean")) values[element.name] = element.checked;
+        else {
+          if (!values[element.name]) values[element.name] = [];
+          if (element.checked) values[element.name].push(element.value);
+        }
       } else {
         values[element.name] = element.value.trim();
       }
@@ -1638,6 +1658,8 @@
       const regionCode = data.region_code || "";
       const ceremonyType = data.ceremony_type || "";
       const scheduleItems = Array.isArray(data.schedule_items) ? data.schedule_items : [];
+      const reducedPaymentWillingness = data.reduced_payment_willingness || "";
+      const photoUseConsent = data.photo_use_consent === true;
       if (!allowIncomplete && wizard.step === 1 && !COUPLE_REGION_OPTIONS.some((option) => option[0] === regionCode)) {
         throw new Error("Wähle das Bundesland eurer Hochzeit aus.");
       }
@@ -1645,6 +1667,10 @@
         throw new Error("Wähle die Art der Trauung aus.");
       }
       if (!allowIncomplete && wizard.step === 2 && !coverage.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+      if (!allowIncomplete && wizard.step === 2 && !photoUseConsent) throw new Error("Für ein WedConnect-Profil ist die grundsätzliche Zustimmung zur Bildnutzung mit vorheriger Freigabe erforderlich.");
+      if (!allowIncomplete && wizard.step === 2 && !["yes", "no", "depends"].includes(reducedPaymentWillingness)) {
+        throw new Error("Gib an, ob ihr grundsätzlich zu einem reduzierten Preis bereit wärt.");
+      }
       if (!allowIncomplete && wizard.step === 2 && scheduleItems.some((item) => item.event === "other" && !String(item.label || "").trim())) {
         throw new Error("Gib den Namen für den weiteren Programmpunkt ein.");
       }
@@ -1654,6 +1680,10 @@
       data.coverage_scope = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]).join(", ");
       data.schedule_items = scheduleItems;
       data.schedule = formatScheduleItems(scheduleItems);
+      data.photo_use_consent = photoUseConsent;
+      data.reduced_payment_willingness = ["yes", "no", "depends"].includes(reducedPaymentWillingness) ? reducedPaymentWillingness : null;
+      data.photographer_usage_preference = photoUseConsent ? "case_by_case" : "no";
+      data.compensation_budget_max_eur = null;
       data.styles = [];
       data.visual_style = "";
       data.image_wishes = "";
@@ -1677,6 +1707,19 @@
       data.experience = [years !== null ? years + (years === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : "", weddings !== null ? weddings + " fotografierte Hochzeiten" : ""].filter(Boolean).join(" · ");
       data.styles = styles;
       data.visual_style = styleLabels.join(", ");
+      const compensationModel = data.compensation_model || "";
+      const photoUseApproval = data.photo_use_approval === true;
+      if (!allowIncomplete && !["free", "reduced", "both"].includes(compensationModel)) {
+        throw new Error("Wähle kostenlos, reduzierten Preis oder beide Vergütungsmodelle aus.");
+      }
+      if (!allowIncomplete && wizard.step === 2 && !photoUseApproval) {
+        throw new Error("Bestätige, dass du ausgewählte Fotos vor der Veröffentlichung dem Paar zur Freigabe vorlegst.");
+      }
+      data.compensation_model = ["free", "reduced", "both"].includes(compensationModel) ? compensationModel : null;
+      data.compensation_type = compensationModel === "free" ? "free" : "negotiable";
+      data.compensation_amount_eur = null;
+      data.photo_use_approval = photoUseApproval;
+      data.usage_rights_preference = photoUseApproval ? "case_by_case" : "no";
       if (wizard.step === 2) {
         const coverage = Array.isArray(data.coverage_options) ? data.coverage_options : [];
         const coverageLabels = coverage.map((value) => (COVERAGE_OPTIONS.find((option) => option[0] === value) || [value, value])[1]);
@@ -1684,15 +1727,6 @@
         data.coverage_options = coverage;
         data.coverage_scope = coverageLabels.join(", ");
       }
-      if (!allowIncomplete && !["free", "fixed"].includes(data.compensation_type)) {
-        throw new Error("Wähle deine gewünschte Vergütung aus.");
-      }
-      const amount = data.compensation_amount_eur === "" || data.compensation_amount_eur == null ? null : Number(data.compensation_amount_eur);
-      if (!allowIncomplete && data.compensation_type === "fixed" && (!Number.isInteger(amount) || amount < 1 || amount > 100000)) {
-        throw new Error("Gib einen Betrag zwischen 1 und 100.000 Euro ein.");
-      }
-      if (data.compensation_type !== "fixed") data.compensation_amount_eur = null;
-      else data.compensation_amount_eur = amount;
       if (allowIncomplete) {
         try { data.instagram_url = normalizeInstagram(data.instagram_url || ""); } catch (_) {}
         try { data.website_url = normalizeWebsite(data.website_url || ""); } catch (_) {}
@@ -2015,7 +2049,7 @@
 
   const DISCOVER_MATCH_CRITERIA = [
     { key: "region", label: "Region / Bundesland" },
-    { key: "coverage", label: "Begleitungsumfang" }
+    { key: "compensation", label: "Vergütungsmodell passt zu den Angaben" }
   ];
 
   function defaultDiscoverPreferences() {
@@ -2064,12 +2098,19 @@
     if (prefs.enabled.region) {
       const weddingRegion = couple.region_code || "";
       const photographerRegions = profileArray(photographer.regions);
-      if (weddingRegion && (photographerRegions.includes("AT") || photographerRegions.includes(weddingRegion))) score += 1;
+      if (weddingRegion && (photographerRegions.includes("AT") || photographerRegions.includes(weddingRegion))) score += 2;
     }
-    if (prefs.enabled.coverage) {
-      const coupleCoverage = profileArray(couple.coverage_options);
-      const photographerCoverage = new Set(profileArray(photographer.coverage_options));
-      if (coupleCoverage.some((item) => photographerCoverage.has(item))) score += 1;
+    if (prefs.enabled.compensation) {
+      const willingness = couple.reduced_payment_willingness;
+      const model = photographer.compensation_model || (photographer.compensation_type === "free" ? "free" : photographer.compensation_type === "fixed" || photographer.compensation_type === "negotiable" ? "reduced" : "");
+      const offersFree = model === "free" || model === "both";
+      const offersReduced = model === "reduced" || model === "both";
+      const modelFits = willingness === "yes"
+        ? offersReduced
+        : willingness === "no"
+          ? offersFree
+          : willingness === "depends" && (offersFree || offersReduced);
+      if (modelFits) score += 1;
     }
     return score;
   }
@@ -2078,7 +2119,9 @@
     if (!ids.length) return [];
     const targetRole = currentRole === "couple" ? "photographer" : "couple";
     const table = targetRole === "couple" ? "couple_profiles" : "photographer_profiles";
-    const columns = targetRole === "couple" ? "id,region_code,coverage_options" : "id,regions,coverage_options";
+    const columns = targetRole === "couple"
+      ? "id,region_code,reduced_payment_willingness"
+      : "id,regions,compensation_model,compensation_type";
     const { data, error } = await supabase.from(table).select(columns).in("id", ids);
     if (error || !Array.isArray(data)) return ids;
     const profilesById = new Map(data.map((profile) => [profile.id, profile]));
@@ -2101,12 +2144,15 @@
       checkbox.checked = preferences.enabled[criterion.key] !== false;
       checkbox.dataset.discoverCriterion = criterion.key;
       const copy = document.createElement("span");
-      copy.textContent = criterion.label;
+      copy.textContent = criterion.key === "compensation"
+        ? currentRole === "couple" ? "Vergütungsmodell und Zahlungsbereitschaft" : "Paar ist offen für reduzierten Beitrag"
+        : criterion.label;
       row.append(checkbox, copy);
       list.append(row);
     });
-    document.querySelector("#discover-preferences-description").textContent =
-      "Wähle, welche gemeinsamen Merkmale bei der Sortierung zählen. Profile mit mehr Übereinstimmungen erscheinen zuerst. Keine Profile werden dadurch ausgeblendet.";
+    document.querySelector("#discover-preferences-description").textContent = currentRole === "couple"
+      ? "Die Region zählt am stärksten. Danach werden Fotografen nach dem Vergütungsmodell und eurer Zahlungsbereitschaft sortiert. Alle Profile bleiben sichtbar; ihr könnt jedes Profil liken."
+      : "Die Region zählt am stärksten. Danach werden Paare nach ihrer Bereitschaft zu einem reduzierten Preis sortiert. Alle Profile bleiben sichtbar; du kannst jedes Profil liken.";
     status.textContent = discoverPreferencesLoadError
       ? "Deine Auswahl wird angezeigt, kann aber noch nicht gespeichert werden. Bitte führe die Entdecken-Einstellungen-Migration in Supabase aus."
       : "Änderungen werden automatisch gespeichert. Alle passenden Profile bleiben sichtbar.";
@@ -2171,11 +2217,8 @@
 
   function profileDetailRows(role, profile) {
     if (role === "couple") {
-      const preference = profile.photographer_usage_preference === "open"
-        ? "Grundsätzlich offen"
-        : profile.photographer_usage_preference === "case_by_case"
-          ? "Nur nach Absprache"
-          : profile.photographer_usage_preference === "no" ? "Nein" : "";
+      const photoUse = profile.photo_use_consent ? "Ausgewählte Fotos nach vorheriger Freigabe" : "";
+      const reducedPayment = reducedPaymentWillingnessLabel(profile.reduced_payment_willingness);
       const region = coupleRegionLabel(profile.region_code);
       const location = [profile.wedding_town, region].filter(Boolean).join(", ");
       const weddingLocations = [
@@ -2186,14 +2229,15 @@
         chips: [
           ["calendar", "Hochzeitsdatum", profileDate(profile.wedding_date)],
           ["pin", "Hochzeitsort", location],
-          ["camera", "Nutzung durch den Fotografen", preference]
+          ["camera", "Bildnutzung", photoUse]
         ],
         sections: [
           ...weddingLocations,
           ["Art der Trauung", ceremonyTypeLabel(profile.ceremony_type)],
           ["Gewünschte Begleitung", profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope],
           ["Ablauf", formatScheduleItems(profile.schedule_items) || profile.schedule],
-          ["Nutzung durch den Fotografen", preference]
+          ["Bildnutzung", photoUse],
+          ["Bereitschaft zu reduziertem Preis", reducedPayment]
         ]
       };
     }
@@ -2204,11 +2248,7 @@
     const regions = profileLabels(profile.regions, REGION_OPTIONS) || profile.region || "";
     const styles = profileLabels(profile.styles, STYLE_OPTIONS) || profile.visual_style || "";
     const coverage = profileLabels(profile.coverage_options, COVERAGE_OPTIONS) || profile.coverage_scope || "";
-    const compensation = profile.compensation_type === "free"
-      ? "Unentgeltlich"
-      : profile.compensation_type === "fixed" && profile.compensation_amount_eur
-        ? "Entgeltlich · " + Number(profile.compensation_amount_eur).toLocaleString("de-AT") + " €"
-        : profile.compensation_type === "fixed" ? "Entgeltlich" : "";
+    const compensation = compensationModelLabel(profile.compensation_model || (profile.compensation_type === "free" ? "free" : profile.compensation_type === "fixed" || profile.compensation_type === "negotiable" ? "reduced" : ""));
     return {
       keyFacts: [
         ["camera", "Erfahrung", years],
@@ -2219,7 +2259,10 @@
         ["sparkle", "Bildstil", styles],
         ["clock", "Begleitungsumfang", coverage]
       ],
-      sections: weddings ? [["Fotografierte Hochzeiten", weddings]] : []
+      sections: [
+        ...(weddings ? [["Fotografierte Hochzeiten", weddings]] : []),
+        ["Bildfreigabe", profile.photo_use_approval ? "Ausgewählte Fotos werden dem Paar vor der Veröffentlichung zur Freigabe vorgelegt" : ""]
+      ]
     };
   }
 
@@ -4938,16 +4981,6 @@
       const details = row && row.querySelector("[data-schedule-fields]");
       if (details) details.hidden = !target.checked;
     }
-    if (target.matches('select[name="compensation_type"]')) {
-      const amountWrap = fields.querySelector("#compensation-amount-wrap");
-      const amountInput = fields.querySelector('input[name="compensation_amount_eur"]');
-      if (amountWrap && amountInput) {
-        const showAmount = target.value === "fixed";
-        amountWrap.hidden = !showAmount;
-        amountInput.required = showAmount;
-        if (!showAmount) amountInput.value = "";
-      }
-    }
     if (!target.matches('input[type="checkbox"][data-select-group="regions"]')) return;
     const countrywide = fields.querySelector('input[name="regions"][value="AT"]');
     if (!countrywide) return;
@@ -5000,6 +5033,8 @@
         if (wizard.role === "couple" && wizard.step === 2) {
           if (!values.coverage_options || !values.coverage_options.length) throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
           if (!CEREMONY_OPTIONS.some((option) => option[0] === values.ceremony_type)) throw new Error("Wähle die Art der Trauung aus.");
+          if (!values.photo_use_consent) throw new Error("Für ein WedConnect-Profil ist die Bildnutzung ausgewählter Fotos nach vorheriger Freigabe erforderlich.");
+          if (!["yes", "no", "depends"].includes(values.reduced_payment_willingness)) throw new Error("Wähle aus, ob ihr zu einem reduzierten Preis bereit wärt.");
         }
         if (wizard.role === "photographer" && wizard.step === 1) {
           if (!values.regions || !values.regions.length) throw new Error("Wähle mindestens ein Einsatzgebiet aus.");
@@ -5008,6 +5043,9 @@
         }
         if (wizard.role === "photographer" && wizard.step === 2 && (!values.coverage_options || !values.coverage_options.length)) {
           throw new Error("Wähle mindestens einen Begleitungsumfang aus.");
+        }
+        if (wizard.role === "photographer" && wizard.step === 2 && !values.photo_use_approval) {
+          throw new Error("Bestätige, dass du ausgewählte Fotos vor der Veröffentlichung dem Paar zur Freigabe vorlegst.");
         }
         await flushDraftAutoSave();
         await saveRoleProfile(values);
@@ -5034,6 +5072,8 @@
             throw new Error("Lade ein gemeinsames Foto oder je ein Foto für beide Personen hoch.");
           }
           if (message.includes("couple_profile_incomplete")) throw new Error("Bitte prüfe die Pflichtfelder, Trauungsart, Begleitung und Fotos.");
+          if (message.includes("couple_collaboration_terms_required")) throw new Error("Bitte bestätige die Bildnutzung nach vorheriger Freigabe und gib eure Bereitschaft zu einem reduzierten Preis an.");
+          if (message.includes("photographer_collaboration_terms_required")) throw new Error("Bitte bestätige die Bildfreigabe und wähle dein Vergütungsmodell.");
           if (message.includes("portfolio_requires_3_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           if (message.includes("portfolio_requires_10_photos")) throw new Error("Lade mindestens 3 Stilfotos hoch.");
           const code = error.code ? " (" + error.code + ")" : "";
