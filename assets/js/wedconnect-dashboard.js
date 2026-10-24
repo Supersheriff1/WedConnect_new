@@ -78,6 +78,10 @@
   const matchMomentsShown = new Set();
   let accountAvatarPath = "";
   let accountAvatarUrl = "";
+  let accountMenuScreen = "home";
+  let accountReturnScreen = "home";
+  let roleChangeMode = false;
+  let roleChangeConfirmed = false;
   let wizard = { step: 0, role: "", data: { couple: {}, photographer: {} }, photos: [], pendingPhotos: [], pendingCouplePhotos: [], isEditing: false, autoSaveEnabled: false };
   let draftAutoSaveTimer = null;
   let draftAutoSavePromise = Promise.resolve();
@@ -772,7 +776,7 @@
             ? (wizard.role === "couple" ? "Lade für jede Person mindestens ein eigenes Foto hoch. Ein gemeinsames Foto ist optional." : "Lade mindestens 3 Stilfotos für dein Portfolio hoch.")
             : "Prüfe deine Angaben und schließe dein Profil ab.";
     const profileEditExit = document.querySelector("#profile-edit-exit");
-    if (profileEditExit) profileEditExit.hidden = !wizard.isEditing;
+    if (profileEditExit) profileEditExit.hidden = !wizard.isEditing && !roleChangeMode;
     setDraftAutoSaveStatus(wizard.isEditing ? "Änderungen werden automatisch gespeichert" : "");
     document.querySelector("#setup-title").textContent = titles[step];
     document.querySelector("#setup-step-label").textContent = "PROFIL · SCHRITT " + visibleStep + " VON " + totalSteps;
@@ -5055,6 +5059,10 @@
       if (wizard.step === 0) {
         const selected = form.querySelector('input[name="selected-role"]:checked');
         if (!selected) throw new Error("Wähle Hochzeitspaar oder Fotograf aus.");
+        if (roleChangeMode && currentRole && selected.value !== currentRole && !roleChangeConfirmed) {
+          openWorkspaceDialog(document.querySelector("#role-change-confirm-dialog"));
+          return;
+        }
         const { data, error } = await supabase.rpc("assign_initial_role", { p_role: selected.value });
         if (error) {
           if ((error.message || "").includes("account_role_already_set")) {
@@ -5066,6 +5074,8 @@
         const previousRole = wizard.role;
         const nextRole = data || selected.value;
         const changedRole = Boolean(previousRole && previousRole !== nextRole);
+        roleChangeConfirmed = false;
+        if (changedRole) roleChangeMode = false;
         await loadWizard(nextRole, 1);
         if (changedRole) showNotice("Rolle geändert. Ergänze jetzt dein Profil für " + (nextRole === "couple" ? "Hochzeitspaare." : "Fotografen."));
       } else if (wizard.step === 1 || wizard.step === 2) {
@@ -5229,6 +5239,13 @@
     if (dialog && !dialog.open) dialog.showModal();
   }
 
+  function setAccountMenuScreen(screen = "home") {
+    accountMenuScreen = screen;
+    document.querySelectorAll("[data-account-screen]").forEach((section) => {
+      section.hidden = section.dataset.accountScreen !== screen;
+    });
+  }
+
   function openDeleteMessageDialog(messageId) {
     const message = (activityCache.messages || []).find((item) => item.id === messageId && item.sender_id === currentUser.id);
     if (!message || !messageDeletionFeatureAvailable) return;
@@ -5244,8 +5261,40 @@
     pendingDeleteConversation = null;
     document.querySelector("#delete-conversation-confirm").disabled = false;
   });
-  if (accountTrigger) accountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
-  if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => openWorkspaceDialog(accountDialog));
+  if (accountTrigger) accountTrigger.addEventListener("click", () => { setAccountMenuScreen("home"); openWorkspaceDialog(accountDialog); });
+  if (mobileAccountTrigger) mobileAccountTrigger.addEventListener("click", () => { setAccountMenuScreen("home"); openWorkspaceDialog(accountDialog); });
+  document.addEventListener("click", (event) => {
+    const openSection = event.target.closest("[data-account-section-open]");
+    if (openSection) { setAccountMenuScreen(openSection.dataset.accountSectionOpen); return; }
+    if (event.target.closest("[data-account-back]")) { setAccountMenuScreen("home"); return; }
+    const returnButton = event.target.closest("[data-account-return]");
+    if (returnButton) {
+      const currentDialog = returnButton.closest("dialog");
+      if (currentDialog && currentDialog.open) currentDialog.close();
+      setAccountMenuScreen(returnButton.dataset.accountReturn || "home");
+      openWorkspaceDialog(accountDialog);
+    }
+  });
+  const profileEditExit = document.querySelector("#profile-edit-exit");
+  if (profileEditExit) profileEditExit.addEventListener("click", async () => {
+    try { if (wizard.isEditing) await flushDraftAutoSave(); } catch (_) {}
+    onboarding.classList.add("hidden");
+    onboarding.classList.remove("profile-edit-overlay");
+    dashboard.classList.remove("is-editing-profile", "hidden");
+    roleChangeMode = false; roleChangeConfirmed = false;
+    setAccountMenuScreen("profile");
+    openWorkspaceDialog(accountDialog);
+  });
+  document.querySelector("#role-change-confirm")?.addEventListener("click", () => {
+    roleChangeConfirmed = true;
+    const dialog = document.querySelector("#role-change-confirm-dialog");
+    if (dialog && dialog.open) dialog.close();
+    form.requestSubmit();
+  });
+  document.querySelector("#role-change-cancel")?.addEventListener("click", () => {
+    const dialog = document.querySelector("#role-change-confirm-dialog");
+    if (dialog && dialog.open) dialog.close();
+  });
   const accountPhotoPreview = document.querySelector("#account-photo-preview");
   if (accountPhotoPreview) accountPhotoPreview.addEventListener("click", async () => {
     if (!accountAvatarPath) {
@@ -5270,6 +5319,7 @@
     } finally { accountPhotoPreview.disabled = false; }
   });
   if (accountAvatarOpen) accountAvatarOpen.addEventListener("click", () => {
+    accountReturnScreen = "profile";
     if (accountDialog && accountDialog.open) accountDialog.close();
     if (accountPhotoStatus) accountPhotoStatus.textContent = "";
     refreshAccountPhotoPreview();
@@ -5299,11 +5349,13 @@
     loadEmailPreferences();
   });
   document.querySelector("#account-settings-open").addEventListener("click", () => {
+    accountReturnScreen = "manage";
     if (accountDialog.open) accountDialog.close();
     openWorkspaceDialog(settingsDialog);
     loadEmailPreferences();
   });
   document.querySelector("#account-discover-preferences-open").addEventListener("click", async () => {
+    accountReturnScreen = "discover";
     if (accountDialog.open) accountDialog.close();
     await loadDiscoverPreferences();
     renderDiscoverPreferenceOptions();
@@ -5377,10 +5429,12 @@
     }
   });
   document.querySelector("#account-profile-edit").addEventListener("click", () => {
+    roleChangeMode = false; roleChangeConfirmed = false;
     if (accountDialog.open) accountDialog.close();
     beginWizard(currentRole, currentRole ? 1 : 0);
   });
   document.querySelector("#account-role-change").addEventListener("click", () => {
+    roleChangeMode = true; roleChangeConfirmed = false;
     if (accountDialog.open) accountDialog.close();
     beginWizard(currentRole, 0);
   });
@@ -5539,6 +5593,7 @@
     }
     const partnerOffersOpen = event.target.closest("#account-partner-offers-open");
     if (partnerOffersOpen) {
+      accountReturnScreen = "offers";
       if (accountDialog && accountDialog.open) accountDialog.close();
       setDashboardView("partner-offers");
       await refreshActivityViews();
@@ -5547,6 +5602,7 @@
     }
     const contactOpen = event.target.closest("#account-contact-open");
     if (contactOpen) {
+      accountReturnScreen = "offers";
       if (accountDialog && accountDialog.open) accountDialog.close();
       openWorkspaceDialog(contactDialog);
       await loadSupportData(true);
@@ -5599,6 +5655,7 @@
       const currentPartnerOffersView = !document.querySelector("#partner-offers-view").hidden;
       if (currentPartnerOffersView) {
         setDashboardView("home");
+        setAccountMenuScreen("offers");
         openWorkspaceDialog(accountDialog);
       } else {
         setDashboardView(offerDetailReturnView);
