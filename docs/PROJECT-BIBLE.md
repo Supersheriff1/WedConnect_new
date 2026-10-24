@@ -18,7 +18,7 @@ WedConnect verbindet Hochzeitspaare mit Fotografen für mögliche TFP-Zusammenar
 
 - `fotografen.html` ist der eingefrorene Designmaster der öffentlichen Website. Ohne ausdrückliche Freigabe wird diese Seite nicht verändert.
 - `index.html` und `hochzeitspaare.html` übernehmen das freigegebene visuelle System. Ihre Texte sind noch nicht final und dürfen später inhaltlich überarbeitet werden.
-- Die aktuelle maßgebliche Spezifikation für die öffentliche Website ist [`DESIGN-BIBLE.md`](DESIGN-BIBLE.md), Version 2.3.
+- [`WEBSITE-BIBLE.md`](WEBSITE-BIBLE.md) hält Inhalte, Abschnittsfolge und Bearbeitungsstatus der öffentlichen Seiten getrennt von der App fest. Sie autorisiert keine App-Änderungen und ersetzt keine Produktentscheidung.\n- Die aktuelle maßgebliche visuelle Spezifikation für die öffentliche Website ist [`DESIGN-BIBLE.md`](DESIGN-BIBLE.md), Version 2.3.
 - Dashboard und eingeloggte App haben einen eigenen Standard in [`APP-DESIGN-BIBLE.md`](APP-DESIGN-BIBLE.md).
 
 ## Anmeldung, Rollen und Freischaltung
@@ -100,7 +100,7 @@ Der Bereich **Konto und Einstellungen** ist der erweiterbare Ort für Kontodaten
 | Dokument | Zuständigkeit |
 |---|---|
 | `PROJECT-BIBLE.md` | Produktregeln und verbindliche Entscheidungen |
-| `DESIGN-BIBLE.md` | Eingefrorene öffentliche Website |
+| `WEBSITE-BIBLE.md` | Inhalt und Struktur der öffentlichen Website |\n| `DESIGN-BIBLE.md` | Eingefrorener visueller Standard der öffentlichen Website |
 | `APP-DESIGN-BIBLE.md` | Design- und Interaktionsregeln der eingeloggten App |
 | `IMPLEMENTATION-STATUS.md` | Code, Datenbank, Verifikation und Abweichungen |
 | `IDEAS-BIBLE.md` | Unverbindliche Ideen |
