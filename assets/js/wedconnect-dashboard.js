@@ -4637,12 +4637,12 @@
     roleRow.classList.toggle("hidden", hideRoleRow);
     if (view === "discover") startDiscoverProfileRefresh();
     else stopDiscoverProfileRefresh();
-    syncOverviewScrollHint();
     if (viewChanged) {
       window.scrollTo(0, 0);
       const pageContent = document.querySelector(".content");
       if (pageContent) pageContent.scrollTop = 0;
     }
+    syncOverviewScrollHint();
   }
 
   async function openConversation(peerId) {
