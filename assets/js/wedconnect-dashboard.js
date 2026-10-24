@@ -28,7 +28,8 @@
   let currentUser = null;
   let currentRole = "";
   let currentProfile = {};
-  let currentGreeting = "";\n  let activeDashboardView = "";
+  let currentGreeting = "";
+  let activeDashboardView = "";
   let activeConversationPeer = "";
   let activeSupportThreadId = "";
   let supportFeatureAvailable = false;
