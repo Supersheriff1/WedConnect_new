@@ -4974,7 +4974,8 @@
     if (discoverIntro) discoverIntro.textContent = couple ? "Entdecke Hochzeitsfotografen, die zu euch passen könnten." : "Entdecke Hochzeitspaare, deren Geschichten zu deiner Arbeit passen könnten.";
     document.querySelector("#side-role").textContent = roleName;
     await renderAccountAvatar();
-    document.querySelector("#account-display-name").textContent = greeting || profileGreeting(currentRole, profile) || (user.user_metadata && user.user_metadata.first_name) || "Dein WedConnect-Profil";\n    renderAccountStats();
+    document.querySelector("#account-display-name").textContent = greeting || profileGreeting(currentRole, profile) || (user.user_metadata && user.user_metadata.first_name) || "Dein WedConnect-Profil";
+    renderAccountStats();
     document.querySelector("#account-role-label").textContent = roleName;
     document.querySelector("#role-eyebrow").textContent = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Dein WedConnect-Konto";
     document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting + "!" : "Willkommen!";
