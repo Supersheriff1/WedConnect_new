@@ -507,12 +507,18 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .account-menu-group strong{font-size:14px;font-weight:600}
 .account-menu-group small{color:var(--muted);font-size:12px}
 .account-menu-group-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--gold);background:rgba(213,182,122,.1)}.account-menu-group-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.account-submenu-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 5px}.account-submenu-heading h3{margin:0;font-size:18px}.account-menu-screen h3{font-size:18px}
-.account-submenu-intro{margin:0 0 17px;color:var(--muted);font-size:13px;line-height:1.5}
-.account-submenu-back,.account-dialog-back{border:0;background:transparent;color:var(--gold);font:inherit;font-size:13px;cursor:pointer}
-.account-submenu-back{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:5px 10px;margin:0;border:1px solid var(--border);border-radius:999px;background:var(--raised);font-size:12px}.account-submenu-back:hover,.account-submenu-back:focus-visible{border-color:var(--gold);outline:none}
-.account-submenu-back span{font-size:20px;vertical-align:-1px;margin-right:5px}
-.account-dialog-back{white-space:nowrap}
+.account-submenu-heading{display:flex;align-items:center;justify-content:flex-start;gap:12px;margin:4px 0 10px}.account-submenu-heading h3{order:2;margin:0;font-size:18px}.account-menu-screen h3{font-size:18px}
+ .account-submenu-intro{margin:0 0 17px;color:var(--muted);font-size:13px;line-height:1.5}
+ .account-submenu-back,.account-dialog-back{display:inline-flex;align-items:center;justify-content:center;border:1px solid rgb(213 182 122 / 62%);background:rgb(213 182 122 / 12%);color:var(--gold);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+ .account-submenu-back{order:1;gap:5px;min-height:44px;padding:8px 12px;margin:0;border-radius:8px;font-size:13px}.account-submenu-back:hover,.account-submenu-back:focus-visible{border-color:var(--gold);background:rgb(213 182 122 / 20%);outline:3px solid rgb(213 182 122 / 24%);outline-offset:2px}
+ .account-submenu-back span{font-size:22px;line-height:1}
+ .account-navigation-header{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;grid-template-areas:"back spacer close" "title title title";align-items:center;column-gap:10px;row-gap:13px}
+ .account-navigation-header>div{grid-area:title}
+ .account-navigation-header>.account-dialog-back{grid-area:back;width:44px;height:44px;border-radius:8px;text-decoration:none}
+ .account-navigation-header>.account-dialog-back:hover,.account-navigation-header>.account-dialog-back:focus-visible{border-color:var(--gold);background:rgb(213 182 122 / 20%);outline:3px solid rgb(213 182 122 / 24%);outline-offset:2px}
+ .account-navigation-header>.dialog-close{grid-area:close;width:44px;height:44px;justify-self:end;border-color:rgb(213 182 122 / 62%);border-radius:8px;background:rgb(213 182 122 / 12%);color:var(--gold);font-size:27px}
+ #account-dialog .dialog-close{width:42px;height:42px;border-color:rgb(213 182 122 / 68%);border-radius:8px;background:rgb(213 182 122 / 14%);color:var(--gold);font-size:27px}
+ #account-dialog .dialog-close:hover,#account-dialog .dialog-close:focus-visible{border-color:var(--gold);background:rgb(213 182 122 / 23%);outline:3px solid rgb(213 182 122 / 24%);outline-offset:2px}
 .account-signout-button{width:100%;justify-content:flex-start}
 </style>
   <style>
@@ -610,7 +616,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         <button class="button button-secondary account-menu-button account-signout-button" type="button" data-signout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M8 12h10"/></svg><span>Abmelden</span></button>
       </section>
       <section class="account-menu-screen" data-account-screen="profile" hidden>
-        <div class="account-submenu-heading"><h3>Profil</h3><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button></div><p class="account-submenu-intro">Verwalte dein Konto- und Profilbild sowie deine Profildaten.</p>
+        <div class="account-submenu-heading"><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button><h3>Profil</h3></div><p class="account-submenu-intro">Verwalte dein Konto- und Profilbild sowie deine Profildaten.</p>
         <div class="workspace-dialog-actions">
           <button class="button button-secondary account-menu-button account-avatar-open" type="button" id="account-avatar-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span id="account-avatar-open-label">Profilfoto hinzufügen</span></button>
           <button class="button button-secondary account-menu-button" type="button" id="account-profile-edit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1a6 6 0 0 1 6-6h2M15 14l5-5 2 2-5 5-3 1z"/></svg><span>Profil bearbeiten</span></button>
@@ -618,7 +624,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         </div>
       </section>
  <section class="account-menu-screen" data-account-screen="offers" hidden>
-        <div class="account-submenu-heading"><h3>Angebote und Hilfe</h3><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button></div><p class="account-submenu-intro">Entdecke Partnerangebote oder kontaktiere das WedConnect-Team.</p>
+        <div class="account-submenu-heading"><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button><h3>Angebote und Hilfe</h3></div><p class="account-submenu-intro">Entdecke Partnerangebote oder kontaktiere das WedConnect-Team.</p>
         <div class="workspace-dialog-actions">
           <button class="button button-secondary account-menu-button" type="button" id="account-partner-offers-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.4-3.2L12 7Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 7Z"/></svg><span>Partnerangebote</span><span aria-hidden="true">›</span></button>
           <button class="button button-secondary account-menu-button" type="button" id="account-contact-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 3z"/><path d="M8 9h8M8 13h5"/></svg><span>Kontakt / Feedback</span><span aria-hidden="true">›</span></button>
@@ -627,7 +633,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     </div>
   </dialog>  <dialog id="discover-preferences-dialog" class="workspace-dialog" aria-labelledby="discover-preferences-title">
     <div class="workspace-dialog-content">
-      <header class="workspace-dialog-header"><div><p class="eyebrow">DEIN KONTO</p><h2 id="discover-preferences-title">Entdecken &amp; Profile</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button><button class="account-dialog-back" type="button" data-account-return="home">‹ Konto</button></header>
+      <header class="workspace-dialog-header account-navigation-header"><div><p class="eyebrow">DEIN KONTO</p><h2 id="discover-preferences-title">Entdecken &amp; Profile</h2></div><button class="account-dialog-back" type="button" data-account-return="home" aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span></button><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
       <p id="discover-preferences-description" class="discover-preferences-intro">Die Region zählt am stärksten. Vergütungsmodelle helfen zusätzlich beim Sortieren. Alle Profile bleiben sichtbar und jedes Profil kann gelikt werden.</p>
       <div id="discover-preferences-list" class="discover-preferences-list"></div>
       <p id="discover-preferences-status" class="discover-preferences-status" role="status" aria-live="polite">Einstellungen werden geladen …</p>
@@ -635,7 +641,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   </dialog>
   <dialog id="account-photo-dialog" class="workspace-dialog account-photo-dialog" aria-labelledby="account-photo-dialog-title">
     <div class="workspace-dialog-content">
-      <header class="workspace-dialog-header"><div><p class="eyebrow">KONTO</p><h2 id="account-photo-dialog-title">Profilfoto</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button><button class="account-dialog-back" type="button" data-account-return="profile">‹ Konto</button></header>
+      <header class="workspace-dialog-header account-navigation-header"><div><p class="eyebrow">KONTO</p><h2 id="account-photo-dialog-title">Profilfoto</h2></div><button class="account-dialog-back" type="button" data-account-return="profile" aria-label="Zurück zum Profilmenü"><span aria-hidden="true">‹</span></button><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
       <div class="account-photo-editor">
         <button class="account-photo-preview" id="account-photo-preview" type="button" aria-label="Profilfoto ausrichten"><span>＋</span></button>
         <p>Dein Foto erscheint rund im Menü und im Chat. Im nächsten Schritt richtest du den Ausschnitt aus.</p>
@@ -651,7 +657,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   </dialog>
   <dialog id="settings-dialog" class="workspace-dialog" aria-labelledby="settings-dialog-title">
     <div class="workspace-dialog-content">
-      <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="settings-dialog-title">Einstellungen</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button><button class="account-dialog-back" type="button" data-account-return="home">‹ Konto</button></header>
+      <header class="workspace-dialog-header account-navigation-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="settings-dialog-title">Einstellungen</h2></div><button class="account-dialog-back" type="button" data-account-return="home" aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span></button><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
       <form id="email-preferences-form" class="settings-form">
         <fieldset class="settings-section">
           <legend>E-Mail-Benachrichtigungen</legend>
@@ -684,7 +690,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   </dialog>
   <dialog id="block-profile-dialog" class="workspace-dialog message-delete-dialog" aria-labelledby="block-profile-title"><div class="workspace-dialog-content"><header class="workspace-dialog-header"><div><p class="eyebrow">CHATOPTIONEN</p><h2 id="block-profile-title">Person blockieren?</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header><p id="block-profile-copy" class="message-delete-copy">Wenn du blockierst, könnt ihr euch keine Nachrichten mehr schicken. Der bisherige Chat bleibt sichtbar.</p><div class="message-delete-actions"><button class="button button-secondary" type="button" data-dialog-close>Abbrechen</button><button id="block-profile-confirm" class="button button-primary message-delete-confirm" type="button">Blockieren</button></div><p id="block-profile-status" class="settings-save-status" role="status" aria-live="polite"></p></div></dialog><dialog id="contact-feedback-dialog" class="workspace-dialog support-dialog" aria-labelledby="contact-feedback-title">
     <div class="workspace-dialog-content">
-      <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="contact-feedback-title">Kontakt / Feedback</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button><button class="account-dialog-back" type="button" data-account-return="offers">‹ Konto</button></header>
+      <header class="workspace-dialog-header account-navigation-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="contact-feedback-title">Kontakt / Feedback</h2></div><button class="account-dialog-back" type="button" data-account-return="offers" aria-label="Zurück zu Angebote und Hilfe"><span aria-hidden="true">‹</span></button><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
       <p class="support-intro">Wähle die Art der Kontaktaufnahme, gib einen Betreff und deine Nachricht ein. Thema, Betreff und Nachricht erscheinen im Chat. Deine Nachricht wird an die bestehende Unterhaltung angehängt.</p>
       <form id="support-new-form" class="support-compose">
         <div class="support-compose-fields">
