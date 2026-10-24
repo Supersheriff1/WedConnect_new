@@ -253,7 +253,8 @@
     .workspace-dialog-header .eyebrow{margin:0 0 5px;font-size:9px}
     .workspace-dialog-header h2{margin:0;color:var(--ink);font-size:25px;line-height:1.2;letter-spacing:-.04em}
     .dialog-close{width:36px;height:36px;flex:0 0 36px;aspect-ratio:1;padding:0;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--raised);color:var(--body);font-size:24px;line-height:1;cursor:pointer}
-    .account-summary{display:grid;gap:4px;margin-bottom:18px;padding:15px;border:1px solid var(--border);border-radius:10px;background:var(--canvas)}
+    .account-menu-dialog .workspace-dialog-header{gap:8px}.account-menu-dialog .workspace-dialog-header>div{flex:1;min-width:0}.account-menu-dialog .workspace-dialog-header>.account-dialog-back{flex:none;width:42px;height:42px;border-color:rgb(213 182 122 / 68%);border-radius:8px;background:rgb(213 182 122 / 14%);color:var(--gold);font-size:25px}.account-menu-dialog .workspace-dialog-header>.account-dialog-back:hover,.account-menu-dialog .workspace-dialog-header>.account-dialog-back:focus-visible{border-color:var(--gold);background:rgb(213 182 122 / 23%);outline:3px solid rgb(213 182 122 / 24%);outline-offset:2px}.account-menu-dialog .workspace-dialog-header>.account-dialog-back[hidden]{display:none}
+     .account-summary{display:grid;gap:4px;margin-bottom:18px;padding:15px;border:1px solid var(--border);border-radius:10px;background:var(--canvas)}
     .account-summary span{color:var(--muted);font:500 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}.account-summary strong{color:var(--ink);font-size:17px;line-height:1.25}.account-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:-8px 0 18px}.account-stat{display:grid;gap:3px;min-width:0;padding:10px 9px;border:1px solid var(--border);border-radius:10px;background:var(--raised);text-align:center}.account-stat strong{color:var(--gold);font-size:18px;line-height:1.1}.account-stat span{color:var(--muted);font-size:10px;line-height:1.25}.account-menu-dialog .workspace-dialog-content{max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
     .account-summary strong{color:var(--ink);font-size:14px;overflow-wrap:anywhere}
     .workspace-dialog-actions{display:grid;gap:9px}
@@ -599,7 +600,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   </main>
 <dialog id="account-dialog" class="workspace-dialog account-menu-dialog" aria-labelledby="account-dialog-title">
     <div class="workspace-dialog-content">
-      <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="account-dialog-title">Konto</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
+      <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="account-dialog-title">Konto</h2></div><button class="account-dialog-back" type="button" data-account-back aria-label="Zurück" hidden><span aria-hidden="true">‹</span></button><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
       <div class="account-summary"><span id="account-role-label">Dein Bereich</span><strong id="account-display-name">Dein WedConnect-Profil</strong></div>
       <div class="account-stats" aria-label="Deine WedConnect-Aktivität">
         <div class="account-stat"><strong id="account-stat-likes">0</strong><span>Offene Likes</span></div>
@@ -616,7 +617,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         <button class="button button-secondary account-menu-button account-signout-button" type="button" data-signout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M8 12h10"/></svg><span>Abmelden</span></button>
       </section>
       <section class="account-menu-screen" data-account-screen="profile" hidden>
-        <div class="account-submenu-heading"><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button><h3>Profil</h3></div><p class="account-submenu-intro">Verwalte dein Konto- und Profilbild sowie deine Profildaten.</p>
+        <p class="account-submenu-intro">Verwalte dein Konto- und Profilbild sowie deine Profildaten.</p>
         <div class="workspace-dialog-actions">
           <button class="button button-secondary account-menu-button account-avatar-open" type="button" id="account-avatar-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span id="account-avatar-open-label">Profilfoto hinzufügen</span></button>
           <button class="button button-secondary account-menu-button" type="button" id="account-profile-edit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1a6 6 0 0 1 6-6h2M15 14l5-5 2 2-5 5-3 1z"/></svg><span>Profil bearbeiten</span></button>
@@ -624,7 +625,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
         </div>
       </section>
  <section class="account-menu-screen" data-account-screen="offers" hidden>
-        <div class="account-submenu-heading"><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button><h3>Angebote und Hilfe</h3></div><p class="account-submenu-intro">Entdecke Partnerangebote oder kontaktiere das WedConnect-Team.</p>
+        <p class="account-submenu-intro">Entdecke Partnerangebote oder kontaktiere das WedConnect-Team.</p>
         <div class="workspace-dialog-actions">
           <button class="button button-secondary account-menu-button" type="button" id="account-partner-offers-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.4-3.2L12 7Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 7Z"/></svg><span>Partnerangebote</span><span aria-hidden="true">›</span></button>
           <button class="button button-secondary account-menu-button" type="button" id="account-contact-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 3z"/><path d="M8 9h8M8 13h5"/></svg><span>Kontakt / Feedback</span><span aria-hidden="true">›</span></button>
