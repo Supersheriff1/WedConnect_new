@@ -500,7 +500,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       top:24px!important;
     }
 
-.account-menu-groups{display:grid;gap:9px;margin:4px 0 18px}
+.profile-edit-exit{margin-right:auto}.account-menu-groups{display:grid;gap:9px;margin:4px 0 18px}
 .account-menu-group{display:grid;grid-template-columns:36px 1fr 20px;align-items:center;gap:12px;width:100%;padding:13px 14px;text-align:left;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:pointer}
 .account-menu-group:hover,.account-menu-group:focus-visible{border-color:var(--gold);outline:none}
 .account-menu-group>span:nth-child(2){display:grid;gap:3px}
@@ -571,7 +571,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="onboarding" class="onboarding hidden">
     <header class="setup-topbar">
       <a class="mobile-brand" href="/dashboard.html">Wed<span>Connect</span></a>
-      <div class="setup-topbar-actions"><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
+      <div class="setup-topbar-actions"><button class="button button-secondary profile-edit-exit" id="profile-edit-exit" type="button" hidden>‹ Zurück zum Konto</button><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
     </header>
     <div class="setup-content">
       <div class="setup-heading">
@@ -675,6 +675,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       <section class="settings-danger-zone" aria-labelledby="delete-account-heading"><h3 id="delete-account-heading">Konto löschen</h3><p>Hier kannst du dein WedConnect-Konto und die damit verbundenen Daten dauerhaft entfernen.</p><button class="button settings-delete-account" id="account-delete-open" type="button">Konto dauerhaft löschen</button></section>
     </div>
   </dialog>
+  <dialog id="role-change-confirm-dialog" class="workspace-dialog message-delete-dialog" aria-labelledby="role-change-confirm-title"><div class="workspace-dialog-content"><header class="workspace-dialog-header"><div><p class="eyebrow">PROFIL</p><h2 id="role-change-confirm-title">Rolle wechseln?</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header><p class="message-delete-copy">Ein Rollenwechsel kann Auswirkungen auf deine gespeicherten Profildaten haben. Prüfe deine Angaben im nächsten Schritt, bevor du dein Profil erneut abschließt.</p><div class="message-delete-actions"><button class="button button-secondary" type="button" id="role-change-cancel">Abbrechen</button><button class="button button-primary message-delete-confirm" type="button" id="role-change-confirm">Rolle wechseln</button></div></div></dialog>
   <dialog id="delete-account-dialog" class="workspace-dialog delete-account-dialog" aria-labelledby="delete-account-title"><div class="workspace-dialog-content"><header class="workspace-dialog-header"><div><p class="eyebrow">KONTO</p><h2 id="delete-account-title">Konto dauerhaft löschen?</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header><div class="delete-account-copy"><p>Dein Profil, deine Fotos, Likes, Matches, Nachrichten und Einstellungen werden dauerhaft gelöscht. Auch deine Chatnachrichten verschwinden für die andere Person.</p><p>Diese Aktion kann nicht rückgängig gemacht werden.</p></div><form id="delete-account-form"><label for="delete-account-confirmation">Gib zur Bestätigung <strong>KONTO LÖSCHEN</strong> ein.</label><input id="delete-account-confirmation" name="confirmation" type="text" autocomplete="off" required><p id="delete-account-status" class="delete-account-status" role="status" aria-live="polite"></p><div class="profile-dialog-actions"><button class="button button-secondary" type="button" data-dialog-close>Abbrechen</button><button class="button settings-delete-account" id="delete-account-submit" type="submit" disabled>Konto endgültig löschen</button></div></form></div></dialog>
   <dialog id="conversation-dialog" class="workspace-dialog conversation-dialog" aria-labelledby="conversation-title">
     <div class="workspace-dialog-content">
