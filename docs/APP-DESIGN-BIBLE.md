@@ -71,7 +71,7 @@ Das Konto-Menü ist als Hauptansicht mit klaren Bereichen aufgebaut:
 - **Abmelden:** bleibt direkt im Hauptmenü.
 - **Konto dauerhaft löschen:** bleibt als deutlich hervorgehobene Aktion in den Einstellungen.
 
-Jede Unteransicht hat eine einheitlich positionierte Zurück-Aktion zur unmittelbar vorherigen Ansicht. Dialoge kehren zur passenden Konto-Unterseite zurück. Beim Wechsel eines Hauptmenüpunkts der App wird die neue Ansicht am Seitenanfang geöffnet; beim Wechsel der Konto-Unterseite beginnt deren Inhalt ebenfalls oben.
+Jede Unteransicht hat eine einheitlich positionierte Zurück-Aktion zur unmittelbar vorherigen Ansicht. „Zurück“ steht links oben, der Schließen-Button rechts oben; beide sind kontrastreich, gut erreichbar und haben ausreichend große Trefferflächen. Dialoge kehren zur passenden Konto-Unterseite zurück. Beim Wechsel eines Hauptmenüpunkts der App wird die neue Ansicht am Seitenanfang geöffnet; beim Wechsel der Konto-Unterseite beginnt deren Inhalt ebenfalls oben.
 
 **Umsetzungsstatus:** Die gruppierte Kontonavigation, Zurück-Aktionen, direkte Einstellungen, Rollenwechsel-Bestätigung und Scroll-Reset sind im Dashboard-Code umgesetzt. Der Implementierungsstatus dokumentiert die Code- und Live-Prüfung.
 
