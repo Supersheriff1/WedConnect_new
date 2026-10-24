@@ -5266,6 +5266,10 @@
     document.querySelectorAll("[data-account-screen]").forEach((section) => {
       section.hidden = section.dataset.accountScreen !== screen;
     });
+    const accountTitle = document.querySelector("#account-dialog-title");
+    const accountBack = accountDialog && accountDialog.querySelector("[data-account-back]");
+    if (accountTitle) accountTitle.textContent = screen === "profile" ? "Profil" : screen === "offers" ? "Angebote und Hilfe" : "Konto";
+    if (accountBack) accountBack.hidden = screen === "home";
     const dialogContent = accountDialog && accountDialog.querySelector(".workspace-dialog-content");
     if (dialogContent) dialogContent.scrollTop = 0;
   }
