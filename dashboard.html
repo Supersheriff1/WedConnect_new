@@ -501,7 +501,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       top:24px!important;
     }
 
-#onboarding.profile-edit-overlay .setup-topbar{display:flex}#onboarding.profile-edit-overlay .setup-topbar-actions{display:flex}.profile-edit-exit{margin-right:auto}.account-menu-groups{display:grid;gap:9px;margin:4px 0 18px}
+#onboarding.profile-edit-overlay .setup-topbar{display:flex}#onboarding.profile-edit-overlay .setup-topbar-actions{display:flex}.profile-edit-exit{min-height:40px;margin-right:auto;padding:7px 10px;border-color:transparent;border-radius:8px;background:transparent;color:var(--gold);font-size:12px;font-weight:700}.profile-edit-exit:hover{border-color:rgb(213 182 122 / 35%);background:rgb(213 182 122 / 9%);color:var(--ink)}.profile-edit-exit svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.account-menu-groups{display:grid;gap:9px;margin:4px 0 18px}
 .account-menu-group{display:grid;grid-template-columns:36px 1fr 20px;align-items:center;gap:12px;width:100%;padding:13px 14px;text-align:left;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer}
 .account-menu-group:hover,.account-menu-group:focus-visible{border-color:var(--gold);outline:none}
 .account-menu-group>span:nth-child(2){display:grid;gap:3px}
@@ -578,7 +578,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <main id="onboarding" class="onboarding hidden">
     <header class="setup-topbar">
       <a class="mobile-brand" href="/dashboard.html">Wed<span>Connect</span></a>
-      <div class="setup-topbar-actions"><button class="button button-secondary profile-edit-exit" id="profile-edit-exit" type="button" hidden>‹ Zurück zum Konto</button><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
+      <div class="setup-topbar-actions"><button class="button profile-edit-exit" id="profile-edit-exit" type="button" aria-label="Zurück zum Konto" title="Zurück zum Konto" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12"/></svg><span>Konto</span></button><button class="button button-secondary" type="button" data-signout>Abmelden</button></div>
     </header>
     <div class="setup-content">
       <div class="setup-heading">
