@@ -28,7 +28,7 @@
   let currentUser = null;
   let currentRole = "";
   let currentProfile = {};
-  let currentGreeting = "";
+  let currentGreeting = "";\n  let activeDashboardView = "";
   let activeConversationPeer = "";
   let activeSupportThreadId = "";
   let supportFeatureAvailable = false;
@@ -4599,6 +4599,8 @@
     hint.hidden = !(isOverview && hasMoreBelow);
   }
   function setDashboardView(view) {
+    const viewChanged = activeDashboardView !== view;
+    activeDashboardView = view;
     document.querySelectorAll("[data-dashboard-view]").forEach((section) => {
       section.hidden = section.dataset.dashboardView !== view;
     });
@@ -4635,6 +4637,11 @@
     if (view === "discover") startDiscoverProfileRefresh();
     else stopDiscoverProfileRefresh();
     syncOverviewScrollHint();
+    if (viewChanged) {
+      window.scrollTo(0, 0);
+      const pageContent = document.querySelector(".content");
+      if (pageContent) pageContent.scrollTop = 0;
+    }
   }
 
   async function openConversation(peerId) {
@@ -5244,6 +5251,8 @@
     document.querySelectorAll("[data-account-screen]").forEach((section) => {
       section.hidden = section.dataset.accountScreen !== screen;
     });
+    const dialogContent = accountDialog && accountDialog.querySelector(".workspace-dialog-content");
+    if (dialogContent) dialogContent.scrollTop = 0;
   }
 
   function openDeleteMessageDialog(messageId) {
@@ -5349,7 +5358,7 @@
     loadEmailPreferences();
   });
   document.querySelector("#account-settings-open").addEventListener("click", () => {
-    accountReturnScreen = "manage";
+    accountReturnScreen = "home";
     if (accountDialog.open) accountDialog.close();
     openWorkspaceDialog(settingsDialog);
     loadEmailPreferences();
