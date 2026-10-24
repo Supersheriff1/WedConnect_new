@@ -3484,6 +3484,8 @@
         .map((item) => item.liker_id)
         .filter((id) => !outgoingIds.has(id) && !blockedIds.has(id)));
       updateMatchesBadge(incomingIds.size);
+      const accountLikesStat = document.querySelector("#account-stat-likes");
+      if (accountLikesStat) accountLikesStat.textContent = String(incomingIds.size);
     } finally {
       incomingLikeBadgeRefreshBusy = false;
     }
