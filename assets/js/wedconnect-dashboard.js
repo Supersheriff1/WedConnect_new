@@ -2604,11 +2604,21 @@
   async function loadPublicProfileSummary(userId) {
     const { data: header, error: headerError } = await supabase.from("profiles").select("id,role").eq("id", userId).maybeSingle();
     if (headerError || !header) return null;
-    const table = header.role === "couple" ? "couple_profiles" : "photographer_profiles";
+    let profileRole = header.role;
+    if (profileRole !== "couple" && profileRole !== "photographer") {
+      const [coupleRole, photographerRole] = await Promise.all([
+        supabase.from("couple_profiles").select("id").eq("id", userId).maybeSingle(),
+        supabase.from("photographer_profiles").select("id").eq("id", userId).maybeSingle()
+      ]);
+      if (coupleRole.data && !photographerRole.data) profileRole = "couple";
+      else if (photographerRole.data && !coupleRole.data) profileRole = "photographer";
+      else return null;
+    }
+    const table = profileRole === "couple" ? "couple_profiles" : "photographer_profiles";
     const { data: profile, error: profileError } = await supabase.from(table).select("*").eq("id", userId).maybeSingle();
     if (profileError || !profile) return null;
-    const summary = { id: userId, role: header.role, name: "", detail: "", photoUrl: "", photoPath: "" };
-    if (header.role === "couple") {
+    const summary = { id: userId, role: profileRole, name: "", detail: "", photoUrl: "", photoPath: "" };
+    if (profileRole === "couple") {
       summary.name = [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar";
       summary.detail = [profileDate(profile.wedding_date), profile.wedding_town, coupleRegionLabel(profile.region_code)].filter(Boolean).join(" · ");
     } else {
@@ -2638,10 +2648,10 @@
     if (!summary.photoUrl) {
       const { data: photos } = await supabase.from("profile_photos")
         .select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order").limit(30);
-      const candidates = (photos || []).filter((photo) => header.role === "photographer"
+      const candidates = (photos || []).filter((photo) => profileRole === "photographer"
         ? photo.photo_type === "portfolio"
         : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
-      const photo = header.role === "couple"
+      const photo = profileRole === "couple"
         ? candidates.find((item) => item.photo_type === "couple") || candidates.find((item) => item.photo_type === "partner_one") || candidates[0]
         : candidates[0];
       if (photo) {
