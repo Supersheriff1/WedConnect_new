@@ -254,7 +254,7 @@
     .workspace-dialog-header h2{margin:0;color:var(--ink);font-size:25px;line-height:1.2;letter-spacing:-.04em}
     .dialog-close{width:36px;height:36px;flex:0 0 36px;aspect-ratio:1;padding:0;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--raised);color:var(--body);font-size:24px;line-height:1;cursor:pointer}
     .account-summary{display:grid;gap:4px;margin-bottom:18px;padding:15px;border:1px solid var(--border);border-radius:10px;background:var(--canvas)}
-    .account-summary span{color:var(--muted);font:500 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+    .account-summary span{color:var(--muted);font:500 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}.account-summary strong{color:var(--ink);font-size:17px;line-height:1.25}.account-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:-8px 0 18px}.account-stat{display:grid;gap:3px;min-width:0;padding:10px 9px;border:1px solid var(--border);border-radius:10px;background:var(--raised);text-align:center}.account-stat strong{color:var(--gold);font-size:18px;line-height:1.1}.account-stat span{color:var(--muted);font-size:10px;line-height:1.25}.account-menu-dialog .workspace-dialog-content{max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
     .account-summary strong{color:var(--ink);font-size:14px;overflow-wrap:anywhere}
     .workspace-dialog-actions{display:grid;gap:9px}
     .workspace-dialog-actions .button{width:100%;justify-content:flex-start}
@@ -594,7 +594,12 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <dialog id="account-dialog" class="workspace-dialog account-menu-dialog" aria-labelledby="account-dialog-title">
     <div class="workspace-dialog-content">
       <header class="workspace-dialog-header"><div><p class="eyebrow">WEDCONNECT</p><h2 id="account-dialog-title">Konto</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button></header>
-      <div class="account-summary"><span id="account-role-label">Dein Bereich</span><strong id="account-email">Angemeldet</strong></div>
+      <div class="account-summary"><span id="account-role-label">Dein Bereich</span><strong id="account-display-name">Dein WedConnect-Profil</strong></div>
+      <div class="account-stats" aria-label="Deine WedConnect-Aktivität">
+        <div class="account-stat"><strong id="account-stat-likes">0</strong><span>Erhaltene Likes</span></div>
+        <div class="account-stat"><strong id="account-stat-matches">0</strong><span>Matches</span></div>
+        <div class="account-stat"><strong id="account-stat-unread">0</strong><span>Ungelesen</span></div>
+      </div>
       <section class="account-menu-screen" data-account-screen="home">
         <div class="account-menu-groups">
           <button class="account-menu-group" type="button" data-account-section-open="profile"><span class="account-menu-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span><span><strong>Profil</strong><small>Profilfoto und Profildaten</small></span><span aria-hidden="true">›</span></button>
