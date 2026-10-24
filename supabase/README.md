@@ -38,6 +38,7 @@ For a new project, execute the SQL files in the order below using the Supabase S
 30. `supabase/migrations/20261016190000_user_discover_preferences.sql`
 31. `supabase/migrations/20261018100000_mutual_matching_preferences.sql`
 32. `supabase/migrations/20261019100000_collaboration_model_and_profile_consent.sql`
+33. `supabase/migrations/20261024100000_chat_identity_for_existing_matches.sql`
 
 The collaboration migration adds mandatory pair consent for use of selected photos subject to approval before publication, a pair's willingness to consider a reduced contribution (`yes`, `no`, or `depends`), and the photographer's offer (`free`, `reduced`, or `both`) plus agreement to submit photos for approval before publication. The exact reduced price remains negotiable according to coverage scope. Existing completed profiles are reopened so their owners can confirm the new terms; profile data and photos remain stored. Profile completion enforces the terms in Supabase. Discover sorts by region first and collaboration-model compatibility second; no soft preference hides profiles or restricts likes. Likes still work for any visible profile, even when the compensation model does not align. Do not infer that these migrations are live; check the current Supabase migration history.
 
@@ -82,3 +83,8 @@ supabase functions deploy delete-account
 ```
 
 Die Supabase-Standard-Secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY` (oder `SUPABASE_PUBLISHABLE_KEY`) und `SUPABASE_SERVICE_ROLE_KEY` müssen für Functions verfügbar sein. Der Service-Role-Key bleibt ausschließlich im Supabase-Secret-Store und darf nie in Browsercode oder Vercel-Clientvariablen veröffentlicht werden. Bei einem Storage-Fehler wird die Auth-Löschung abgebrochen; ein erneuter Versuch kann nötig sein, falls bereits ein Teil der Dateien entfernt wurde. Das Deployment und die Ausführung in Produktion sind separat zu prüfen.
+
+
+## Namen und Profilbilder in bestehenden Chats
+
+Profile, die wegen neuer Pflichtangaben erneut geöffnet wurden, bleiben für Discover verborgen, bis sie bestätigt sind. Die Migration `20261024100000_chat_identity_for_existing_matches.sql` lässt Gesprächspartner trotzdem die Namen und Konto-Profilbilder eines bestehenden Chats sehen. Sie gibt nur Profilinformationen für Personen frei, mit denen bereits eine gegenseitige Unterhaltung besteht.
