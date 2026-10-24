@@ -2607,7 +2607,7 @@
     const table = header.role === "couple" ? "couple_profiles" : "photographer_profiles";
     const { data: profile, error: profileError } = await supabase.from(table).select("*").eq("id", userId).maybeSingle();
     if (profileError || !profile) return null;
-    const summary = { id: userId, role: header.role, name: "", detail: "", photoUrl: "" };
+    const summary = { id: userId, role: header.role, name: "", detail: "", photoUrl: "", photoPath: "" };
     if (header.role === "couple") {
       summary.name = [profile.partner_one_first_name, profile.partner_two_first_name].filter(Boolean).join(" & ") || "Hochzeitspaar";
       summary.detail = [profileDate(profile.wedding_date), profile.wedding_town, coupleRegionLabel(profile.region_code)].filter(Boolean).join(" · ");
@@ -2615,28 +2615,73 @@
       summary.name = profile.first_name || "Fotograf";
       summary.detail = [profile.region, profile.experience_years != null ? profile.experience_years + (Number(profile.experience_years) === 1 ? " Jahr Erfahrung" : " Jahre Erfahrung") : ""].filter(Boolean).join(" · ");
     }
-    const { data: photos } = await supabase.from("profile_photos")
-      .select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order").limit(30);
-    const candidates = (photos || []).filter((photo) => header.role === "photographer"
-      ? photo.photo_type === "portfolio"
-      : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
-    const photo = header.role === "couple"
-      ? candidates.find((item) => item.photo_type === "couple") || candidates.find((item) => item.photo_type === "partner_one") || candidates[0]
-      : candidates[0];
-    if (photo) {
-      const photoPath = photo.display_path || photo.object_path;
-      const cachedPhoto = profilePhotoUrlCache.get(photoPath);
-      if (cachedPhoto && cachedPhoto.expiresAt > Date.now() + 30000) {
-        summary.photoUrl = cachedPhoto.url;
-      } else {
-        const { data } = await supabase.storage.from(photoBucket).createSignedUrl(photoPath, 600);
-        if (data && data.signedUrl) {
-          summary.photoUrl = data.signedUrl;
-          profilePhotoUrlCache.set(photoPath, { url: data.signedUrl, expiresAt: Date.now() + 540000 });
-        }
+
+    async function signedPhotoUrl(path) {
+      if (!path) return "";
+      const cachedPhoto = profilePhotoUrlCache.get(path);
+      if (cachedPhoto && cachedPhoto.expiresAt > Date.now() + 30000) return cachedPhoto.url;
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(path, 3600);
+      if (error || !data || !data.signedUrl) return "";
+      profilePhotoUrlCache.set(path, { url: data.signedUrl, expiresAt: Date.now() + 3540000 });
+      return data.signedUrl;
+    }
+
+    // The personal avatar is the intended image for chat and is preferred here.
+    const { data: accountAvatar, error: avatarError } = await supabase.from("profile_avatars")
+      .select("object_path").eq("user_id", userId).maybeSingle();
+    if (!avatarError && accountAvatar && accountAvatar.object_path) {
+      summary.photoPath = accountAvatar.object_path;
+      summary.photoUrl = await signedPhotoUrl(summary.photoPath);
+    }
+
+    // Fall back to the profile gallery when no account avatar is set.
+    if (!summary.photoUrl) {
+      const { data: photos } = await supabase.from("profile_photos")
+        .select("photo_type,object_path,display_path,sort_order").eq("user_id", userId).order("sort_order").limit(30);
+      const candidates = (photos || []).filter((photo) => header.role === "photographer"
+        ? photo.photo_type === "portfolio"
+        : ["couple", "partner_one", "partner_two"].includes(photo.photo_type));
+      const photo = header.role === "couple"
+        ? candidates.find((item) => item.photo_type === "couple") || candidates.find((item) => item.photo_type === "partner_one") || candidates[0]
+        : candidates[0];
+      if (photo) {
+        summary.photoPath = photo.display_path || photo.object_path;
+        summary.photoUrl = await signedPhotoUrl(summary.photoPath);
       }
     }
     return summary;
+  }
+
+  function renderProfileSummaryAvatar(container, summary, fallbackName) {
+    container.replaceChildren();
+    const initial = String(fallbackName || summary && summary.name || "W").trim().slice(0, 1).toUpperCase() || "W";
+    const showFallback = () => {
+      container.replaceChildren();
+      container.textContent = initial;
+    };
+    if (!summary || !summary.photoUrl) {
+      showFallback();
+      return;
+    }
+    const image = document.createElement("img");
+    image.alt = "";
+    image.onerror = async () => {
+      if (image.dataset.urlRetried === "true" || !summary.photoPath) {
+        showFallback();
+        return;
+      }
+      image.dataset.urlRetried = "true";
+      const { data, error } = await supabase.storage.from(photoBucket).createSignedUrl(summary.photoPath, 3600);
+      if (error || !data || !data.signedUrl) {
+        showFallback();
+        return;
+      }
+      summary.photoUrl = data.signedUrl;
+      profilePhotoUrlCache.set(summary.photoPath, { url: data.signedUrl, expiresAt: Date.now() + 3540000 });
+      image.src = data.signedUrl;
+    };
+    image.src = summary.photoUrl;
+    container.append(image);
   }
 
   async function loadDashboardContent() {
@@ -2891,15 +2936,7 @@
     avatar.dataset.openProfile = summary.id;
     avatar.dataset.profileContext = kind;
     avatar.setAttribute("aria-label", "Profil von " + summary.name + " öffnen");
-    if (summary.photoUrl) {
-      const image = document.createElement("img");
-      image.src = summary.photoUrl;
-      image.alt = "";
-      avatar.append(image);
-    } else {
-      avatar.textContent = summary.name.trim().slice(0, 1).toUpperCase() || "W";
-      avatar.setAttribute("aria-hidden", "true");
-    }
+    renderProfileSummaryAvatar(avatar, summary, summary.name);
     const copy = document.createElement("div");
     copy.className = "activity-card-copy";
     const name = document.createElement("button");
@@ -3598,14 +3635,7 @@
       const avatar = document.createElement("div");
       avatar.className = "activity-avatar";
       avatar.setAttribute("aria-hidden", "true");
-      if (summary.photoUrl) {
-        const image = document.createElement("img");
-        image.src = summary.photoUrl;
-        image.alt = "";
-        avatar.append(image);
-      } else {
-        avatar.textContent = summary.name.trim().slice(0, 1).toUpperCase() || "W";
-      }
+      renderProfileSummaryAvatar(avatar, summary, summary.name);
       const copy = document.createElement("div");
       copy.className = "activity-card-copy";
       const name = document.createElement("strong");
@@ -4602,14 +4632,7 @@
     document.querySelector("#conversation-title").textContent = partnerName;
     const avatar = document.querySelector("#conversation-avatar");
     avatar.replaceChildren();
-    if (summary && summary.photoUrl) {
-      const image = document.createElement("img");
-      image.src = summary.photoUrl;
-      image.alt = "";
-      avatar.append(image);
-    } else {
-      avatar.textContent = partnerName.trim().slice(0, 1).toUpperCase() || "W";
-    }
+    renderProfileSummaryAvatar(avatar, summary, partnerName);
     updateConversationBlockUI(peerId);
     await renderConversationThread();
     document.querySelector("#conversation-status").textContent = "";
