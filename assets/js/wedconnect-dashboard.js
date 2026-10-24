@@ -4639,7 +4639,11 @@
     resetConversationComposer("Nachricht schreiben …", "Nachricht");
     const summary = activityCache.summaries.get(peerId) || await loadPublicProfileSummary(peerId);
     const partnerName = summary && summary.name ? summary.name : "Nachricht";
-    document.querySelector("#conversation-title").textContent = partnerName;
+    const titleButton = document.querySelector("#conversation-title");
+    titleButton.textContent = partnerName;
+    titleButton.dataset.openProfile = peerId;
+    titleButton.dataset.profileContext = "match";
+    titleButton.setAttribute("aria-label", "Profil von " + partnerName + " öffnen");
     const avatar = document.querySelector("#conversation-avatar");
     avatar.replaceChildren();
     renderProfileSummaryAvatar(avatar, summary, partnerName);
@@ -4665,7 +4669,11 @@
     updateConversationBlockUI("");
     setConversationMenuOpen(false);
     const title = supportOperator ? ("Support · " + (thread.subject || "Anfrage")) : "WedConnect-Team";
-    document.querySelector("#conversation-title").textContent = title;
+    const titleButton = document.querySelector("#conversation-title");
+    titleButton.textContent = title;
+    delete titleButton.dataset.openProfile;
+    delete titleButton.dataset.profileContext;
+    titleButton.removeAttribute("aria-label");
     const avatar = document.querySelector("#conversation-avatar");
     avatar.replaceChildren();
     avatar.textContent = "W";
@@ -5606,6 +5614,8 @@
     const cardAction = event.target.closest("[data-like-back], [data-dismiss-like], [data-open-conversation]");
     const profileButton = cardAction ? null : event.target.closest("[data-open-profile]");
     if (profileButton) {
+      const conversationDialog = profileButton.closest("#conversation-dialog");
+      if (conversationDialog && conversationDialog.open) conversationDialog.close();
       openMatchedProfile(profileButton.dataset.openProfile, profileButton.dataset.profileContext || "match");
       return;
     }
