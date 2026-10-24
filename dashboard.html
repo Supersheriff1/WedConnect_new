@@ -598,7 +598,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
       <section class="account-menu-screen" data-account-screen="home">
         <div class="account-menu-groups">
           <button class="account-menu-group" type="button" data-account-section-open="profile"><span class="account-menu-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span><span><strong>Profil</strong><small>Profilfoto und Profildaten</small></span><span aria-hidden="true">›</span></button>
-          <button class="account-menu-group" type="button" data-account-section-open="discover"><span class="account-menu-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4"/><circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/></svg></span><span><strong>Entdecken</strong><small>Profile und Sortierung</small></span><span aria-hidden="true">›</span></button>
+          <button class="account-menu-group" type="button" id="account-discover-preferences-open"><span class="account-menu-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4"/><circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/></svg></span><span><strong>Entdecken &amp; Profile</strong><small>Sortierung deiner Vorschläge</small></span><span aria-hidden="true">›</span></button>
           <button class="account-menu-group" type="button" data-account-section-open="offers"><span class="account-menu-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.4-3.2L12 7Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 7Z"/></svg></span><span><strong>Angebote und Hilfe</strong><small>Partnerangebote und Kontakt</small></span><span aria-hidden="true">›</span></button>
           <button class="account-menu-group" type="button" id="account-settings-open"><span class="account-menu-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 2.9-.2-.1a1.7 1.7 0 0 0-1.8.2l-.1.1h-3.4l-.1-.2a1.7 1.7 0 0 0-1.5-1.1 1.7 1.7 0 0 0-1.5 1.1l-.1.2H6l-.1-.2a1.7 1.7 0 0 0-1.8-.2l-.1.1-1.7-2.9.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1.1H1v-3.4h.2a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L4 4.5l.2.1a1.7 1.7 0 0 0 1.8-.2l.1-.1h3.4l.1.2a1.7 1.7 0 0 0 1.5 1.1 1.7 1.7 0 0 0 1.5-1.1l.1-.2H16l.1.2a1.7 1.7 0 0 0 1.8.2l.1-.1 1.7 2.9-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1.1h.2v3.4h-.2a1.7 1.7 0 0 0-1.4 1.1Z"/></svg></span><span><strong>Konto verwalten</strong><small>Einstellungen und Sicherheit</small></span><span aria-hidden="true">›</span></button>
         </div>
@@ -612,21 +612,17 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
           <button class="button button-secondary account-menu-button" type="button" id="account-role-change"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15m-3-3 3 3-3 3M20 17H5m3-3-3 3 3 3"/></svg><span>Rolle wechseln</span></button>
         </div>
       </section>
-      <section class="account-menu-screen" data-account-screen="discover" hidden>
-        <div class="account-submenu-heading"><h3>Entdecken</h3><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button></div><p class="account-submenu-intro">Lege fest, welche Kriterien die Reihenfolge der Profile beeinflussen.</p>
-        <div class="workspace-dialog-actions"><button class="button button-secondary account-menu-button" id="account-discover-preferences-open" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4"/><circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/></svg><span>Entdecken &amp; Profile</span><span aria-hidden="true">›</span></button></div>
-      </section>
-      <section class="account-menu-screen" data-account-screen="offers" hidden>
+ <section class="account-menu-screen" data-account-screen="offers" hidden>
         <div class="account-submenu-heading"><h3>Angebote und Hilfe</h3><button class="account-submenu-back" type="button" data-account-back aria-label="Zurück zum Konto"><span aria-hidden="true">‹</span> Zurück</button></div><p class="account-submenu-intro">Entdecke Partnerangebote oder kontaktiere das WedConnect-Team.</p>
         <div class="workspace-dialog-actions">
           <button class="button button-secondary account-menu-button" type="button" id="account-partner-offers-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.4-3.2L12 7Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 7Z"/></svg><span>Partnerangebote</span><span aria-hidden="true">›</span></button>
           <button class="button button-secondary account-menu-button" type="button" id="account-contact-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 3z"/><path d="M8 9h8M8 13h5"/></svg><span>Kontakt / Feedback</span><span aria-hidden="true">›</span></button>
         </div>
       </section>
-/div>
+    </div>
   </dialog>  <dialog id="discover-preferences-dialog" class="workspace-dialog" aria-labelledby="discover-preferences-title">
     <div class="workspace-dialog-content">
-      <header class="workspace-dialog-header"><div><p class="eyebrow">DEIN KONTO</p><h2 id="discover-preferences-title">Entdecken &amp; Profile</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button><button class="account-dialog-back" type="button" data-account-return="discover">‹ Konto</button></header>
+      <header class="workspace-dialog-header"><div><p class="eyebrow">DEIN KONTO</p><h2 id="discover-preferences-title">Entdecken &amp; Profile</h2></div><button class="dialog-close" type="button" data-dialog-close aria-label="Schließen">×</button><button class="account-dialog-back" type="button" data-account-return="home">‹ Konto</button></header>
       <p id="discover-preferences-description" class="discover-preferences-intro">Die Region zählt am stärksten. Vergütungsmodelle helfen zusätzlich beim Sortieren. Alle Profile bleiben sichtbar und jedes Profil kann gelikt werden.</p>
       <div id="discover-preferences-list" class="discover-preferences-list"></div>
       <p id="discover-preferences-status" class="discover-preferences-status" role="status" aria-live="polite">Einstellungen werden geladen …</p>
