@@ -163,7 +163,7 @@
       }
     }
     accountAvatarUrl = "";
-    button.textContent = ((currentUser && currentUser.user_metadata && currentUser.user_metadata.first_name) || currentUser && currentUser.email || "W").slice(0, 1).toUpperCase();
+    button.textContent = ((currentGreeting) || (currentUser && currentUser.user_metadata && currentUser.user_metadata.first_name) || "W").slice(0, 1).toUpperCase();
     refreshAccountPhotoPreview();
   }
 
@@ -3774,12 +3774,22 @@
 
   document.querySelector("#messages-search").addEventListener("input", renderMessagesList);
 
+  function renderAccountStats() {
+    const likes = document.querySelector("#account-stat-likes");
+    const matches = document.querySelector("#account-stat-matches");
+    const unread = document.querySelector("#account-stat-unread");
+    if (likes) likes.textContent = String((activityCache.incoming || []).length);
+    if (matches) matches.textContent = String((activityCache.matches || []).length);
+    if (unread) unread.textContent = String(unreadMessageCount());
+  }
+
   async function refreshActivityViews() {
     try {
       await loadActivityData();
       renderOverviewActivity();
       renderMatchList();
       renderMessagesList();
+      renderAccountStats();
     } catch (error) {
       showNotice(error && error.message ? error.message : "Aktivitäten konnten nicht geladen werden.");
       document.querySelector("#overview-empty-state").hidden = false;
@@ -3814,6 +3824,7 @@
       if (activeSupportThreadId) await markSupportThreadRead(activeSupportThreadId);
       renderMessagesList();
       updateUnreadMessageBadges();
+      renderAccountStats();
     } finally {
       unreadRefreshBusy = false;
     }
@@ -4963,7 +4974,7 @@
     if (discoverIntro) discoverIntro.textContent = couple ? "Entdecke Hochzeitsfotografen, die zu euch passen könnten." : "Entdecke Hochzeitspaare, deren Geschichten zu deiner Arbeit passen könnten.";
     document.querySelector("#side-role").textContent = roleName;
     await renderAccountAvatar();
-    document.querySelector("#account-email").textContent = user.email || "E-Mail nicht verfügbar";
+    document.querySelector("#account-display-name").textContent = greeting || profileGreeting(currentRole, profile) || (user.user_metadata && user.user_metadata.first_name) || "Dein WedConnect-Profil";\n    renderAccountStats();
     document.querySelector("#account-role-label").textContent = roleName;
     document.querySelector("#role-eyebrow").textContent = couple ? "Hochzeitspaar" : photographer ? "Fotograf" : "Dein WedConnect-Konto";
     document.querySelector("#page-title").textContent = greeting ? "Willkommen, " + greeting + "!" : "Willkommen!";
