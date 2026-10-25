@@ -31,6 +31,12 @@
     const legalBack = document.querySelector("#legal-back");
     if (new URLSearchParams(window.location.search).get("from") === "account") {
       legalBack.href = "/dashboard.html?account=legal";
+      legalBack.addEventListener("click", (event) => {
+        if (window.history.length > 1) {
+          event.preventDefault();
+          window.history.back();
+        }
+      });
     }
   </script>
 </body>
