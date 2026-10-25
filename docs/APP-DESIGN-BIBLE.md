@@ -66,6 +66,7 @@ Das Konto-Menü ist als Hauptansicht mit klaren Bereichen aufgebaut:
 - **Profil:** Profilfoto, Profil bearbeiten und Rollenwechsel. Der Rollenwechsel liegt innerhalb dieses Profilbereichs und erfordert vor der Änderung eine ausdrückliche Bestätigung.
 - **Entdecken & Profile:** Öffnet die Sortierkriterien direkt; eine zusätzliche Zwischenseite entfällt.
 - **Angebote und Hilfe:** Partnerangebote sowie Kontakt / Feedback.
+- **Rechtliches:** Links zu Impressum, Datenschutz und AGB. Die aktuellen Seiten sind ausdrücklich als Entwürfe markiert und noch keine fertigen Rechtstexte.
 - **Konto verwalten:** Öffnet direkt die Einstellungen, ohne zusätzliche Zwischenseite.
 - Im Kontokopf stehen der Profilname und die Rolle. Die Anmelde-E-Mail wird nicht im Menü wiederholt. Darunter zeigen kompakte Aktivitätswerte offene Likes, Matches und ungelesene Nachrichten.
 - **Abmelden:** bleibt direkt im Hauptmenü.
