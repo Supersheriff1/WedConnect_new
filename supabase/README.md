@@ -40,6 +40,7 @@ For a new project, execute the SQL files in the order below using the Supabase S
 32. `supabase/migrations/20261019100000_collaboration_model_and_profile_consent.sql`
 33. `supabase/migrations/20261024100000_chat_identity_for_existing_matches.sql`
 34. `supabase/migrations/20261024110000_chat_gallery_photo_access.sql`
+35. `supabase/migrations/20261025100000_admin_dashboard.sql`
 
 The collaboration migration adds mandatory pair consent for use of selected photos subject to approval before publication, a pair's willingness to consider a reduced contribution (`yes`, `no`, or `depends`), and the photographer's offer (`free`, `reduced`, or `both`) plus agreement to submit photos for approval before publication. The exact reduced price remains negotiable according to coverage scope. Existing completed profiles are reopened so their owners can confirm the new terms; profile data and photos remain stored. Profile completion enforces the terms in Supabase. Discover sorts by region first and collaboration-model compatibility second; no soft preference hides profiles or restricts likes. Likes still work for any visible profile, even when the compensation model does not align. Do not infer that these migrations are live; check the current Supabase migration history.
 
@@ -92,3 +93,30 @@ Profile, die wegen neuer Pflichtangaben erneut geöffnet wurden, bleiben für Di
 
 
 Die Migration `20261024110000_chat_gallery_photo_access.sql` erlaubt es, bei einem bestehenden Chat das erste Profilfoto als Avatar zu laden, wenn kein persönliches Konto-Profilbild vorhanden ist.
+
+## Admin-Bereich
+
+Der Admin-Bereich ist unter `/admin` erreichbar und wird nicht in die normalen Dashboard-Dateien eingebunden. Vor der ersten Anmeldung muss die Migration `20261025100000_admin_dashboard.sql` im Supabase SQL Editor ausgeführt werden.
+
+1. Lege in Supabase Auth ein eigenes E-Mail-Konto für die Administration an und bestätige die Adresse. Verwende ein Passwort mit mindestens 14 Zeichen.
+2. Kopiere die Auth-User-ID dieses Kontos und trage sie über den SQL Editor in die private Admin-Freigabeliste ein:
+
+```sql
+insert into public.admin_users (user_id, access_level)
+values ('00000000-0000-0000-0000-000000000000', 'owner');
+```
+
+3. Öffne `/admin`, melde dich mit diesem Konto an und richte den TOTP-Authenticator ein. Die zehn einmaligen Wiederherstellungscodes erscheinen nach der Einrichtung genau einmal. Bewahre sie offline auf.
+4. Setze in Supabase Auth eine Mindestpasswortlänge von 14 Zeichen. MFA-Prüfung, Admin-Freigabe und Zeitlimits werden zusätzlich in den Admin-Datenbankfunktionen serverseitig geprüft. Die Admin-Tabellen sind für Browserrollen gesperrt; es wird kein Service-Role-Key ausgeliefert.
+
+Neue Fotograf:innen bleiben bis zur Profilfreigabe unsichtbar. Bereits vollständige Profile werden bei der Einführung als bestehender Bestand freigegeben, damit die Migration ihre Sichtbarkeit nicht unerwartet ändert. UID-, Firmenbuchnummer und Registername werden in einer gesonderten, für andere Nutzer gesperrten Tabelle gespeichert. Fotograf:innen können die Angaben im Profil eintragen und die gewerbliche Verifizierung beantragen. Die Admin-Einträge für Partner und Kampagnen sind nach der Migration leer.
+
+Die Admin-Oberfläche enthält Nutzerwarnungen, befristete (7–30 Tage) und dauerhafte Sperren, Entsperren, Fotograf:innen-Pausen, Rollenreset und Kontolöschung. Für Rollenreset und Kontolöschung muss zusätzlich die Edge Function deployed sein; sie entfernt Storage-Dateien und löscht beim endgültigen Entfernen auch das Supabase-Auth-Konto. Dauerhafte Sperre, Rollenreset, Löschung und Audit-Export verlangen eine erneute Passwort- und TOTP-Prüfung. Änderungen werden vor der Ausführung im unveränderlichen Admin-Protokoll festgehalten.
+
+```sh
+supabase functions deploy admin-delete-account
+```
+
+Die Funktion benötigt die Supabase-Standard-Secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY` (oder `SUPABASE_PUBLISHABLE_KEY`) und `SUPABASE_SERVICE_ROLE_KEY`. Der Service-Role-Key bleibt ausschließlich im Supabase-Secret-Store.
+
+Zwei projektweite Schutzmaßnahmen benötigen weiterhin separate Supabase-Auth-Konfiguration: eine E-Mail-Benachrichtigung bei Admin-Anmeldungen und die Begrenzung auf fünf fehlgeschlagene Loginversuche mit 15 Minuten Sperre. Die gewünschte Aufbewahrungsdauer des Admin-Protokolls ist noch festzulegen; aktuell erfolgt kein automatisches Löschen.

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#25242b">
+  <title>Administration — WedConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/wedconnect-admin.css?v=20261025-1">
+</head>
+<body>
+  <main id="admin-app" class="admin-app">
+    <section id="auth-screen" class="auth-screen" aria-labelledby="auth-title">
+      <form id="auth-form" class="auth-card">
+        <a class="brand" href="/">Wed<span>Connect</span></a>
+        <p class="eyebrow">GESCHÜTZTER BEREICH</p>
+        <h1 id="auth-title">Admin-Anmeldung</h1>
+        <p class="muted">Melde dich mit deinem freigeschalteten Admin-Konto an. Ein bestätigter zweiter Faktor ist erforderlich.</p>
+        <label for="admin-email">E-Mail-Adresse</label>
+        <input id="admin-email" name="email" type="email" autocomplete="username" required>
+        <label for="admin-password">Passwort</label>
+        <input id="admin-password" name="password" type="password" autocomplete="current-password" minlength="14" required>
+        <div id="mfa-step" class="mfa-step" hidden>
+          <label for="admin-code">Authenticator-Code</label>
+          <input id="admin-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
+          <button id="use-recovery" class="link-button" type="button">Stattdessen einen einmaligen Wiederherstellungscode verwenden</button>
+          <div id="recovery-step" hidden><label for="recovery-code">Wiederherstellungscode</label><input id="recovery-code" autocomplete="one-time-code"></div>
+        </div>
+        <div id="enroll-step" class="enroll-step" hidden>
+          <p>Scanne diesen Code mit deiner Authenticator-App und bestätige die Einrichtung mit dem sechsstelligen Code.</p>
+          <img id="mfa-qr" alt="QR-Code für die Authenticator-App">
+          <p id="mfa-secret" class="mono"></p>
+        </div>
+        <div id="backup-codes-step" class="backup-codes-step" hidden>
+          <p><strong>Bewahre diese zehn Codes offline auf.</strong> Jeder Code funktioniert genau einmal. Du kannst sie nach der Einrichtung nicht erneut anzeigen.</p>
+          <pre id="backup-codes"></pre>
+          <label class="backup-confirm"><input id="backup-saved" type="checkbox"> Ich habe die Codes sicher offline gespeichert.</label>
+        </div>
+        <p id="auth-status" class="status" role="status" aria-live="polite"></p>
+        <button id="auth-submit" class="button button-primary" type="submit">Anmelden</button>
+      </form>
+    </section>
+
+    <section id="admin-shell" class="admin-shell" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="/">Wed<span>Connect</span></a>
+        <div class="admin-label"><small>ADMINISTRATION</small><strong id="admin-email-label">Admin</strong></div>
+        <nav id="admin-nav" class="admin-nav" aria-label="Administration">
+          <button class="nav-item active" data-page="overview">Übersicht</button>
+          <button class="nav-item" data-page="reviews">Prüfung <span data-count="reviews">0</span></button>
+          <button class="nav-item" data-page="verifications">Verifizierungen <span data-count="verifications">0</span></button>
+          <button class="nav-item" data-page="users">Nutzer</button>
+          <button class="nav-item" data-page="support">Support <span data-count="support">0</span></button>
+          <button class="nav-item" data-page="partners">Partner &amp; Angebote</button>
+          <button class="nav-item" data-page="audit">Protokoll</button>
+        </nav>
+        <button id="sign-out" class="button button-secondary sign-out">Abmelden</button>
+      </aside>
+      <section class="main-panel">
+        <header class="topbar"><span class="eyebrow">WEDCONNECT · ADMIN</span><span id="clock-label" class="mono"></span></header>
+        <div class="content">
+          <div class="page-heading"><div><p id="page-eyebrow" class="eyebrow">PLATTFORMSTATUS</p><h1 id="page-title">Übersicht</h1></div><button id="refresh" class="button button-secondary">Aktualisieren</button></div>
+          <p id="page-status" class="status" role="status" aria-live="polite"></p>
+          <section id="page-overview" class="admin-page">
+            <div class="task-card"><div><p class="eyebrow">HEUTE ZU TUN</p><h2>Offene Fälle</h2></div><div id="task-list" class="task-list"></div></div>
+            <div class="section-heading"><h2>Plattformzahlen</h2><label class="period-select">Zeitraum <select id="period"><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="90">90 Tage</option></select></label></div>
+            <div id="stat-grid" class="stat-grid"></div>
+            <div class="section-heading"><h2>Registrierung bis erste Aktivität</h2></div>
+            <div id="funnel-grid" class="funnel-grid"></div>
+          </section>
+          <section id="page-reviews" class="admin-page" hidden><div class="toolbar"><p>Älteste Einreichung zuerst.</p><select id="review-filter"><option value="pending">Offen</option><option value="all">Alle</option></select></div><div id="review-list" class="work-list"></div></section>
+          <section id="page-verifications" class="admin-page" hidden><div class="toolbar"><p>Die gewerbliche Verifizierung ist unabhängig von der Profilfreigabe.</p></div><div id="verification-list" class="work-list"></div></section>
+          <section id="page-users" class="admin-page" hidden><div class="toolbar"><input id="user-search" type="search" placeholder="E-Mail, Vorname oder Konto-ID suchen"><select id="user-role"><option value="">Alle Rollen</option><option value="couple">Hochzeitspaare</option><option value="photographer">Fotograf:innen</option></select><select id="user-status"><option value="">Alle Status</option><option value="active">Aktiv</option><option value="suspended">Gesperrt</option><option value="paused">Pausiert</option></select><select id="user-test"><option value="">Testkonten: alle</option><option value="false">Ohne Testkonten</option><option value="true">Nur Testkonten</option></select></div><div id="user-list" class="work-list"></div></section>
+          <section id="page-support" class="admin-page" hidden><div class="toolbar"><input id="support-search" type="search" placeholder="Betreff oder Nachricht durchsuchen" aria-label="Supportanfragen suchen"></div><div class="support-layout"><div id="support-list" class="work-list"></div><article id="support-detail" class="support-detail"><p class="empty-state">Wähle eine Anfrage aus.</p></article></div></section>
+          <section id="page-partners" class="admin-page" hidden><div class="section-heading"><div><h2>Partnerverwaltung</h2><p class="muted">Partner, Konditionen und Angebote zentral verwalten.</p></div><button id="partner-create" class="button button-primary">Partner hinzufügen</button></div><div id="partner-list" class="work-list"></div><div class="section-heading"><div><h2>Kampagnen</h2><p class="muted">Codes ausgeben; Einlösungen und Provisionen nachhalten.</p></div><button id="campaign-create" class="button button-primary">Kampagne hinzufügen</button></div><div id="campaign-list" class="work-list"></div><div class="section-heading"><h2>Einlösungen und Abrechnung</h2></div><div id="redemption-list" class="work-list"></div></section>
+          <section id="page-audit" class="admin-page" hidden><div class="toolbar"><select id="audit-filter"><option value="">Alle Aktionen</option></select><input id="audit-account" type="search" placeholder="Konto-ID"><input id="audit-period" type="date" aria-label="Ab Datum"><button id="audit-export" class="button button-secondary">Protokoll exportieren</button></div><div id="audit-list" class="work-list"></div></section>
+        </div>
+      </section>
+    </section>
+    <dialog id="action-dialog" class="admin-dialog"><form method="dialog" id="action-form"><h2 id="dialog-title">Aktion bestätigen</h2><p id="dialog-copy" class="muted"></p><label for="action-reason">Begründung</label><textarea id="action-reason" required maxlength="1000" rows="4"></textarea><div id="action-extra"></div><div class="dialog-actions"><button class="button button-secondary" value="cancel">Abbrechen</button><button id="dialog-confirm" class="button button-primary" value="confirm">Bestätigen</button></div></form></dialog>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
+  <script src="/assets/js/supabase-config.js"></script>
+  <script src="/assets/js/wedconnect-admin.js?v=20261025-1" defer></script>
+</body>
+</html>
