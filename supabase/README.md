@@ -45,6 +45,7 @@ For a new project, execute the SQL files in the order below using the Supabase S
 37. `supabase/migrations/20261024110000_chat_gallery_photo_access.sql`
 38. `supabase/migrations/20261025100000_admin_dashboard.sql`
 39. `supabase/migrations/20261025110000_admin_access_level_volatility.sql`
+40. `supabase/migrations/20261025120000_fix_admin_overview_region_alias.sql`
 
 The collaboration migration adds mandatory pair consent for use of selected photos subject to approval before publication, a pair's willingness to consider a reduced contribution (`yes`, `no`, or `depends`), and the photographer's offer (`free`, `reduced`, or `both`) plus agreement to submit photos for approval before publication. The exact reduced price remains negotiable according to coverage scope. Existing completed profiles are reopened so their owners can confirm the new terms; profile data and photos remain stored. Profile completion enforces the terms in Supabase. Discover sorts by region first and collaboration-model compatibility second; no soft preference hides profiles or restricts likes. Likes still work for any visible profile, even when the compensation model does not align. Do not infer that these migrations are live; check the current Supabase migration history.
 
