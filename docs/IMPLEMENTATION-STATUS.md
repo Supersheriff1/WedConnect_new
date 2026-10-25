@@ -33,7 +33,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 
 - `impressum.html`, `datenschutz.html` und `agb.html` sind als strukturierte Entwürfe angelegt.
 - Konto → Rechtliches verlinkt auf alle drei Seiten. Die öffentlichen Fußzeilen enthalten dieselben Links.
-- Jede Rechtsseite hat denselben Zurück-Pfeil oben rechts. Von Konto-Links führt er zurück zu Konto → Rechtliches; von öffentlichen Fußzeilen zurück zur Startseite.
+- Jede Rechtsseite hat oben rechts eine sichtbare Zurück-Aktion mit Pfeil und Beschriftung. Von Konto-Links führt sie zurück zu Konto → Rechtliches; von öffentlichen Fußzeilen zurück zur Startseite. Die Rechtstexte selbst enthalten keine wiederholte Linkliste im Footer.
 - Die Seiten sind deutlich als nicht veröffentlichungsreif markiert. Betreiberangaben, tatsächliche Datenverarbeitung und verbindliche Nutzungsbedingungen müssen ergänzt und rechtlich geprüft werden. Es wird keine Rechtskonformität behauptet.
 
 ## Ablauf und Profile
