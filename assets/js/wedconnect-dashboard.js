@@ -5268,7 +5268,7 @@
     });
     const accountTitle = document.querySelector("#account-dialog-title");
     const accountBack = accountDialog && accountDialog.querySelector("[data-account-back]");
-    if (accountTitle) accountTitle.textContent = screen === "profile" ? "Profil" : screen === "offers" ? "Angebote und Hilfe" : "Konto";
+    if (accountTitle) accountTitle.textContent = screen === "profile" ? "Profil" : screen === "offers" ? "Angebote und Hilfe" : screen === "legal" ? "Rechtliches" : "Konto";
     if (accountBack) accountBack.hidden = screen === "home";
     const dialogContent = accountDialog && accountDialog.querySelector(".workspace-dialog-content");
     if (dialogContent) dialogContent.scrollTop = 0;
