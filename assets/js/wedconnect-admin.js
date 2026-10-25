@@ -144,7 +144,9 @@
     const { data:enrollment, error } = await supabase.auth.mfa.enroll({ factorType:"totp", friendlyName:"WedConnect Admin" });
     if (error) throw error;
     pendingEnrollFactorId = enrollment.id;
-    $("#mfa-qr").src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(enrollment.totp.qr_code)}`;
+    const qrCode=enrollment?.totp?.qr_code;
+    if(!qrCode)throw new Error("Supabase hat keinen QR-Code für den Authenticator geliefert.");
+    $("#mfa-qr").src=qrCode.startsWith("data:")?qrCode:`data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrCode)}`;
     $("#mfa-secret").textContent = `Manueller Schlüssel: ${enrollment.totp.secret}`;
     setLoginMode("enroll");
     status(authStatus, "Für dieses Konto ist noch kein Authenticator eingerichtet.");
