@@ -142,6 +142,11 @@
       codeInput.focus();
       return;
     }
+    const unfinishedAdminFactors=(factors.totp||[]).filter(item=>item.status!=="verified"&&(item.friendly_name??item.friendlyName)==="WedConnect Admin");
+    for(const factor of unfinishedAdminFactors){
+      const {error:removeError}=await supabase.auth.mfa.unenroll({factorId:factor.id});
+      if(removeError)throw new Error("Die unvollständige vorherige Authenticator-Einrichtung konnte nicht zurückgesetzt werden. Bitte versuche es erneut.");
+    }
     const { data:enrollment, error } = await supabase.auth.mfa.enroll({ factorType:"totp", friendlyName:"WedConnect Admin" });
     if (error) throw error;
     pendingEnrollFactorId = enrollment.id;
