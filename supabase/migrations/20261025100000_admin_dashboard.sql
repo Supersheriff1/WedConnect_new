@@ -488,11 +488,11 @@ returns table(id uuid,email text,display_name text,role text,profile_status text
 language plpgsql security definer set search_path=public,auth,pg_temp as $$
 begin
   perform public.admin_require_access(array['owner','moderator','support','read_only']);
-  return query select p.id,u.email,coalesce(cp.partner_one_first_name||' & '||cp.partner_two_first_name,pp.first_name,p.id::text),p.role,p.profile_status,coalesce(pp.region,cp.location,'—'),coalesce(s.status,'active'),public.admin_is_test_account(p.id),
-    (select count(*) from public.profile_likes l where l.liker_id=p.id),(select count(*) from public.profile_likes l where l.liked_id=p.id),
-    (select count(*) from public.profile_likes a join public.profile_likes b on b.liker_id=a.liked_id and b.liked_id=a.liker_id where a.liker_id=p.id),
-    (select count(*) from public.profile_messages m where m.sender_id=p.id or m.recipient_id=p.id),
-    (select count(*) from public.admin_user_warnings w where w.user_id=p.id),pp.admin_review_status,pp.admin_verification_status,p.created_at,u.last_sign_in_at
+  return query select p.id,u.email::text,coalesce(cp.partner_one_first_name||' & '||cp.partner_two_first_name,pp.first_name,p.id::text)::text,p.role::text,p.profile_status::text,coalesce(pp.region,cp.location,'—')::text,coalesce(s.status,'active')::text,public.admin_is_test_account(p.id)::boolean,
+    (select count(*)::bigint from public.profile_likes l where l.liker_id=p.id),(select count(*)::bigint from public.profile_likes l where l.liked_id=p.id),
+    (select count(*)::bigint from public.profile_likes a join public.profile_likes b on b.liker_id=a.liked_id and b.liked_id=a.liker_id where a.liker_id=p.id),
+    (select count(*)::bigint from public.profile_messages m where m.sender_id=p.id or m.recipient_id=p.id),
+    (select count(*)::bigint from public.admin_user_warnings w where w.user_id=p.id),pp.admin_review_status::text,pp.admin_verification_status::text,p.created_at::timestamptz,u.last_sign_in_at::timestamptz
   from public.profiles p join auth.users u on u.id=p.id left join public.couple_profiles cp on cp.id=p.id left join public.photographer_profiles pp on pp.id=p.id left join public.admin_account_status s on s.user_id=p.id
   where (coalesce(p_query,'')='' or u.email ilike '%'||p_query||'%' or cp.partner_one_first_name ilike '%'||p_query||'%' or cp.partner_two_first_name ilike '%'||p_query||'%' or pp.first_name ilike '%'||p_query||'%' or p.id::text ilike '%'||p_query||'%')
   and (p_role is null or p.role=p_role) and (p_status is null or coalesce(s.status,'active')=p_status)
