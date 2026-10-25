@@ -18,7 +18,8 @@ Diese Fassung friert keine neuen Gestaltungsideen ein. Sie dokumentiert bestäti
 - Klare Ausrichtung, moderate Rundungen, dünne Grenzen und sparsame Schatten. Keine dekorativen Rahmen, die Fotos nicht sauber einschließen.
 - Dashboard-Texte sind knapp und selbsterklärend. Lange Hilfen stehen in einem eigenen Hilfebereich.
 - Fotos sind ein Hauptbestandteil der Profile. Sie dürfen weder abgeschnitten noch durch unpassende Containerformate, Hintergrundstreifen oder überlagerte Bilder verfälscht erscheinen.
-- Kein Zoom der ganzen Seite auf Mobilgeräten. Die Foto-Bedienung ist davon getrennt und darf die Oberfläche nicht versehentlich verschieben.
+- Browser-Zoom und Textvergrößerung bleiben auf Mobilgeräten erlaubt, damit Nutzer:innen Inhalte barrierefrei vergrößern und Fotos heranzoomen können.
+- Formulareingaben auf Mobilgeräten verwenden mindestens 16 px, damit iOS beim Antippen nicht automatisch in die Seite hineinzoomt. Foto-Auswahl bleibt über eine gut erreichbare Schaltfläche bedienbar.
 
 ## Navigation und Layout
 

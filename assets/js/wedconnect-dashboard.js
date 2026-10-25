@@ -5934,7 +5934,7 @@
     }
   }));
 
-  function waitForAuthSession(timeoutMs = 12000) {
+  function waitForAuthSession(timeoutMs = 950) {
     return new Promise((resolve) => {
       let settled = false;
       let subscription = null;
@@ -5949,12 +5949,12 @@
       timer = window.setTimeout(() => finish(null), timeoutMs);
       const listener = supabase.auth.onAuthStateChange((event, session) => {
         if (session && ["INITIAL_SESSION", "SIGNED_IN", "TOKEN_REFRESHED"].includes(event)) finish(session);
-        else if (event === "SIGNED_OUT") finish(null);
+        else if (event === "SIGNED_OUT" || event === "INITIAL_SESSION") finish(null);
       });
       subscription = listener.data.subscription;
       if (settled && subscription) subscription.unsubscribe();
       supabase.auth.getSession().then(({ data, error }) => {
-        if (!error && data.session) finish(data.session);
+        if (!error) finish(data.session || null);
       }).catch(() => {});
     });
   }
@@ -5965,9 +5965,7 @@
       return;
     }
     supabase = createClient(config.url, config.publishableKey);
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    let session = !sessionError && sessionData.session ? sessionData.session : null;
-    if (!session) session = await waitForAuthSession();
+    const session = await waitForAuthSession();
     if (!session) {
       window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
       return;

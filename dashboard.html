@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#25242b">
   <meta name="description" content="Dein persönlicher WedConnect-Bereich.">
   <title>Dashboard — WedConnect</title>
@@ -521,7 +521,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
  #account-dialog .dialog-close{width:42px;height:42px;border-color:rgb(213 182 122 / 68%);border-radius:8px;background:rgb(213 182 122 / 14%);color:var(--gold);font-size:27px}
  #account-dialog .dialog-close:hover,#account-dialog .dialog-close:focus-visible{border-color:var(--gold);background:rgb(213 182 122 / 23%);outline:3px solid rgb(213 182 122 / 24%);outline-offset:2px}
 .account-signout-button{width:100%;justify-content:flex-start}
-</style>
+@media(max-width:720px){input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),select,textarea{font-size:16px!important}.photo-picker-button{font-size:16px}}
+  </style>
   <style>
     .discover-mode-tabs{display:flex;gap:8px;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
     .discover-mode-tab{min-height:40px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
@@ -856,9 +857,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     </div>
   </dialog>
   <main id="error-state" class="error-state hidden"><div class="error-card"><p class="eyebrow">WedConnect</p><h1 id="error-title">Dashboard konnte nicht geladen werden</h1><p id="error-copy">Bitte melde dich erneut an.</p><a class="button button-primary" href="/?auth=signin">Zur Anmeldung</a></div></main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
   <script src="/assets/js/supabase-config.js"></script>
-  <script src="/assets/js/wedconnect-dashboard.js?v=20261016-discover-profile-ranking-v2"></script>
+  <script src="/assets/js/wedconnect-dashboard.js?v=20261025-mobile-access-auth-v1"></script>
 </body>
 </html>
 

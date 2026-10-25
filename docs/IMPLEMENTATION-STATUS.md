@@ -29,6 +29,12 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 | Konto → Entdecken & Profile | Region/Bundesland wird zuerst gewichtet, danach die Passung zwischen Zahlungsbereitschaft des Paars und Vergütungsmodell des Fotografen. Präferenzen ändern nur die Reihenfolge. Alle aktiven Profile bleiben sichtbar; jedes Profil kann gelikt werden, auch bei abweichender Preisvorstellung. |
 | Supabase-Live-Status | Migration `20261019100000_collaboration_model_and_profile_consent.sql` muss im richtigen Supabase-Projekt ausgeführt werden. Eine Migration im Repository beweist nicht, dass sie live ausgeführt wurde. |
 
+## Mobile Bedienung, Anmeldung und Supabase SDK (25. Oktober 2026)
+
+- Dashboard-Zoomsperre entfernt; Pinch-Zoom ist erlaubt. Auf Mobilgeräten haben Formularfelder mindestens 16 px. Die Foto-Auswahl-Schaltfläche ist ebenfalls auf 16 px gesetzt.
+- Bei einer bestätigten leeren Supabase-Sitzung leitet das Dashboard sofort zur Anmeldung weiter. Die Auth-Zustandsprüfung berücksichtigt `INITIAL_SESSION`, `SIGNED_IN` und `TOKEN_REFRESHED`; ein Fallback beendet die Wartezeit spätestens nach 950 ms.
+- Supabase-JS ist in `index.html` und `dashboard.html` auf `2.118.0` festgesetzt.
+
 ## Rechtliche Seiten (25. Oktober 2026)
 
 - `impressum.html`, `datenschutz.html` und `agb.html` sind als strukturierte Entwürfe angelegt.
