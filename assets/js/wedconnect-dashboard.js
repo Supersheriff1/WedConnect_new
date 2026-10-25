@@ -6006,6 +6006,11 @@
     await keepLoadingVisible();
     if (photoError) showNotice("Einige Profilfotos konnten nicht geladen werden.");
     await setupRole(account.role, currentUser, true, profileGreeting(account.role, profile), profile, photoError ? [] : photos || []);
+    const requestedAccountScreen = new URLSearchParams(window.location.search).get("account");
+    if (requestedAccountScreen === "legal") {
+      setAccountMenuScreen("legal");
+      openWorkspaceDialog(accountDialog);
+    }
     supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") window.location.replace(new URL("index.html?auth=signin", window.location.href).toString());
     });
