@@ -76,13 +76,14 @@
     return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,"0")).join("");
   }
   function setLoginMode(mode) {
-    mfaStep.hidden = mode !== "challenge";
+    mfaStep.hidden = mode !== "challenge" && mode !== "enroll";
     enrollStep.hidden = mode !== "enroll";
     $("#backup-codes-step").hidden = mode !== "backup-codes";
     $("#admin-email").disabled = mode !== "login";
     $("#admin-password").disabled = mode !== "login";
     $("#admin-password").required = mode === "login";
     codeInput.required = mode === "challenge" || mode === "enroll";
+    $("#use-recovery").hidden = mode !== "challenge";
     $("#recovery-step").hidden = true;
     $("#recovery-code").required = false;
     authButton.textContent = mode === "challenge" ? "Code bestätigen" : mode === "enroll" ? "2FA aktivieren" : mode === "backup-codes" ? "Codes gespeichert · weiter" : "Anmelden";
