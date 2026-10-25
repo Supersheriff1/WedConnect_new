@@ -93,7 +93,7 @@ revoke all on function public.admin_open_session() from public,anon;
 grant execute on function public.admin_open_session() to authenticated;
 
 create or replace function public.admin_my_access_level()
-returns text language plpgsql stable security definer set search_path=public,auth,pg_temp as $$
+returns text language plpgsql volatile security definer set search_path=public,auth,pg_temp as $$
 declare v_level text;
 begin
   perform public.admin_require_access();

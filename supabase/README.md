@@ -33,14 +33,18 @@ For a new project, execute the SQL files in the order below using the Supabase S
 25. `supabase/migrations/20261016100000_profile_message_hidden.sql` (legacy; no longer used by the app)
 26. `supabase/migrations/20261016110000_profile_message_delete_for_everyone.sql`
 27. `supabase/migrations/20261016130000_support_contact_feedback.sql`
-28. `supabase/migrations/20261016170000_profile_blocks.sql`
-29. `supabase/migrations/20261016180000_profile_saved_profiles.sql`
-30. `supabase/migrations/20261016190000_user_discover_preferences.sql`
-31. `supabase/migrations/20261018100000_mutual_matching_preferences.sql`
-32. `supabase/migrations/20261019100000_collaboration_model_and_profile_consent.sql`
-33. `supabase/migrations/20261024100000_chat_identity_for_existing_matches.sql`
-34. `supabase/migrations/20261024110000_chat_gallery_photo_access.sql`
-35. `supabase/migrations/20261025100000_admin_dashboard.sql`
+28. `supabase/migrations/20261016150000_message_read_receipts.sql`
+29. `supabase/migrations/20261016160000_hide_conversations_for_user.sql`
+30. `supabase/migrations/20261016170000_profile_blocks.sql`
+31. `supabase/migrations/20261016180000_profile_saved_profiles.sql`
+32. `supabase/migrations/20261016190000_user_discover_preferences.sql`
+33. `supabase/migrations/20261018100000_mutual_matching_preferences.sql`
+34. `supabase/migrations/20261019100000_collaboration_model_and_profile_consent.sql`
+35. `supabase/migrations/20261019120000_recover_profile_role_after_collaboration_migration.sql`
+36. `supabase/migrations/20261024100000_chat_identity_for_existing_matches.sql`
+37. `supabase/migrations/20261024110000_chat_gallery_photo_access.sql`
+38. `supabase/migrations/20261025100000_admin_dashboard.sql`
+39. `supabase/migrations/20261025110000_admin_access_level_volatility.sql`
 
 The collaboration migration adds mandatory pair consent for use of selected photos subject to approval before publication, a pair's willingness to consider a reduced contribution (`yes`, `no`, or `depends`), and the photographer's offer (`free`, `reduced`, or `both`) plus agreement to submit photos for approval before publication. The exact reduced price remains negotiable according to coverage scope. Existing completed profiles are reopened so their owners can confirm the new terms; profile data and photos remain stored. Profile completion enforces the terms in Supabase. Discover sorts by region first and collaboration-model compatibility second; no soft preference hides profiles or restricts likes. Likes still work for any visible profile, even when the compensation model does not align. Do not infer that these migrations are live; check the current Supabase migration history.
 
