@@ -78,6 +78,9 @@ Nutzer:innen steuern in den Einstellungen pro Ereignis, ob WedConnect E-Mails zu
 
 Der Bereich **Konto und Einstellungen** ist der erweiterbare Ort für Kontodaten, Profilfoto, Rollenverwaltung, Hilfe und spätere Einstellungen. Die Hauptnavigation bleibt während der Profilbearbeitung erreichbar. Erklärungen im Dashboard sind kurz und selbsterklärend; ausführliche Hilfetexte gehören in einen eigenen Hilfe-Bereich.
 
+- Eine Rubrik **Rechtliches** führt zu Impressum, Datenschutzerklärung und Allgemeinen Geschäftsbedingungen.
+- Die drei Seiten sind im Repository als Entwurfsgerüste vorbereitet und zusätzlich in den öffentlichen Fußzeilen verlinkt. Sie sind klar als nicht veröffentlichungsreif gekennzeichnet, bis Betreiberangaben, tatsächliche Datenverarbeitung und verbindliche Bedingungen ergänzt und geprüft wurden.
+
 ### Kontakt und Feedback
 
 - Der Kontobereich bietet ausschließlich Chat mit dem WedConnect-Team. Push-Benachrichtigungen und Support-E-Mail-Versand sind nicht vorgesehen.
