@@ -31,7 +31,7 @@ Dieses Dokument beschreibt den Stand im Repository. Es unterscheidet implementie
 
 ## Mobile Bedienung, Anmeldung und Supabase SDK (25. Oktober 2026)
 
-- Dashboard-Zoomsperre entfernt; Pinch-Zoom ist erlaubt. Auf Mobilgeräten haben Formularfelder mindestens 16 px. Die Foto-Auswahl-Schaltfläche ist ebenfalls auf 16 px gesetzt.
+- Dashboard-Zoomsperre entfernt; Pinch-Zoom ist erlaubt, auch in den Foto-Galerien neben dem horizontalen Wischen. Auf Mobilgeräten haben Formularfelder mindestens 16 px. Die Foto-Auswahl-Schaltfläche ist ebenfalls auf 16 px gesetzt.
 - Bei einer bestätigten leeren Supabase-Sitzung leitet das Dashboard sofort zur Anmeldung weiter. Die Auth-Zustandsprüfung berücksichtigt `INITIAL_SESSION`, `SIGNED_IN` und `TOKEN_REFRESHED`; ein Fallback beendet die Wartezeit spätestens nach 950 ms.
 - Supabase-JS ist in `index.html` und `dashboard.html` auf `2.118.0` festgesetzt.
 
